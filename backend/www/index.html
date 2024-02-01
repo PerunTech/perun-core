@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+</head>
+
+<body id="body">
+  <script src="../services/WsConf/getServer"></script>
+  <script>
+    const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
+    fetch(assetsUrl).then(response => response.json()).then(res => {
+      if (res.VALUE) {
+        const assetsLocation = res.VALUE
+        // Assign the assets location to a window variable
+        window.assets = assetsLocation;
+        // Fetch the script for loading any additional scripts per project/environment
+        const additionalScriptsScript = Object.assign(document.createElement('script'), {
+          type: 'text/javascript', src: `${window.server.substring(0, window.server.lastIndexOf('/'))}${assetsLocation}/js/scripts.js`
+        });
+        document.body.appendChild(additionalScriptsScript);
+      }
+    }).catch(err => {
+      console.log(err)
+    })
+    // Get the current server
+    const currentServer = window.server.substring(0, window.server.lastIndexOf('/'));
+    // Fetch the script for getting any geospatial data
+    const geospatialScript = Object.assign(document.createElement('script'), {
+      type: 'text/javascript', src: `${currentServer}/perun-assets/js/geospatial.js`
+    });
+    document.body.appendChild(geospatialScript);
+  </script>
+  <script src="perun-core.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer>
+  </script>
+</body>
+
+</html>
