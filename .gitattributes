@@ -1,0 +1,35 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.h text
+*.sql text
+
+# Declare files that will always have CRLF line endings on checkout.
+# This is for visual studio files
+*.sln text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jar binary
+*.shp binary
+*.dbf binary
+*.shx binary
+*.docx binary
+*.xlsx binary
+*.xsl binary
+*.mp4 binary
+*.webm binary
+*.war binary
+*.eot binary
+*.otf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.dmp filter=lfs diff=lfs merge=lfs -text
+*.DMP filter=lfs diff=lfs merge=lfs -text

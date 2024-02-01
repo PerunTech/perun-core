@@ -1,0 +1,5 @@
+{
+    "componentNameParameter": "componentName",
+    "getConfigurationServiceName": "GET_COMPONENT_CONFIGURATION",
+    "session": "session"
+}

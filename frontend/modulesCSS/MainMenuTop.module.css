@@ -1,0 +1,151 @@
+.checkIfCSSisPresent{}
+
+  .container_left {
+    float: left;
+  }
+
+  .container_right {
+    float: right;
+  }
+
+  .menu_container, .lang_container {
+    display: inline-block;
+  }
+
+  .menu_container img {
+    max-width: 50%;
+  }
+
+  .menu_container ul {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1040;
+    display: inline-block;
+    padding: 0 0 0 50px;
+    width: calc(100% + 50px);
+    margin-left: -50px;
+    background: rgb(38, 48, 56);
+    height: 80px;
+    border-bottom: 5px solid #e0ab10;
+    box-shadow: 1px 1px 30px rgb(38, 48, 56);
+    text-align: center;
+  }
+
+  .menu_container ul ul {
+      display: none;
+      background: transparent;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      margin-left: -25px;
+  }
+
+  .menu_container ul ul li {
+      float: none;
+      display: block;
+      width: auto;
+      height: auto;
+      background: rgb(38, 48, 56);
+      box-shadow: 0 3px 5px rgba(38, 48, 56, 0.8);
+      -webkit-transition: background 500ms;
+      -moz-transition: background 500ms;
+      -ms-transition: background 500ms;
+      -o-transition: background 500ms;
+      transition: background 500ms;
+      transition-timing-function: ease-out;
+  }
+
+  .menu_container ul ul li:hover {
+    background: #e0ab10;
+  }
+
+  .menu_container ul ul ul {
+    top: 0;
+    left: 100%;
+    box-shadow: none;
+  }
+
+  .menu_container ul li:hover > ul {
+    display: block;
+  }
+
+  .menu_container li {
+    position: relative;
+    border-bottom: none;
+    height: 80px;
+    width: auto;
+    display: inline-block;
+    cursor: pointer;
+    cursor: hand;
+    background: transparent;
+    border: none;
+    line-height: 40px;
+    padding: 2px;
+    -webkit-transition: background 500ms;
+    -moz-transition: background 500ms;
+    -ms-transition: background 500ms;
+    -o-transition: background 500ms;
+    transition: background 500ms;
+    transition-timing-function: ease-out;
+  }
+
+  .menu_container a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    width: auto;
+    height: 40px;
+    text-align: center;
+  }
+
+  .icon_div {
+    padding-left: 25%;
+    padding-right: 25%
+  }
+
+  .menu_container img {
+    max-height: 150px;
+  }
+
+  .menu_container .link_selected {
+    background:#e0ab10
+  }
+
+  @media only screen and (max-width: 1440px) {
+    .menu_container ul li {
+      width: auto;
+      height: 79px;
+      line-height: 35px;
+      vertical-align: -webkit-baseline-middle;
+    }
+
+    .menu_container  img {
+      max-height: 120px;
+    }
+
+    .menu_container ul ul li {
+      float: none;
+      display: block;
+      width: auto;
+      line-height: 40px;
+      background: #2B2A28;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+      -webkit-transition: background 500ms;
+      -moz-transition: background 500ms;
+      -ms-transition: background 500ms;
+      -o-transition: background 500ms;
+      transition: background 500ms;
+      transition-timing-function: ease-out;
+    }
+
+    .menu_container .menu-text {
+      height: 25px;
+      padding-top: 5px;
+      margin-bottom: 5px;
+    }
+  }

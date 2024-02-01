@@ -1,0 +1,63 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Menu } from 'react-data-grid-addons';
+import { prepJsonFromConf } from './ExportableGrid';
+import { labelBasePath } from '../../config';
+
+const { ContextMenu, MenuItem } = Menu
+
+function copyRow (rows, gridConfig, rowIdx, idx) {
+  // this saves the whole row as string
+  const selectedRow = prepJsonFromConf(gridConfig, [rows[rowIdx]])
+  const keys = Object.keys(selectedRow[0])
+  let string = ''
+  for (let i = 0; i < keys.length; i++) {
+    string = string + String(keys[i]) + ': ' + String(selectedRow[0][keys[i]]) + ', '
+  }
+  saveCopiedValueToClipboard(string)
+}
+
+function copyCell (rows, gridConfig, rowIdx, idx, enableMultiSelect) {
+  // try to find the cell in the row by IDX
+  let cellType
+  if (typeof enableMultiSelect !== 'undefined' && enableMultiSelect) {
+    if (idx === 0) {
+      cellType = gridConfig[idx].name
+    } else {
+      cellType = gridConfig[idx - 1].name
+    }
+  } else {
+    cellType = gridConfig[idx].name
+  }
+  const selectedRow = prepJsonFromConf(gridConfig, [rows[rowIdx]])
+  let cellValue = String(selectedRow[0][cellType])
+  saveCopiedValueToClipboard(cellValue)
+}
+
+function saveCopiedValueToClipboard (string) {
+  /* next, we have to create a hidden element and and set the string row as value
+  so we can save it to clipboard, because thats how javascript does it */
+  const el = document.createElement('textarea')
+  el.value = string
+  document.body.appendChild(el)
+  el.select()
+  document.execCommand('copy')
+  document.body.removeChild(el)
+}
+
+const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect }, context) => {
+  return <ContextMenu id={id}>
+    <MenuItem data={{ rowIdx, idx }} onClick={() => copyRow(rows, gridConfig, rowIdx, idx)}>
+      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_row`, defaultMessage: `${labelBasePath}.main.grids.copy_row` })}
+    </MenuItem>
+    <MenuItem data={{ rowIdx, idx }} onClick={() => copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect)}>
+      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_cell`, defaultMessage: `${labelBasePath}.main.grids.copy_cell` })}
+    </MenuItem>
+  </ContextMenu>
+}
+
+ContextMenuPopup.contextTypes = {
+  intl: PropTypes.object.isRequired
+}
+
+export default ContextMenuPopup

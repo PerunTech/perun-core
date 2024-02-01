@@ -1,0 +1,376 @@
+.conversationHeader {
+  height: 97%;
+  min-height: 400px;
+  min-width: 300px;
+  width: 35%;
+  color: white;
+  background-color: #ffffff82;
+  border: 1px solid #000000;
+  position: absolute;
+}
+
+.conversationHeader a {
+  padding: 5px;
+  color: #000000;
+  font: bold;
+}
+
+.msgContent {
+	height: auto;
+	width: 94%;
+	margin-left: 2%;
+	margin-top: 9px;
+	display: block;
+	color: white;
+	background-color: purple;
+}
+
+.msgContent2 {
+	height: auto;
+	width: 92%;
+	margin-left: 7%;
+	margin-top: 9px;
+	display: block;
+	color: white;
+	background-color: #007a80;
+}
+
+/* .msgContent:last-child, .msgContent2:last-child {
+  font-weight: bold;
+  border: 1px solid rgb(224, 171, 16);
+  box-shadow: 1px 1px 25px rgb(224, 171, 16) !important;
+} */
+
+.msgContent a, .msgContent2 a {
+	font-size: 1.1em;
+}
+
+.msgHolder {
+	height: auto;
+	max-height: 58%;
+	width: 94%;
+	overflow: auto;
+	position: relative;
+	margin-left: 2%;
+	margin-top: 9px;
+	color: white;
+}
+
+.msgInput {
+	background-color: #f0f8ff00;
+	border-width: 1px 1px 2px;
+	width: 99%;
+	word-break: break-all;
+	margin: 0px 10px 5px 2px;
+	height: 100%;
+}
+
+.afterInput {
+	background-color: purple;
+	border: 1px solid #feffff;
+	border-width: 0px 1px 1px;
+	width: 100% !important;
+	height: 64px !important;
+	font-size: 15px;
+	word-break: break-word;
+	min-width: 90%;
+}
+
+
+.conversationTitle {
+  background:#737373;
+  margin-left: 9%;
+  margin-top: 7%;
+  width: 80%;
+}
+
+.conversationTitle a {
+  color: white;
+  text-align: center;
+  display: block;
+}
+
+
+.holderConvMsg {
+  width: 90%;
+  height: 100%;
+  background: red;
+  display: block;
+  margin: 5%
+}
+
+.btnHolder {
+  width: 95%;
+  bottom:0;
+  position:inherit;
+  left:2%;
+  margin-bottom:2%;
+}
+
+
+.btnHolder a {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btnReplyMsg {
+  cursor: pointer;
+  color: black !important;
+}
+
+.btnReplyMsg:hover {
+	color: red !important;
+}
+
+.btnEditConv {
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid;
+	margin: 2px 2px 2px 2px;
+	font-size: 10px;
+	float: right;
+}
+
+.btnEditConv:hover {
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid;
+	margin: 2px 2px 2px 2px;
+	font-size: 10px;
+	float: right;
+	color: white !important;
+}
+
+
+.btnSaveEditConv {
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid;
+	font-size: 10px;
+	float: right;
+	margin: 2px 2px 2px 2px;
+}
+
+.btnSaveEditConv:hover {
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid;
+	margin: 2px 2px 2px 2px;
+	font-size: 10px;
+	float: right;
+	color: white !important;
+}
+
+
+.editAssignedUser {
+	color: black !important;
+}
+
+.btnDeleteMsg {
+  cursor: pointer;
+  color: black !important;
+}
+
+.btnDeleteMsg:hover {
+	color: red !important;
+}
+
+.btnExport {
+  float: right;
+}
+
+.btnCreate {
+  float: left;
+}
+
+.btnReplyConv {
+	float: left;
+}
+
+.btnDeleteConv {
+  float: left;
+}
+
+.createConvFormHold {
+  background-color: #737373b5;
+  min-height: 50%;
+  width: 250px;
+}
+
+.selectEditDropdown {
+	color:black;
+}
+
+.bntConvHold {
+  width:inherit;
+}
+
+.form_style_5{
+	max-width: 500px;
+	min-width: 360px;
+  width: 36%;
+	padding: 10px 20px;
+	background: #f4f7f8;
+	margin: 10px 10px 10px 10px;
+	padding: 20px;
+	background: rgb(88, 72, 58);
+	border-radius: 8px;
+	font-family: Georgia, "Times New Roman", Times, serif;
+}
+.form_style_5 fieldset{
+	border: none;
+}
+.form_style_5 legend {
+	font-size: 1.4em;
+	margin-bottom: 10px;
+}
+.form_style_5 label {
+	display: block;
+	margin-bottom: 8px;
+}
+.form_style_5 input[type="text"],
+.form_style_5 input[type="date"],
+.form_style_5 input[type="datetime"],
+.form_style_5 input[type="email"],
+.form_style_5 input[type="number"],
+.form_style_5 input[type="search"],
+.form_style_5 input[type="time"],
+.form_style_5 input[type="url"],
+.form_style_5 textarea,
+.form_style_5 select {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	background: rgba(255,255,255,.1);
+	border: none;
+	border-radius: 4px;
+	font-size: 15px;
+	margin: 0;
+	outline: 0;
+	padding: 10px;
+	width: 100%;
+	box-sizing: border-box; 
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box; 
+	background-color: #e8eeef;
+	color:#52595f;
+	-webkit-box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+	box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+	margin-bottom: 30px;
+}
+.form_style_5 input[type="text"]:focus,
+.form_style_5 input[type="date"]:focus,
+.form_style_5 input[type="datetime"]:focus,
+.form_style_5 input[type="email"]:focus,
+.form_style_5 input[type="number"]:focus,
+.form_style_5 input[type="search"]:focus,
+.form_style_5 input[type="time"]:focus,
+.form_style_5 input[type="url"]:focus,
+.form_style_5 textarea:focus,
+.form_style_5 select:focus{
+	background: #d2d9dd;
+}
+.form_style_5 select{
+	-webkit-appearance: menulist-button;
+	height: 39px;
+}
+.form_style_5 .number {
+	background: #1abc9c;
+	color: #fff;
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	font-size: 0.8em;
+	margin-right: 4px;
+	line-height: 30px;
+	text-align: center;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+	border-radius: 15px 15px 15px 0px;
+}
+.form_style_5 input[type="submit"]
+{
+	position: relative;
+	display: block;
+	padding: 12px 30px 12px 30px;
+	color: #FFF;
+	margin: 0 auto;
+	background: rgb(88, 72, 58);
+	text-align: center;
+	font-style: normal;
+	float: left;
+	width: 30%;
+	border: 1px solid #feffff;
+	border-width: 1px 1px 2px;
+	margin-bottom: 10px;
+}
+.form_style_5 input[type="submit"]:hover
+{
+	background: rgb(216, 132, 59);
+}
+.form_style_5 input[type="button"] {
+	position: relative;
+	display: block;
+	padding: 12px 30px 12px 30px;
+	color: #FFF;
+	margin: 0 auto;
+	background: rgb(88, 72, 58);
+	text-align: center;
+	font-style: normal;
+	width: 30%;
+	border: 1px solid #feffff;
+	border-width: 1px 1px 2px;
+	margin-bottom: 10px;
+	margin-left: 70% !important;
+}
+.form_style_5 input[type="button"]:hover
+{
+	background: #7b1105;
+}
+
+.searchForm {
+	margin-top: 15px;
+	width: auto;
+	height: auto;
+	display: table-caption;
+	color: white;
+}
+
+.searchForm select {
+	color: black;
+}
+
+.searchForm input {
+	color: black;
+}
+
+/* .searchForm label {
+} */
+
+.linkedObjects {
+	margin-top: 10px;
+	display: grid;
+}
+
+.linkedObjects a {
+	color: rgb(0, 0, 0);
+  font-weight: 600;
+  background-color: rgb(233, 241, 218);
+  box-shadow: 1px 1px 10px rgba(255, 181, 15, 0.5);
+  border-radius: 5px;
+  margin-top: 8px;
+	margin-left: 7px;
+	margin-right: 7px;
+	padding: 2px !important;
+}
+
+.fieldsLeft {
+	width: 49%;
+	float: left;
+}
+
+.fieldsRight {
+	padding: 0 1%;
+  width: 49%;
+  float: right;
+  border: 1px solid rgba(36, 19, 8, 0.8);
+  box-shadow: 1px 1px 15px rgba(36, 19, 8, 0.8);
+  border-radius: 5px;
+}

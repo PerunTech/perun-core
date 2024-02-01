@@ -1,0 +1,73 @@
+.scrollLeft {
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.titleNotif {
+  align-items: center;
+  color: rgb(179, 71, 0);
+  display:flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.contentNotif {
+  color: rgb(227, 190, 85);
+  height: 100%;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  justify-content: left;
+}
+
+.notificationHolder {
+  overflow-y: auto;
+  height: 50%;
+  display: block;
+  background-color: rgba(0, 0, 0, 0.75);
+  box-shadow: 1px 1px 30px rgba(0,0,0,0.5);
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.notificationHolder_top {
+  padding: 0;
+  top: 0%;
+  overflow-y: auto;
+  height: 70px;
+  display: block;
+  background-color: rgba(0, 0, 0, 0.20);
+  border-style: solid;
+  border-width: 1px;
+  border-color: #e3be55;
+
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+  z-index: 1060
+}
+
+.customHolder {
+  right: 0;
+  margin-right: 14px;
+  margin-top: 3px;
+  padding: 0;
+  position: absolute;
+  right: 0;
+  top: 0%;
+  width: 22%;
+  z-index: 1060;
+}

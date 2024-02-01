@@ -1,0 +1,173 @@
+import React, { useEffect, useState, useRef } from 'react'
+import LogonActions from '../functional/LogonActions'
+import LogonFunctions from '../functional/LogonFunctions'
+import { InputElement } from '../../../elements';
+import { Link } from 'react-router-dom'
+import * as config from 'config/config.js'
+import { getCapsLockState } from '../../../functions/utils';
+
+const LoginForm = (props, context) => {
+  const { alert, errors, username, password } = props.internalComponentState
+  const { onSubmit, onChange } = props
+  const labels = context.intl
+  const [logonImgJson, setLogonImgJson] = useState([])
+  const [projectImgJson, setProjectImgJson] = useState([])
+  const [loginLinks, setLoginLinks] = useState([])
+  // This is needed for keeping track when the component is mounted and performing state changes, so React doesn't complain
+  const componentIsMounted = useRef(true)
+  const [capsLockOn, setCapsLockOn] = useState(false);
+
+  useEffect(() => {
+    getLogonImgJson()
+    getLoginLinks()
+    getProjectImgJson()
+
+    return () => {
+      componentIsMounted.current = false
+    }
+  }, [])
+  const getLoginLinks = () => {
+    const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
+
+    fetch(url)
+      .then(res => res.json())
+      .then(json => {
+        setLoginLinks(json)
+      })
+      .catch(err => { throw err });
+  }
+  const getLogonImgJson = () => {
+    let url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
+    // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
+    if (window.assetsContext) {
+      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/LogonImg.json`
+    }
+    fetch(url).then(res => res.json()).then(json => {
+      if (componentIsMounted.current) {
+        setLogonImgJson(json)
+      }
+    }).catch(err => { throw err })
+  }
+
+  const getProjectImgJson = () => {
+    const url = `${window.location.origin}${window.assets}/json/config/ProjectImg.json`
+    fetch(url).then(res => res.json()).then(json => {
+      if (componentIsMounted.current) {
+        setProjectImgJson(json)
+      }
+    }).catch(err => { throw err })
+  }
+
+  return (
+    <div id='holder' className='holderLogon'>
+      <div className='onlyLoginCustomHeight'>
+        <form id='submit_form' className='form fadeIn login-form' onSubmit={onSubmit}>
+          {alert}
+          <div className='grid'>
+            <div className='left'>
+              <div>
+                <div className='login-form-title'>
+                  <h4>
+                    {labels.formatMessage({
+                      id: `${config.labelBasePath}.login.login_form_title`,
+                      defaultMessage: `${config.labelBasePath}.login.login_form_title`
+                    })}
+                  </h4>
+                </div>
+                <InputElement
+                  name='username'
+                  value={username}
+                  placeholder={labels.formatMessage({
+                    id: `${config.labelBasePath}.login.user_name`,
+                    defaultMessage: `${config.labelBasePath}.login.user_name`
+                  })}
+                  label='username'
+                  error={errors.username}
+                  type='text'
+                  onChange={onChange}
+                  id='idbrLogin'
+                  className='inputLoginStyle'
+                />
+                <InputElement
+                  name='password'
+                  value={password}
+                  placeholder={labels.formatMessage({
+                    id: `${config.labelBasePath}.login.password`,
+                    defaultMessage: `${config.labelBasePath}.login.password`
+                  })}
+                  type='password'
+                  id='passLogin'
+                  label='password'
+                  onChange={onChange}
+                  error={errors.password}
+                  className='inputLoginStyle'
+                  onKeyUp={(event) => getCapsLockState(event, setCapsLockOn)}
+                />
+                {capsLockOn && (
+                  <p className='caps-lock-is-active'>
+                    {labels.formatMessage({
+                      id: `${config.labelBasePath}.admin_console.caps_lock_active`,
+                      defaultMessage: `${config.labelBasePath}.admin_console.caps_lock_active`
+                    })}
+                  </p>
+                )}
+                <button id='login_submit' className='logonBtns' type='submit' >
+                  <span>{labels.formatMessage({
+                    id: `${config.labelBasePath}.login.login`,
+                    defaultMessage: `${config.labelBasePath}.login.login`
+                  })}</span>
+                </button>
+              </div>
+              {logonImgJson?.length > 0 && (
+                <div className='logonImg' onDoubleClick={function () { window.localStorage.clear(); }}>
+                  {logonImgJson.map(img => {
+                    return (
+                      <img key={img.id} id={img.id} src={img.src} className={img.className} />
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+            {loginLinks?.length > 0 && <>
+              <div className='verticalLine'></div>
+              <div className='right'>
+                <div className='linkStyle'>
+                  {loginLinks.map((item, index) => {
+                    return < div key={`${item.id}_${index}`}>
+                      <Link to={item.href} key={item.id} className={item.className}>
+                        {labels.formatMessage({
+                          id: `perun.login.${item.id}`,
+                          defaultMessage: `perun.${item.id}`
+                        })}</Link>
+                    </div >
+                  })}
+                </div>
+              </div>
+            </>
+            }
+
+          </div>
+        </form>
+      </div >
+      {projectImgJson?.length > 0 && (
+        <div id='imgProject' className='projectImg'>
+          {projectImgJson.map(img => {
+            return (
+              <div key={img.id} className={img.containerClassName}>
+                {img.href ? (
+                  <a href={img.href} target='_blank' id={img.id} className={img.linkClassName}>
+                    <img src={img.src} className={img.imgClassName} />
+                  </a>
+                ) : (
+                  <img src={img.src} className={img.imgClassName} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div >
+  )
+}
+
+export default LogonActions(LogonFunctions(LoginForm, 'LOGIN', 'login1', 'loginUser'))
