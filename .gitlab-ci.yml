@@ -23,7 +23,7 @@ after_script:
     - pwd
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install
+    - npm install --legacy-peer-deps
     - npm run test
     - npm run build
 
@@ -41,7 +41,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install
+    - npm install --legacy-peer-deps
     - rm -rf backend/www/*.js
     - npm run build-dev
     - cd backend
@@ -60,7 +60,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install
+    - npm install --legacy-peer-deps
     - rm -rf backend/www/*.js
     - npm run build-dev
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -82,7 +82,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install
+    - npm install --legacy-peer-deps
     - rm -rf backend/www/*.js
     - npm run build
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -92,7 +92,7 @@ after_script:
     - git commit -m "Auto commit of perun-core library for npm" || exit 0
     - git push origin HEAD:$CI_COMMIT_REF_NAME    
   only:
-    - master
+    - main
     - staging
   when: manual
 
@@ -103,7 +103,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install
+    - npm install --legacy-peer-deps
     - rm -rf backend/www/*.js
     - npm run build
     - cd backend
@@ -111,7 +111,7 @@ after_script:
     - pwd
     - mvn clean package deploy -DskipTests
   only:
-    - master
+    - main
     - staging
 
 1_perun-sonarqube_backend:
