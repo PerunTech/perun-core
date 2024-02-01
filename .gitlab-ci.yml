@@ -47,7 +47,7 @@ after_script:
     - cd backend
     - ls -al www/
     - pwd
-    - mvn clean package org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy -DskipTests
+    - mvn clean package deploy -DskipTests
   only:
     - dev
     - RND
@@ -92,7 +92,7 @@ after_script:
     - git commit -m "Auto commit of perun-core library for npm" || exit 0
     - git push origin HEAD:$CI_COMMIT_REF_NAME    
   only:
-    - master
+    - main
     - staging
   when: manual
 
@@ -109,9 +109,9 @@ after_script:
     - cd backend
     - ls -al www/
     - pwd
-    - mvn clean package org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy -DskipTests
+    - mvn clean package deploy -DskipTests
   only:
-    - master
+    - main
     - staging
 
 1_perun-sonarqube_backend:
