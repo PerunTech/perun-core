@@ -16,8 +16,6 @@
  */
 package com.prtech.perun_core;
 
-import java.util.ArrayList;
-
 import org.apache.logging.log4j.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
