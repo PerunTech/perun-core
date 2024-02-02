@@ -21,5 +21,6 @@ backend/build/
 backend/doc/
 backend/target/
 backend/www/perun-core.js
+backend/www/perun-core.js.map
 backend/www/*.perun-core.js
 backend/www/*.perun-core.js.map
