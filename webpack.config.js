@@ -1,8 +1,8 @@
 let path = require('path');
 
-module.exports = (mode, {env}) => {
+module.exports = (mode, { env }) => {
     return {
-        devtool: 'source-map',
+        ...mode.NODE_ENV !== 'production' && { devtool: 'source-map' },
         mode: mode,
         entry: './frontend/client.js',
         output: {
@@ -19,7 +19,7 @@ module.exports = (mode, {env}) => {
         module: {
             rules: [
                 {
-                    test: /\.(js|jsx)?$/, 
+                    test: /\.(js|jsx)?$/,
                     exclude: /(node_modules)/,
                     use: {
                         loader: 'babel-loader',
@@ -43,8 +43,8 @@ module.exports = (mode, {env}) => {
                         {
                             loader: 'css-loader',
                             options: {
-                                modules: { 
-                                    localIdentName: '[name]-[local]' 
+                                modules: {
+                                    localIdentName: '[name]-[local]'
                                 }
                             },
                         },
