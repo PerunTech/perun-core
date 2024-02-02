@@ -2,7 +2,7 @@ name: Publish package to the Maven Central Repository
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches: [ main ]
 jobs:
@@ -18,7 +18,15 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'          
+          node-version: '16.x'          
+      - name: Npm install
+        run: npm install --legacy-peer-deps
+      - name: Rm  the backend.js
+        run: rm -rf backend/www/*.js
+      - name: Build the new JS
+        run: npm run build
+      - name: Switch current dir
+        run: cd backend
       - name: Publish package
         env:
           JRELEASER_NEXUS2_USERNAME: ${{ secrets.JRELEASER_NEXUS2_USERNAME }}
@@ -27,8 +35,4 @@ jobs:
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm install
-        run: rm -rf backend/www/*.js
-        run: npm run build
-        run: cd backend
         run: mvn -Prelease deploy jreleaser:deploy -DaltDeploymentRepository=local::file:./target/staging-deploy -DskipTests
