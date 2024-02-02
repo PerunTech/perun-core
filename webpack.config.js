@@ -6,14 +6,14 @@ module.exports = (mode, { env }) => {
         mode: mode,
         entry: './frontend/client.js',
         output: {
-            path: path.resolve('./backend/www'),
+            path: path.resolve('./www'),
             filename: 'perun-core.js',
             library: 'perun-core',
             libraryTarget: 'umd',
             globalObject: 'this'
         },
         devServer: {
-            contentBase: './backend/www',
+            contentBase: './www',
             port: 8080
         },
         module: {
