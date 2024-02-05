@@ -8,7 +8,7 @@ import Msgs from './Msgs';
 import convStyle from './ShowMsg.module.css'
 
 class ShowMsg extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showAlert: false,
@@ -44,7 +44,7 @@ class ShowMsg extends React.Component {
     return conversationData
   }
 
-  componentDidMount () {
+  componentDidMount() {
     let data
     const url = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_CONVERSATION_DATA + this.props.security.svSession + '/' +
       this.state.parentConversation[this.state.convType].rowClicked['SVAROG_CONVERSATION.OBJECT_ID']
@@ -106,7 +106,7 @@ class ShowMsg extends React.Component {
     this.setState({ [e.target.name]: e.target.value })
   }
 
-  iterateConfConv (data) {
+  iterateConfConv(data) {
     let i
     let attachments = data.attachments
     let objectName
@@ -156,14 +156,13 @@ class ShowMsg extends React.Component {
           data: msgContent,
           url: restUrl + this.props.security.svSession + '/SVAROG_MESSAGE/' + this.state.OBJECT_ID + '/0',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(function (response) {
+        }).then(function () {
           component.setState({ showMsg: null },
             () => component.setState({ showMsg: component.state.showMsgs }))
           console.log('success')
+        }).catch(function () {
+          console.log('error')
         })
-          .catch(function (response) {
-            console.log('error')
-          })
         break
       case 'btnCancelReply':
         this.setState({ showMsg: this.state.showMsgs })
@@ -333,7 +332,7 @@ class ShowMsg extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const { PRIORITY, ASSIGNED_TO_USERNAME } = this.state
     const { showAlert, alertType, alertTitle, alertMessage, onConfirm, onCancel, showCancelBtn, cancelBtnText } = this.state
     return (

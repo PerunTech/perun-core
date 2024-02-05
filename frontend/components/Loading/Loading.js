@@ -16,7 +16,7 @@ const Loading = (_props, context) => {
 }
 
 Loading.contextTypes = {
-  intl: PropTypes.object.isRequired
+  intl: PropTypes.object
 }
 
 export default Loading

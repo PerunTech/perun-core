@@ -167,7 +167,7 @@ class GenericGrid extends React.Component {
   /**
   * Internal function to generate a new Editor for fields that have the appropriate configuration.
   */
-  generateEditorFromConfig (editorConfig) {
+  generateEditorFromConfig(editorConfig) {
     let retval = null
     const editorType = editorConfig.editorType
     const editorOptions = editorConfig.editorOptions
@@ -196,7 +196,7 @@ class GenericGrid extends React.Component {
   /**
  * Internal function to generate a new Formatter for fields that have the appropriate configuration.
  */
-  generateFormatterFromConfig (editorConfig) {
+  generateFormatterFromConfig(editorConfig) {
     let retval = null
     const editorType = editorConfig.formatterType
     const editorOptions = editorConfig.formatterOptions
@@ -226,7 +226,7 @@ class GenericGrid extends React.Component {
  * @param {JSON} gridConfig - the grid configuration object
  * @param {JSON} gridData - grid data object
  */
-  formatDates (gridConfig, gridData) {
+  formatDates(gridConfig, gridData) {
     for (let c = 0; c < gridConfig.length; c++) {
       if (gridConfig[c].datetype) {
         for (let d = 0; d < gridData.length; d++) {
@@ -285,7 +285,7 @@ class GenericGrid extends React.Component {
     return formattedData
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Refresh state if new labels are loaded
     // if (nextProps.gridLang && (this.props.gridLang !== nextProps.gridLang)) {
     //   this.forceUpdate()
@@ -338,15 +338,22 @@ class GenericGrid extends React.Component {
 
     if ((this.props.gridConfigLoaded !== nextProps.gridConfigLoaded || this.props.gridConfig !== nextProps.gridConfig) &&
       nextProps.gridConfigLoaded === false) {
-      this.setState({
-        hideLoader: true,
-        alert: alertUser(
-          true, 'error',
-          this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.load_config_failed`, defaultMessage: `${labelBasePath}.main.grids.load_config_failed` }),
-          nextProps.gridConfig,
-          () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, undefined
-        )
-      })
+      let errorMessage = 'A system error occured, please contact the IT administrator.'
+      try {
+        errorMessage = nextProps.gridConfig.response.data
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.setState({
+          hideLoader: true,
+          alert: alertUser(
+            true, 'error',
+            this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.load_config_failed`, defaultMessage: `${labelBasePath}.main.grids.load_config_failed` }),
+            errorMessage,
+            () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, undefined
+          )
+        })
+      }
     }
 
     if (this.props.gridDataLoaded !== nextProps.gridDataLoaded || this.props.gridData !== nextProps.gridData) {
@@ -406,7 +413,7 @@ class GenericGrid extends React.Component {
     // }
   }
 
-  updateRowsAfterSave (comp, nextProps) {
+  updateRowsAfterSave(comp, nextProps) {
     const savedObject = nextProps.inlineSaveResult.data
     const rowId = savedObject.ROW_ID
     delete savedObject.ROW_ID
@@ -424,7 +431,7 @@ class GenericGrid extends React.Component {
     }
     store.dispatch(resetGridEditResponseState(comp.state.id))
   }
-  onSelectedRowsChange (rows) {
+  onSelectedRowsChange(rows) {
     if (this.state.onSelectChangeFunct !== null && this.state.onSelectChangeFunct !== undefined) {
       this.state.onSelectChangeFunct(rows, this.state.id)
     } else {
@@ -432,7 +439,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     this.getGridConfig()
     if (!this.state.gridDataLoaded) {
       this.getGridData(this.state.params)
@@ -442,7 +449,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  filterValues (row, columnFilter, columnKey) {
+  filterValues(row, columnFilter, columnKey) {
     let include = true
     if (columnFilter === null) {
       include = false
@@ -452,7 +459,7 @@ class GenericGrid extends React.Component {
     return include
   }
 
-  columnValueContainsSearchTerms (columnValue, filterTerms) {
+  columnValueContainsSearchTerms(columnValue, filterTerms) {
     let columnValueContainsSearchTerms = false
     for (const key in filterTerms) {
       if (!filterTerms.hasOwnProperty(key)) {
@@ -470,11 +477,11 @@ class GenericGrid extends React.Component {
     return columnValueContainsSearchTerms
   }
 
-  getGridConfig () {
+  getGridConfig() {
     store.dispatch(getGridConfig(this.state.id, this.state.configTableName, this.state.session, this.state.params, this.state.gridType))
   }
 
-  getGridData (params, getNewData) {
+  getGridData(params, getNewData) {
     if (getNewData) {
       store.dispatch(getGridData(this.state.id, getNewData.dataTableName, this.state.session, params, this.state.gridType, 100))
     } else {
@@ -482,7 +489,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  handleFilterChange (filter) {
+  handleFilterChange(filter) {
     const newFilters = Object.assign({}, this.state.filters)
     if (filter.filterTerm) {
       if (filter.column.formatterType !== null && filter.column.formatterType !== undefined && filter.column.formatterType === 'DropDownFormatter') {
@@ -533,7 +540,7 @@ class GenericGrid extends React.Component {
     this.setState({ filteredRows, filters: newFilters, selectedIndexes })
   }
 
-  onClearFilters () {
+  onClearFilters() {
     // all filters removed
     let selectedIndexes = []
     if (isValidArray(this.state.selectedIndexesBeforeFilters, 1)) {
@@ -542,7 +549,7 @@ class GenericGrid extends React.Component {
     this.setState({ filteredRows: undefined, filters: [], selectedIndexes })
   }
 
-  onRowsSelected (rows) {
+  onRowsSelected(rows) {
     if (!isValidObject(this.state.filters, 1)) {
       const LocalIndexes = this.state.selectedIndexes.concat(rows.map(r => r.rowIdx))
       const allRows = Selectors.getRows(this.state)
@@ -584,7 +591,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  onRowsDeselected (rows) {
+  onRowsDeselected(rows) {
     if (!isValidObject(this.state.filters, 1)) {
       const rowIndexes = rows.map(r => r.rowIdx)
       const LocalIndexes = this.state.selectedIndexes.filter(i => rowIndexes.indexOf(i) === -1)
@@ -634,7 +641,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  jsonPrepareObjectForSvarog (tmpObject, tableNameDot) {
+  jsonPrepareObjectForSvarog(tmpObject, tableNameDot) {
     let svarogString1 = '' // to package svarog data
     let svarogString2 = '' // to package rest of the data
     for (let key in tmpObject) {
@@ -667,21 +674,21 @@ class GenericGrid extends React.Component {
     return returnstring
   }
 
-  getRows () {
+  getRows() {
     const filteredRows = Selectors.getRows(this.state)
     return filteredRows
   }
 
-  rowGetter (i) {
+  rowGetter(i) {
     const rows = this.getRows()
     return rows[i]
   }
 
-  getSize () {
+  getSize() {
     return this.getRows().length
   }
 
-  onRowClick (rowIdx, row) {
+  onRowClick(rowIdx, row) {
     if (rowIdx > -1 && !this.state.handleRowUpdatedFunct) {
       store.dispatch(rowClicked(this.state.id, row, rowIdx))
       if (this.state.onRowClickFunct && (typeof this.state.onRowClickFunct === 'function')) {
@@ -692,7 +699,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  handleRowUpdated (commit) {
+  handleRowUpdated(commit) {
     if (this.state.active && this.state.handleRowUpdatedFunct) {
       this.setState({ requestPending: true })
       let rows = Selectors.getRows(this.state)
@@ -708,7 +715,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  saveAllPrompt (c, rows) {
+  saveAllPrompt(c, rows) {
     c.setState({
       alert: alertUser(true,
         'warning',
@@ -729,7 +736,7 @@ class GenericGrid extends React.Component {
     })
   }
 
-  saveAllRecords () {
+  saveAllRecords() {
     if (this.state.saveAllRecords) {
       let rows = []
       const filteredRows = this.state.filteredRows
@@ -757,7 +764,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  handleGridRowsUpdated ({ fromRow, toRow, updated }) {
+  handleGridRowsUpdated({ fromRow, toRow, updated }) {
     const rows = this.state.rows.slice()
     for (let i = fromRow; i <= toRow; i++) {
       const rowToUpdate = rows[i]
@@ -768,11 +775,11 @@ class GenericGrid extends React.Component {
     this.setState({ rows })
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     this.props.refFunction(this)
   }
 
-  getValidFilterValues (columnId) {
+  getValidFilterValues(columnId) {
     const keys = this.state.rows.map(r => r[columnId])
     let config = null
     const columns = this.state.gridConfig
@@ -828,7 +835,7 @@ class GenericGrid extends React.Component {
     return retval
   }
 
-  addRow (newRowIndx) {
+  addRow() {
     if (this.state.addRowSubgrid) this.state.addRowSubgrid()
   }
 
@@ -848,11 +855,11 @@ class GenericGrid extends React.Component {
 
   }
 
-  mouseOn () {
+  mouseOn() {
     this.setState({ active: true })
   }
 
-  mouseOff () {
+  mouseOff() {
     this.setState({ active: false })
   }
 
@@ -870,7 +877,7 @@ class GenericGrid extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const rowText = this.state.selectedIndexes.length === 1
       ? this.context.intl.formatMessage(
         { id: `${labelBasePath}.row_selected`, defaultMessage: `${labelBasePath}.row_selected` }
@@ -1002,7 +1009,8 @@ class GenericGrid extends React.Component {
                 rows={this.state.filteredRows || this.state.rows}
                 id={this.state.id}
                 enableMultiSelect={this.state.enableMultiSelect}
-                gridConfig={this.state.gridConfig} />
+                gridConfig={this.state.gridConfig}
+                editContextFunc={this.props.editContextFunc} />
               }
               emptyRowsView={NoData}
             />

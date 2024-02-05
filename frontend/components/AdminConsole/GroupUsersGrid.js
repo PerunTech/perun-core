@@ -1,10 +1,7 @@
 import React from 'react'
-import { store } from '../../model';
 import { ExportableGrid, PropTypes } from '../../client';
 import { alertUser } from '../../elements';
 import { ComponentManager } from '../../elements';
-
-const tableName = 'SVAROG_USER_GROUPS'
 
 export default class GroupUsersGrid extends React.Component {
   constructor(props) {
@@ -21,6 +18,7 @@ export default class GroupUsersGrid extends React.Component {
   componentDidMount() {
     this.generateGroupUsersGrid()
   }
+
   generateGroupUsersGrid = () => {
     const groupUsersGridId = 'SVAROG_USER_GROUP_GRID'
     const grid = <ExportableGrid

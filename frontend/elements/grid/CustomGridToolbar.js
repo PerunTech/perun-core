@@ -120,7 +120,7 @@ export default class CustomGridToolbar extends Toolbar {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.customButton !== nextProps.customButton) {
       this.customButtonJSX(nextProps)
     }

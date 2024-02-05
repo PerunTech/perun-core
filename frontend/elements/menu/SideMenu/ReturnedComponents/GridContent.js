@@ -13,7 +13,7 @@ class GridContent extends React.Component {
     linkName: PropTypes.string,
     // isContainer: PropTypes.bool
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showPopup: false,
@@ -29,17 +29,17 @@ class GridContent extends React.Component {
     this.onAlertClose = this.onAlertClose.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (this.props.showGrid) {
       this.generateGrid(this.props)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.showGrid !== this.props.showGrid ||
-        nextProps.parentId !== this.props.parentId ||
-        nextProps.linkName !== this.props.linkName ||
-        nextProps.toggleCustomButton !== this.props.toggleCustomButton) {
+      nextProps.parentId !== this.props.parentId ||
+      nextProps.linkName !== this.props.linkName ||
+      nextProps.toggleCustomButton !== this.props.toggleCustomButton) {
       this.generateGrid(nextProps)
     }
     // re-render if labels change
@@ -49,7 +49,7 @@ class GridContent extends React.Component {
     }
   }
 
-  generateGrid (props) {
+  generateGrid(props) {
     if (props) {
       const {
         showGrid, parentId, linkName, isContainer, gridConfig, linkedTable
@@ -128,7 +128,7 @@ class GridContent extends React.Component {
     }
   }
 
-  insertNewRow (gridId) {
+  insertNewRow(gridId) {
     this.generateForm(null, gridId, this.props, false)
   }
 
@@ -144,21 +144,21 @@ class GridContent extends React.Component {
       gridId: gridId
     }
     this.setState(
-      {gridInModal: ''},
-      () => this.setState({gridInModal: <this.props.gridInModal {...linkData} />})
+      { gridInModal: '' },
+      () => this.setState({ gridInModal: <this.props.gridInModal {...linkData} /> })
     )
   }
 
-  generateObjectsForParent (gridId, rowIdx, row) {
+  generateObjectsForParent(gridId, rowIdx, row) {
     store.dispatch(lastSelectedItem(gridId, row))
   }
 
-  editItemOnRowClick (gridId, rowIdx, row) {
+  editItemOnRowClick(gridId, rowIdx, row) {
     const objectId = row[`${this.props.showGrid}.OBJECT_ID`]
     this.generateForm(objectId, gridId, this.props)
   }
 
-  generateForm (objectId, gridId, props, enableExcludedFields) {
+  generateForm(objectId, gridId, props, enableExcludedFields) {
     if (this.state.showPopup === false) {
       this.setState({ showPopup: true })
     }
@@ -220,30 +220,30 @@ class GridContent extends React.Component {
     this.setState({ popUpForm })
   }
 
-  closeWindow () {
+  closeWindow() {
     this.setState({ popUpForm: undefined, showPopup: false })
   }
 
-  onAlertClose (gridId) {
+  onAlertClose(gridId) {
     this.setState({ popUpForm: undefined, showPopup: false })
     GridManager.reloadGridData(gridId)
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.props.showGrid && this.props.parentId ? this.state.renderGrid : null}
         {this.state.showPopup &&
-        <div id='form_modal' className='modal' style={{ display: 'block' }}>
-          <div id='form_modal_content' className='modal-content'>
-            <div className='modal-header'>
-              <button id='modal_close_btn' type='button' className='close' onClick={this.closeWindow} data-dismiss='modal'>&times;</button>
-            </div>
-            <div id='form_modal_body' className='modal-body'>
-              {this.state.popUpForm}
+          <div id='form_modal' className='modal' style={{ display: 'block' }}>
+            <div id='form_modal_content' className='modal-content'>
+              <div className='modal-header'>
+                <button id='modal_close_btn' type='button' className='close' onClick={this.closeWindow} data-dismiss='modal'>&times;</button>
+              </div>
+              <div id='form_modal_body' className='modal-body'>
+                {this.state.popUpForm}
+              </div>
             </div>
           </div>
-        </div>
         }
         {this.state.gridInModal}
       </div>

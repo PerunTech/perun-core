@@ -58,7 +58,7 @@ class ContextMenuItem extends React.Component {
 
   configureMenuItems() {
     const { contextMenuItem, generateGrid, generateForm, getSearchFormData } = this.props
-    const { isActive, activeSubMenuItem } = this.state
+    const { isActive } = this.state
     const { onClick, onSubMenuItemClick, context } = this
     let button
 

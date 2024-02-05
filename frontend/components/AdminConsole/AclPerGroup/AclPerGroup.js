@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, Loading } from '../../../client'
-import { GenericGrid } from '../../../client';
+import { ComponentManager, GenericGrid } from '../../../client'
 let prev
 const AclPerGroup = (props, context) => {
     const [flag, setFlag] = useState(false)
@@ -29,13 +28,13 @@ const AclPerGroup = (props, context) => {
     }
     return (
         <>
-
             <div className='aclpergroup-container'>
-                <h3 className='aclpergroup-legend'>{context.intl.formatMessage({ id: 'perun.adminConsole.acl_per_group_legend', defaultMessage: 'perun.dminConsole.acl_per_group_legend' })}</h3>
+                <h3 className='aclpergroup-legend'>
+                    {context.intl.formatMessage({ id: 'perun.adminConsole.acl_per_group_legend', defaultMessage: 'perun.adminConsole.acl_per_group_legend' })}
+                </h3>
                 <div>
                     {flag && generateAclGrid()}
                 </div>
-
             </div>
         </>
     )
@@ -44,7 +43,6 @@ const AclPerGroup = (props, context) => {
 const mapStateToProps = state => ({
     svSession: state.security.svSession
 })
-
 
 AclPerGroup.contextTypes = {
     intl: PropTypes.object.isRequired,

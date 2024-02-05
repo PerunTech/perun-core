@@ -84,7 +84,6 @@ class UserGuide extends React.Component {
   /* iterate json and create documents html*/
   iterateDocs(json) {
     let docHTML
-    let titleHTML
     let elArr = []
     let matchingResultArr = []
 
@@ -150,7 +149,7 @@ class UserGuide extends React.Component {
           docHTML = <div key={el.id} id={el.id} className='user-guide-flex'>
             <div className='user-guide-title'>
               {el.exactLink &&
-                <a href={`${el.exactLink}`} target='_blank' title={el.exactLink} className='user-guide-link-title user-guide-flex-align-items user-guide-document'>
+                <a href={`${el.exactLink}`} target='_blank' rel='noopener noreferrer' title={el.exactLink} className='user-guide-link-title user-guide-flex-align-items user-guide-document'>
                   <div className='user-guide-icon'>{iconManager.getIcon('fileLinkIcon')}</div>
                   {el.title}
                 </a>

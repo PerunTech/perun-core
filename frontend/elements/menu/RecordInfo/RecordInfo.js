@@ -27,7 +27,7 @@ import('modulesCSS/RecordInfo.module.css').then((projectCSS) => {
   console.log('No external style for RecordInfo.module.css')
 })
 
-function decodeValueFromCodelist (valueToDecode, item) {
+function decodeValueFromCodelist(valueToDecode, item) {
   let decodedValue
   if (item.formatterOptions && item.formatterOptions.length > 0) {
     for (let i = 0; i < item.formatterOptions.length; i++) {
@@ -38,7 +38,7 @@ function decodeValueFromCodelist (valueToDecode, item) {
   }
   return decodedValue || valueToDecode
 }
-function getConfigFromFile (configuration, renderedGrids, context) {
+function getConfigFromFile(configuration, renderedGrids, context) {
   const bulkData = []
   for (let k = 0; k < renderedGrids.length; k++) {
     if (renderedGrids[k].rowClicked && Object.keys(renderedGrids[k]).length > 0) {
@@ -63,7 +63,7 @@ function getConfigFromFile (configuration, renderedGrids, context) {
           renderedGrids[k].rowClicked[itemsArray[i].VALUE[1]]) {
           value = `${spacing + renderedGrids[k].rowClicked[itemsArray[i].VALUE[0]]} ${renderedGrids[k].rowClicked[itemsArray[i].VALUE[1]]}`
         } else if ((typeof itemsArray[i].VALUE === 'string' || itemsArray[i].VALUE instanceof String) &&
-            renderedGrids[k].rowClicked[itemsArray[i].VALUE]) {
+          renderedGrids[k].rowClicked[itemsArray[i].VALUE]) {
           value = spacing + renderedGrids[k].rowClicked[itemsArray[i].VALUE]
           if (itemsArray[i].LINK_TO_PARRENT_BY) {
             let criteria
@@ -100,7 +100,7 @@ function getConfigFromFile (configuration, renderedGrids, context) {
   return bulkData
 }
 
-function getConfigFromDb (menuType, configuration, renderedGrids) {
+function getConfigFromDb(menuType, configuration, renderedGrids) {
   const value = []
   const newLine = <br />
   for (let i = 0; i < renderedGrids.length; i++) {
@@ -158,7 +158,7 @@ RecordInfo.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   let renderedGrids
   const dynamicComponents = state.gridConfig.gridHierarchy.length
   if (dynamicComponents > 0) {

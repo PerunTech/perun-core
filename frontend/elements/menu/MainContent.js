@@ -14,7 +14,7 @@ class MainContent extends React.Component {
   static propTypes = {
     gridToDisplay: PropTypes.string.isRequired
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showPopup: false,
@@ -29,13 +29,13 @@ class MainContent extends React.Component {
     this.onAlertClose = this.onAlertClose.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (this.props) {
       this.generateGrid(this.props)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.gridLang && (this.props.gridLang !== nextProps.gridLang)) {
       !translateComponents && this.forceUpdate()
       translateComponents && GridManager.reloadGridData(this.props.gridToDisplay)
@@ -45,7 +45,7 @@ class MainContent extends React.Component {
     }
   }
 
-  generateGrid (props) {
+  generateGrid(props) {
     const gridToDisplay = props.gridToDisplay
     let toggleCustomButton = props.toggleCustomButton
     const filterBy = props.filterBy
@@ -120,7 +120,7 @@ class MainContent extends React.Component {
     this.setState({ renderGrid })
   }
 
-  generateForm (objectId, props, enableExcludedFields) {
+  generateForm(objectId, props, enableExcludedFields) {
     if (this.state.showPopup === false) {
       this.setState({ showPopup: true })
     }
@@ -171,7 +171,7 @@ class MainContent extends React.Component {
     this.setState({ popUpForm })
   }
 
-  onRowSelect (gridId, rowIdx, row) {
+  onRowSelect(gridId, rowIdx, row) {
     if (!this.props.onRowSelectProp) {
       hashHistory.push('/main/data')
     } else if (this.props.onRowSelectProp instanceof Function) {
@@ -184,16 +184,16 @@ class MainContent extends React.Component {
     }
   }
 
-  closeWindow () {
+  closeWindow() {
     this.setState({ popUpForm: undefined, showPopup: false })
   }
 
-  onAlertClose () {
+  onAlertClose() {
     GridManager.reloadGridData(this.props.gridToDisplay)
     this.setState({ popUpForm: undefined, showPopup: false })
   }
 
-  insertNewRow () {
+  insertNewRow() {
     this.generateForm(null, this.props, false)
   }
 
@@ -201,13 +201,13 @@ class MainContent extends React.Component {
     this.generateForm(null, this.props, true)
   }
 
-  editItemOnRowClick () {
+  editItemOnRowClick() {
     const grid = this.props.gridToDisplay
     const objectId = store.getState()[grid].rowClicked[`${grid}.OBJECT_ID`]
     this.generateForm(objectId, this.props)
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.props.gridToDisplay && this.state.renderGrid}

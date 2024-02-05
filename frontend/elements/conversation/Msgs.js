@@ -5,7 +5,7 @@ import { svConfig } from '../../config';
 import msgStyle from './ShowMsg.module.css';
 
 class Msgs extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       deleteObj: '',
@@ -20,7 +20,7 @@ class Msgs extends React.Component {
     this.handleConvActions = this.handleConvActions.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     let data
     const url = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_MESSAGES + this.props.security.svSession + '/' + this.state.conversationId
     axios.get(url)
@@ -35,7 +35,7 @@ class Msgs extends React.Component {
       })
   }
 
-  iterateMsgs (data) {
+  iterateMsgs(data) {
     // let objects
     // let reply
     // let deleteB
@@ -66,10 +66,10 @@ class Msgs extends React.Component {
       }
       msgsBuffer.push(htmlElement)
     }
-    this.setState({msgs: msgsBuffer})
+    this.setState({ msgs: msgsBuffer })
   }
 
-  handleConvActions (action, objects) {
+  handleConvActions(action, objects) {
     let deleteObj = objects
     const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.DELETE_CONVERSATION_MSGS
     switch (action) {
@@ -84,20 +84,19 @@ class Msgs extends React.Component {
           data: '',
           url: restUrl + this.props.security.svSession + '/' + objects['MESSAGE.OBJECT_ID'] + '/' + objects['MESSAGE.OBJECT_TYPE'] + '/' + objects['MESSAGE.PKID'],
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(function (response) {
+        }).then(function () {
           console.log('success')
-        })
-          .catch(function (response) {
+        }).catch(function () {
           /* initMsgData() with function or triger re-render */
-            console.log('error')
-          })
+          console.log('error')
+        })
         console.log('BtnDelete')
         break
       default:
     }
   }
 
-  render () {
+  render() {
     return (
       <div>
         <div id='allMessages'>

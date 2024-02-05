@@ -9,10 +9,10 @@ import { dataToRedux, publishState, store, injectAsyncReducer, removeAsyncReduce
  * @version 0.9
  * @function
  */
-export function WrapItUp (ComposedComponent, typeOfComponent, id, isPersistent, storeKeys) {
-/**
- * A function that maps all the values of the wrapped components own reducer to the local state.
- */
+export function WrapItUp(ComposedComponent, typeOfComponent, id, isPersistent, storeKeys) {
+  /**
+   * A function that maps all the values of the wrapped components own reducer to the local state.
+   */
   const mapStateToProps = (state, ownProps) => {
     let dynamicReducerName = ownProps.id
     if (dynamicReducerName === null || dynamicReducerName === undefined) { dynamicReducerName = id }
@@ -51,13 +51,13 @@ export function WrapItUp (ComposedComponent, typeOfComponent, id, isPersistent, 
    * Generates a new reducer from the ReducerTemplater for the object and injects it into the store
    * @constructor
    */
-    constructor (props) {
+    constructor(props) {
       super(props)
       this.childDidMount = this.childDidMount.bind(this)
       this.publishMe = this.publishMe.bind(this)
     }
 
-    componentWillMount () {
+    UNSAFE_componentWillMount() {
       let finalId
       if (this.props.id === null || this.props.id === undefined) {
         finalId = id
@@ -70,7 +70,7 @@ export function WrapItUp (ComposedComponent, typeOfComponent, id, isPersistent, 
       // this.publishMe(finalId, this.props)
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
       if (!isPersistent) {
         let finalId
         if (!this.props.id) {
@@ -89,7 +89,7 @@ export function WrapItUp (ComposedComponent, typeOfComponent, id, isPersistent, 
    * @function
    */
 
-    publishMe (finalId, props) {
+    publishMe(finalId, props) {
       if (typeOfComponent === 'GenericGrid') {
         store.dispatch(publishState(finalId, props))
       } else if (typeOfComponent === 'genericComponent') {
@@ -102,14 +102,14 @@ export function WrapItUp (ComposedComponent, typeOfComponent, id, isPersistent, 
    * Function callback that is sent to any child. When called the function publishes the child's state
    * @function
    */
-    childDidMount (child) {
+    childDidMount(child) {
       if (child !== null && child !== undefined) {
         const stateToSend = child.state
         this.publishMe(this.props.id, stateToSend)
       }
     }
 
-    render () {
+    render() {
       const svsession = store.getState().security.svSession
       return <ComposedComponent {...this.props} session={svsession} refFunction={this.childDidMount} />
     }

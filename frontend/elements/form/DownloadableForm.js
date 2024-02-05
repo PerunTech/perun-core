@@ -6,7 +6,7 @@ import { ComponentManager, alertUser } from '..';
 import StructuredForm from './StructuredForm';
 
 export default class DownloadableForm extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       ...this.props,
@@ -17,16 +17,16 @@ export default class DownloadableForm extends React.Component {
     this.handleFileSelection = this.handleFileSelection.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // this.props.refFunction(this)
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     // this.props.refFunction(this)
   }
 
   /* default downloadFile function f.r */
-  downloadSingleFile (id, formName, session, fileId) {
+  downloadSingleFile(id, formName, session, fileId) {
     let verbPath = svConfig.triglavRestVerbs[formName]
     verbPath = verbPath.replace('%session', session)
     verbPath = verbPath.replace('%fileObjectId', fileId)
@@ -36,7 +36,7 @@ export default class DownloadableForm extends React.Component {
 
   /* if parametar is function use that function
 if not use default download file - function f.r */
-  downloadFile (dataDoc) {
+  downloadFile() {
     const objectToGet = ComponentManager.getStateForComponent(this.props.id, 'formTableData')
     const session = ComponentManager.getStateForComponent(this.props.id, 'session')
     if (objectToGet.OBJECT_ID) { this.downloadSingleFile('DOWNLOAD', 'DOWNLOAD_FILE', session, objectToGet.OBJECT_ID) } else {
@@ -49,7 +49,7 @@ if not use default download file - function f.r */
       })
     }
   }
-  handleFileSelection (e) {
+  handleFileSelection(e) {
     // Item for upload was selected, set state to true
     // and call parent function which also sets the parent's stat
     e.preventDefault()
@@ -58,7 +58,7 @@ if not use default download file - function f.r */
 
     this.setState({ file: fileToUpload })
   }
-  saveFile (formData, session) {
+  saveFile(formData, session) {
     if (this.state.file) {
       // hack to get the data directly from the dom element as setState causes rerender which removes all data currently in the form
       saveFormDataWithFile(this.props.id, 'SAVE_FILE', session, formData, this.state.file, this.props.params)
@@ -73,7 +73,7 @@ if not use default download file - function f.r */
     }
   }
 
-  render () {
+  render() {
     const propsToSend = { ...this.props }
     delete propsToSend.addSaveFunction
     propsToSend.addSaveFunction = this.saveFile

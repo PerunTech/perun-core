@@ -6,7 +6,7 @@ import { labelBasePath } from '../../config';
 
 const { ContextMenu, MenuItem } = Menu
 
-function copyRow (rows, gridConfig, rowIdx, idx) {
+function copyRow(rows, gridConfig, rowIdx) {
   // this saves the whole row as string
   const selectedRow = prepJsonFromConf(gridConfig, [rows[rowIdx]])
   const keys = Object.keys(selectedRow[0])
@@ -17,7 +17,7 @@ function copyRow (rows, gridConfig, rowIdx, idx) {
   saveCopiedValueToClipboard(string)
 }
 
-function copyCell (rows, gridConfig, rowIdx, idx, enableMultiSelect) {
+function copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect) {
   // try to find the cell in the row by IDX
   let cellType
   if (typeof enableMultiSelect !== 'undefined' && enableMultiSelect) {
@@ -34,7 +34,7 @@ function copyCell (rows, gridConfig, rowIdx, idx, enableMultiSelect) {
   saveCopiedValueToClipboard(cellValue)
 }
 
-function saveCopiedValueToClipboard (string) {
+function saveCopiedValueToClipboard(string) {
   /* next, we have to create a hidden element and and set the string row as value
   so we can save it to clipboard, because thats how javascript does it */
   const el = document.createElement('textarea')
@@ -45,8 +45,11 @@ function saveCopiedValueToClipboard (string) {
   document.body.removeChild(el)
 }
 
-const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect }, context) => {
+const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect, editContextFunc }, context) => {
   return <ContextMenu id={id}>
+    {editContextFunc && <MenuItem data={{ rowIdx, idx }} onClick={() => editContextFunc(id, rowIdx, rows[rowIdx])}>
+      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.edit_row`, defaultMessage: `${labelBasePath}.main.grids.edit_row` })}
+    </MenuItem>}
     <MenuItem data={{ rowIdx, idx }} onClick={() => copyRow(rows, gridConfig, rowIdx, idx)}>
       {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_row`, defaultMessage: `${labelBasePath}.main.grids.copy_row` })}
     </MenuItem>

@@ -9,7 +9,7 @@ class GetDocumentsForParent extends React.Component {
     formName: PropTypes.number.isRequired,
     parentId: PropTypes.number.isRequired
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showPopup: false,
@@ -22,19 +22,19 @@ class GetDocumentsForParent extends React.Component {
     this.editItemOnRowClick = this.editItemOnRowClick.bind(this)
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     if (this.props.formName && this.props.parentId) {
       this.generateGrid(this.props)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.formName !== this.props.formName || nextProps.parentId !== this.props.parentId) {
       this.generateGrid(nextProps)
     }
   }
 
-  generateGrid (props) {
+  generateGrid(props) {
     if (props) {
       const formName = props.formName
       const parentId = props.parentId
@@ -67,7 +67,7 @@ class GetDocumentsForParent extends React.Component {
     }
   }
 
-  generateForm (objectId, props) {
+  generateForm(objectId, props) {
     if (this.state.showPopup === false) {
       this.setState({ showPopup: true })
     }
@@ -108,11 +108,11 @@ class GetDocumentsForParent extends React.Component {
     this.setState({ popUpForm })
   }
 
-  closeWindow () {
+  closeWindow() {
     this.setState({ popUpForm: undefined, showPopup: false })
   }
 
-  saveInputData (formData, session) {
+  saveInputData(formData, session) {
     let datafields = formData.formData
     datafields = JSON.stringify(datafields)
     const params = []
@@ -140,7 +140,7 @@ class GetDocumentsForParent extends React.Component {
     saveFormData(activeForm, 'SAVE_DOCUMENT_OBJECT', session, params)
   }
 
-  editInputDataAndSave (formData, session) {
+  editInputDataAndSave(formData, session) {
     let datafields = formData.formData
     datafields = JSON.stringify(datafields)
     const params = []
@@ -174,21 +174,21 @@ class GetDocumentsForParent extends React.Component {
     saveFormData(activeForm, 'SAVE_DOCUMENT_OBJECT', session, params)
   }
 
-  onAlertClose () {
+  onAlertClose() {
     this.setState({ popUpForm: undefined, showPopup: false })
     GridManager.reloadGridData(`${this.props.formName}_${this.props.parentId}`)
   }
 
-  insertNewRow () {
+  insertNewRow() {
     this.generateForm(null, this.props)
   }
 
-  editItemOnRowClick () {
+  editItemOnRowClick() {
     const objectId = store.getState()[`${this.props.formName}_${this.props.parentId}`].rowClicked['SVAROG_FORM.OBJECT_ID']
     this.generateForm(objectId, this.props)
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.props.formName && this.props.parentId ? this.state.renderGrid : null}

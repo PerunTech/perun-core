@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom'
 import { MainApp } from 'containers/ContainersIndex'
 import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
-const External = () => {
+import PropTypes from 'prop-types';
+const External = (_props, context) => {
   const [json, setJson] = useState([])
   const [activeLanguage, setActiveLanguage] = useState('')
   useEffect(() => {
@@ -37,7 +38,7 @@ const External = () => {
           return (
             <li key={`${element.id}-item`} className='nav-item'>
               <Link to={element.route} id={element.id} key={element.id} className={`nav-link ${element.className ? element.className : 'link-default'}`}>
-                {element.label}
+                {context.intl.formatMessage({ id: `perun.login.${element.label}`, defaultMessage: `perun.login.${element.label}` })}
               </Link>
             </li>
           )
@@ -97,5 +98,8 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(HomeMenu)
+External.contextTypes = {
+  intl: PropTypes.object.isRequired
+}
 
+export default connect(mapStateToProps)(HomeMenu)

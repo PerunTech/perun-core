@@ -3,18 +3,18 @@ import { store } from '../../model';
 import FormManager from '../../elements/form/FormManager'
 
 export default class GroupUsersForm extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showForm: ''
     }
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     this.generateUsersForm()
   }
 
-  generateUsersForm () {
+  generateUsersForm() {
     const formId = 'SVAROG_USER_GROUPS_FORM'
     const params = []
     params.push({
@@ -37,9 +37,9 @@ export default class GroupUsersForm extends React.Component {
     let dataForm = FormManager.generateForm(formId, formId,
       params, 'formData', 'GET_FORM_BUILDER_MAVEN', 'GET_UISCHEMA_MAVEN', 'GET_DATA_FROM_FORM_MAVEN',
       null, null, null, null, 'form-container', null, 'close', null)
-    this.setState({showForm: dataForm})
+    this.setState({ showForm: dataForm })
   }
-  render () {
+  render() {
     const { showForm } = this.state
     return (
       <div>{showForm}</div>

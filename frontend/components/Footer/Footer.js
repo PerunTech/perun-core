@@ -24,7 +24,7 @@ const Footer = (props) => {
         <div className='footer-list-title'>
           {json.map((element) => {
             if (element.href) {
-              return <a key={element.id} id={element.id} href={element.href} target='_blank' className={`${element.className ? element.className : 'link-firm'}`}>
+              return <a key={element.id} id={element.id} href={element.href} target='_blank' rel='noopener noreferrer' className={`${element.className ? element.className : 'link-firm'}`}>
                 {element.label}
               </a>
             } else {

@@ -13,7 +13,7 @@ class MultiGrid extends React.Component {
     linkName: PropTypes.string,
     // isContainer: PropTypes.bool
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showPopup: false,
@@ -30,18 +30,18 @@ class MultiGrid extends React.Component {
     this.onAlertClose = this.onAlertClose.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (this.props.showGrid) {
       this.generateGrid(this.props, 'STATUS', 'VALID', '1')
       this.generateGrid(this.props, 'STATUS', 'RETIRED', '2')
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.showGrid !== this.props.showGrid ||
-        nextProps.parentId !== this.props.parentId ||
-        nextProps.linkName !== this.props.linkName ||
-        nextProps.toggleCustomButton !== this.props.toggleCustomButton) {
+      nextProps.parentId !== this.props.parentId ||
+      nextProps.linkName !== this.props.linkName ||
+      nextProps.toggleCustomButton !== this.props.toggleCustomButton) {
       this.generateGrid(nextProps, 'STATUS', 'VALID', '1')
       this.generateGrid(nextProps, 'STATUS', 'RETIRED', '2')
     }
@@ -52,7 +52,7 @@ class MultiGrid extends React.Component {
     }
   }
 
-  generateGrid (props, filterByCol, filterValue, position) {
+  generateGrid(props, filterByCol, filterValue, position) {
     if (props) {
       const {
         showGrid, parentId, linkName, isContainer, gridConfig, linkedTable
@@ -157,7 +157,7 @@ class MultiGrid extends React.Component {
     }
   }
 
-  insertNewRow (gridId) {
+  insertNewRow(gridId) {
     this.generateForm(null, gridId, this.props, false)
   }
 
@@ -173,12 +173,12 @@ class MultiGrid extends React.Component {
       gridId: gridId
     }
     this.setState(
-      {gridInModal: ''},
-      () => this.setState({gridInModal: <this.props.gridInModal {...linkData} />})
+      { gridInModal: '' },
+      () => this.setState({ gridInModal: <this.props.gridInModal {...linkData} /> })
     )
   }
 
-  generateObjectsForParent (gridId, rowIdx, row) {
+  generateObjectsForParent(gridId, rowIdx, row) {
     /* let subGridId
     if (gridId.indexOf('_VALID') > -1) {
       subGridId = gridId.replace(/_VALID/g, '')
@@ -188,12 +188,12 @@ class MultiGrid extends React.Component {
     store.dispatch(lastSelectedItem(gridId, row))
   }
 
-  editItemOnRowClick (gridId, rowIdx, row) {
+  editItemOnRowClick(gridId, rowIdx, row) {
     const objectId = row[`${this.props.showGrid}.OBJECT_ID`]
     this.generateForm(objectId, gridId, this.props)
   }
 
-  generateForm (objectId, gridId, props, enableExcludedFields) {
+  generateForm(objectId, gridId, props, enableExcludedFields) {
     if (this.state.showPopup === false) {
       this.setState({ showPopup: true })
     }
@@ -255,16 +255,16 @@ class MultiGrid extends React.Component {
     this.setState({ popUpForm })
   }
 
-  closeWindow () {
+  closeWindow() {
     this.setState({ popUpForm: undefined, showPopup: false })
   }
 
-  onAlertClose (gridId) {
+  onAlertClose(gridId) {
     this.setState({ popUpForm: undefined, showPopup: false })
     GridManager.reloadGridData(gridId)
   }
 
-  switchGrid (props) {
+  switchGrid(props) {
     this.generateGrid(props)
     if (this.state.switchBtnName === 'Show Dead') {
       this.setState({ switchBtnName: 'Show Alive' })
@@ -273,7 +273,7 @@ class MultiGrid extends React.Component {
     }
   }
 
-  render () {
+  render() {
     // const switchable = <button id='switchGrid' className='switch-grid-btn'
     //   onClick={() => this.switchGrid(this.props)}>
     //   {this.state.switchBtnName}
@@ -288,20 +288,20 @@ class MultiGrid extends React.Component {
     const grids = this.state.renderGrid.map((element, index) => <li key={index}>{element}</li>)
     return (
       <div>
-        <ul id='grids' style={{'listStyleType': 'none', 'padding': '0'}}>
+        <ul id='grids' style={{ 'listStyleType': 'none', 'padding': '0' }}>
           {grids}
         </ul>
         {this.state.showPopup &&
-        <div id='form_modal' className='modal' style={{ display: 'block' }}>
-          <div id='form_modal_content' className='modal-content'>
-            <div className='modal-header'>
-              <button id='modal_close_btn' type='button' className='close' onClick={this.closeWindow} data-dismiss='modal'>&times;</button>
-            </div>
-            <div id='form_modal_body' className='modal-body'>
-              {this.state.popUpForm}
+          <div id='form_modal' className='modal' style={{ display: 'block' }}>
+            <div id='form_modal_content' className='modal-content'>
+              <div className='modal-header'>
+                <button id='modal_close_btn' type='button' className='close' onClick={this.closeWindow} data-dismiss='modal'>&times;</button>
+              </div>
+              <div id='form_modal_body' className='modal-body'>
+                {this.state.popUpForm}
+              </div>
             </div>
           </div>
-        </div>
         }
         {this.state.gridInModal}
       </div>

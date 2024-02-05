@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const PreviewData = (props, context) => {
+const PreviewData = (props) => {
   let selectedItem = []
   let view = []
   const element = document.getElementById('selected_item')

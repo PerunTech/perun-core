@@ -34,7 +34,7 @@ class ChangePassword extends React.Component {
     this.hashHistory = createHashHistory()
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.status) {
       let statusType = nextProps.status.toLowerCase()
       if (statusType === 'exception') { statusType = 'error' }

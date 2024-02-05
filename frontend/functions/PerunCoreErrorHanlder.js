@@ -14,14 +14,14 @@ class PerunCoreErrorHanlder extends React.Component {
     this.state = { hasError: false, hasCallback: false };
   }
 
-  static getDerivedStateFromError = (error) => {
+  static getDerivedStateFromError = () => {
     // Update state so the next render will show the fallback UI.
-      return { hasError : true }
+    return { hasError: true }
   }
 
   componentDidCatch(error, errorInfo) {
     console.log(error, errorInfo)
-    if (this.props.customCallBackErrorFunc){
+    if (this.props.customCallBackErrorFunc) {
       this.props.customCallBackErrorFunc(error, errorInfo)
     }
   }
@@ -30,16 +30,16 @@ class PerunCoreErrorHanlder extends React.Component {
     if (this.state.hasError) {
       if (this.props.customErrorLabel) {
         return (
-        <>
-          <h1>{this.props.customErrorLabel}
-          </h1>{this.props.children}
-        </>)
+          <>
+            <h1>{this.props.customErrorLabel}
+            </h1>{this.props.children}
+          </>)
       } else {
         return (
-        <>
-          <h1>{this.context.intl.formatMessage({ id: 'general.errorLabel', defaultMessage: 'general.errorLabel' })}</h1>
-          {this.props.children}
-        </>);
+          <>
+            <h1>{this.context.intl.formatMessage({ id: 'general.errorLabel', defaultMessage: 'general.errorLabel' })}</h1>
+            {this.props.children}
+          </>);
       }
     } else {
       return this.props.children;
