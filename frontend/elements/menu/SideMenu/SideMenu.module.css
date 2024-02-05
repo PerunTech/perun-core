@@ -1,32 +1,33 @@
 .ul_item {
-    font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
-    font-size:13px;
+    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+    font-size: 13px;
     list-style-type: none;
     margin: 0;
     padding: 5px 2px 5px 2px;
     width: 100%;
-    vertical-align:middle;
+    vertical-align: middle;
     text-align: left;
 }
 
 .li_item {
-    margin:5px;
+    margin: 5px;
     display: block;
     color: #000;
-    background-color: rgba(249, 235, 210, 0.6);;
+    background-color: rgba(249, 235, 210, 0.6);
+    ;
     width: 94%;
-    padding-left:15px;
-    padding-right:5px;
-    padding-top:10px;
-    padding-bottom:10px;
+    padding-left: 15px;
+    padding-right: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     text-decoration: none;
     text-align: left;
-    opacity:1;
-    filter:alpha(opacity=100);
-    -webkit-transition:600ms ease;
-    -moz-transition:600ms ease;
-    -o-transition:600ms ease;
-    transition:600ms ease;
+    opacity: 1;
+    filter: alpha(opacity=100);
+    -webkit-transition: 600ms ease;
+    -moz-transition: 600ms ease;
+    -o-transition: 600ms ease;
+    transition: 600ms ease;
     border: none
 }
 
@@ -38,33 +39,32 @@
 }
 
 .li_item_clicked {
-    margin-top:5px;
-    margin-bottom:5px;
-    width:94%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 94%;
     display: block;
-    padding-left:10px;
-    padding-top:10px;
-    padding-bottom:10px;
-    padding-right:5px;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 5px;
     color: rgb(249, 235, 210);
     cursor: pointer;
     background-color: rgba(34, 61, 16, 0.6);
     border-style: solid;
     border-color: #7a9966;
-    -webkit-transition:600ms ease;
-    -moz-transition:600ms ease;
-    -o-transition:600ms ease;
-    transition:600ms ease;
+    -webkit-transition: 600ms ease;
+    -moz-transition: 600ms ease;
+    -o-transition: 600ms ease;
+    transition: 600ms ease;
 }
 
 .li_item:active {
     display: block;
     color: rgba(34, 61, 16, 0.6);
     background-color: rgb(249, 235, 210);
-    opacity:1;
-    filter:alpha(opacity=100);
+    opacity: 1;
+    filter: alpha(opacity=100);
     cursor: pointer;
-    background-image: url("/PERUNJS/img/bg_O_transparent.png")
 }
 
 .collapsibleIndicator {
@@ -82,7 +82,7 @@
     transition: max-height .5s;
 }
 
-input[type=checkbox]:checked ~ .collapsibleMenu {
+input[type=checkbox]:checked~.collapsibleMenu {
     max-height: 400px;
 }
 
@@ -104,8 +104,8 @@ input[type=checkbox]:checked ~ .collapsibleMenu {
     transition: transform .5s;
 }
 
-input[type=checkbox]:checked + .collapsibleIndicator {
-    -webkit-transform: rotate(180deg); 
+input[type=checkbox]:checked+.collapsibleIndicator {
+    -webkit-transform: rotate(180deg);
     transform: rotate(180deg);
 }
 

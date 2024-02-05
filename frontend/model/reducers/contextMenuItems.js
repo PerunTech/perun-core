@@ -1,15 +1,15 @@
-import { contextMenuItemWasClicked, subMenuItemWasClicked, clearContextMenuItems } from '../actionNames.json'
+import a from '../actionNames.json'
 
-export default function contextMenuItemsReducer (state = {
+export default function contextMenuItemsReducer(state = {
   clickedContextMenuItemId: '',
   clickedSubMenuItemId: ''
 }, action) {
   switch (action.type) {
-    case contextMenuItemWasClicked:
+    case a.contextMenuItemWasClicked:
       return { ...state, clickedContextMenuItemId: action.payload }
-    case subMenuItemWasClicked:
+    case a.subMenuItemWasClicked:
       return { ...state, clickedSubMenuItemId: action.payload }
-    case clearContextMenuItems:
+    case a.clearContextMenuItems:
       return { ...state, clickedContextMenuItemId: '', clickedSubMenuItemId: '' }
     default:
       return state

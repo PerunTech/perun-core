@@ -1,4 +1,5 @@
 import * as ReactBootstrap from 'react-bootstrap';
+import Form from 'react-jsonschema-form';
 /* util */
 export { findWidget, findSectionName, replaceConfigParamsWithFieldVals, $ } from './util/utils';
 export { alertUser } from './util/alertUser';
@@ -43,7 +44,6 @@ export { default as SelectedItem } from './selector/SelectedItem';
 /* These should be moved to client.js */
 export { default as Draggable, DraggableCore } from 'react-draggable';
 // export { Select } from 'react-select';
-export { Form } from 'react-jsonschema-form';
 export { default as SchemaField } from 'react-jsonschema-form/lib/components/fields/SchemaField'
-export { createFilterOptions } from "react-select-fast-filter-options";
-export { ReactBootstrap }
+export * as createFilterOptions from "react-select-fast-filter-options";
+export { ReactBootstrap, Form }

@@ -1,7 +1,7 @@
-import { store, addConfiguration } from '../model'
-import * as config from 'config/config.js'
-import * as C from './constants.json'
 import axios from 'axios'
+import { store, addConfiguration } from '../model'
+import * as config from '../config/config'
+import constants from './constants.json'
 
 /**
  * Get configuration dispatch function- gets the requested configuration from the DB.
@@ -12,12 +12,12 @@ import axios from 'axios'
  * @function
  */
 
-export function loadConfiguration (componentName, configPath) {
-/**
- * MANDATORY PARAMETERS
- * @param {string} componentName - Type of configuration required by the web service
- * @param {string} configPath - Class path to get component configuration
- */
+export function loadConfiguration(componentName, configPath) {
+  /**
+   * MANDATORY PARAMETERS
+   * @param {string} componentName - Type of configuration required by the web service
+   * @param {string} configPath - Class path to get component configuration
+   */
 
   /* workaround/fastest way to integrate edbar architecture in perun-core f.r */
   let session = null
@@ -32,9 +32,9 @@ export function loadConfiguration (componentName, configPath) {
   if (configPath) {
     verbPath = configPath
   } else {
-    verbPath = config.svConfig.triglavRestVerbs[C.getConfigurationServiceName]
-    verbPath = verbPath.replace(`%${C.componentNameParameter}`, componentName)
-    verbPath = verbPath.replace(`%${C.session}`, session)
+    verbPath = config.svConfig.triglavRestVerbs[constants.getConfigurationServiceName]
+    verbPath = verbPath.replace(`%${constants.componentNameParameter}`, componentName)
+    verbPath = verbPath.replace(`%${constants.session}`, session)
   }
   const restUrl = config.svConfig.restSvcBaseUrl + verbPath
   axios.get(restUrl)
