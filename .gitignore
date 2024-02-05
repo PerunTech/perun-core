@@ -9,7 +9,6 @@ perunjs/client.min*
 WEB-INF
 *.war
 .build_war
-package-lock.json
 temp/
 backend/*.retry
 backend/build/*
