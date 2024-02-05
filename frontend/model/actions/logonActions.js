@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as a from '../actionNames.json';
+import a from '../actionNames.json';
 import { svSessionRegxp } from '..';
 
 export function loginUser(restUrl, method, formData, customData) {

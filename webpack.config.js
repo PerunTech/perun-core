@@ -1,9 +1,9 @@
 let path = require('path');
 
-module.exports = (mode, { env }) => {
+module.exports = (mode) => {
     return {
         ...mode.NODE_ENV !== 'production' && { devtool: 'source-map' },
-        mode: mode,
+        mode: mode.NODE_ENV,
         entry: './frontend/client.js',
         output: {
             path: path.resolve('./www'),
@@ -13,7 +13,10 @@ module.exports = (mode, { env }) => {
             globalObject: 'this'
         },
         devServer: {
-            contentBase: './www',
+            static: {
+                directory: path.join(__dirname, 'www'),
+            },
+            compress: true,
             port: 8080
         },
         module: {
@@ -65,7 +68,10 @@ module.exports = (mode, { env }) => {
                 path.resolve('./node_modules'),
                 path.resolve('./lib')
             ],
-            extensions: ['.js', '.jsx']
+            extensions: ['.js', '.jsx'],
+            fallback: {
+                'url': require.resolve('url')
+            }
         }
     }
 };

@@ -1,12 +1,12 @@
-import { secondaryModalIsActive, secondaryModalIsClosed } from '../actionNames.json'
+import a from '../actionNames.json'
 
-export function modalReducer (state = {
+export function modalReducer(state = {
   secondaryModalIsActive: false
 }, action) {
   switch (action.type) {
-    case secondaryModalIsActive:
+    case a.secondaryModalIsActive:
       return { ...state, secondaryModalIsActive: true }
-    case secondaryModalIsClosed:
+    case a.secondaryModalIsClosed:
       return { ...state, secondaryModalIsActive: false }
     default:
       return state

@@ -1,6 +1,6 @@
-import * as a from '../actionNames.json'
+import a from '../actionNames.json'
 
-export default function security (state = {
+export default function security(state = {
   isBusy: false,
   svSession: undefined,
   svTitle: undefined,
@@ -16,7 +16,8 @@ export default function security (state = {
     case a.changeEmailPending:
     case a.activateUserPending:
     case a.logoutUserPending: {
-      return {...state,
+      return {
+        ...state,
         isBusy: true,
         svSession: undefined,
         svTitle: undefined,
@@ -36,7 +37,8 @@ export default function security (state = {
     case a.changePassFulfilled:
     case a.changeEmailFulfilled:
     case a.activateUserFulfilled: {
-      return {...state,
+      return {
+        ...state,
         isBusy: false,
         svSession: undefined,
         svTitle: action.payload.title,
@@ -45,7 +47,8 @@ export default function security (state = {
       }
     }
     case a.loginFulfilled: {
-      return {...state,
+      return {
+        ...state,
         isBusy: false,
         svSession: action.payload.data.token,
         data: action.payload.data.farmer,
@@ -56,7 +59,8 @@ export default function security (state = {
       }
     }
     case a.loginIacs: {
-      return {...state,
+      return {
+        ...state,
         isBusy: false,
         svSession: action.payload.data.token,
         data: action.payload.data,
@@ -66,7 +70,8 @@ export default function security (state = {
       }
     }
     case a.logoutUserFulfilled: {
-      return {...state,
+      return {
+        ...state,
         isBusy: false,
         svSession: undefined,
         svTitle: undefined,
