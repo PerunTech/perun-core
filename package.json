@@ -71,8 +71,8 @@
     "webpack-dev-server": "^3.8.1"
   },
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack --mode=production --env.NODE_ENV=production --progress --colors",
-    "build-dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack --mode=development --env.NODE_ENV=development --progress --colors",
+    "build": "cross-env webpack --mode=production --env.NODE_ENV=production --progress --colors",
+    "build-dev": "cross-env webpack --mode=development --env.NODE_ENV=development --progress --colors",
     "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --compress --inline --hot --progress --colors --watch --history-api-fallback --port 8080",
     "test": "eslint --fix frontend/ || exit 0",
     "testCSS": "stylelint frontend/css/*.css --color"
