@@ -148,9 +148,9 @@ axios.interceptors.request.use(
           // location.reload();
           break;
         case msg.includes('500'):
-          return Promise.reject(error);
+          return Promise.reject(err);
         case msg.includes('502'):
-          return Promise.reject(error);
+          return Promise.reject(err);
         default:
           console.log(err)
       }
