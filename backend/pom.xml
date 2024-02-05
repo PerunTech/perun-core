@@ -14,7 +14,7 @@ Agreement
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.peruntech</groupId>
 	<artifactId>perun-core</artifactId>
-	<version>4.3.1</version>
+	<version>4.3.2</version>
 	<packaging>bundle</packaging>
 	<name>Perun Core</name>
 	<url>https://github.com/PerunTech/perun-core</url>
@@ -63,7 +63,7 @@ Agreement
 			<timezone>Europe/Skopje</timezone>
 		</developer>
 	</developers>
-	<description>Perun-core is front-ned bundle of the Svarog Business Platform</description>
+	<description>Perun-core is front-end bundle of the Svarog Business Platform</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
