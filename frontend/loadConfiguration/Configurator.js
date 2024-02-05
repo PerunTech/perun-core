@@ -39,7 +39,7 @@ class _Configurator extends React.Component {
     store.dispatch({ type: 'RESET_ACTIVE_MODULE_MENU_ITEM' })
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.type !== nextProps.type || this.props.configPath !== nextProps.configPath) {
       this.setState({ isFetching: true })
       loadConfiguration(nextProps.type, nextProps.configPath)

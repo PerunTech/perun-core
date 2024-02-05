@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 
 import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
-import { labelBasePath, translateComponents } from '../../config/config';
+import { labelBasePath } from '../../config/config';
 import { menuConfig } from '../../config/menuConfig'
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
 import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser } from '..';
@@ -76,6 +76,7 @@ class GenericForm extends React.Component {
     return (
       <DependencyDropdown
         formInstance={this}
+        formId={this.state.id}
         formSchema={this.state.uischema}
         formConfig={this.state.formData}
         formData={this.state.formTableData}
@@ -90,7 +91,7 @@ class GenericForm extends React.Component {
   }
 
   GPSCoordinate = props => {
-    const { value, readonly, disabled, autofocus, onBlur, onFocus, options, schema, formContext, registry, rawErrors, ...inputProps } = props;
+    const { value, readonly, disabled, autofocus, onBlur, onFocus, ...inputProps } = props;
     const defaultValue = `${'00'}°${'00'}'${'00'}''`
 
     const pad = string => {
@@ -276,7 +277,7 @@ class GenericForm extends React.Component {
     }
   }
   // transform json schema forms with labels
-  transformFormDataToLabels = (nextProps) => {
+  transformFormDataToLabels = () => {
     // change tile props to labels
     // if (nextProps.formData && nextProps.formData.properties) {
     //   // uncoment to copy labels from dev console using copy(temp1)
@@ -299,7 +300,7 @@ class GenericForm extends React.Component {
     // }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // translate components
     // translateComponents && this.transformFormDataToLabels(nextProps)
     // Remove form fileds from config
@@ -458,35 +459,35 @@ class GenericForm extends React.Component {
 
     let saved = false
     // check if all dependecy dropdowns have values
-    const fieldCode = findWidget(formData.uiSchema, 'ui:widget', 'DependencyDropdown')
-    const sectionName = findSectionName(formData.uiSchema, fieldCode)
-    const dataSection = formData.formData[sectionName]
-    if (fieldCode) {
-      // Check primary dep ddl value
-      if (!dataSection[fieldCode]) {
-        const el = document.getElementById(`root_${sectionName}_${fieldCode}`)
-        el.onchange = function () {
-          el.style.border = ''
-        }
-        el.style.border = '1px solid #d9230f'
-        return
-      }
-      // Check for other dep ddl values that may be missing
-      for (const field in dataSection) {
-        if (dataSection.hasOwnProperty(field)) {
-          if (formData.uiSchema[sectionName][field] &&
-            formData.uiSchema[sectionName][field].dependentOn &&
-            !dataSection[field]) {
-            const el = document.getElementById(`root_${sectionName}_${field}`)
-            el.onchange = function () {
-              el.style.border = ''
-            }
-            el.style.border = '1px solid #d9230f'
-            return
-          }
-        }
-      }
-    }
+    // const fieldCode = findWidget(formData.uiSchema, 'ui:widget', 'DependencyDropdown')
+    // const sectionName = findSectionName(formData.uiSchema, fieldCode)
+    // const dataSection = formData.formData[sectionName]
+    // if (fieldCode) {
+    // Check primary dep ddl value
+    // if (!dataSection[fieldCode]) {
+    //   const el = document.getElementById(`root_${sectionName}_${fieldCode}`)
+    //   el.onchange = function () {
+    //     el.style.border = ''
+    //   }
+    //   el.style.border = '1px solid #d9230f'
+    //   return
+    // }
+    //   // Check for other dep ddl values that may be missing
+    //   for (const field in dataSection) {
+    //     if (dataSection.hasOwnProperty(field)) {
+    //       if (formData.uiSchema[sectionName][field] &&
+    //         formData.uiSchema[sectionName][field].dependentOn &&
+    //         !dataSection[field]) {
+    //         const el = document.getElementById(`root_${sectionName}_${field}`)
+    //         el.onchange = function () {
+    //           el.style.border = ''
+    //         }
+    //         el.style.border = '1px solid #d9230f'
+    //         return
+    //       }
+    //     }
+    //   }
+    // }
 
     /* if flag customSave = true then escape default save f.r  */
     if (this.state.customSave) {
@@ -551,7 +552,7 @@ class GenericForm extends React.Component {
     })
   }
 
-  prepDropLinkParams = (state) => {
+  prepDropLinkParams = () => {
     let paramsLength = 0
     if (this.state.params) {
       paramsLength = this.state.params.length
@@ -679,7 +680,7 @@ class GenericForm extends React.Component {
 
   onFieldChange = (name, fieldData) => {
     if (this.props.bypassInputChange) {
-      /* global variables f.r */
+      // global variables
       fieldName = name
       fieldValue = fieldData
     }

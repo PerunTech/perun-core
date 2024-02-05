@@ -87,11 +87,11 @@ class MainMenu extends React.Component {
           <div className='top-nav-holder nav-flex'>
             {this.state.navbarImgJson?.length > 0 && (
               <React.Fragment>
-                {this.state.navbarImgJson.map(item => {
+                {this.state.navbarImgJson.map((item, i) => {
                   return (
-                    <React.Fragment>
+                    <React.Fragment key={`${item.id}_${i}`}>
                       {item.href ? (
-                        <a key={item.id} href={item.href} target='_blank' id={item.id} className={item.linkClassName}>
+                        <a key={item.id} href={item.href} target='_blank' rel='noopener noreferrer' id={item.id} className={item.linkClassName}>
                           {item.children?.length > 0 ? (
                             <React.Fragment>
                               {item.children.map(child => {

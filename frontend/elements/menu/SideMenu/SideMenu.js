@@ -21,7 +21,7 @@ const hashHistory = createHashHistory()
 
 let sideMenuStyle = ''
 // Import Project CSS
-import ('modulesCSS/SideMenu.module.css').then((projectCSS) => {
+import('modulesCSS/SideMenu.module.css').then((projectCSS) => {
   // Check if class is present in css, temporary workaround of webpack bug
   // true code should be in catch block
   // github issue https://github.com/webpack/webpack/issues/5662
@@ -54,7 +54,7 @@ class SideMenu extends React.Component {
     lastSelectedItem: PropTypes.func.isRequired
     // dataSource: PropTypes.string
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       listItemId: undefined,
@@ -65,13 +65,13 @@ class SideMenu extends React.Component {
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.state.stateTooltip !== nextProps.stateTooltip) {
       this.setState({ stateTooltip: nextProps.stateTooltip })
     }
   }
 
-  generateForm (varType, isSingle) {
+  generateForm(varType, isSingle) {
     if (isSingle) {
       this.setState({
         returnedComponent: <EditSingleRecord
@@ -92,7 +92,7 @@ class SideMenu extends React.Component {
     }
   }
 
-  generateGrid (varType, isContainer, linkName, linkedTable, linkNote,
+  generateGrid(varType, isContainer, linkName, linkedTable, linkNote,
     actionsEnabled, multiGrid) {
     let toggleCustomButton = false
     let formFieldsToBeEcluded
@@ -134,20 +134,22 @@ class SideMenu extends React.Component {
       key: `${varType}_${this.props.objectId}`
     }
     if (multiGrid) {
-      this.setState({returnedComponent: <div>
-        {/* {actionsEnabled &&
+      this.setState({
+        returnedComponent: <div>
+          {/* {actionsEnabled &&
           <ExecuteActionOnSelectedRows gridId={gridProps.key} />
         } */}
-        <MultiGrid {...gridProps} />
-      </div>
+          <MultiGrid {...gridProps} />
+        </div>
       })
     } else {
-      this.setState({returnedComponent: <div>
-        {/* {actionsEnabled &&
+      this.setState({
+        returnedComponent: <div>
+          {/* {actionsEnabled &&
           <ExecuteActionOnSelectedRows gridId={gridProps.key} />
         } */}
-        <GridContent {...gridProps} />
-      </div>
+          <GridContent {...gridProps} />
+        </div>
       })
     }
   }
@@ -167,23 +169,22 @@ class SideMenu extends React.Component {
     })
   }
 */
-  showLpis () {
+  showLpis() {
     hashHistory.push('/main/lpis')
   }
 
-  showPrint (farmId) {
-    const url = `${svConfig.restSvcBaseUrl}/printGenerator/printFarmDetails/${
-      this.props.svSession}/${farmId}`
+  showPrint(farmId) {
+    const url = `${svConfig.restSvcBaseUrl}/printGenerator/printFarmDetails/${this.props.svSession}/${farmId}`
     window.open(url, 'Application print' + 'Farm Details', '')
   }
 
-  highlightActivatedElement (listItemId) {
+  highlightActivatedElement(listItemId) {
     this.setState({ isActive: true, listItemId })
   }
 
   renderDocuments = () => this.setState({ returnedComponent: <DocumentsForm {...this.props} /> })
 
-  componentDidMount () {
+  componentDidMount() {
     if (menuConfig(`SIDE_MENU_${this.props.menuType}`, this.context.intl) && menuConfig(`SIDE_MENU_${this.props.menuType}`, this.context.intl).LIST_OF_ITEMS) {
       menuConfig(`SIDE_MENU_${this.props.menuType}`, this.context.intl).LIST_OF_ITEMS.map(
         element => {
@@ -195,7 +196,7 @@ class SideMenu extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const {
       returnedComponent, stateTooltip, isActive, listItemId
     } = this.state
@@ -288,17 +289,17 @@ class SideMenu extends React.Component {
           <ul id='sidemenu_list' className={`list-group ${sideMenuStyle.ul_item}`}>
             {htmlBuffer}
             {documentsFound > 0 &&
-            <ul
-              id='displayDocuments'
-              className={sideMenuStyle.ul_item}
-            >
-              <input id='documents_btn' type='checkbox' />
-              <label id='documents_label' className={sideMenuStyle.collapsibleMenuHeading} htmlFor='documents_btn'>
-                Documents
-                <span id='collapsible_indicator' className={`${sideMenuStyle.collapsibleIndicator} glyphicon glyphicon-menu-down`} />
-              </label>
-              <ul id='sidemenu_documents' className={`${sideMenuStyle.ul_item} ${sideMenuStyle.collapsibleMenu}`}> {documentBuffer} </ul>
-            </ul> }
+              <ul
+                id='displayDocuments'
+                className={sideMenuStyle.ul_item}
+              >
+                <input id='documents_btn' type='checkbox' />
+                <label id='documents_label' className={sideMenuStyle.collapsibleMenuHeading} htmlFor='documents_btn'>
+                  Documents
+                  <span id='collapsible_indicator' className={`${sideMenuStyle.collapsibleIndicator} glyphicon glyphicon-menu-down`} />
+                </label>
+                <ul id='sidemenu_documents' className={`${sideMenuStyle.ul_item} ${sideMenuStyle.collapsibleMenu}`}> {documentBuffer} </ul>
+              </ul>}
           </ul>
         </div>
         <div

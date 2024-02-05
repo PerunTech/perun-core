@@ -5,7 +5,7 @@ import Form from 'react-jsonschema-form';
 // import {menuConfig} from 'config/menuConfig.js'
 
 class DocumentsForm extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showForm: false,
@@ -14,7 +14,7 @@ class DocumentsForm extends React.Component {
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.json !== nextProps.json) {
       if (nextProps.json && nextProps.json.data) {
         this.setState({ showForm: true, jsonSchema: nextProps.json.data })
@@ -27,7 +27,7 @@ class DocumentsForm extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.documentsReduxAction('YES_NO_JSON', this.props.svSession, this.props.objectId, this.props.parentTypeId, 'dropdown')
     this.props.documentsReduxAction('YES_NO_FORM', this.props.svSession, this.props.objectId, this.props.parentTypeId, 'dropdown')
     if (this.props.json && this.props.json.data) {
@@ -38,7 +38,7 @@ class DocumentsForm extends React.Component {
     }
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.showForm && <Form

@@ -31,6 +31,7 @@ import UserForm from './UserForm';
 import EditUserWrapper from './utils/EditUserWrapper';
 import EditUserGroupWrapper from './utils/EditUserGroupWrapper';
 import AclPerGroup from './AclPerGroup/AclPerGroup';
+import PerunPluginTable from './PerunPluginTable'
 class AppSettings extends React.Component {
   constructor(props) {
     super(props)
@@ -357,7 +358,7 @@ class AppSettings extends React.Component {
   setGroupObjectId(groupObjectId) {
     this.setState({ selectedGroupObjId: groupObjectId })
   }
-  з
+
   rowClickFn(selectedStatus, selectedObjId, selectedUserName) {
     this.setState({ selectedRowStatus: selectedStatus, selectedRowObjId: selectedObjId, selectedRowUserName: selectedUserName })
   }
@@ -366,8 +367,6 @@ class AppSettings extends React.Component {
     this.setState({ showUsersModal: false, showGroupUsersModal: false, refreshModal: false, showModal: false, updateTableAccessModal: false, editUsersModal: false })
     if (paramFor === 'refreshFarmData') {
       this.setState({ idBr: undefined, idNo: undefined })
-    }
-    if (paramFor === 'allFarmData') {
     }
   }
 
@@ -548,39 +547,35 @@ class AppSettings extends React.Component {
 
     if (formCompleted === 'saveUser' || formCompleted === 'saveUserGroup') {
       this.setState({ loading: <Loading /> })
-
-      let th1s = this
       let restUrl = window.server + '/WsAdminConsole/' + formCompleted + '/' + this.props.svSession
       axios({
         method: 'post',
         data: form_params,
         url: restUrl,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).then(function (response) {
+      }).then((response) => {
         if (response.data) {
-          th1s.setState({ loading: false })
+          this.setState({ loading: false })
           if (forForm === 'saveUserGroup' || forForm === 'editUserGroup') {
             GridManager.reloadGridData('SVAROG_USER_GROUP_GRID')
-            th1s.setState({ alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null), active: 'showGroups', showModal: false })
+            this.setState({ alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null), active: 'showGroups', showModal: false })
           } else if (forForm === 'saveUser') {
             GridManager.reloadGridData('SVAROG_USERS_GRID')
-            th1s.setState({
+            this.setState({
               alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null),
               active: 'showUsers'
             })
           }
         }
-        th1s.setState(emptyCustomForms)
+        formCompleted = ''
+      }).catch((error) => {
+        this.setState({ loading: false })
+        let type
+        type = error.response.data.type
+        type = type.toLowerCase()
+        this.setState({ alert: alertUser(true, type, error.response.data.message, null) })
         formCompleted = ''
       })
-        .catch(function (error) {
-          th1s.setState({ loading: false })
-          let type
-          type = error.response.data.type
-          type = type.toLowerCase()
-          th1s.setState({ alert: alertUser(true, type, error.response.data.message, null) })
-          formCompleted = ''
-        })
     }
   }
 
@@ -923,7 +918,7 @@ class AppSettings extends React.Component {
                   {isShown && <React.Fragment>
                     <nav className={`nav-menu`}>
                       <ul className={`menu-list`}>
-                        {this.state.menuItems && this.state.menuItems.navigation.items.map((el) => {
+                        {this.state.menuItems && this.state.menuItems.navigation.items.map((el, i) => {
                           let isSubMenuActive = false
                           if (this.state.showUserMng && el.id === this.state.userArrowId) {
                             isSubMenuActive = true
@@ -932,8 +927,10 @@ class AppSettings extends React.Component {
                           } else if (this.state.showManagePriviledges && el.id === this.state.privilegesArrowId) {
                             isSubMenuActive = true
                           }
-                          return <React.Fragment>
-                            <li key={el.id} id={el.id}
+                          return <React.Fragment key={`${el.id}_${i}`}>
+                            <li
+                              key={el.id}
+                              id={el.id}
                               className={el['sub-menu'] ? `var_nav_arrow ${isSubMenuActive ? 'active' : ''}` : `var_nav ${el.id === activeId ? 'active' : ''}`}
                               tabIndex='1'
                               onClick={() => {
@@ -999,6 +996,7 @@ class AppSettings extends React.Component {
               {active === 'OrganizationalUnit' && <OrganizationalUnit />}
               {active === 'LabelEditor' && <LabelEditor />}
               {active === 'CodeListEditor' && <CodeListEditor />}
+              {active === 'PerunPluginTable' && <PerunPluginTable />}
             </div >
           </div >
         </>}

@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import axios from 'axios'
 import * as utils from '../utils'
 import * as config from 'config/config.js'
 import { alertUser } from '../../../elements';
@@ -30,7 +29,7 @@ export default function LogonFunctions(TargetComponent, validationString, method
       }
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
       if (nextProps.status) {
         let statusType = nextProps.status.toLowerCase()
         if (statusType === 'exception') { statusType = 'error' }

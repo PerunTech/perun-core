@@ -17,7 +17,7 @@ class ActivateUser extends React.Component {
     configuration: PropTypes.object
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props)
     const uuid = utils.getURLParameterByName('uuid', window.location.href)
     this.state = {
@@ -28,13 +28,13 @@ class ActivateUser extends React.Component {
     this.hashHistory = createHashHistory()
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (this.props.configuration) {
       this.activateUser(this.props.configuration.data)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const nextConfiguration = nextProps.configuration
     if (nextProps.status) {
       let statusType = nextProps.status.toLowerCase()
@@ -63,7 +63,7 @@ class ActivateUser extends React.Component {
     }
   }
 
-  activateUser (configuration) {
+  activateUser(configuration) {
     const method = configuration.activateUser1.methodtype
     let formData
     let webService
@@ -77,7 +77,7 @@ class ActivateUser extends React.Component {
     this.props.activateUser(restUrl, method, formData)
   }
 
-  render () {
+  render() {
     return (this.state.alert || <Loading />)
   }
 }

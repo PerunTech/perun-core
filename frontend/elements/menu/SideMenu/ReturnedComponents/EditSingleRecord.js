@@ -9,14 +9,14 @@ class EditSingleRecord extends React.Component {
     showForm: PropTypes.string.isRequired,
     parentId: PropTypes.number.isRequired
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = { formToRender: undefined }
     this.generateForm = this.generateForm.bind(this)
     this.getSingleObjectByParentId = this.getSingleObjectByParentId.bind(this)
   }
 
-  generateForm (props, objectId) {
+  generateForm(props, objectId) {
     const showForm = props.showForm
     const parentId = props.parentId
     const svSession = props.svSession
@@ -55,7 +55,7 @@ class EditSingleRecord extends React.Component {
     this.setState({ formToRender: dataForm })
   }
 
-  getSingleObjectByParentId (props) {
+  getSingleObjectByParentId(props) {
     let objectId
     dataToRedux((response) => {
       if (response.length) {
@@ -65,19 +65,19 @@ class EditSingleRecord extends React.Component {
     }, null, null, 'GET_BYPARENTID_SYNC', props.svSession, props.parentId, props.showForm, 1)
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     if (this.props.showForm) {
       this.getSingleObjectByParentId(this.props)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.showForm !== nextProps.showForm || this.props.parentId !== nextProps.parentId) {
       this.getSingleObjectByParentId(nextProps)
     }
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.formToRender}

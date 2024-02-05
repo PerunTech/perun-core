@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Modal } from '../../client'
+import SystemConfLogsWrapper from './SystemConfLogsWrapper'
 
 const tableName = 'SVAROG_CONFIG_LOG'
 class SystemConfLogs extends React.Component {
@@ -51,6 +52,7 @@ class SystemConfLogs extends React.Component {
       uiSchemaConfigMethod={'/ReactElements/getTableUISchema/%session/' + formName}
       tableFormDataMethod={'/ReactElements/getFormDataByParentId/%session/' + parentId + '/' + formName}
       hideBtns='all'
+      inputWrapper={SystemConfLogsWrapper}
     />
     let loginfo = <Modal customClassBtnModal='customClassBtnModal'
       closeModal={this.closeModal}

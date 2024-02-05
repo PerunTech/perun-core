@@ -4,7 +4,7 @@ import classnames from 'classnames';
 import ReactTooltip from 'react-tooltip';
 
 const generateHtmlOptions = (options) => {
-  const htmlOptions = options.map((element, index) => (<option
+  const htmlOptions = options.map((element) => (<option
     id={element.id}
     key={element.id}
     name={element.name}

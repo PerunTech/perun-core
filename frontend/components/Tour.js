@@ -36,7 +36,7 @@ const buttonContainerStyle = {
 }
 
 export default class UserTour extends React.Component {
-  constructor () {
+  constructor() {
     super()
     this.state = {
       isTourActive: false,
@@ -44,25 +44,25 @@ export default class UserTour extends React.Component {
     }
   }
 
-  componentDidMount () {
-    this.setState({isTourActive: true})
+  componentDidMount() {
+    this.setState({ isTourActive: true })
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.steps !== nextProps.steps) {
-      this.setState({isTourActive: true})
+      this.setState({ isTourActive: true })
     }
   }
 
-  render () {
+  render() {
     return (
       <div>
         <Tour
           active={this.state.isTourActive}
           step={this.state.tourStep}
-          onNext={(step) => this.setState({tourStep: step})}
-          onBack={(step) => this.setState({tourStep: step})}
-          onCancel={() => this.setState({isTourActive: false})}
+          onNext={(step) => this.setState({ tourStep: step })}
+          onBack={(step) => this.setState({ tourStep: step })}
+          onCancel={() => this.setState({ isTourActive: false })}
           steps={this.props.steps}
           hideClose
           backButtonText='Назад'

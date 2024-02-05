@@ -5,7 +5,7 @@ import { svConfig, labelBasePath } from '../../config';
 import msgStyle from './ShowMsg.module.css';
 
 class NewMsg extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showMsgss: true,
@@ -17,11 +17,11 @@ class NewMsg extends React.Component {
     this.onChange = this.onChange.bind(this)
   }
 
-  onChange (e) {
+  onChange(e) {
     this.setState({ [e.target.name]: e.target.value })
   }
 
-  handleConvActions (action) {
+  handleConvActions(action) {
     const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CREATE_MSGS
     let msgContent = {
       MESSAGE_TEXT: this.state.MESSAGE_TEXT
@@ -33,12 +33,11 @@ class NewMsg extends React.Component {
           data: msgContent,
           url: restUrl + this.props.security.svSession + '/SVAROG_MESSAGE/' + this.state.parentId + '/0',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(function (response) {
+        }).then(function () {
           console.log('success')
+        }).catch(function () {
+          console.log('error')
         })
-          .catch(function (response) {
-            console.log('error')
-          })
         console.log('BtnReply')
         break
       case 'btnExport':
@@ -49,7 +48,7 @@ class NewMsg extends React.Component {
     }
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.showMsgss && <div id='msg_content' className={msgStyle.msgContent}>

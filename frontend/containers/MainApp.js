@@ -7,7 +7,7 @@ import { alertUser } from '../elements';
 import { MainMenu, Loading, Tour } from 'components/ComponentsIndex'
 
 class MainApp extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       showReactTooltip: false,
@@ -34,27 +34,27 @@ class MainApp extends React.Component {
     this.dispatchGlobalRequest = this.dispatchGlobalRequest.bind(this)
   }
 
-  logoutOnException (exceptionTitle, exceptionMessage) {
+  logoutOnException(exceptionTitle, exceptionMessage) {
     this.setState({
       alert: alertUser(true, 'error',
         exceptionTitle,
         exceptionMessage,
         () => {
           localStorage.clear()
-          store.dispatch({type: 'LOGOUT_FULFILLED', payload: undefined})
+          store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           location.reload()
         },
         undefined, false, undefined, undefined, false, '#e0ab10', true)
     })
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     if (this.props.exceptionTitle && this.props.exceptionMessage) {
       this.logoutOnException(this.props.exceptionTitle, this.props.exceptionMessage)
     }
   }
 
-  replaceParamsWithBoundPropVals (string, props, coreObject) {
+  replaceParamsWithBoundPropVals(string, props, coreObject) {
     let array = string.split('/')
     for (let i = 0; i < array.length; i++) {
       if (array[i].charAt(0) === '{' && array[i].charAt(array[i].length - 1) === '}') {
@@ -79,13 +79,13 @@ class MainApp extends React.Component {
     return string
   }
 
-  logout (webService) {
+  logout(webService) {
     webService = webService.replace('{token}', this.props.token)
     const restUrl = svConfig.restSvcBaseUrl + webService
     store.dispatch(logoutUser(restUrl))
   }
 
-  showReactTooltip () {
+  showReactTooltip() {
     const labels = this.context.intl
     if (store.getState().stateTooltip.stateTooltip === false) {
       dataToRedux(null, 'stateTooltip', 'stateTooltip', true)
@@ -106,28 +106,29 @@ class MainApp extends React.Component {
     }
   }
 
-  dispatchGlobalRequest (webService, id, index, elementConfig) {
+  dispatchGlobalRequest(webService, id, index, elementConfig) {
     let requestLabels
     try {
       requestLabels = elementConfig.actionPrompt
       if (requestLabels) {
-        this.setState({alert: alertUser(true,
-          'warning',
-          requestLabels.title,
-          requestLabels.message,
-          () => {
-            const restUrl = svConfig.restSvcBaseUrl + webService
-            store.dispatch(globalRequest(restUrl, id))
-            this.setState({isProcessing: true})
-          },
-          () => this.setState({alert: alertUser(false, 'info', ' ')}),
-          true,
-          requestLabels.buttonConfirm,
-          requestLabels.buttonCancel,
-          true,
-          '#78aa22',
-          true),
-        dispatchSource: elementConfig
+        this.setState({
+          alert: alertUser(true,
+            'warning',
+            requestLabels.title,
+            requestLabels.message,
+            () => {
+              const restUrl = svConfig.restSvcBaseUrl + webService
+              store.dispatch(globalRequest(restUrl, id))
+              this.setState({ isProcessing: true })
+            },
+            () => this.setState({ alert: alertUser(false, 'info', ' ') }),
+            true,
+            requestLabels.buttonConfirm,
+            requestLabels.buttonCancel,
+            true,
+            '#78aa22',
+            true),
+          dispatchSource: elementConfig
         })
       }
     } catch (error) {
@@ -135,12 +136,12 @@ class MainApp extends React.Component {
     }
   }
 
-  generatePrint (webService) {
+  generatePrint(webService) {
     const restUrl = svConfig.restSvcBaseUrl + webService
     window.open(restUrl, 'Барање')
   }
 
-  setObject (objectConfiguration, elementId) {
+  setObject(objectConfiguration, elementId) {
     this.setState({
       objectConfiguration: objectConfiguration,
       elementId: elementId,
@@ -153,7 +154,7 @@ class MainApp extends React.Component {
     })
   }
 
-  setSubObject (subObjectConfig, subElementId, sideMenuItemId, sideMenuItemType) {
+  setSubObject(subObjectConfig, subElementId, sideMenuItemId, sideMenuItemType) {
     this.setState({
       subObjectConfig: undefined,
       subElementId: undefined,
@@ -175,7 +176,7 @@ class MainApp extends React.Component {
     }
   }
 
-  setDataMenu (objectConfiguration, varId) {
+  setDataMenu(objectConfiguration, varId) {
     this.setState({
       subObjectConfig: undefined,
       subElementId: undefined,
@@ -187,7 +188,7 @@ class MainApp extends React.Component {
     }))
   }
 
-  render () {
+  render() {
     const { mainMenuType, stateTooltip, steps } = this.props
     const { alert, objectConfiguration, elementId, subObjectConfig, subElementId, sideMenuItemId,
       sideMenuItemType, isProcessing, dataMenuConfig, dataMenuId } = this.state
@@ -213,17 +214,17 @@ class MainApp extends React.Component {
         {stateTooltip && steps ? <Tour steps={steps} /> : null}
         {alert}
         {isProcessing && <Loading />}
-          <MainMenu
-            mainMenuType={mainMenuType}
-            showReactTooltip={this.showReactTooltip}
-            setObject={this.setObject}
-            setSubObject={this.setSubObject}
-            dispatchGlobalRequest={this.dispatchGlobalRequest}
-            generatePrint={this.generatePrint}
-            logout={this.logout}
-            source='database'
-            key={mainMenuType}
-          />
+        <MainMenu
+          mainMenuType={mainMenuType}
+          showReactTooltip={this.showReactTooltip}
+          setObject={this.setObject}
+          setSubObject={this.setSubObject}
+          dispatchGlobalRequest={this.dispatchGlobalRequest}
+          generatePrint={this.generatePrint}
+          logout={this.logout}
+          source='database'
+          key={mainMenuType}
+        />
         {/* Following line renders the cloned children with added parent state and props */}
         {children && <div id='mainAppContainer' className='main-container'>
           {children}

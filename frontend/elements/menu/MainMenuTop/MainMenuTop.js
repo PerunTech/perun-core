@@ -41,7 +41,7 @@ class MainMenuTop extends React.Component {
     mainMenuType: PropTypes.string,
     setObject: PropTypes.func
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       stateTooltip: this.props.stateTooltip,
@@ -54,7 +54,7 @@ class MainMenuTop extends React.Component {
     this.hover.bind(this)
   }
 
-  hover (refName) {
+  hover(refName) {
     if (this.state.hover === false) {
       this.state[refName] = true
       this.setState({ [refName]: true })
@@ -66,19 +66,19 @@ class MainMenuTop extends React.Component {
     }
   }
 
-  highlightActivatedElement (listItemId, linkId, imgId) {
+  highlightActivatedElement(listItemId, linkId, imgId) {
     this.setState({
       isActive: true, listItemId, linkId, imgId
     })
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.state.stateTooltip !== nextProps.stateTooltip) {
       this.setState({ stateTooltip: nextProps.stateTooltip })
     }
   }
 
-  render () {
+  render() {
     const { ...state } = this.state
     const { ...props } = this.props
     let topMenu
@@ -139,18 +139,18 @@ class MainMenuTop extends React.Component {
               id={imgId}
               {...!this.state[`uniqLiId${index}`] ? { src: element.IMAGESRC } : { src: element.IMAGESRC2 }}
               {...state.isActive &&
-                state.imgId === imgId &&
-                state.listItemId === listItemId &&
-                { className: mainMenuStyle.image_highlighted }
+              state.imgId === imgId &&
+              state.listItemId === listItemId &&
+              { className: mainMenuStyle.image_highlighted }
               }
             />
           </span>
           <a
             {...(varFunc !== 'help' && varFunc !== 'logout') && { ...element.LINK_TO ? { href: `#${element.LINK_TO}` } : { href: `#${props.defaultLinkRoute}` } }}
             {...state.isActive &&
-              state.linkId === linkId &&
-              state.listItemId === listItemId &&
-              { className: mainMenuStyle.link_selected }
+            state.linkId === linkId &&
+            state.listItemId === listItemId &&
+            { className: mainMenuStyle.link_selected }
             }
             id={linkId}
             key={linkId}
@@ -190,18 +190,18 @@ class MainMenuTop extends React.Component {
               id={imgId}
               {...!this.state[`uniqLiId${index}`] ? { src: element.IMAGESRC } : { src: element.IMAGESRC2 }}
               {...state.isActive &&
-                state.imgId === imgId &&
-                state.listItemId === listItemId &&
-                { className: mainMenuStyle.image_highlighted }
+              state.imgId === imgId &&
+              state.listItemId === listItemId &&
+              { className: mainMenuStyle.image_highlighted }
               }
             />
           </span>
           <a
             {...varLink && { href: `#${varLink}` }}
             {...state.isActive &&
-              state.linkId === linkId &&
-              state.listItemId === listItemId &&
-              { className: mainMenuStyle.link_selected }
+            state.linkId === linkId &&
+            state.listItemId === listItemId &&
+            { className: mainMenuStyle.link_selected }
             }
             id={linkId}
             key={linkId}

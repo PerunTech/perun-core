@@ -2,12 +2,11 @@ import axios from 'axios'
 import { store, addConfiguration } from '../model'
 import * as config from '../config/config'
 import constants from './constants.json'
-
+import { alertUser } from '../elements'
 /**
  * Get configuration dispatch function- gets the requested configuration from the DB.
  * After the request has been fulfilled a reducing function writes the configuration in the global application state.
  * The wrapper then returns the retreived configuration to the wrapped component.
- * @author KNI
  * @version 1.0
  * @function
  */
@@ -19,7 +18,7 @@ export function loadConfiguration(componentName, configPath) {
    * @param {string} configPath - Class path to get component configuration
    */
 
-  /* workaround/fastest way to integrate edbar architecture in perun-core f.r */
+  /* workaround/fastest way to integrate edbar architecture in perun-core */
   let session = null
   let sessionCheck = document.cookie.match(new RegExp('(^| )' + 'sessionedbar' + '=([^;]+)'));
   if (sessionCheck) {
@@ -40,8 +39,10 @@ export function loadConfiguration(componentName, configPath) {
   axios.get(restUrl)
     .then((response) => {
       store.dispatch(addConfiguration(response.data, componentName))
-    }).catch((error) => {
-      console.log('Error', error.message)
-      throw new Error(error)
-    })
+    }).catch(err => {
+      console.error(err)
+      const title = err.response?.data?.title || err
+      const msg = err.response?.data?.message || ''
+      alertUser(true, "error", title, msg);
+    });
 }

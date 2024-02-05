@@ -137,7 +137,7 @@ const LoginForm = (props, context) => {
                       <Link to={item.href} key={item.id} className={item.className}>
                         {labels.formatMessage({
                           id: `perun.login.${item.id}`,
-                          defaultMessage: `perun.${item.id}`
+                          defaultMessage: `perun.login.${item.id}`
                         })}</Link>
                     </div >
                   })}
@@ -155,7 +155,7 @@ const LoginForm = (props, context) => {
             return (
               <div key={img.id} className={img.containerClassName}>
                 {img.href ? (
-                  <a href={img.href} target='_blank' id={img.id} className={img.linkClassName}>
+                  <a href={img.href} target='_blank' rel='noopener noreferrer' id={img.id} className={img.linkClassName}>
                     <img src={img.src} className={img.imgClassName} />
                   </a>
                 ) : (

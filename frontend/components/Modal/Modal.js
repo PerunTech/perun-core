@@ -83,7 +83,7 @@ class Modal extends React.Component {
 
   render() {
     const { customHeaderContent } = this.props
-    const { submitAction, showSubmitBtn, closeAction, showCloseBtn, modalSize, onMouseEnterFunction, classBodyState, customClassBtnModal, removeFooterHeight, removeTopPadding } = this.state
+    const { submitAction, showSubmitBtn, modalSize, onMouseEnterFunction, classBodyState, removeFooterHeight, removeTopPadding } = this.state
     return (
       <React.Fragment>
         <div className={`modal-bg ${removeTopPadding}`}>
@@ -95,7 +95,6 @@ class Modal extends React.Component {
             </div>
             <div className={classBodyState} onMouseEnter={onMouseEnterFunction ? onMouseEnterFunction : null}>{this.props.modalContent}</div>
             <div className={`modal-footer ${removeFooterHeight}`}>
-              {/* {showCloseBtn && <button onClick={closeAction} className={customClassBtnModal}>{this.props.nameCloseBtn}</button>} */}
               {showSubmitBtn && <button onClick={submitAction} className='modal-button button-submitModal'>{this.props.nameSubmitBtn}</button>}
             </div>
           </div>

@@ -9,19 +9,19 @@ import style from './RecordInfo.module.css';
 const hashHistory = createHashHistory()
 
 class RecordInfoClass extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       pharagraphItemTitle: undefined
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // start functions
     this.loadFunctions(this.props)
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // start functions when data is changed (form is saved)
     if (this.props.gridConfig !== nextProps.gridConfig) {
       this.loadFunctions(nextProps)
@@ -58,20 +58,20 @@ class RecordInfoClass extends React.Component {
       const currentSelectedRowIndex = props.componentStack.length - 1
       const currentSelectedRow = this.isNatural(currentSelectedRowIndex) && props.componentStack[currentSelectedRowIndex]
 
-      return {...currentSelectedRow.row, gridType: props.gridType}
+      return { ...currentSelectedRow.row, gridType: props.gridType }
     }
   }
   // iterate configuration prop
   iterateConfig = (state, props, callback) => {
     this.props.configuration(props.gridType, this.context.intl) &&
-    props.configuration(props.gridType, this.context.intl).CHOSEN_ITEM &&
-    props.configuration(props.gridType, this.context.intl).CHOSEN_ITEM.map(
-      element => {
-        if (callback instanceof Function) {
-          callback(state, props, element)
+      props.configuration(props.gridType, this.context.intl).CHOSEN_ITEM &&
+      props.configuration(props.gridType, this.context.intl).CHOSEN_ITEM.map(
+        element => {
+          if (callback instanceof Function) {
+            callback(state, props, element)
+          }
         }
-      }
-    )
+      )
   }
   // translate codes from WS, see recordConfig.js
   translateCodes = (callback) => (state, props, element) => {
@@ -85,7 +85,7 @@ class RecordInfoClass extends React.Component {
           element,
           callback: (response) => {
             this.setState(
-              {[`${props.gridType}.${element.ID}`]: response},
+              { [`${props.gridType}.${element.ID}`]: response },
               () => {
                 if (callback instanceof Function) {
                   callback(this.state, props, element)
@@ -104,9 +104,9 @@ class RecordInfoClass extends React.Component {
   }
   // create pharagraph items and set to state
   createParagraphItems = (state, props, element) => {
-    const pharagraphItemTitle = [<p style={{margin: '0'}} key={'record_info_' + props.gridType + 'title'} >{props.gridType}</p>]
+    const pharagraphItemTitle = [<p style={{ margin: '0' }} key={'record_info_' + props.gridType + 'title'} >{props.gridType}</p>]
     let pharagraphItem
-    let style = {margin: '0'}
+    let style = { margin: '0' }
     let click
     const value = state[`${props.gridType}.${element.ID}`]
 
@@ -134,7 +134,7 @@ class RecordInfoClass extends React.Component {
       </p>)
     }
 
-    this.setState({pharagraphItemTitle, [element.ID]: pharagraphItem})
+    this.setState({ pharagraphItemTitle, [element.ID]: pharagraphItem })
   }
   // render phararaph items
   renderParagraphItems = (state, props) => props.configuration(props.gridType, this.context.intl) &&
@@ -145,7 +145,7 @@ class RecordInfoClass extends React.Component {
       }
     )
 
-  render () {
+  render() {
     return (
       <div id='record_info' className={style.divMainContent}>
         <div id='selected_item' className={style.selected_item}>
@@ -165,7 +165,7 @@ RecordInfoClass.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return ({
     // this is used to trigger a rerender if props are changed (when saving a form)
     gridConfig: state.gridConfig,

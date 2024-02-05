@@ -11,7 +11,7 @@ class EditSelectedItem extends React.Component {
     parentId: PropTypes.number,
     source: PropTypes.string
   }
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = { formToRender: undefined }
     this.generateFormFromSourceFile = this.generateFormFromSourceFile.bind(this)
@@ -20,7 +20,7 @@ class EditSelectedItem extends React.Component {
     this.customSave = this.customSave.bind(this)
   }
 
-  generateFormFromSourceFile (props) {
+  generateFormFromSourceFile(props) {
     const showForm = props.showForm
     const objectId = props.objectId
     const parentId = props.parentId
@@ -51,7 +51,7 @@ class EditSelectedItem extends React.Component {
     this.setState({ formToRender: dataForm })
   }
 
-  generateFormFromDbConfig (props) {
+  generateFormFromDbConfig(props) {
     let dataForm
     const showForm = props.showForm
     const objectId = props.objectId
@@ -77,18 +77,18 @@ class EditSelectedItem extends React.Component {
         null, this.customSave, null, null, null, null, uneditable, this.updateSelectedRecord)
     }
     ComponentManager.setStateForComponent(formId, null,
-      {onAlertClose: this.updateSelectedRecord, addSaveFunction: this.customSave})
-    this.setState({formToRender: dataForm})
+      { onAlertClose: this.updateSelectedRecord, addSaveFunction: this.customSave })
+    this.setState({ formToRender: dataForm })
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount() {
     if (this.props.showForm) {
       if (this.props.source === 'database') this.generateFormFromDbConfig(this.props)
       else this.generateFormFromSourceFile(this.props)
     }
   }
 
-  componentWillReceiveProps (nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.gridLang && (this.props.gridLang !== nextProps.gridLang)) {
       this.forceUpdate()
     }
@@ -99,7 +99,7 @@ class EditSelectedItem extends React.Component {
     }
   }
 
-  updateSelectedRecord () {
+  updateSelectedRecord() {
     // update currently selected record in global state
     const selectedRecords = this.props.selectedRecords
     const comps = selectedRecords.length
@@ -130,7 +130,7 @@ class EditSelectedItem extends React.Component {
     }
   }
 
-  customSave (formData) {
+  customSave(formData) {
     const p = this.props
     const showForm = p.showForm
     const objectId = p.objectId
@@ -144,7 +144,7 @@ class EditSelectedItem extends React.Component {
     saveFormData(formId, p.onSave, p.svSession, defaultSaveParams, true)
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.formToRender}

@@ -6,6 +6,7 @@ import Select from 'react-select'
 import { alertUser } from '../../elements'
 import { store, logoutUser } from '../../model';
 import Loading from '../Loading/Loading'
+import { svConfig } from '../../config'
 
 class DirectAccess extends React.Component {
   constructor(props) {
@@ -133,7 +134,7 @@ class DirectAccess extends React.Component {
 
   }
 
-  onSave = (e) => {
+  onSave = () => {
     const { multiValue, typeAccess, contextName } = this.state
     let saveJson = this.prepareSaveJson(multiValue, typeAccess);
     let restUrl = window.server + `/WsConf/saveTypeAccess/${this.props.svSession}/${contextName.value}`
