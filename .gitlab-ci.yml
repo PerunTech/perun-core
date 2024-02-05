@@ -23,7 +23,7 @@ after_script:
     - pwd
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install --legacy-peer-deps
+    - npm install
     - npm run test
     - npm run build
 
@@ -41,7 +41,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install --legacy-peer-deps
+    - npm install
     - rm -rf backend/www/*.js
     - npm run build-dev
     - cd backend
@@ -60,7 +60,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install --legacy-peer-deps
+    - npm install
     - rm -rf backend/www/*.js
     - npm run build-dev
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -82,7 +82,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install --legacy-peer-deps
+    - npm install
     - rm -rf backend/www/*.js
     - npm run build
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -103,7 +103,7 @@ after_script:
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
     - rm -rf node_modules
-    - npm install --legacy-peer-deps
+    - npm install
     - rm -rf backend/www/*.js
     - npm run build
     - cd backend
