@@ -30,7 +30,7 @@ after_script:
 1_build_test_java:
   stage: 2_build_and_install
   script:
-    - cd backend
+    #- cd backend
     - mvn clean
     - mvn test
     
@@ -44,7 +44,7 @@ after_script:
     - npm install
     - rm -rf www/*.js
     - npm run build-dev
-    - cd backend
+    #- cd backend
     # - ls -al www/
     - pwd
     - mvn clean package deploy -DskipTests
@@ -106,7 +106,7 @@ after_script:
     - npm install
     - rm -rf www/*.js
     - npm run build
-    - cd backend
+    #- cd backend
     # - ls -al www/
     - pwd
     - mvn clean package deploy -DskipTests
@@ -118,7 +118,7 @@ after_script:
   stage: 4_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
-    - cd backend
+    #- cd backend
     - mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.projectName=$CI_PROJECT_NAME -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID
   when: manual
 
@@ -126,7 +126,7 @@ after_script:
   stage: 4_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
-    - cd backend
+    #- cd backend
     - mvn sonar:sonar -Dsonar.analysis.mode=publish -Dsonar.projectName=$CI_PROJECT_NAME -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID -Donar.gitlab.user_token access=a18878c7b5beb401ce2f847537c296b46a3902b8 
   environment:
     name: $CI_COMMIT_REF_NAME
