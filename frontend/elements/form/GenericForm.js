@@ -1,4 +1,3 @@
-// OWNER : f.r
 import React from 'react';
 import PropTypes from 'prop-types';
 import Form from 'react-jsonschema-form';
@@ -7,7 +6,6 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
 import { labelBasePath } from '../../config/config';
-import { menuConfig } from '../../config/menuConfig'
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
 import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
@@ -581,16 +579,6 @@ class GenericForm extends React.Component {
           }
           if (this.state.id) {
             dropLinkParams.id = this.state.id
-          }
-        }
-      )
-    }
-
-    if (menuConfig instanceof Function && menuConfig('SHOW_GRIDMODAL_TO_LINK_TO_TABLE')) {
-      menuConfig('SHOW_GRIDMODAL_TO_LINK_TO_TABLE').map(
-        element => {
-          if ((element.TABLE === dropLinkParams.TABLE) && (element.LINKEDTABLE === dropLinkParams.LINKEDTABLE)) {
-            this.setState({ dropLinkParams })
           }
         }
       )

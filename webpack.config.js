@@ -1,4 +1,5 @@
-let path = require('path');
+const path = require('path');
+const webpack = require('webpack');
 
 module.exports = (mode) => {
     return {
@@ -13,12 +14,20 @@ module.exports = (mode) => {
             globalObject: 'this'
         },
         devServer: {
+            client: {
+                overlay: false
+            },
             static: {
                 directory: path.join(__dirname, 'www'),
             },
             compress: true,
             port: 8080
         },
+        plugins: [
+            new webpack.ProvidePlugin({
+                process: 'process/browser',
+            }),
+        ],
         module: {
             rules: [
                 {

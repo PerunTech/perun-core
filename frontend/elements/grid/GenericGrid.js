@@ -462,7 +462,7 @@ class GenericGrid extends React.Component {
   columnValueContainsSearchTerms(columnValue, filterTerms) {
     let columnValueContainsSearchTerms = false
     for (const key in filterTerms) {
-      if (!filterTerms.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(filterTerms, key)) {
         continue
       }
       if (columnValue !== undefined && filterTerms[key].value !== undefined) {

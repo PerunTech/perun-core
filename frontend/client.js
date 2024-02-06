@@ -71,14 +71,6 @@ export {
   ExportableGrid, GenericGrid, GridManager, JsonToExcel, ComponentManager, Modal, MenuHolder, ContextMenuHolder, RuleEngineModal, attachmentButtons, AttachmentInput
 };
 
-/* menus */
-import MainMenuTop from './elements/menu/MainMenuTop/MainMenuTop'
-import RecordInfo from './elements/menu/RecordInfo/RecordInfo'
-import RecordInfoClass from './elements/menu/RecordInfo/RecordInfoClass'
-import SideMenu from './elements/menu/SideMenu/SideMenu'
-
-
-export { MainMenuTop, RecordInfo, RecordInfoClass, SideMenu };
 
 /* exception for arraybuffer response types f.r */
 function validResponse(res) {
