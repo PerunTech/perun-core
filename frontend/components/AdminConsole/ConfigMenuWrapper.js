@@ -16,6 +16,14 @@ const CofigMenuWrapper = (props, context) => {
     }, [])
 
 
+    useEffect(() => {
+        if (shouldRender) {
+            handleInput()
+        }
+    }, [shouldRender])
+
+
+
     const handleInput = () => {
         const firstInput = document.getElementById("root_MENU_CONF");
         if (firstInput) {
@@ -79,7 +87,6 @@ const CofigMenuWrapper = (props, context) => {
             {shouldRender &&
                 <>
                     {props.children}
-                    {props.children && handleInput()}
                 </>
 
 
