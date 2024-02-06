@@ -346,7 +346,7 @@ class DependentElements extends React.Component {
           }
         }
       }
-    } catch (error) {
+    } catch (error) { // eslint-disable-line
       throw error
     } finally {
       /* search only for dropdowns, since there are inputs with the same element

@@ -332,4 +332,4 @@ export function changeLanguageAndLocale(locale, language) {
       'perun'
     );
   })
-};
+}

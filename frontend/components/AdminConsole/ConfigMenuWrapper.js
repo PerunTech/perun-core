@@ -9,7 +9,6 @@ const { Modal } = ReactBootstrap;
 const CofigMenuWrapper = (props, context) => {
     const [show, setShow] = useState(false);
     const [shouldRender, setRender] = useState(false)
-    const [firstInputId, _setFirst] = useState("root_MENU_CONF")
     const [fieldJson, setFieldJson] = useState({})
     const [editedJson, setJson] = useState(undefined)
     useEffect(() => {
@@ -18,7 +17,7 @@ const CofigMenuWrapper = (props, context) => {
 
 
     const handleInput = () => {
-        const firstInput = document.getElementById(firstInputId);
+        const firstInput = document.getElementById("root_MENU_CONF");
         if (firstInput) {
             firstInput.addEventListener("click", openJsonEditor);
             firstInput.style.cursor = "pointer"

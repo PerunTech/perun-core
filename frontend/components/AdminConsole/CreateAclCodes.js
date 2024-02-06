@@ -62,7 +62,7 @@ class CreateAclCodes extends React.Component {
             <div className='custom-form-element'>
               <label htmlFor='accessType'>{this.context.intl.formatMessage({ id: 'perun.admin_console.permission_type', defaultMessage: 'perun.admin_console.permission_type' })}:</label>
               <select className='form-control' id="accessType" value={accessType} onChange={this.onChange}>
-                <option value='default' disable='disable' selected>{this.context.intl.formatMessage({ id: 'perun.admin_console.choose_value', defaultMessage: 'perun.admin_console.choose_value' })}</option>
+                <option value='default' disabled selected>{this.context.intl.formatMessage({ id: 'perun.admin_console.choose_value', defaultMessage: 'perun.admin_console.choose_value' })}</option>
                 <option value='READ'>READ</option>
                 <option value='MODIFY'>MODIFY</option>
                 <option value='NONE'>NONE</option>

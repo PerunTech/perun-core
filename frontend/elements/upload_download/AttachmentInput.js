@@ -40,7 +40,7 @@ class AttachmentInput extends React.Component {
   generateRender = () => {
     this.setState({
       renderInput : <div className={`${style.divUploadFile}`}>
-        <label className={`${style.labelStyle}`} for='upload_File' id='uploadLabel'> {this.context.intl.formatMessage({ id: 'perun.upload_file', defaultMessage: 'perun.upload_file' })} </label>
+        <label className={`${style.labelStyle}`} htmlFor='upload_File' id='uploadLabel'> {this.context.intl.formatMessage({ id: 'perun.upload_file', defaultMessage: 'perun.upload_file' })} </label>
         <div className={`${style.uploadFileHolder}`}>
           <input type="file" id='upload_File' style={{display: 'flex', margin: '0'}} onChange={this.inputChange}/>
           {this.state.hideAttachBtn === true ? null : <button className={`${style.uploadFileBtn}`} onClick={(e) => this.saveAttachment(e)} id='uploadBtn'>{iconManager.getIcon('uploadAtt')} {this.context.intl.formatMessage({ id: 'perun.upload_file', defaultMessage: 'perun.upload_file' })} </button>}

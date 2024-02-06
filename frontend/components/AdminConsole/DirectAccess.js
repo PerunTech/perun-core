@@ -105,7 +105,7 @@ class DirectAccess extends React.Component {
       multiValue.map((el) => {
         groups.push(el.label)
       })
-      return saveJson = { 'directAccess': false, 'accessGroup': groups }
+      return saveJson = { 'directAccess': false, 'accessGroup': groups } // eslint-disable-line no-unused-vars
     }
   }
 
