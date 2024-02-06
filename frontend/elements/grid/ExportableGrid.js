@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { labelBasePath } from '../../config';
 import { WrapItUp, ComponentManager } from '..';
 import GenericGrid from './GenericGrid';
-import json2csv from 'json2csv';
+import { Parser } from '@json2csv/plainjs';
 import xlsx from 'xlsx';
 
 /* This extension component adds a downloadable filter option to the grid,
@@ -18,7 +18,7 @@ The table row names and table data are decoded, using the grid config formatter 
 and as such are saved in the array. Internal system data (such as pkid, object_id, parent_id etc...)
 is also automatically removed since it corresponds to no relevant data in the grid config formatter.
 If no data was filtered, the function returns an empty array. */
-export function prepJsonFromConf (gridConfig, arrOfObj) {
+export function prepJsonFromConf(gridConfig, arrOfObj) {
   let cleanArray = []
   if (gridConfig && arrOfObj) {
     const confLen = gridConfig.length
@@ -61,7 +61,7 @@ export function prepJsonFromConf (gridConfig, arrOfObj) {
 
 /* A function that returns all rows (or the filtered ones if any filters are present) for selected grid.
 Returns JSON or an empty array if there are no records to display. */
-function getRows (grid, context) {
+function getRows(grid, context) {
   let filterByLabel = context.intl.formatMessage({
     id: `${labelBasePath}.main.grids.filter_by`,
     defaultMessage: `${labelBasePath}.main.grids.filter_by`
@@ -98,11 +98,12 @@ function getRows (grid, context) {
 }
 
 /* A function that converts filtered JSON rows to CSV. Creates and downloads a .csv document */
-function generateCsv (grid, context) {
+function generateCsv(grid, context) {
   const dataForCsv = getRows(grid, context)
   if (dataForCsv.length > 0) {
     // transform json to csv and create a link which donwloads the document when it is synthetically clicked
-    const csv = json2csv.parse(dataForCsv, { withBOM: true })
+    const csvParser = new Parser({ withBOM: true })
+    const csv = csvParser.parse(dataForCsv)
     const data = new Blob([csv], { type: 'text/csv' }) // eslint-disable-line
     const csvURL = window.URL.createObjectURL(data)
     const tempLink = document.createElement('a')
@@ -113,7 +114,7 @@ function generateCsv (grid, context) {
 }
 
 /* Download document as Excel .xls or .xlsx format */
-function generateExcel (gridId, context, extension) {
+function generateExcel(gridId, context, extension) {
   const gridData = getRows(gridId, context)
   if (gridData.length > 0) {
     const filename = `${gridId.toLowerCase()}.${extension}`
@@ -128,27 +129,27 @@ const ExportableGrid = (props, context) => {
   return (
     <div id='exportableGridHolder' className='exportableGridHolder'>
       <GenericGrid {...props} />
-      { props.gridConfigLoaded && props.gridDataLoaded &&
-      <div id='exportBtns' className='exportBtnsHolder' style={{ marginLeft: props.floatDownloadBtnsToRight && 'auto' }}>
-        <button
-          id='btn_exportCsv'
-          className='btn btn-success btnExportCsv'
-          onClick={() => generateCsv(props.id, context)}>
-          .CSV
-        </button>
-        <button
-          id='export-excel-xls'
-          className='btn btn-success btnExportExcel'
-          onClick={() => generateExcel(props.id, context, 'xls')}>
-          .XLS
-        </button>
-        <button
-          id='export-excel-xlsx'
-          className='btn btn-success btnExportExcel'
-          onClick={() => generateExcel(props.id, context, 'xlsx')}>
-          .XLSX
-        </button>
-      </div>
+      {props.gridConfigLoaded && props.gridDataLoaded &&
+        <div id='exportBtns' className='exportBtnsHolder' style={{ marginLeft: props.floatDownloadBtnsToRight && 'auto' }}>
+          <button
+            id='btn_exportCsv'
+            className='btn btn-success btnExportCsv'
+            onClick={() => generateCsv(props.id, context)}>
+            .CSV
+          </button>
+          <button
+            id='export-excel-xls'
+            className='btn btn-success btnExportExcel'
+            onClick={() => generateExcel(props.id, context, 'xls')}>
+            .XLS
+          </button>
+          <button
+            id='export-excel-xlsx'
+            className='btn btn-success btnExportExcel'
+            onClick={() => generateExcel(props.id, context, 'xlsx')}>
+            .XLSX
+          </button>
+        </div>
       }
     </div>
   )
