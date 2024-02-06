@@ -33,7 +33,7 @@ export function prepJsonFromConf(gridConfig, arrOfObj) {
         if (element[key]) {
           let formattedValue = ''
           // if value is a code list, we need to decode it
-          if (gridConfig[i].hasOwnProperty('formatterOptions')) { // if object has this property, decode the value
+          if (Object.prototype.hasOwnProperty.call(gridConfig[i], 'formatterOptions')) { // if object has this property, decode the value
             for (let j = 0; j < gridConfig[i].formatterOptions.length; j++) {
               if (element[key] === gridConfig[i].formatterOptions[j].id) {
                 formattedValue = gridConfig[i].formatterOptions[j].text
@@ -74,7 +74,7 @@ function getRows(grid, context) {
   if (filtersObject.constructor === Object && Object.keys(filtersObject).length > 0) {
     arrOfObj = ComponentManager.getStateForComponent(grid, 'filteredRows')
     for (const i in filtersObject) {
-      if (filtersObject.hasOwnProperty(i)) {
+      if (Object.prototype.hasOwnProperty.call(filtersObject, i)) {
         const filteredObj = {}
         let filterKey = ''
         let filterTerms = ''
