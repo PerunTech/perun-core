@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
-import Form from 'react-jsonschema-form'
+import Form from '@rjsf/core'
 import { Loading } from '../ComponentsIndex'
 import { alertUser } from '../../elements'
 import { getUserGroupsFormSchema } from './utils/userGroupsFormSchema'
-
+import validator from '@rjsf/validator-ajv8';
 const UserGroupsForm = (props, context) => {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({})
@@ -46,7 +46,7 @@ const UserGroupsForm = (props, context) => {
     <React.Fragment>
       {loading && <Loading />}
       <div className='admin-console-user-form-container'>
-        <Form schema={schema} uiSchema={uiSchema} formData={formData} className='user-form-container' onSubmit={onSubmit} onChange={onChange}>
+        <Form validator={validator} schema={schema} uiSchema={uiSchema} formData={formData} className='user-form-container' onSubmit={onSubmit} onChange={onChange}>
           <></>
           <div id='buttonHolder'>
             <div id='btnSeparator' className='userFormBtn'>

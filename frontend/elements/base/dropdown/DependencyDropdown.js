@@ -7,14 +7,14 @@ import { findWidget, findSectionName } from '../..';
 
 // component which generates the dropdown externally, or in a react jsonschema form
 class DependencyDropdown extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       component: null
     }
   }
 
-  getUiSchema (c) {
+  getUiSchema(c) {
     const server = svConfig.restSvcBaseUrl
     const verbPath = svConfig.triglavRestVerbs
     let webCall = verbPath.GET_UISCHEMA
@@ -24,7 +24,7 @@ class DependencyDropdown extends React.Component {
     return axios.get(restUrl)
   }
 
-  getConfig (c) {
+  getConfig(c) {
     const server = svConfig.restSvcBaseUrl
     const verbPath = svConfig.triglavRestVerbs
     let webCall = verbPath.GET_FORM_BUILDER
@@ -34,8 +34,8 @@ class DependencyDropdown extends React.Component {
     return axios.get(restUrl)
   }
 
-  componentDidMount () {
-    // IF the dropdowns are generated within a react-jsonschema-form
+  componentDidMount() {
+    // IF the dropdowns are generated within a @rjsf/core
     if (this.props.formInstance) {
       this.setState({
         component: <DependentElements {...this.props} />
@@ -68,12 +68,12 @@ class DependencyDropdown extends React.Component {
     }
   }
 
-  render () {
+  render() {
     return this.state.component
   }
 }
 
-function mapStateToProps (state) {
+function mapStateToProps(state) {
   return {
     svSession: state.security.svSession
   }

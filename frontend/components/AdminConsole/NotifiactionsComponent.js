@@ -1,12 +1,12 @@
 import React from 'react'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import Form from 'react-jsonschema-form'
+import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, Modal, PropTypes } from '../../client'
 import { alertUser, GridManager } from '../../elements'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
-
+import validator from '@rjsf/validator-ajv8';
 /* name of the table, if needed change only here */
 const tableName = 'SVAROG_NOTIFICATION'
 class NotificationsComponent extends React.Component {
@@ -82,7 +82,7 @@ class NotificationsComponent extends React.Component {
     const url = `${window.server}${wsPath}`
     const onSubmit = (e) => this.onSubmit(e, url)
 
-    const form = <Form className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
+    const form = <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
       <></>
       <div id='buttonHolder'>
         <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>

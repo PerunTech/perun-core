@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Form from "react-jsonschema-form";
+import Form from "@rjsf/core";
 import axios from "axios";
 import { connect } from "react-redux";
 import Loading from "../../Loading/Loading";
 import { ComponentManager, GenericGrid, PropTypes } from "../../../client";
 import { orgSearchSchema } from "../utils/orgSearchSchema";
-
+import validator from '@rjsf/validator-ajv8';
 let gridId = "USER_INTERN_GRID";
 const OrgSearch = (props, context) => {
   const [grid, setGrid] = useState(undefined);
@@ -99,6 +99,7 @@ const OrgSearch = (props, context) => {
   const generateForm = () => {
     const form = (
       <Form
+        validator={validator}
         className='admin-console-show-user-main-form'
         uiSchema={uiSchema}
         onSubmit={showTable}

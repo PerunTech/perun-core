@@ -46,7 +46,8 @@ export {
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUser } from './elements'
 
 /* elements-form & grid*/
-import Form from 'react-jsonschema-form';
+import Form from '@rjsf/core';
+import validator from '@rjsf/validator-ajv8';
 import DownloadableForm from './elements/form/DownloadableForm'
 import FormManager from './elements/form/FormManager'
 import GenericForm from './elements/form/GenericForm'
@@ -65,10 +66,10 @@ import RuleEngineModal from './components/RuleEngineModal/RuleEngineModal'
 import { attachmentButtons } from './elements/upload_download/AttachmentData'
 import AttachmentInput from './elements/upload_download/AttachmentInput';
 
-
 export {
   Form, Button, DependencyDropdown, Dropdown, InputElement, DownloadableForm, FormManager, GenericForm, StructuredForm, ContextMenuPopup, CustomGridToolbar,
-  ExportableGrid, GenericGrid, GridManager, JsonToExcel, ComponentManager, Modal, MenuHolder, ContextMenuHolder, RuleEngineModal, attachmentButtons, AttachmentInput
+  ExportableGrid, GenericGrid, GridManager, JsonToExcel, ComponentManager, Modal, MenuHolder, ContextMenuHolder, RuleEngineModal, attachmentButtons, AttachmentInput,
+  validator
 };
 
 

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
     ComponentManager,
-    Form,
     ExportableGrid,
     GridManager,
     PropTypes,
 } from "../../../client";
+import Form from '@rjsf/core';
 import { connect } from "react-redux";
 import { alertUser, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
 import LabelSearchSchema from "./LabelSearchSchema"
 import LabelFormSchema from "./LabelFormSchema"
+import validator from '@rjsf/validator-ajv8';
 let prev
 const LabelEditor = (props, context) => {
     const [grid, setGrid] = useState(undefined)
@@ -92,6 +93,7 @@ const LabelEditor = (props, context) => {
                 uiSchema={uiSchema}
                 schema={schema}
                 className={`form-test label-form`}
+                validator={validator}
                 onSubmit={(e) => {
                     submitLabel(e)
                 }}

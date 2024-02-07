@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
     ComponentManager,
-    Form,
     ExportableGrid,
     GridManager,
     Loading,
@@ -12,7 +11,8 @@ import { alertUser, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
 import CodeListFormSchema from "./CodeListFormSchema";
-
+import Form from '@rjsf/core';
+import validator from '@rjsf/validator-ajv8';
 let prevId
 
 const CodeListEditor = (props, context) => {
@@ -97,6 +97,7 @@ const CodeListEditor = (props, context) => {
         let form = <Form
             key={'SVAROG_CODES_EDIT'}
             uiSchema={uiSchema}
+            validator={validator}
             schema={schema}
             formData={formData}
             className={`form-test label-form code-list-form ${edit && 'code-list-edit-form'}`}
