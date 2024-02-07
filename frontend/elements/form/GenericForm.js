@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Form from 'react-jsonschema-form';
+import Form from '@rjsf/core';
 import { connect } from 'react-redux';
 
 import Select from 'react-select';
@@ -9,7 +9,7 @@ import { labelBasePath } from '../../config/config';
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
 import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
-
+import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
 let fieldName
 let fieldValue
@@ -713,6 +713,7 @@ class GenericForm extends React.Component {
 
     const loading = <div><Loading /></div>
     let form = <Form
+      validator={validator}
       noValidate={this.state.noValidate}
       className={className}
       fields={{ SchemaField: CustomOnchangeFunction }}

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types'
 import { alertUser, Dropdown } from "../../../elements/";
 import UsersGrid from "../UsersGrid";
-import Form from "react-jsonschema-form";
+import Form from "@rjsf/core";
 import axios from "axios";
 import { connect } from "react-redux";
 import Loading from "../../Loading/Loading";
 import { userDropDownListSchema } from "../utils/userDropDownListSchema";
-
+import validator from '@rjsf/validator-ajv8';
 const ShowUsersDropDown = (props, context) => {
   const [selectedOption, setSelectedOption] = useState(undefined);
   const [showUserDrop, setshowUserDrop] = useState(null);
@@ -161,6 +161,7 @@ const ShowUsersDropDown = (props, context) => {
   const generateForm = () => {
     const form = (
       <Form
+        validator={validator}
         className='admin-console-show-user-main-form'
         uiSchema={uiSchema}
         onSubmit={showTable}
