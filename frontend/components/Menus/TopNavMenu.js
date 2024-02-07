@@ -41,25 +41,6 @@ class TopNavMenu extends React.Component {
       .then(json => this.setState({ json }))
       .catch(err => { throw err })
   }
-
-  // getCardsData() {
-  //   let type
-  //   const url = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB + this.props.svSession
-  //   axios.get(url)
-  //     .then((response) => {
-  //       if (response.data) {
-  //         this.iterateLinks(response.data.data)
-  //         console.log(response.data.data);
-
-  //       }
-  //     })
-  //     .catch((response) => {
-  //       type = response.response.data.type
-  //       type = type.toLowerCase()
-  //       this.setState({ alert: alertUser(true, type, response.response.data.message, null, null) })
-  //     })
-  // }
-
   /*generate sidenav element links */
   iterateLinks(urlData) {
     if (urlData) {
