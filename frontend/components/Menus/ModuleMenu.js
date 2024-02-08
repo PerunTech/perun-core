@@ -50,7 +50,7 @@ class ModuleMenu extends React.Component {
           alertUser(true, data.type.toLowerCase(), data.message, null, this.closeAlert)
         } else {
           if (data) {
-            store.dispatch({ type: 'GET_PROJECT_LINKS', payload: { data } })
+            store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
             for (let i = 0; i < data.data.length; i++) {
               const plugin = data.data[i]
               // Check if the plugin should be directly accessed
