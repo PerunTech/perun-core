@@ -46,29 +46,26 @@ class UserGuide extends React.Component {
     let url
     if (axiosFor) {
       if (axiosFor === 'routes') {
-        url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`
+        this.generateRoutes(this.props.moduleLinks?.data?.data || [])
       } else {
         url = window.server + '/PublicWs/getGuides/' + this.props.svSession + '/UserGuideJson'
-      }
-      axios.get(url).then((response) => {
-        if (response.data) {
-          if (response.data.data) {
-            if (axiosFor === 'routes') {
-              this.generateRoutes(response.data.data)
-            } else {
+        axios.get(url).then((response) => {
+          if (response.data) {
+            if (response.data.data) {
               this.iterateDocs(response.data.data)
             }
           }
-        }
-      }).catch((err) => {
-        if (err) {
-          if (err.data) {
-            if (err.data.type) {
-              alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
+        }).catch((err) => {
+          if (err) {
+            if (err.data) {
+              if (err.data.type) {
+                alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
+              }
             }
           }
-        }
-      })
+        })
+      }
+
     }
   }
 
@@ -235,7 +232,8 @@ UserGuide.contextTypes = {
 }
 
 const mapStateToProps = state => ({
-  svSession: state.security.svSession
+  svSession: state.security.svSession,
+  moduleLinks: state.moduleLinks.data
 })
 
 export default connect(mapStateToProps)(UserGuide)

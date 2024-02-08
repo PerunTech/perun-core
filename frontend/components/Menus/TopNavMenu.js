@@ -69,7 +69,7 @@ class TopNavMenu extends React.Component {
 
   showElements() {
     this.setState({ showElements: true })
-    this.iterateLinks(this.props.moduleLinks.data.data)
+    this.iterateLinks(this.props.moduleLinks?.data?.data || [])
   }
 
   closeHamb() {
