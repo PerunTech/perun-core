@@ -30,7 +30,7 @@ class TopNavMenu extends React.Component {
   }
   componentDidUpdate(prevProps) {
     if (this.props.moduleLinks !== prevProps.moduleLinks) {
-      this.iterateLinks(this.props.moduleLinks.data.data)
+      this.iterateLinks(this.props.moduleLinks?.data?.data || [])
     }
   }
 
@@ -43,7 +43,7 @@ class TopNavMenu extends React.Component {
   }
   /*generate sidenav element links */
   iterateLinks(urlData) {
-    if (Object.keys(urlData).length > 0) {
+    if (urlData.length > 0) {
       let createdUrl = []
       for (let i = 0; i < urlData.length; i++) {
         if (urlData[i].id && urlData[i].id !== 'perun-assets' && urlData[i].id !== 'spatial') {
