@@ -43,20 +43,13 @@ class TopNavMenu extends React.Component {
   }
   /*generate sidenav element links */
   iterateLinks(urlData) {
-    if (urlData) {
+    if (Object.keys(urlData).length > 0) {
       let createdUrl = []
       for (let i = 0; i < urlData.length; i++) {
         if (urlData[i].id && urlData[i].id !== 'perun-assets' && urlData[i].id !== 'spatial') {
-          if (urlData[i].id === 'edbar') {
-            let url = window.location.href
-            let arr = url.split("/")
-            let currentUrl = arr[0] + "//" + arr[2]
-            createdUrl.push(this.buttonHtml(urlData[i].id, urlData[i].title, currentUrl + '/edbar/indexedbar.html'))
-          } else {
-            createdUrl.push(<Link onClick={this.closeHamb} key={urlData[i].id} to={'/main/' + urlData[i].id}>
-              {this.buttonHtml(urlData[i].id, urlData[i].title)}
-            </Link>)
-          }
+          createdUrl.push(<Link onClick={this.closeHamb} key={urlData[i].id} to={'/main/' + urlData[i].id}>
+            {this.buttonHtml(urlData[i].id, urlData[i].title)}
+          </Link>)
         }
       }
       this.setState({ createdUrlState: createdUrl })
@@ -64,9 +57,8 @@ class TopNavMenu extends React.Component {
   }
 
   /* return top-nav menu html element */
-  buttonHtml(id, btnTitle, redirectEdbar) {
-    let onClick = redirectEdbar ? () => location.replace(redirectEdbar) : null
-    return <button onClick={onClick} className='url-el'>
+  buttonHtml(id, btnTitle) {
+    return <button className='url-el'>
       <div className='button-flex'>
         {iconManager.getIcon(id)}<span>
           {btnTitle}
@@ -77,6 +69,7 @@ class TopNavMenu extends React.Component {
 
   showElements() {
     this.setState({ showElements: true })
+    this.iterateLinks(this.props.projectLinks.data.data)
   }
 
   closeHamb() {
