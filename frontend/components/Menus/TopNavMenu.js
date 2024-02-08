@@ -29,8 +29,8 @@ class TopNavMenu extends React.Component {
     this.getTopMenuJson()
   }
   componentDidUpdate(prevProps) {
-    if (this.props.projectLinks !== prevProps.projectLinks) {
-      this.iterateLinks(this.props.projectLinks.data.data)
+    if (this.props.moduleLinks !== prevProps.moduleLinks) {
+      this.iterateLinks(this.props.moduleLinks.data.data)
     }
   }
 
@@ -69,7 +69,7 @@ class TopNavMenu extends React.Component {
 
   showElements() {
     this.setState({ showElements: true })
-    this.iterateLinks(this.props.projectLinks.data.data)
+    this.iterateLinks(this.props.moduleLinks.data.data)
   }
 
   closeHamb() {
@@ -130,7 +130,7 @@ TopNavMenu.contextTypes = {
 
 const mapStateToProps = state => ({
   svSession: state.security.svSession,
-  projectLinks: state.projectLinks.data
+  moduleLinks: state.moduleLinks.data
 })
 
 export default connect(mapStateToProps)(TopNavMenu)

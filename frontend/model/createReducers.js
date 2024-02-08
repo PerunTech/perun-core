@@ -14,7 +14,7 @@ import { historyReducer } from './reducers/historyReducer';
 import { routesReducer } from './reducers/routesReducer';
 import { modalReducer } from './reducers/modalReducer';
 import { userInfoReducer } from './reducers/userInfoReducer';
-import projectLinksReducer from './reducers/projectLinksReducer';
+import moduleLinksReducer from './reducers/moduleLinksReducer';
 
 export default function createReducers(asyncReducers) {
   const appReducer = combineReducers({
@@ -34,7 +34,7 @@ export default function createReducers(asyncReducers) {
     routes: routesReducer,
     modal: modalReducer,
     userInfo: userInfoReducer,
-    projectLinks: projectLinksReducer,
+    moduleLinks: moduleLinksReducer,
     ...asyncReducers
   })
 
