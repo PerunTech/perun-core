@@ -14,8 +14,9 @@ import { historyReducer } from './reducers/historyReducer';
 import { routesReducer } from './reducers/routesReducer';
 import { modalReducer } from './reducers/modalReducer';
 import { userInfoReducer } from './reducers/userInfoReducer';
+import moduleLinksReducer from './reducers/moduleLinksReducer';
 
-export default function createReducers (asyncReducers) {
+export default function createReducers(asyncReducers) {
   const appReducer = combineReducers({
     gridConfig: gridConfig,
     security: security,
@@ -33,6 +34,7 @@ export default function createReducers (asyncReducers) {
     routes: routesReducer,
     modal: modalReducer,
     userInfo: userInfoReducer,
+    moduleLinks: moduleLinksReducer,
     ...asyncReducers
   })
 

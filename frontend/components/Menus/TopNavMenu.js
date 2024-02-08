@@ -14,7 +14,6 @@ class TopNavMenu extends React.Component {
       json: [],
     }
     this.state = { showElements: false }
-    this.getCardsData = this.getCardsData.bind(this)
     this.iterateLinks = this.iterateLinks.bind(this)
     this.showElements = this.showElements.bind(this)
     this.closeHamb = this.closeHamb.bind(this)
@@ -27,8 +26,12 @@ class TopNavMenu extends React.Component {
     if (mainroute === 'main') {
       document.getElementById('hideHamb').className = 'hideHambMenu';
     }
-    this.getCardsData()
     this.getTopMenuJson()
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.moduleLinks !== prevProps.moduleLinks) {
+      this.iterateLinks(this.props.moduleLinks?.data?.data || [])
+    }
   }
 
   getTopMenuJson = () => {
@@ -38,39 +41,15 @@ class TopNavMenu extends React.Component {
       .then(json => this.setState({ json }))
       .catch(err => { throw err })
   }
-
-  getCardsData() {
-    let type
-    const url = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB + this.props.svSession
-    axios.get(url)
-      .then((response) => {
-        if (response.data) {
-          this.iterateLinks(response.data.data)
-        }
-      })
-      .catch((response) => {
-        type = response.response.data.type
-        type = type.toLowerCase()
-        this.setState({ alert: alertUser(true, type, response.response.data.message, null, null) })
-      })
-  }
-
   /*generate sidenav element links */
   iterateLinks(urlData) {
-    if (urlData) {
+    if (urlData.length > 0) {
       let createdUrl = []
       for (let i = 0; i < urlData.length; i++) {
         if (urlData[i].id && urlData[i].id !== 'perun-assets' && urlData[i].id !== 'spatial') {
-          if (urlData[i].id === 'edbar') {
-            let url = window.location.href
-            let arr = url.split("/")
-            let currentUrl = arr[0] + "//" + arr[2]
-            createdUrl.push(this.buttonHtml(urlData[i].id, urlData[i].title, currentUrl + '/edbar/indexedbar.html'))
-          } else {
-            createdUrl.push(<Link onClick={this.closeHamb} key={urlData[i].id} to={'/main/' + urlData[i].id}>
-              {this.buttonHtml(urlData[i].id, urlData[i].title)}
-            </Link>)
-          }
+          createdUrl.push(<Link onClick={this.closeHamb} key={urlData[i].id} to={'/main/' + urlData[i].id}>
+            {this.buttonHtml(urlData[i].id, urlData[i].title)}
+          </Link>)
         }
       }
       this.setState({ createdUrlState: createdUrl })
@@ -78,9 +57,8 @@ class TopNavMenu extends React.Component {
   }
 
   /* return top-nav menu html element */
-  buttonHtml(id, btnTitle, redirectEdbar) {
-    let onClick = redirectEdbar ? () => location.replace(redirectEdbar) : null
-    return <button onClick={onClick} className='url-el'>
+  buttonHtml(id, btnTitle) {
+    return <button className='url-el'>
       <div className='button-flex'>
         {iconManager.getIcon(id)}<span>
           {btnTitle}
@@ -91,6 +69,7 @@ class TopNavMenu extends React.Component {
 
   showElements() {
     this.setState({ showElements: true })
+    this.iterateLinks(this.props.moduleLinks.data.data)
   }
 
   closeHamb() {
@@ -150,7 +129,8 @@ TopNavMenu.contextTypes = {
 }
 
 const mapStateToProps = state => ({
-  svSession: state.security.svSession
+  svSession: state.security.svSession,
+  moduleLinks: state.moduleLinks.data
 })
 
 export default connect(mapStateToProps)(TopNavMenu)
