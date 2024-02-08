@@ -1,10 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { svConfig } from '../../config';
-import { alertUser } from '../../elements';
 import { iconManager } from '../../assets/svg/svgHolder';
 
 class TopNavMenu extends React.Component {
@@ -28,6 +25,7 @@ class TopNavMenu extends React.Component {
     }
     this.getTopMenuJson()
   }
+
   componentDidUpdate(prevProps) {
     if (this.props.moduleLinks !== prevProps.moduleLinks) {
       this.iterateLinks(this.props.moduleLinks?.data?.data || [])
