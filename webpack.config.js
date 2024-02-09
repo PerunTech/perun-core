@@ -20,8 +20,7 @@ module.exports = (mode) => {
             static: {
                 directory: path.join(__dirname, 'www'),
             },
-            compress: true,
-            port: 8080
+            compress: true
         },
         plugins: [
             new webpack.ProvidePlugin({

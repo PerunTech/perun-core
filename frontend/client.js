@@ -6,7 +6,6 @@ import { Provider, connect } from 'react-redux'; // these should be represented 
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
 import PerunCoreErrorHanlder from './functions/PerunCoreErrorHanlder'
-
 /* assets */
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
@@ -85,76 +84,9 @@ function validResponse(res) {
   }
 }
 
-/* axios interceptors config f.r */
-//GET
-axios.interceptors.request.use(
-  (res) => {
-    if (res.status === 200) {
-      if (res.data.type === 'ERROR' && (res.data.title === 'Невалидна сесија' || res.data.title === 'error.invalid_session')) {
-        alertUser(true, 'error', 'Invalid session', 'Please log in again', () => {
-          createHashHistory().push('/home/login')
-          // location.reload();
-          return res;
-        })
-      }
-      if (res.data?.message?.includes('not_authorised')) {
-        alertUser(true, 'error', 'You are trying to perform an action you are not authorised to perform', '', () => {
-          // createHashHistory().push('/home/login')
-          // // location.reload();
-          return res;
-        })
-      }
-    }
-    if (res.data && res.data.type === 'EXCEPTION') {
-      alertUser(true, 'error', res.data.title, '', () => {
-        createHashHistory().push('/home/login')
-        // location.reload();
-        return res;
-      })
-    }
-    return res;
-  },
-  (err) => {
-    if (err.status) {
-      switch (err.status) {
-        case '302':
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found')
-          break;
-        case '401':
-          createHashHistory().push('/home/login')
-          // location.reload();
-          break;
-        case '500':
-          alertUser(true, 'error', 'The server responsed with a status code 500 Internal Server Error')
-          break;
-        case '502':
-          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway')
-          break;
-        default:
-          console.log(err)
-      }
-    } else {
-      let msg = err.message
-      switch (true) {
-        case msg.includes('401'):
-          createHashHistory().push('/home/login')
-          // location.reload();
-          break;
-        case msg.includes('500'):
-          return Promise.reject(err);
-        case msg.includes('502'):
-          return Promise.reject(err);
-        default:
-          console.log(err)
-      }
-    }
-  }, { runWhen: validResponse }
-);
-
-//POST
 axios.interceptors.response.use(
   (res) => {
-    if (res.status === 200) {
+    if (res?.status === 200) {
       if (res.data.type === 'ERROR' && (res.data.title === 'Невалидна сесија' || res.data.title === 'error.invalid_session')) {
         alertUser(true, 'error', 'Invalid session', 'Please log in again', () => {
           createHashHistory().push('/home/login')
@@ -163,7 +95,7 @@ axios.interceptors.response.use(
         })
       }
       if (res.data && res.data.type === 'EXCEPTION') {
-        alertUser(true, 'error', res.data.title, '', () => {
+        alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
           createHashHistory().push('/home/login')
           // location.reload();
           return res;
@@ -173,23 +105,24 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
-    if (error.status) {
-      switch (error.status) {
-        case '302':
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found')
+    const url = error.response.config.url || ''
+    if (error.response.status) {
+      switch (error.response.status) {
+        case 302:
+          alertUser(true, 'error', 'The server responsed with a status code 302 Found', url)
           break;
-        case '401':
+        case 401:
           createHashHistory().push('/home/login')
-          // location.reload();
+          const title = error.response?.data?.title || error
+          const msg = error.response?.data?.message || ''
+          alertUser(true, "error", title, msg);
+          redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
-        case '500':
-          alertUser(true, 'error', 'The server responsed with a status code 500 Internal Server Error')
-          break;
-        case '502':
-          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway')
+        case 502:
+          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
           break;
         default:
-          console.log(error)
+          return Promise.reject(error);
       }
     } else {
       let msg = error.message
