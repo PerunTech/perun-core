@@ -106,8 +106,6 @@ axios.interceptors.response.use(
   },
   (error) => {
     const url = error.response.config.url || ''
-    const title = error.response?.data?.title || error
-    const msg = error.response?.data?.message || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
@@ -115,17 +113,16 @@ axios.interceptors.response.use(
           break;
         case 401:
           createHashHistory().push('/home/login')
+          const title = error.response?.data?.title || error
+          const msg = error.response?.data?.message || ''
           alertUser(true, "error", title, msg);
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
-          break;
-        case 500:
-          alertUser(true, 'error', title, msg)
           break;
         case 502:
           alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
           break;
         default:
-          console.log(error)
+          return Promise.reject(error);
       }
     } else {
       let msg = error.message
