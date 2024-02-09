@@ -83,9 +83,10 @@ function validResponse(res) {
     return true
   }
 }
+
 axios.interceptors.response.use(
   (res) => {
-    if (res.status === 200) {
+    if (res?.status === 200) {
       if (res.data.type === 'ERROR' && (res.data.title === 'Невалидна сесија' || res.data.title === 'error.invalid_session')) {
         alertUser(true, 'error', 'Invalid session', 'Please log in again', () => {
           createHashHistory().push('/home/login')
@@ -94,7 +95,7 @@ axios.interceptors.response.use(
         })
       }
       if (res.data && res.data.type === 'EXCEPTION') {
-        alertUser(true, 'error', res.data.title, '', () => {
+        alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
           createHashHistory().push('/home/login')
           // location.reload();
           return res;
@@ -104,10 +105,11 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
+    const url = error.response.config.url || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found')
+          alertUser(true, 'error', 'The server responsed with a status code 302 Found', url)
           break;
         case 401:
           createHashHistory().push('/home/login')
@@ -117,10 +119,10 @@ axios.interceptors.response.use(
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 500:
-          alertUser(true, 'error', 'The server responsed with a status code 500 Internal Server Error')
+          alertUser(true, 'error', 'The server responsed with a status code 500 Internal Server Error', url)
           break;
         case 502:
-          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway')
+          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
           break;
         default:
           console.log(error)
