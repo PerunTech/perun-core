@@ -39,6 +39,7 @@ const LabelEditor = (props, context) => {
             schema={schema}
             key={'SVAROG_LABELS_SEARCH'}
             className={`form-test label-form-search`}
+            validator={validator}
             onSubmit={(e) => {
                 ComponentManager.cleanComponentReducerState(prev)
                 generateLabelsGrid(e.formData)
@@ -134,6 +135,7 @@ const LabelEditor = (props, context) => {
             key={'SVAROG_LABELS_EDIT'}
             formData={formData}
             className={`form-test label-form`}
+            validator={validator}
             onSubmit={(e) => {
                 submitLabel(e)
             }}

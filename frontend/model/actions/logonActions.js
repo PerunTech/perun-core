@@ -24,7 +24,9 @@ export function loginUser(restUrl, method, formData, customData) {
         }
       }).catch((error) => {
         // error
-        dispatch({ type: a.loginRejected, payload: error })
+        const title = error.response?.data?.title || error
+        const message = error.response?.data?.title || ''
+        dispatch({ type: a.loginRejected, payload: { type: 'error', title, message } })
       })
     }
   }
@@ -43,7 +45,9 @@ export function registerUser(restUrl, method, formData) {
       dispatch({ type: a.registerFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.registerRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.registerRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -61,7 +65,9 @@ export function recoverPassword(restUrl, method, formData) {
       dispatch({ type: a.recoverPassFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.recoverPassRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.recoverPassRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -79,7 +85,9 @@ export function changePassword(restUrl, method, formData) {
       dispatch({ type: a.changePassFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.changePassRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.changePassRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -97,7 +105,9 @@ export function changeEmail(restUrl, method, formData) {
       dispatch({ type: a.changeEmailFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.changeEmailRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.changeEmailRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -115,7 +125,9 @@ export function activateUser(restUrl, method, formData) {
       dispatch({ type: a.activateUserFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.activateUserRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.activateUserRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -133,7 +145,9 @@ export function activateLink(restUrl, method, formData) {
       dispatch({ type: a.activateUserFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.activateUserRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.activateUserRejected, payload: { type: 'error', title, message } })
     })
   }
 }
@@ -146,7 +160,9 @@ export function logoutUser(restUrl) {
       dispatch({ type: a.logoutUserFulfilled, payload: response.data })
     }).catch((error) => {
       // error
-      dispatch({ type: a.logoutUserRejected, payload: error })
+      const title = error.response?.data?.title || error
+      const message = error.response?.data?.title || ''
+      dispatch({ type: a.logoutUserRejected, payload: { type: 'error', title, message } })
     })
   }
 }
