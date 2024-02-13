@@ -106,6 +106,8 @@ axios.interceptors.response.use(
   },
   (error) => {
     const url = error.response.config.url || ''
+    const title = error.response?.data?.title || error
+    const msg = error.response?.data?.message || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
@@ -113,9 +115,7 @@ axios.interceptors.response.use(
           break;
         case 401:
           createHashHistory().push('/home/login')
-          const title = error.response?.data?.title || error
-          const msg = error.response?.data?.message || ''
-          alertUser(true, "error", title, msg);
+          alertUser(true, 'error', title, msg);
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 502:
