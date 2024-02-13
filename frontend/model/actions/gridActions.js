@@ -63,9 +63,9 @@ export function getGridConfig (gridid, gridName, session, params, gridType) {
 
       axios.get(gridConfigPath)
         .then((response) => {
-          let data
-          if (isValidObject(response.data, 1) || isValidArray(response.data, 1)) {
-            if (isValidArray(response.data.data, 1)) {
+          let data = []
+          if (isValidObject(response?.data, 1) || isValidArray(response?.data, 1)) {
+            if (isValidArray(response.data?.data, 1)) {
               data = response.data.data
             } else {
               data = response.data
@@ -105,12 +105,12 @@ export function getGridData (gridid, gridNameOrData, session, params, gridType) 
 
     axios.get(gridConfig)
       .then((response) => {
-        let data
-        if (isValidObject(response.data, 1) || isValidArray(response.data)) {
-          if (isValidArray(response.data.data)) {
+        let data = []
+        if (isValidObject(response?.data, 1) || isValidArray(response?.data)) {
+          if (isValidArray(response.data?.data)) {
             data = response.data.data
           } else {
-            if (response.data.type && response.data.type?.toLowerCase() !== 'success') {
+            if (response?.data?.type && response?.data?.type?.toLowerCase() !== 'success') {
               dispatch({ id: gridid, type: gridid + '/FETCH_GRID_DATA_REJECTED', payload: { response: { data: response.data.title || '' } } })
               data = []
             } else {
