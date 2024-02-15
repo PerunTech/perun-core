@@ -94,8 +94,16 @@ class SvarogSystemParams extends React.Component {
     }
   }
 
+  resetFormDeleteState = (formId) => {
+    ComponentManager.setStateForComponent(formId, null, { deleteExecuted: false })
+  }
+
+  resetFormSaveState = (formId) => {
+    ComponentManager.setStateForComponent(formId, null, { saveExecuted: false })
+  }
+
   /* delete callback function from genericForm, prepare delete params */
-  deleteFormCallback = (id, method, session, params) => {
+  deleteFormCallback = (_id, _method, _session, params) => {
     let valueToSend = params[4].PARAM_VALUE
     this.deleteAxiosPost(valueToSend)
   }
@@ -103,21 +111,27 @@ class SvarogSystemParams extends React.Component {
   /* simple axios post delete method from prepared params from deleteFormCallback */
   deleteAxiosPost(valueToSend) {
     let restUrl = window.server + '/ReactElements/deleteObject/' + this.props.svSession
-    let th1s = this
     axios({
       method: 'post',
-      data: valueToSend,
+      data: encodeURIComponent(valueToSend),
       url: restUrl,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then((response) => {
-      if (response.data) {
-        th1s.setState({ setModal: false })
-        GridManager.reloadGridData(tableName + '_GRID')
-        alertUser(true, response.data.type.toLowerCase(), response.data.message)
+    }).then((res) => {
+      if (res.data) {
+        const resType = res.data.type
+        const title = res.data.title || ''
+        const msg = res.data.message || ''
+        alertUser(true, resType?.toLowerCase() || 'info', title, msg, () => this.resetFormDeleteState(`${tableName}_FORM`))
+        if (resType?.toLowerCase() === 'success') {
+          this.setState({ setModal: false })
+          GridManager.reloadGridData(tableName + '_GRID')
+        }
       }
-    }).catch((err) => {
-      th1s.setState({ setModal: false })
-      alertUser(true, err.data.type.toLowerCase(), err.data.message)
+    }).catch((error) => {
+      console.error(error)
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg, () => this.resetFormDeleteState(`${tableName}_FORM`))
     })
   }
 
@@ -130,21 +144,28 @@ class SvarogSystemParams extends React.Component {
 
   /* simple axios post method with prepared e.formData */
   saveFormData = (form_params, restUrl) => {
-    let th1s = this
     axios({
       method: 'post',
       data: encodeURIComponent(JSON.stringify(form_params)),
       url: restUrl,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then(function (response) {
-      if (response.data) {
-        alertUser(true, response.data.type.toLowerCase(), response.data.message, null, () => th1s.closeModal())
-        GridManager.reloadGridData(tableName + '_GRID')
+    }).then((res) => {
+      if (res.data) {
+        const resType = res.data.type
+        const title = res.data.title || ''
+        const msg = res.data.message || ''
+        alertUser(true, resType?.toLowerCase() || 'info', title, msg, () => this.resetFormSaveState(`${tableName}_FORM`))
+        if (resType?.toLowerCase() === 'success') {
+          this.setState({ setModal: false })
+          GridManager.reloadGridData(tableName + '_GRID')
+        }
       }
+    }).catch((error) => {
+      console.error(error)
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg, () => this.resetFormSaveState(`${tableName}_FORM`))
     })
-      .catch(function (error) {
-        alertUser(true, 'error', error, '')
-      })
   }
 
   /* hide modal */
@@ -162,7 +183,7 @@ class SvarogSystemParams extends React.Component {
   }
 
   /* on rowClick callback from grid, sets objId */
-  onRowClickFn = (id, idx, row) => {
+  onRowClickFn = (_id, _idx, row) => {
     let objectId = row[`${tableName}.OBJECT_ID`]
     this.setState({ objId: objectId })
   }
