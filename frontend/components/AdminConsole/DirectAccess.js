@@ -4,9 +4,7 @@ import { connect } from 'react-redux'
 import axios from 'axios'
 import Select from 'react-select'
 import { alertUser } from '../../elements'
-import { store, logoutUser } from '../../model';
 import Loading from '../Loading/Loading'
-import { svConfig } from '../../config'
 
 class DirectAccess extends React.Component {
   constructor(props) {
@@ -16,14 +14,13 @@ class DirectAccess extends React.Component {
   }
 
   writeTypeAccess = (object) => {
-    if (object.value === 'directAccess')
+    if (object.value === 'directAccess') {
       this.setState({ typeAccess: object, showGroup: false, showModule: true, multiValue: '', contextName: '' });
+    }
 
-    if (object.value === 'accessGroup')
-      this.setState({
-        typeAccess: object, showGroup: true, showModule: false,
-        multiValue: '', contextName: ''
-      });
+    if (object.value === 'accessGroup') {
+      this.setState({ typeAccess: object, showGroup: true, showModule: false, multiValue: '', contextName: '' });
+    }
   }
 
   handleMultiChange = (option) => {
@@ -39,24 +36,19 @@ class DirectAccess extends React.Component {
   }
 
   getAllGroups = () => {
-    let type
-    let url = window.server + '/WsAdminConsole/getAllGroups/' + this.props.svSession
     this.setState({ loading: <Loading /> })
-    let th1s = this
-    axios.get(url)
-      .then((response) => {
-        if (response.data) {
-          th1s.createUpdateTableAccessModal(response.data)
-        }
-        th1s.setState({ loading: false })
-      }).catch((error) => {
-        if (error.data) {
-          type = error.data.type
-          type = type.toLowerCase()
-          alertUser(true, type, error.data.message, null)
-          th1s.setState({ loading: false })
-        }
-      })
+    const url = window.server + '/WsAdminConsole/getAllGroups/' + this.props.svSession
+    axios.get(url).then((response) => {
+      if (response.data) {
+        this.createUpdateTableAccessModal(response.data)
+      }
+      this.setState({ loading: false })
+    }).catch((error) => {
+      this.setState({ loading: false })
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    })
   }
 
   createUpdateTableAccessModal = (data) => {
@@ -65,26 +57,20 @@ class DirectAccess extends React.Component {
     allGroups = allGroups.replaceAll('groupName', 'label')
     allGroups = allGroups.replaceAll('objectId', 'value')
     allGroups = JSON.parse(allGroups)
-    this.setState({ filterOptions: allGroups })
+    this.setState({ filterOptions: allGroups, loading: <Loading /> })
 
-    let type
-    let url = window.server + `/ReactElements/getOptionsFromTable/${this.props.svSession}/SVAROG_PERUN_PLUGIN/CONTEXT_NAME`
-    this.setState({ loading: <Loading /> })
-    let th1s = this
-    axios.get(url)
-      .then((response) => {
-        if (response.data) {
-          th1s.singleOptionValueDrop(response.data.data)
-        }
-        this.setState({ loading: false })
-      }).catch((error) => {
-        if (error.data) {
-          type = error.data.type
-          type = type.toLowerCase()
-          alertUser(true, type, error.data.message, null)
-          this.setState({ loading: false })
-        }
-      })
+    const url = window.server + `/ReactElements/getOptionsFromTable/${this.props.svSession}/SVAROG_PERUN_PLUGIN/CONTEXT_NAME`
+    axios.get(url).then((response) => {
+      if (response.data) {
+        this.singleOptionValueDrop(response.data.data)
+      }
+      this.setState({ loading: false })
+    }).catch((error) => {
+      this.setState({ loading: false })
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    })
   }
 
   singleOptionValueDrop = (modulesV) => {
@@ -109,16 +95,6 @@ class DirectAccess extends React.Component {
     }
   }
 
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
-  }
-
-  logout = () => {
-    const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.svSession
-    store.dispatch(logoutUser(restUrl))
-  }
-
   callOnSave = () => {
     const directAccessChangeLabel = this.context.intl.formatMessage({ id: 'perun.admin_console.direct_access_change', defaultMessage: 'perun.admin_console.direct_access_change' })
     const yesLabel = this.context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' })
@@ -136,8 +112,8 @@ class DirectAccess extends React.Component {
 
   onSave = () => {
     const { multiValue, typeAccess, contextName } = this.state
-    let saveJson = this.prepareSaveJson(multiValue, typeAccess);
-    let restUrl = window.server + `/WsConf/saveTypeAccess/${this.props.svSession}/${contextName.value}`
+    const saveJson = this.prepareSaveJson(multiValue, typeAccess);
+    const restUrl = window.server + `/WsConf/saveTypeAccess/${this.props.svSession}/${contextName.value}`
     let form_params = new URLSearchParams()
     form_params.append('guiMeta', JSON.stringify(saveJson))
     axios({
@@ -145,37 +121,21 @@ class DirectAccess extends React.Component {
       data: form_params,
       url: restUrl,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then(response => {
-      if (response.data) {
-        if (response.data.type) {
-          alertUser(true, response.data.type.toLowerCase(), response.data.message, null)
-          this.setState({ typeAccess: '', multiValue: '', contextName: '', showGroup: '', showModule: '' }, () => {
-            this.getAllGroups()
-          })
-        }
+    }).then(res => {
+      if (res.data) {
+        const resType = res.data.type
+        const title = res.data.title || ''
+        const msg = res.data.message || ''
+        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
+        this.setState({ typeAccess: '', multiValue: '', contextName: '', showGroup: '', showModule: '' }, () => {
+          this.getAllGroups()
+        })
       }
+    }).catch(error => {
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     })
-      .catch(error => {
-        if (error.response.data.message === 'error.invalid_session') {
-          this.setState({ alert: alertUser(true, 'error', error.response.data.message, null, this.closeAlert) })
-        }
-        if (error && error.data) {
-          let type
-          type = error.response.data.type
-          type = type.toLowerCase()
-          alertUser(true, type, error.response.data.message, null)
-        }
-      })
-  }
-
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
-  }
-
-  logout = () => {
-    const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.svSession
-    store.dispatch(logoutUser(restUrl))
   }
 
   render() {
