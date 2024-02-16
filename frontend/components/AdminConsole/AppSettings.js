@@ -14,7 +14,7 @@ import GenericForm from '../../elements/form/GenericForm'
 import md5 from 'md5'
 import PropTypes from 'prop-types'
 import Loading from '../Loading/Loading';
-import NotificationsComponent from './NotifiactionsComponent';
+import NotificationsComponent from './NotificationsComponent';
 import SvarogAclGrid from './SvarogAclGrid';
 import AssignAcl from './AssignAcl';
 import CreateAclCodes from './CreateAclCodes'

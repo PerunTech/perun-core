@@ -55,17 +55,16 @@ class NotificationsComponent extends React.Component {
   }
 
   onSubmit = (e, url) => {
-    let th1s = this
     const formData = flattenObject(e.formData)
     const data = JSON.parse(JSON.stringify(formData).replaceAll('%', '%25'))
     axios({ method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(function (response) {
       if (response.data) {
-        alertUser(true, response.data.type.toLowerCase(), response.data.message, null, () => th1s.closeModal())
-        th1s.reloadGrid(`${tableName}_GRID`)
+        alertUser(true, response.data.type.toLowerCase(), response.data.message, null, () => this.closeModal())
+        this.reloadGrid(`${tableName}_GRID`)
       }
     }).catch(function (error) {
       console.log(error)
-      alertUser(true, error.data.type.toLowerCase(), error.data.message, null, () => th1s.closeModal())
+      alertUser(true, error.data.type.toLowerCase(), error.data.message, null, () => this.closeModal())
     })
   }
 
