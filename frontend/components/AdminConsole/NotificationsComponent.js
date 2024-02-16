@@ -57,14 +57,23 @@ class NotificationsComponent extends React.Component {
   onSubmit = (e, url) => {
     const formData = flattenObject(e.formData)
     const data = JSON.parse(JSON.stringify(formData).replaceAll('%', '%25'))
-    axios({ method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(function (response) {
-      if (response.data) {
-        alertUser(true, response.data.type.toLowerCase(), response.data.message, null, () => this.closeModal())
-        this.reloadGrid(`${tableName}_GRID`)
+    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    axios(reqConfig).then((res) => {
+      if (res.data) {
+        const resType = res.data.type
+        const title = res.data.title || ''
+        const msg = res.data.message || ''
+        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
+        if (resType?.toLowerCase() === 'success') {
+          this.closeModal()
+          this.reloadGrid(`${tableName}_GRID`)
+        }
       }
-    }).catch(function (error) {
+    }).catch((error) => {
       console.log(error)
-      alertUser(true, error.data.type.toLowerCase(), error.data.message, null, () => this.closeModal())
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     })
   }
 
@@ -102,16 +111,24 @@ class NotificationsComponent extends React.Component {
   /* simple axios post delete method */
   deleteAxiosPost = () => {
     const { selectedRow } = this.state
-    let restUrl = window.server + '/ReactElements/deleteObject/' + this.props.svSession
-    axios({ method: 'post', data: selectedRow, url: restUrl, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then((response) => {
-      if (response.data) {
-        this.setState({ setModal: false })
-        this.reloadGrid(`${tableName}_GRID`)
-        alertUser(true, response.data.type.toLowerCase(), response.data.message)
+    const restUrl = window.server + '/ReactElements/deleteObject/' + this.props.svSession
+    const reqConfig = { method: 'post', data: selectedRow, url: restUrl, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    axios(reqConfig).then((res) => {
+      if (res.data) {
+        const resType = res.data.type
+        const title = res.data.title || ''
+        const msg = res.data.message || ''
+        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
+        if (resType?.toLowerCase() === 'success') {
+          this.closeModal()
+          this.reloadGrid(`${tableName}_GRID`)
+        }
       }
-    }).catch((err) => {
-      this.setState({ setModal: false })
-      alertUser(true, 'error', err.data.message)
+    }).catch((error) => {
+      console.error(error)
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     })
   }
 
