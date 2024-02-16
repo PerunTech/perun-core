@@ -56,7 +56,7 @@ class NotificationsComponent extends React.Component {
 
   onSubmit = (e, url) => {
     const formData = flattenObject(e.formData)
-    const data = JSON.parse(JSON.stringify(formData).replaceAll('%', '%25'))
+    const data = encodeURIComponent(JSON.stringify(formData))
     const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     axios(reqConfig).then((res) => {
       if (res.data) {
@@ -111,8 +111,9 @@ class NotificationsComponent extends React.Component {
   /* simple axios post delete method */
   deleteAxiosPost = () => {
     const { selectedRow } = this.state
-    const restUrl = window.server + '/ReactElements/deleteObject/' + this.props.svSession
-    const reqConfig = { method: 'post', data: selectedRow, url: restUrl, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    const url = window.server + '/ReactElements/deleteObject/' + this.props.svSession
+    const data = encodeURIComponent(JSON.stringify(selectedRow))
+    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     axios(reqConfig).then((res) => {
       if (res.data) {
         const resType = res.data.type
