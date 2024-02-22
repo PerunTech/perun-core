@@ -27,7 +27,7 @@ class ModuleMenu extends React.Component {
 
     this.showHambMenu = this.showHambMenu.bind(this)
     this.setLegacyEdbar = this.setLegacyEdbar.bind(this)
-    this.naitsLegacyEdbar = this.naitsLegacyEdbar.bind(this)
+    this.setLegacyNaits = this.setLegacyNaits.bind(this)
 
     this.routeGsaa = (function (superProps) {
       const params = queryString.parse(superProps.location.search);
@@ -395,7 +395,7 @@ class ModuleMenu extends React.Component {
       if (naitsPlugin.cardDirectAccess) {
         this.goDirectToRoute(naitsPlugin);
       }
-      this.naitsLegacyEdbar(naitsPlugin);
+      this.setLegacyNaits(naitsPlugin);
       const index = data.findIndex(x => x.id === "naits");
       if (index !== undefined) data.splice(index, 1);
     }
@@ -466,7 +466,7 @@ class ModuleMenu extends React.Component {
     });
   }
 
-  naitsLegacyEdbar(plugin) {
+  setLegacyNaits(plugin) {
     return plugin && this.setState({
       cards: {
         ...this.state.cards, [plugin.id]: <a
