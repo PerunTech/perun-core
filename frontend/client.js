@@ -121,6 +121,9 @@ axios.interceptors.response.use(
         case 502:
           alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
           break;
+        case 503:
+          alertUser(true, 'info', 'The server is temporarily down for maintenance', 'Please try again soon')
+          break;
         default:
           return Promise.reject(error);
       }
