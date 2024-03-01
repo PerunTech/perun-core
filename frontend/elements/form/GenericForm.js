@@ -433,14 +433,13 @@ class GenericForm extends React.Component {
 
     if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) &&
       nextProps.formDataLoaded === false) {
-      this.setState({
-        alert: alertUser(
-          true, 'error',
-          this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.load_data_failed`, defaultMessage: `${labelBasePath}.main.forms.load_data_failed` }),
-          nextProps.formTableData,
-          () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-        )
-      })
+      const errorResponse = nextProps.formTableData
+      const title = errorResponse.response?.data?.title || errorResponse
+      const msg = errorResponse.response?.data?.message || ''
+      alertUser(
+        true, 'error', title, msg,
+        () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
+      )
     }
 
     if (this.props.uischema !== nextProps.uischema) {
