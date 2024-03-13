@@ -10,6 +10,7 @@ import TopNavMenu from './TopNavMenu'
 import { alertUser } from '../../elements'
 import { svConfig } from '../../config';
 import { iconManager } from '../../assets/svg/svgHolder'
+import { changeLanguageAndLocale } from '../../client'
 
 // main menu top- tells the Main app parent which function needs to be dispatched
 // or which grid should be shown in the main content
@@ -18,10 +19,12 @@ class MainMenu extends React.Component {
     super(props)
     this.state = {
       navbarImgJson: [],
+      languageOptions: [],
       stateTooltip: this.props.stateTooltip,
       isActive: false,
       createdUrl: false,
-      currentUser: ''
+      currentUser: '',
+      activeLanguage: ''
     }
     this.hashHistory = createHashHistory()
     this.unmountRegister = this.unmountRegister.bind(this)
@@ -30,6 +33,7 @@ class MainMenu extends React.Component {
 
   componentDidMount() {
     this.getNavbarImgJson()
+    this.getLanguage()
     this.getCurrentUser()
   }
 
@@ -37,6 +41,13 @@ class MainMenu extends React.Component {
     const url = `${window.location.origin}${window.assets}/json/config/NavbarImg.json`
     fetch(url).then(res => res.json()).then(json => {
       this.setState({ navbarImgJson: json })
+    }).catch(err => { throw err })
+  }
+
+  getLanguage() {
+    const url = `${window.location.origin}${window.assets}/json/config/LanguageOptions.json`
+    fetch(url).then(res => res.json()).then(json => {
+      this.setState({ languageOptions: json })
     }).catch(err => { throw err })
   }
 
@@ -77,6 +88,15 @@ class MainMenu extends React.Component {
     document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
       id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
     });
+  }
+
+  getLocale = () => {
+    const locale = cookies.getCookie('defaultLocale')
+    this.setState({ activeLanguage: locale })
+  }
+
+  changeLang = (locale, lang) => {
+    changeLanguageAndLocale(locale, lang)
   }
 
   render() {
@@ -123,6 +143,15 @@ class MainMenu extends React.Component {
           </div>
           <div className='identificationScreen'>
             <p id='identificationScreen'></p>
+          </div>
+          <div className='lang-container'>
+            {this.state.languageOptions?.length > 0 && this.state.languageOptions.map((element) => {
+              return (<p onClick={() => {
+                this.changeLang(element.locale, element.language)
+                this.getLocale()
+              }} className={element.className ? `${element.className} ${this.state.activeLanguage === element.language && 'active-language-internal'}` : 'header-item'}>{element.label}</p>
+              )
+            }) || <></>}
           </div>
           <div className='nav-flex' style={{ marginRight: '5px' }}>
             <div className='btn btn_background custom-icon-width' style={{ width: '50px' }} data-toggle='tooltip' data-placement='right' title='Current user'>
