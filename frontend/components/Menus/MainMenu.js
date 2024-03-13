@@ -11,7 +11,7 @@ import { alertUser } from '../../elements'
 import { svConfig } from '../../config';
 import { iconManager } from '../../assets/svg/svgHolder'
 import { changeLanguageAndLocale } from '../../client'
-
+import * as cookies from '../../functions/cookies'
 // main menu top- tells the Main app parent which function needs to be dispatched
 // or which grid should be shown in the main content
 class MainMenu extends React.Component {
@@ -33,7 +33,7 @@ class MainMenu extends React.Component {
 
   componentDidMount() {
     this.getNavbarImgJson()
-    this.getLanguage()
+    this.getLanguageOptions()
     this.getCurrentUser()
   }
 
@@ -44,7 +44,7 @@ class MainMenu extends React.Component {
     }).catch(err => { throw err })
   }
 
-  getLanguage() {
+  getLanguageOptions() {
     const url = `${window.location.origin}${window.assets}/json/config/LanguageOptions.json`
     fetch(url).then(res => res.json()).then(json => {
       this.setState({ languageOptions: json })
