@@ -147,10 +147,17 @@ class MainMenu extends React.Component {
           </div>
           <div className='lang-container'>
             {this.state.languageOptions?.length > 0 && this.state.languageOptions.map((element) => {
-              return (<p onClick={() => {
-                this.changeLang(element.locale, element.language)
-                this.getLocale()
-              }} className={element.className ? `${element.className} ${this.state.activeLanguage === element.language && 'active-language-internal'}` : 'header-item'}>{element.label}</p>
+              return (
+                <p
+                  key={element.id}
+                  id={element.id}
+                  onClick={() => {
+                    this.changeLang(element.locale, element.language)
+                    this.getLocale()
+                  }}
+                  className={element.className ? `${element.className} ${this.state.activeLanguage === element.language && 'active-language-internal'}` : 'header-item'}
+                >{element.label}
+                </p>
               )
             }) || <></>}
           </div>
