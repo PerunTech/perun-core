@@ -34,6 +34,7 @@ class MainMenu extends React.Component {
   componentDidMount() {
     this.getNavbarImgJson()
     this.getLanguageOptions()
+    this.getLocale()
     this.getCurrentUser()
   }
 
