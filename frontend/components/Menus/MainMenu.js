@@ -32,11 +32,11 @@ class MainMenu extends React.Component {
   }
 
   componentDidMount() {
+    this.switchServerLanguage(cookies.getCookie('defaultLocale'))
     this.getNavbarImgJson()
     this.getLanguageOptions()
     this.getLocale()
     this.getCurrentUser()
-    this.switchServerLanguage(cookies.getCookie('defaultLocale'))
   }
 
   getNavbarImgJson() {
@@ -98,13 +98,15 @@ class MainMenu extends React.Component {
   }
 
   changeLang = (locale, lang) => {
-    this.switchServerLanguage(lang)
-    changeLanguageAndLocale(locale, lang)
+    this.switchServerLanguage(lang, locale)
   }
 
-  switchServerLanguage = (lang) => {
+  switchServerLanguage = (lang, locale) => {
     let url = window.server + `/SvSecurity/i18n/${lang}/perun/${this.props.token}`
     axios.get(url).then(_res => {
+      if (locale) {
+        changeLanguageAndLocale(locale, lang)
+      }
     }).catch(err => {
       console.error(err)
     })
