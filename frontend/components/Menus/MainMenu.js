@@ -46,7 +46,7 @@ class MainMenu extends React.Component {
   }
 
   getLanguageOptions() {
-    const url = `http://192.168.100.110:9096/mdfr-assets/json/config/LanguageOptions.json`
+    const url = `${window.location.origin}${window.assets}/json/config/LanguageOptions.json`
     fetch(url).then(res => res.json()).then(json => {
       this.setState({ languageOptions: json })
     }).catch(err => { throw err })
@@ -97,12 +97,12 @@ class MainMenu extends React.Component {
   }
 
   changeLang = (locale, lang) => {
-    this.changeBackendLang(lang)
+    this.swtichServerLanguage(lang)
     changeLanguageAndLocale(locale, lang)
 
   }
 
-  changeBackendLang = (lang) => {
+  swtichServerLanguage = (lang) => {
     let url = window.server + `/SvSecurity/i18n/${lang}/perun/${this.props.token}`
     axios.get(url).then(res => {
     }).catch(err => {
