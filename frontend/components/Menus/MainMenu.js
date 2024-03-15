@@ -99,7 +99,6 @@ class MainMenu extends React.Component {
   changeLang = (locale, lang) => {
     this.swtichServerLanguage(lang)
     changeLanguageAndLocale(locale, lang)
-
   }
 
   swtichServerLanguage = (lang) => {
