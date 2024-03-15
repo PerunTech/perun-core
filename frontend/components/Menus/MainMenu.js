@@ -97,11 +97,11 @@ class MainMenu extends React.Component {
   }
 
   changeLang = (locale, lang) => {
-    this.swtichServerLanguage(lang)
+    this.switchServerLanguage(lang)
     changeLanguageAndLocale(locale, lang)
   }
 
-  swtichServerLanguage = (lang) => {
+  switchServerLanguage = (lang) => {
     let url = window.server + `/SvSecurity/i18n/${lang}/perun/${this.props.token}`
     axios.get(url).then(_res => {
     }).catch(err => {
