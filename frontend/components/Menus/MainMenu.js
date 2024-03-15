@@ -104,7 +104,7 @@ class MainMenu extends React.Component {
 
   swtichServerLanguage = (lang) => {
     let url = window.server + `/SvSecurity/i18n/${lang}/perun/${this.props.token}`
-    axios.get(url).then(res => {
+    axios.get(url).then(_res => {
     }).catch(err => {
       console.error(err)
     })
