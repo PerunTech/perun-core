@@ -1,6 +1,15 @@
 import axios from 'axios';
 import a from '../actionNames.json';
 import { svSessionRegxp } from '..';
+import * as cookies from '../../functions/cookies'
+
+const switchServerLanguage = (lang, token) => {
+  let url = window.server + `/SvSecurity/i18n/${lang}/perun/${token}`
+  axios.get(url).then(_res => {
+  }).catch(err => {
+    console.error(err)
+  })
+}
 
 export function loginUser(restUrl, method, formData, customData) {
   return function (dispatch) {
@@ -19,6 +28,7 @@ export function loginUser(restUrl, method, formData, customData) {
           // success, session returned
           // dispatch({ type: a.loginFulfilled, payload: response.data })
           dispatch({ type: a.loginIacs, payload: response.data })
+          switchServerLanguage(cookies.getCookie('defaultLocale'), response.data.data.token)
         } else {
           dispatch({ type: a.loginRejected, payload: response.data })
         }
