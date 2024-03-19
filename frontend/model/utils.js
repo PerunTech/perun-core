@@ -1,7 +1,15 @@
+import axios from 'axios';
+
+export const switchServerLanguage = (lang, token) => {
+  let url = window.server + `/SvSecurity/i18n/${lang}/perun/${token}`
+  axios.get(url).then(_res => {
+  }).catch(err => {
+    console.error(err)
+  })
+}
+
 // match svSession to a valid 36 character session
 export const svSessionRegxp = value => /^([a-zA-Z0-9_-]){36}$/.test(value);
-
-import axios from 'axios';
 
 // flatten nested json for farmer data
 export function flattenJson(data) {
@@ -30,14 +38,6 @@ export function flattenJson(data) {
   recurse(data, '')
   return result
 }
-export const switchServerLanguage = (lang, token) => {
-  let url = window.server + `/SvSecurity/i18n/${lang}/perun/${token}`
-  axios.get(url).then(_res => {
-  }).catch(err => {
-    console.error(err)
-  })
-}
-
 
 export function ConvertObjectKeysToUpperCase(obj) {
   var output = {}
