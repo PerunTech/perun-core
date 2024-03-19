@@ -1,10 +1,12 @@
 // match svSession to a valid 36 character session
 export const svSessionRegxp = value => /^([a-zA-Z0-9_-]){36}$/.test(value);
 
+import axios from 'axios';
+
 // flatten nested json for farmer data
-export function flattenJson (data) {
+export function flattenJson(data) {
   var result = {}
-  function recurse (num, prop) {
+  function recurse(num, prop) {
     if (Object(num) !== num) {
       result[prop] = num
     } else if (Array.isArray(num)) {
@@ -28,8 +30,16 @@ export function flattenJson (data) {
   recurse(data, '')
   return result
 }
+export const switchServerLanguage = (lang, token) => {
+  let url = window.server + `/SvSecurity/i18n/${lang}/perun/${token}`
+  axios.get(url).then(_res => {
+  }).catch(err => {
+    console.error(err)
+  })
+}
 
-export function ConvertObjectKeysToUpperCase (obj) {
+
+export function ConvertObjectKeysToUpperCase(obj) {
   var output = {}
   for (const i in obj) {
     if (Object.prototype.toString.apply(obj[i]) === '[object Object]') {
@@ -44,20 +54,20 @@ export function ConvertObjectKeysToUpperCase (obj) {
   return output
 }
 
-export function replaceSpecialCharsInJson (value) {
+export function replaceSpecialCharsInJson(value) {
   const replaceSlash = ',P!_1-'
   const replaceBackSlash = ',P!_2-'
   value = value.split('/').join(replaceSlash)
   return value.split('\\').join(replaceBackSlash)
 }
 
-export function goBack () {
+export function goBack() {
   window.history.back()
 }
 
 /* Recursive function which finds an unidentified property in a nested object and changes it with the given value.
 Returns the new object if such value is found */
-export function changeUndefinedObjectProperty (property, value, object) {
+export function changeUndefinedObjectProperty(property, value, object) {
   object.constructor === Object && Object.keys(object).forEach(key => {
     if (key === property && object[key] === undefined) {
       object[key] = value
@@ -70,7 +80,7 @@ export function changeUndefinedObjectProperty (property, value, object) {
 
 /* Recursive function which finds a key with a given value in a nested object.
 Returns the object that contains the key. Returns the core object if no such key-val combo is found. */
-export function findObjInJSONbyKey (property, value, object) {
+export function findObjInJSONbyKey(property, value, object) {
   object && object.constructor === Object && Object.keys(object).forEach(key => {
     if (key === property && object[key] === value) {
       return object
@@ -82,7 +92,7 @@ export function findObjInJSONbyKey (property, value, object) {
 
 // Clone object sice mutating deep properties mutates original object
 // Object.assign() does not work for deep properties
-export function cloneObject (obj) {
+export function cloneObject(obj) {
   // in case of primitives
   if (obj === null || typeof obj !== "object") {
     return obj;
@@ -112,7 +122,7 @@ export function cloneObject (obj) {
   return clonedObj;
 }
 
-export function isValidArray (array, minNumberOfElements) {
+export function isValidArray(array, minNumberOfElements) {
   /** returns true if the variable passsed as the first parameter is an array and
   there are at least X number of elements in the array, where X is the second function parameter
   minNumberOfElements is an optional parameter if the function should check if the array
@@ -124,11 +134,11 @@ export function isValidArray (array, minNumberOfElements) {
   }
 }
 
-export function isValidObject (object, minNumberOfKeys) {
-/** returns true if the variable passsed as the first parameter is an object and
-  there are at least X number of keys in the object, where X is the second function parameter
-  minNumberOfKeys is an optional parameter if the function should check if the object
-  contains any number of elements */
+export function isValidObject(object, minNumberOfKeys) {
+  /** returns true if the variable passsed as the first parameter is an object and
+    there are at least X number of keys in the object, where X is the second function parameter
+    minNumberOfKeys is an optional parameter if the function should check if the object
+    contains any number of elements */
   if (minNumberOfKeys) {
     return (object && object.constructor === Object && Object.keys(object).length >= minNumberOfKeys)
   } else {
@@ -145,7 +155,7 @@ export function isValidObject (object, minNumberOfKeys) {
  * @param {any} firstValue The first value to be checked & compared
  * @param {any} secondValue The second value to be checked & compared
  */
- export function strcmp (firstValue, secondValue) {
+export function strcmp(firstValue, secondValue) {
   // First, check if both of the values are strings
   if ((typeof firstValue === 'string' && typeof secondValue === 'string') || (firstValue instanceof String && secondValue instanceof String)) {
     // If both of the values are strings, compare them & return the result as a boolean value
@@ -159,7 +169,7 @@ export function isValidObject (object, minNumberOfKeys) {
  * Flattens a nested object
  * @param  {object} obj The object that needs to be flattened
  */
- export function flattenObject (obj) {
+export function flattenObject(obj) {
   const flattened = {}
   Object.keys(obj).forEach((key) => {
     if (strcmp(typeof obj[key], 'object') && obj[key] !== null) {
@@ -171,7 +181,7 @@ export function isValidObject (object, minNumberOfKeys) {
   return flattened
 }
 
-export function errTolastError (state, action) {
+export function errTolastError(state, action) {
   // replace action type name from / to _ so it can get the name of the global var
   const actionTypeName = action.type.replace('/', '_').split('_ERROR')[0]
   // get current redux key so it can be called
@@ -179,10 +189,10 @@ export function errTolastError (state, action) {
   // call error and store to let
   const currentError = action.payload[currentReduxKey].message + ' for ' + currentReduxKey
   // return transformed data and set it to lastError, restore previous value if error
-  return {...state, lastError: currentError, [currentReduxKey]: window[actionTypeName]}
+  return { ...state, lastError: currentError, [currentReduxKey]: window[actionTypeName] }
 }
 
-export function prevReduxValueIfError (state, action) {
+export function prevReduxValueIfError(state, action) {
   // replace action type name from / to _ so it can be declared as a global var
   const actionTypeName = action.type.replace('/', '_')
   // get previous key redux name
