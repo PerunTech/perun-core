@@ -32,7 +32,6 @@ class MainMenu extends React.Component {
   }
 
   componentDidMount() {
-    this.switchServerLanguage(cookies.getCookie('defaultLocale'))
     this.getNavbarImgJson()
     this.getLanguageOptions()
     this.getLocale()
