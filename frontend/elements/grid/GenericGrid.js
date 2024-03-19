@@ -970,7 +970,7 @@ class GenericGrid extends React.Component {
                   </button>
                   }
                   {this.state.refreshData &&
-                    <span id='refreshData' className='refreshData' title="Освежи податоци" onClick={this.refreshData}>
+                    <span id='refreshData' className='refreshData' onClick={this.refreshData}>
                       {/* {this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.refreshData`, defaultMessage: `${labelBasePath}.main.grids.refreshData` })} */}
                       {iconManager.getIcon('refreshGrid')}
                     </span>
