@@ -21,28 +21,21 @@ const OrganizationalUnitModal = (props, context) => {
     );
   };
 
-  //save/submit function that creates sap-application
   const saveApp = (row) => {
     let objecidUser = row['SVAROG_USERS.OBJECT_ID']
     let url = window.server + `/WsAdminConsole/get/assignUserToOU/sid/${props.svSession}/objectIdOU/${props.objectIdOU}/objecidUser/${objecidUser}`
     axios.get(url).then((res) => {
-      if (res.data.type == "SUCCESS") {
-        alertUser(true, 'success', 'Успешно додадовте корисник.')
-        GridManager.reloadGridData(`USER_UNIT_GRID_${props.objectIdOU}`);
-      } else {
-        alertUser(true, res.data.type.toLowerCase(), res.data.title, res.data.message)
+      const resType = res.data.type?.toLowerCase() || 'info'
+      const title = res.data.title || ''
+      const msg = res.data.message || ''
+      alertUser(true, resType, title, msg)
+      if (resType === "success") {
+        GridManager.reloadGridData(`USER_UNIT_GRID_${props.objectIdOU}`)
       }
-    }).catch(function (error) {
-      if (error) {
-        if (error.data) {
-          alertUser(
-            true,
-            error.data.type.toLwindow.serverowerCase(),
-            error.data.title,
-            error.data.message
-          );
-        }
-      }
+    }).catch((error) => {
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     });
   };
 
