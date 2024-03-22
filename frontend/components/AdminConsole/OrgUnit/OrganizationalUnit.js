@@ -80,6 +80,7 @@ const OrganizationalUnit = (props, context) => {
     );
     setGridUser(grid);
   };
+
   const onRowClick = (_id, _rowIdx, row) => {
     let objectIdOU = row["SVAROG_ORG_UNITS.OBJECT_ID"];
     setObj(objectIdOU);
@@ -95,6 +96,7 @@ const OrganizationalUnit = (props, context) => {
   const showUserModal = () => {
     setShowUser(!showUser);
   };
+
   const closeUserModal = () => {
     setShowUser(false);
   };
@@ -109,6 +111,7 @@ const OrganizationalUnit = (props, context) => {
     setRowUser(objecidUser);
     generateForm(objecidUser);
   };
+
   const generateForm = (objecidUser) => {
     const { svSession } = props;
     let form = (
@@ -125,41 +128,25 @@ const OrganizationalUnit = (props, context) => {
     return setForm(form);
   };
 
-  const removeUserFun = () => {
+  const removeUserFromOrgUnit = () => {
     const { svSession } = props;
-    console.log(currentObj + " " + rowUser);
-    let url =
-      window.server +
-      `/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${currentObj}/objecidUser/${rowUser}`;
-    axios
-      .get(url)
-      .then((res) => {
-        if (res.data.type == "SUCCESS") {
-          alertUser(true, "success", context.intl.formatMessage({ id: 'perun.admin_console.success_remove_user', defaultMessage: 'perun.admin_console.success_remove_user' }));
-          GridManager.reloadGridData(`USER_UNIT_GRID_${currentObj}`);
-          setShowUserForm(false)
-        } else {
-          alertUser(
-            true,
-            res.data.type.toLowerCase(),
-            res.data.title,
-            res.data.message
-          );
-        }
-      })
-      .catch(function (error) {
-        if (error) {
-          if (error.data) {
-            alertUser(
-              true,
-              error.data.type.toLwindow.serverowerCase(),
-              error.data.title,
-              error.data.message
-            );
-          }
-        }
-      });
+    let url = `${window.server}/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${currentObj}/objecidUser/${rowUser}`;
+    axios.get(url).then((res) => {
+      const resType = res.data.type?.toLowerCase() || 'info'
+      const title = res.data.title || ''
+      const msg = res.data.message || ''
+      alertUser(true, resType, title, msg)
+      if (resType === 'success') {
+        GridManager.reloadGridData(`USER_UNIT_GRID_${currentObj}`);
+        setShowUserForm(false)
+      }
+    }).catch((error) => {
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    });
   };
+
   return (
     <React.Fragment>
       <div className='admin-console-org-unit'>
@@ -187,7 +174,6 @@ const OrganizationalUnit = (props, context) => {
         closeUserModal={closeUserModal}
         objectIdOU={currentObj}
       />
-
       <Modal
         className='admin-console-unit-modal'
         show={userForm}
@@ -203,7 +189,7 @@ const OrganizationalUnit = (props, context) => {
           <div className='admin-console-remove-user-con'>
             <button
               className='admin-console-remove-user-btn'
-              onClick={() => removeUserFun()}
+              onClick={() => removeUserFromOrgUnit()}
             >
               {context.intl.formatMessage({ id: 'perun.admin_console.remove', defaultMessage: 'perun.admin_console.remove' })}
             </button>
