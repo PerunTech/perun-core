@@ -7,6 +7,7 @@ import { ComponentManager, GenericGrid, PropTypes } from "../../../client";
 import { orgSearchSchema } from "../utils/orgSearchSchema";
 import validator from '@rjsf/validator-ajv8';
 let gridId = "USER_INTERN_GRID";
+
 const OrgSearch = (props, context) => {
   const [grid, setGrid] = useState(undefined);
   const [loading, setLoading] = useState(false);
@@ -65,35 +66,31 @@ const OrgSearch = (props, context) => {
     }
     data.append("multipleFilterData", JSON.stringify(multipleFilterData));
     data.append("basicData", JSON.stringify(basicData));
-    const reqConfig = {
-      method: "post",
-      data,
-      url,
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    };
-    axios(reqConfig)
-      .then((res) => {
-        if (res.data !== "empty") {
-          let grid = (
-            <GenericGrid
-              gridType={"SEARCH_GRID_DATA"}
-              key={gridId}
-              id={gridId}
-              configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_USERS`}
-              dataTableName={res.data}
-              defaultHeight={false}
-              heightRatio={0.5}
-              minHeight={400}
-              refreshData={true}
-              onRowClickFunct={props.handleRowClick}
-            />
-          );
-          return setGrid(grid), setLoading(false)
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    const reqConfig = { method: "post", data, url, headers: { "Content-Type": "application/x-www-form-urlencoded" } };
+    axios(reqConfig).then((res) => {
+      if (res.data !== "empty") {
+        let grid = (
+          <GenericGrid
+            gridType={"SEARCH_GRID_DATA"}
+            key={gridId}
+            id={gridId}
+            configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_USERS`}
+            dataTableName={res.data}
+            defaultHeight={false}
+            heightRatio={0.5}
+            minHeight={400}
+            refreshData={true}
+            onRowClickFunct={props.handleRowClick}
+          />
+        );
+        return setGrid(grid), setLoading(false)
+      }
+    }).catch((error) => {
+      console.error(error);
+      const title = error.response?.data?.title || error
+      const msg = error.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    });
   };
 
   const generateForm = () => {

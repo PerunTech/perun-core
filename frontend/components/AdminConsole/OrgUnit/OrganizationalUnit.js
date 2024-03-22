@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {
-  ComponentManager,
-  ExportableGrid,
-  GridManager,
-  GenericForm,
-  PropTypes
-} from "../../../client";
+import { ComponentManager, ExportableGrid, GridManager, GenericForm, PropTypes } from "../../../client";
 import { connect } from "react-redux";
+import axios from "axios";
 import OrganizationalUnitModal from "./OrganizationalUnitModal";
 import { alertUser, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
-import axios from "axios";
-
 let gridId;
 let gridId2;
 let pastObjOU = "";
+
 const OrganizationalUnit = (props, context) => {
   const [grid, setGrid] = useState(undefined);
   const [gridUser, setGridUser] = useState(undefined);
@@ -23,6 +17,7 @@ const OrganizationalUnit = (props, context) => {
   const [userForm, setShowUserForm] = useState(false);
   const [rowUser, setRowUser] = useState("");
   const [form, setForm] = useState(undefined);
+
   useEffect(() => {
     generateOrgUnitGrid();
 
@@ -85,9 +80,7 @@ const OrganizationalUnit = (props, context) => {
     let objectIdOU = row["SVAROG_ORG_UNITS.OBJECT_ID"];
     setObj(objectIdOU);
     if (pastObjOU != objectIdOU) {
-      ComponentManager.cleanComponentReducerState(
-        `USER_UNIT_GRID_${pastObjOU}`
-      );
+      ComponentManager.cleanComponentReducerState(`USER_UNIT_GRID_${pastObjOU}`);
     }
     setGridUser(undefined);
     generateUserGrid(objectIdOU);
