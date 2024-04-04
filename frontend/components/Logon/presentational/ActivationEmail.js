@@ -74,8 +74,8 @@ const ActivationEmail = (props, context) => {
           )}
           <button id='activation_submit' type='submit' className='logonBtns'>
             <span>{labels.formatMessage({
-              id: `${config.labelBasePath}.login.activation_link`,
-              defaultMessage: `${config.labelBasePath}.login.activation_link`
+              id: `${config.labelBasePath}.login.activation_link_submit`,
+              defaultMessage: `${config.labelBasePath}.login.activation_link_submit`
             })}</span>
           </button>
           <div style={{ 'marginTop': '0.5rem' }}>
