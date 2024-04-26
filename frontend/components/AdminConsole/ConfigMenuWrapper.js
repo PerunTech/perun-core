@@ -1,9 +1,10 @@
 import React from 'react';
-import { ReactBootstrap, alertUser, ComponentManager } from '../../elements';
+import { ReactBootstrap, alertUser, ComponentManager, GridManager } from '../../elements';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import JsonView from 'react-json-view';
 import { isJSON } from '../../functions/utils';
+import axios from 'axios';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
 const CofigMenuWrapper = (props, context) => {
@@ -34,6 +35,8 @@ const CofigMenuWrapper = (props, context) => {
 
     const changeField = () => {
         const { formid } = props
+        ComponentManager.setStateForComponent(formid, "addSaveFunction", addSaveFunction);
+        props.formInstance.setState({ addSaveFunction: addSaveFunction })
         const jsonSchema = ComponentManager.getStateForComponent(
             formid,
             "formData"
@@ -42,18 +45,58 @@ const CofigMenuWrapper = (props, context) => {
             formid,
             "uischema"
         );
-
-
         if (jsonSchema) {
-            uiSchema['MENU_CONF'] = { "ui:readonly": true }
-            delete jsonSchema.properties['MENU_CONF'].format
-            ComponentManager.setStateForComponent(formid, "formData", jsonSchema);
-            props.formInstance.setState({ formData: jsonSchema });
-            ComponentManager.setStateForComponent(formid, "uischema", uiSchema);
-            props.formInstance.setState({ uischema: uiSchema });
-            setRender(true)
+            if (uiSchema) {
+                uiSchema['MENU_CONF'] = { "ui:readonly": true }
+                delete jsonSchema.properties['MENU_CONF'].format
+                ComponentManager.setStateForComponent(formid, "formData", jsonSchema);
+                props.formInstance.setState({ formData: jsonSchema });
+                ComponentManager.setStateForComponent(formid, "uischema", uiSchema);
+                props.formInstance.setState({ uischema: uiSchema });
+                setRender(true)
+            }
         }
     }
+
+    const addSaveFunction = () => {
+        const { svSession } = props;
+        const { formid } = props
+        const formData = ComponentManager.getStateForComponent(
+            formid,
+            "formTableData"
+        );
+        let url =
+            window.server +
+            `/ReactElements/createTableRecordFormData/${svSession}/SVAROG_PERUN_PLUGIN/0`;
+        axios({
+            method: "post",
+            data: encodeURIComponent(JSON.stringify(formData)),
+            url,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        })
+            .then((res) => {
+                if (res.data) {
+                    const resType = res.data.type.toLowerCase()
+                    const title = res.data.title || ''
+                    const msg = res.data.message || ''
+                    alertUser(true, resType, title, msg, () => {
+                        ComponentManager.setStateForComponent(`SVAROG_PERUN_PLUGIN_FORM`, null, {
+                            saveExecuted: false,
+                        });
+                        GridManager.reloadGridData('SVAROG_PERUN_PLUGIN_GRID');
+                    })
+                }
+            })
+            .catch(err => {
+                console.error(err)
+                const title = err.response?.data?.title || err
+                const msg = err.response?.data?.message || ''
+                alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`SVAROG_PERUN_PLUGIN_FORM`, null, {
+                    saveExecuted: false,
+                }));
+
+            });
+    };
 
     const openJsonEditor = () => {
         const { formid } = props
@@ -71,16 +114,17 @@ const CofigMenuWrapper = (props, context) => {
     const jsonManipulation = (obj) => {
         setJson(obj['updated_src'])
     }
-    const changeJson = () => {
+    const changeJson = (editedJson) => {
         const { formid } = props
         const formData = ComponentManager.getStateForComponent(
             formid,
             "formTableData"
         );
-        formData['MENU_CONF'] = JSON.stringify(editedJson)
-        ComponentManager.setStateForComponent(formid, "formTableData", formData);
-        props.formInstance.setState({ formTableData: formData });
-        alertUser(true, "info", "perun.admin_console.change_json")
+        alertUser(true, "info", "perun.admin_console.change_json", "", () => {
+            formData['MENU_CONF'] = JSON.stringify(editedJson)
+            ComponentManager.setStateForComponent(formid, "formTableData", formData);
+            props.formInstance.setState({ formTableData: formData });
+        })
     }
     return (
         <>
@@ -102,7 +146,7 @@ const CofigMenuWrapper = (props, context) => {
                         <div>
                             <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} />
                             <div>
-                                <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson() }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
+                                <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson(editedJson) }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
                             </div>
                         </div>
                     </Modal.Body>
