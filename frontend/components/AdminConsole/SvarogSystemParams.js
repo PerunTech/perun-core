@@ -33,15 +33,13 @@ class SvarogSystemParams extends React.Component {
       customButton={() => this.addSysParam('add')}
       customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
       toggleCustomButton={true}
-      additionalButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.change_delete', defaultMessage: 'perun.admin_console.change_delete' })}
-      additionalButton={() => this.editSysParam('edit')}
       heightRatio={0.75}
       refreshData={true}
     />
     ComponentManager.setStateForComponent(tableName + '_GRID', null, {
       onRowClickFunct: this.onRowClickFn,
       customButton: () => this.addSysParam('add'),
-      additionalButton: () => this.editSysParam('edit')
+
     })
     this.setState({ showGrid: grid })
   }
@@ -185,7 +183,9 @@ class SvarogSystemParams extends React.Component {
   /* on rowClick callback from grid, sets objId */
   onRowClickFn = (_id, _idx, row) => {
     let objectId = row[`${tableName}.OBJECT_ID`]
-    this.setState({ objId: objectId })
+    this.setState({ objId: objectId }, () => {
+      this.editSysParam('edit');
+    });
   }
 
   render() {
