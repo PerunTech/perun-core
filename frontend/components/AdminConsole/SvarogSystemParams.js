@@ -65,7 +65,7 @@ class SvarogSystemParams extends React.Component {
             modalTitle = this.context.intl.formatMessage({ id: 'perun.admin_console.change_delete', defaultMessage: 'perun.admin_console.change_delete' })
           }
         }
-
+          break;
       }
 
       let form = <GenericForm
