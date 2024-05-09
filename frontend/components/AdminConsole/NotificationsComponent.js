@@ -34,7 +34,7 @@ class NotificationsComponent extends React.Component {
       key={tableName + '_GRID'}
       id={tableName + '_GRID'}
       configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getTableData/%session/' + tableName + '/100000'}
+      dataTableName={'/ReactElements/getTableData/%session/' + tableName + '/0'}
       onRowClickFunct={this.onRowClickFn}
       customButton={() => this.generateForm()}
       customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}

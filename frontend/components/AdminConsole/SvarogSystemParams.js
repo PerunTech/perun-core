@@ -28,7 +28,7 @@ class SvarogSystemParams extends React.Component {
       key={tableName + '_GRID'}
       id={tableName + '_GRID'}
       configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getObjectsByParentId/%session/0/' + tableName + '/100000'}
+      dataTableName={'/ReactElements/getObjectsByParentId/%session/0/' + tableName + '/0'}
       onRowClickFunct={this.onRowClickFn}
       customButton={() => this.addSysParam('add')}
       customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}

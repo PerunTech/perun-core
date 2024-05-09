@@ -35,7 +35,7 @@ class GeoLayerTypes extends React.Component {
         key={gridId}
         id={gridId}
         configTableName={`/ReactElements/getTableFieldList/${session}/${tableName}`}
-        dataTableName={`/ReactElements/getTableData/${session}/${tableName}/100000`}
+        dataTableName={`/ReactElements/getTableData/${session}/${tableName}/0`}
         onRowClickFunct={this.onRowClick}
         toggleCustomButton
         customButton={this.showModal}
