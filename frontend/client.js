@@ -96,7 +96,6 @@ axios.interceptors.response.use(
       }
       if (res.data && res.data.type === 'EXCEPTION') {
         alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
-          createHashHistory().push('/home/login')
           // location.reload();
           return res;
         })
