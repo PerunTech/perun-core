@@ -36,7 +36,7 @@ const PerunPluginTable = (props, context) => {
                 id={gridId}
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
                 dataTableName={
-                    `/ReactElements/getTableData/${props.svSession}/${tableName}/100000`}
+                    `/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
                 onRowClickFunct={handleRowClick}
                 refreshData={true}
                 toggleCustomButton={true}

@@ -26,7 +26,7 @@ export default class GroupUsersGrid extends React.Component {
       id={groupUsersGridId}
       gridType={'READ_URL'}
       configTableName={`/ReactElements/getTableFieldList/%session/SVAROG_USER_GROUPS`}
-      dataTableName={`/ReactElements/getTableData/%session/SVAROG_USER_GROUPS/100000`}
+      dataTableName={`/ReactElements/getTableData/%session/SVAROG_USER_GROUPS/0`}
       onRowClickFunct={this.onRowClick}
       heightRatio={0.75}
       refreshData={true}

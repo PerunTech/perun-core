@@ -26,7 +26,7 @@ class SystemConfLogs extends React.Component {
       key={tableName}
       id={tableName}
       configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getFullTableData/%session/' + tableName + '/100000/true'}
+      dataTableName={'/ReactElements/getFullTableData/%session/' + tableName + '/0/true'}
       onRowClickFunct={this.onRowClick}
       heightRatio={0.75}
       refreshData={true}
