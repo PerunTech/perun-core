@@ -28,7 +28,7 @@ class SvarogAclGrid extends React.Component {
       key={tableName}
       id={tableName}
       configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getTableData/%session/' + tableName + '/100000'}
+      dataTableName={'/ReactElements/getTableData/%session/' + tableName + '/0'}
       onRowClickFunct={this.onRowClick}
       heightRatio={0.75}
       refreshData={true}

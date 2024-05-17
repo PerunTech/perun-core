@@ -26,20 +26,17 @@ export default class GroupUsersGrid extends React.Component {
       id={groupUsersGridId}
       gridType={'READ_URL'}
       configTableName={`/ReactElements/getTableFieldList/%session/SVAROG_USER_GROUPS`}
-      dataTableName={`/ReactElements/getTableData/%session/SVAROG_USER_GROUPS/100000`}
+      dataTableName={`/ReactElements/getTableData/%session/SVAROG_USER_GROUPS/0`}
       onRowClickFunct={this.onRowClick}
       heightRatio={0.75}
       refreshData={true}
       customButton={this.showUserGroupsFunc}
       customButtonLabel={this.context.intl.formatMessage({ id: 'perun.adminConsole.show_group_details', defaultMessage: 'perun.adminConsole.show_group_details' })}
       toggleCustomButton={true}
-      additionalButton={this.editUsersGroupFunc}
-      additionalButtonLabel={this.context.intl.formatMessage({ id: 'perun.generalLabel.edit', defaultMessage: 'perun.generalLabel.edit' })}
     />
     ComponentManager.setStateForComponent(groupUsersGridId, null, {
       onRowClickFunct: this.onRowClick,
-      customButton: this.showUserGroupsFunc,
-      additionalButton: this.editUsersGroupFunc
+      customButton: this.showUserGroupsFunc
     })
 
     this.setState({
@@ -70,7 +67,9 @@ export default class GroupUsersGrid extends React.Component {
   onRowClick(gridId, rowId, row) {
     const selectedGroupName = row['SVAROG_USER_GROUPS.GROUP_NAME']
     const selectedGroupObjId = row['SVAROG_USER_GROUPS.OBJECT_ID']
-    this.setState({ objId: selectedGroupObjId, groupName: selectedGroupName })
+    this.setState({ objId: selectedGroupObjId, groupName: selectedGroupName }, () => {
+      this.editUsersGroupFunc();
+    });
   }
 
   render() {
