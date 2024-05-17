@@ -1,6 +1,6 @@
 import React from 'react'
 import modalStyles from './RuleEngineModalStyles.module.css'
-
+import PropTypes from 'prop-types'
 const getRuleEngineTransition = (result) => {
   let transitionResult
   try {
@@ -30,9 +30,9 @@ const getRuleEngineActions = (result) => {
     const subStatus = subTitleObject.RuleStatus
     let text
     if (subStatus) {
-      text = 'Успешно -'
+      text = `${props.context.intl.formatMessage({ id: `${config.labelBasePath}.main.forms.successfully`, defaultMessage: `${config.labelBasePath}.main.forms.successfully` })}`
     } else {
-      text = 'Неуспешно -'
+      text = `${props.context.intl.formatMessage({ id: `${config.labelBasePath}.main.forms.unsuccessfully`, defaultMessage: `${config.labelBasePath}.main.forms.unsuccessfully` })}`
     }
     actionResults.push(<div id='ruleInfoSubtitle' key='ruleInfoSubtitle' className={modalStyles['sub-title']}>{`${text} ${subTitle}`}</div>)
     if (actionsArray.constructor === Array && actionsArray.length > 0) {
@@ -61,7 +61,7 @@ const getRuleEngineActions = (result) => {
 
 const RuleEngineModal = (props) => {
   return (
-    <div id='ruleInfoModal' className='modal' style={{display: 'block', 'zIndex': '8000'}}>
+    <div id='ruleInfoModal' className='modal' style={{ display: 'block', 'zIndex': '8000' }}>
       <div id='ruleInfoModalContent' className={`modal-content ${modalStyles['rule-engine-content']}`}>
         <div id='ruleInfoModalHeader' className={`modal-header ${modalStyles['rule-engine-header']}`}>
           <h4 id='ruleInfoModalTitle' className={`modal-title ${modalStyles['rule-engine-title']}`}>
@@ -72,17 +72,21 @@ const RuleEngineModal = (props) => {
         <div id='ruleInfoModalBody' className={`modal-body ${modalStyles['rule-engine-body']}`}>
           {getRuleEngineActions(props.result)}
         </div>
-        {/* <div id='ruleInfoModalFooter' className={`modal-footer ${modalStyles['rule-engine-footer']}`}> */}       
+        {/* <div id='ruleInfoModalFooter' className={`modal-footer ${modalStyles['rule-engine-footer']}`}> */}
         {/* </div> */}
-        <div className='modal-footer' style={{backgroundColor: '#f9f9f9'}}>
-        <button id='ruleInfoCloseBtn' type='button' className={`btn btn_close_form ${modalStyles['rule-info-close-btn']}`} onClick={props.closeModal} data-dismiss='modal'>
-            {/* {props.context.intl.formatMessage({id: `${config.labelBasePath}.main.forms.close`, defaultMessage: `${config.labelBasePath}.main.forms.close`})} */}
-            Затвори
-          </button>      
-          </div>
+        <div className='modal-footer' style={{ backgroundColor: '#f9f9f9' }}>
+          <button id='ruleInfoCloseBtn' type='button' className={`btn btn_close_form ${modalStyles['rule-info-close-btn']}`} onClick={props.closeModal} data-dismiss='modal'>
+            {props.context.intl.formatMessage({ id: `${config.labelBasePath}.main.forms.close`, defaultMessage: `${config.labelBasePath}.main.forms.close` })}
+          </button>
+        </div>
       </div>
     </div>
   )
+}
+
+
+RuleEngineModal.contextTypes = {
+  intl: PropTypes.object.isRequired
 }
 
 export default RuleEngineModal
