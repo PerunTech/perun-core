@@ -11,7 +11,6 @@ import { iconManager } from '../../assets/svg/svgHolder'
 // import { Link } from 'react-router-dom';
 import Modal from '../Modal/Modal'
 import GenericForm from '../../elements/form/GenericForm'
-import md5 from 'md5'
 import PropTypes from 'prop-types'
 import Loading from '../Loading/Loading';
 import NotificationsComponent from './NotificationsComponent';
@@ -29,8 +28,6 @@ import CodeListEditor from './CodeListComp/CodeListEditor';
 import UserGroupsForm from './UserGroupsForm';
 import UserForm from './UserForm';
 import EditUserWrapper from './utils/EditUserWrapper';
-import EditUserGroupWrapper from './utils/EditUserGroupWrapper';
-import AclPerGroup from './AclPerGroup/AclPerGroup';
 import PerunPluginTable from './PerunPluginTable'
 class AppSettings extends React.Component {
   constructor(props) {
@@ -47,22 +44,19 @@ class AppSettings extends React.Component {
       showModal: '',
       sessionIsGranted: false,
       activeId: '',
-      subMenuActiveId: '',
+      subMenuActiveId: ''
     }
     this.showUsersFn = this.showUsersFn.bind(this)
     this.closeModal = this.closeModal.bind(this)
     this.changeUserStatus = this.changeUserStatus.bind(this)
-    this.showUserGroupsFn = this.showUserGroupsFn.bind(this)
     // this.createAddGroupsFormParams = this.createAddGroupsFormParams.bind(this)
     this.rowClickFn = this.rowClickFn.bind(this)
     this.handleDropDown = this.handleDropDown.bind(this)
-    this.saveForm = this.saveForm.bind(this)
     this.changeUserGroups = this.changeUserGroups.bind(this)
     this.createEditUserGroupsModal = this.createEditUserGroupsModal.bind(this)
     this.getUserGroups = this.getUserGroups.bind(this)
     this.getAllGroups = this.getAllGroups.bind(this)
     this.setGroupObjectId = this.setGroupObjectId.bind(this)
-    this.editUserGroupsFn = this.editUserGroupsFn.bind(this)
     this.tableAccessAxios = this.tableAccessAxios.bind(this)
     this.createUpdateTableAccessModal = this.createUpdateTableAccessModal.bind(this)
     this.saveUpdateTableAcces = this.saveUpdateTableAcces.bind(this)
@@ -408,71 +402,6 @@ class AppSettings extends React.Component {
     }
   }
 
-  showUserGroupsFn(selectedGroupObjId, selectedGroupName) {
-    this.setState({ selectedRowGroupObjId: selectedGroupObjId, selectedRowGroupName: selectedGroupName })
-    if (selectedGroupName === 'USERS') {
-      this.setState({ alert: alertUser(true, 'info', this.context.intl.formatMessage({ id: 'perun.admin_console.cant_show_users_in_group', defaultMessage: 'perun.admin_console.cant_show_users_in_group' }), null) })
-    } else {
-      let type
-      let content
-      let contentArr = []
-      let userGroupsModal = undefined
-      let customTable = undefined
-      let custmInput = undefined
-      let modalContentArr = []
-      const url = window.server + '/WsAdminConsole/getLinkedUsers/' + this.props.svSession + '/' + selectedGroupObjId
-      this.setState({ loading: <Loading /> })
-      axios.get(url)
-        .then((response) => {
-          if (response.data.data) {
-            if (response.data.type.toLowerCase() === 'success') {
-              let arr = response.data.data
-              for (let i = 0; i < arr.length; i++) {
-                content = <tr key={arr[i] + arr[i].userName + arr[i].eMail} className={`customTr`}>
-                  <td key={arr[i].userName + arr[i]} className={`customTd`}>{arr[i].userName}</td>
-                  <td key={arr[i]} className={`customTd`}>{arr[i].pin}</td>
-                  <td key={arr[i].eMail + arr[i]} className={`customTd`}>{arr[i].eMail}</td>
-                </tr>
-                contentArr.push(content)
-              }
-              this.setState({ linkedUsersState: contentArr })
-              customTable =
-                <table id='customTableLinkedUsers' className={`customTable slowLoad`}>
-                  <thead>
-                    <tr className={`customTh`}>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.user_name', defaultMessage: 'perun.adminConsole.user_name' })}: </th>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.pin', defaultMessage: 'perun.adminConsole.pin' })}: </th>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.e_mail', defaultMessage: 'perun.adminConsole.e_mail' })}: </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.state.linkedUsersState}
-                  </tbody>
-                </table>
-              custmInput = <InputElement id='searchInput' name='searchInput' placeholder={this.context.intl.formatMessage({ id: 'perun.admin_console.search_user', defaultMessage: 'perun.admin_console.search_user' })} onChange={() => this.tableSearch('customTableLinkedUsers', 'searchInput')} />
-              modalContentArr.push(custmInput, customTable)
-            }
-            let aclPerGroup = <AclPerGroup groupId={selectedGroupObjId} />
-            modalContentArr.push(aclPerGroup)
-            userGroupsModal = <Modal
-              closeModal={this.closeModal}
-              closeAction={this.closeModal}
-              modalContent={modalContentArr}
-              modalTitle={this.context.intl.formatMessage({ id: 'perun.adminConsole.show_group_details', defaultMessage: 'perun.adminConsole.show_group_details' })}
-              nameCloseBtn={this.context.intl.formatMessage({ id: 'perun.admin_console.close', defaultMessage: 'perun.admin_console.close' })}
-            />
-            this.setState({ showGroupUsersModal: userGroupsModal, loading: false })
-          } else {
-            this.setState({ alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null), loading: false })
-          }
-        })
-        .catch((error) => {
-          type = error.type.data.type
-          type = type.toLowerCase()
-          this.setState({ alert: alertUser(true, type, error.response.data.message, null) })
-        })
-    }
-  }
 
   /* simple table search function */
   tableSearch(tableName, searchInput) {
@@ -494,90 +423,6 @@ class AppSettings extends React.Component {
     }
   }
 
-  editUserGroupsFn = (objectId) => {
-    let modalData = <GenericForm
-      params={'READ_URL'}
-      key={'SVAROG_USER_GROUPS'}
-      id={'SVAROG_USER_GROUPS'}
-      method={'/ReactElements/getTableJSONSchema/%session/' + 'SVAROG_USER_GROUPS'}
-      uiSchemaConfigMethod={'/ReactElements/getTableUISchema/%session/' + 'SVAROG_USER_GROUPS'}
-      tableFormDataMethod={'/ReactElements/getTableFormData/%session/' + objectId + '/' + 'SVAROG_USER_GROUPS'}
-      customSave={true}
-      customSaveButtonName={this.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}
-      addSaveFunction={(e) => this.saveForm(e, 'editUserGroup')}
-      hideBtns='closeAndDelete'
-      inputWrapper={EditUserGroupWrapper}
-    />
-    let modal = <Modal
-      closeModal={this.closeModal}
-      modalContent={modalData}
-      modalTitle={this.context.intl.formatMessage({ id: 'perun.generalLabel.edit', defaultMessage: 'perun.generalLabel.edit' })}
-    />
-
-    this.setState({ showModal: modal })
-  }
-
-  saveForm(e, forForm) {
-    let form_params
-    let formCompleted
-    if (forForm === 'saveUser') {
-      e.preventDefault()
-      if ((this.state.userName && this.state.userName.length > 0) && (this.state.userEmail && this.state.userEmail.length > 0) && (this.state.pin && this.state.pin.length > 0) && (this.state.userPassword && this.state.userPassword.length > 0) && (this.state.confUserPassword && this.state.confUserPassword.length > 0)) {
-        if (this.state.userPassword === this.state.confUserPassword) {
-          form_params = { 'userName': this.state.userName, 'firstName': this.state.firstName, 'lastName': this.state.lastName, 'userEmail': this.state.userEmail, 'userPassword': md5(this.state.userPassword), 'confUserPassword': md5(this.state.confUserPassword), 'pin': this.state.pin }
-          formCompleted = 'saveUser'
-        } else {
-          this.setState({ alert: alertUser(true, 'error', this.context.intl.formatMessage({ id: 'perun.admin_console.inputs_no_match', defaultMessage: 'perun.admin_console.inputs_no_match' })) })
-        }
-      } else {
-        this.setState({ alert: alertUser(true, 'error', this.context.intl.formatMessage({ id: 'perun.adminConsole.mandatory_field', defaultMessage: 'perun.adminConsole.mandatory_field' })) })
-      }
-    } else if (forForm === 'saveUserGroup') {
-      e.preventDefault()
-      if ((this.state.groupName && this.state.groupName.length > 0) && (this.state.groupType) && (this.state.groupSecurityType) && (this.state.groupAccess) && (this.state.groupEmail && this.state.groupEmail.length > 0)) {
-        form_params = { 'GROUP_NAME': this.state.groupName, 'GROUP_TYPE': this.state.groupType, 'GROUP_SECURITY_TYPE': this.state.groupSecurityType, 'E_MAIL': this.state.groupEmail, 'groupAccess': this.state.groupAccess }
-        formCompleted = 'saveUserGroup'
-      } else {
-        this.setState({ alert: alertUser(true, 'error', this.context.intl.formatMessage({ id: 'perun.adminConsole.mandatory_field', defaultMessage: 'perun.adminConsole.mandatory_field' })) })
-      }
-    } else if (forForm === 'editUserGroup') {
-      form_params = e.formData
-      formCompleted = 'saveUserGroup'
-    }
-
-    if (formCompleted === 'saveUser' || formCompleted === 'saveUserGroup') {
-      this.setState({ loading: <Loading /> })
-      let restUrl = window.server + '/WsAdminConsole/' + formCompleted + '/' + this.props.svSession
-      axios({
-        method: 'post',
-        data: form_params,
-        url: restUrl,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).then((response) => {
-        if (response.data) {
-          this.setState({ loading: false })
-          if (forForm === 'saveUserGroup' || forForm === 'editUserGroup') {
-            GridManager.reloadGridData('SVAROG_USER_GROUP_GRID')
-            this.setState({ alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null), active: 'showGroups', showModal: false })
-          } else if (forForm === 'saveUser') {
-            GridManager.reloadGridData('SVAROG_USERS_GRID')
-            this.setState({
-              alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null),
-              active: 'showUsers'
-            })
-          }
-        }
-        formCompleted = ''
-      }).catch((error) => {
-        this.setState({ loading: false })
-        let type
-        type = error.response.data.type
-        type = type.toLowerCase()
-        this.setState({ alert: alertUser(true, type, error.response.data.message, null) })
-        formCompleted = ''
-      })
-    }
-  }
 
   /* add users custom form render */
   handleDropDown(e, selectedDropDown) {
@@ -982,7 +827,7 @@ class AppSettings extends React.Component {
             <div className={`content`}>
               {active === 'showUsers' && <ShowUsersDropDown changeUserPassword={this.changeUserPassword} rowClickFn={this.rowClickFn} editUser={this.editUser} showUsersFn={this.showUsersFn} changeUserStatus={this.changeUserStatus} />}
               {active === 'addUsers' && <UserForm />}
-              {active === 'showGroups' && <GroupUsersGrid showUserGroupsFn={this.showUserGroupsFn} editUserGroupsFn={this.editUserGroupsFn} />}
+              {active === 'showGroups' && <GroupUsersGrid />}
               {showModal}
               {active === 'addGroups' && <UserGroupsForm />}
               {active === 'SvarogAclGrid' && <SvarogAclGrid />}
