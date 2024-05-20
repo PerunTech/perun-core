@@ -9,7 +9,7 @@ import EditUserGroupWrapper from './utils/EditUserGroupWrapper';
 import AclPerGroup from './AclPerGroup/AclPerGroup';
 import Loading from '../Loading/Loading';
 import md5 from 'md5'
-class GroupUsersGrid extends React.Component {
+class UsersGroups extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -117,13 +117,13 @@ class GroupUsersGrid extends React.Component {
             modalContentArr.push(aclPerGroup)
             this.setState({ modalContentGroupDetails: modalContentArr, loading: false })
           } else {
-            this.setState({ alert: alertUser(true, response.data.type.toLowerCase(), response.data.message, null), loading: false })
+            this.setState({ loading: false })
+            alertUser(true, response.data.type.toLowerCase(), response.data.message, null)
           }
         })
         .catch((error) => {
-          type = error.type.data.type
-          type = type.toLowerCase()
-          this.setState({ alert: alertUser(true, type, error.response.data.message, null) })
+          console.error(error);
+          alertUser(true, 'error', error.response?.data?.title || error, error.response?.data?.message || '');
         })
     }
   }
@@ -181,10 +181,7 @@ class GroupUsersGrid extends React.Component {
         formCompleted = ''
       }).catch((error) => {
         this.setState({ loading: false })
-        let type
-        type = error.response.data.type
-        type = type.toLowerCase()
-        this.setState({ alert: alertUser(true, type, error.response.data.message, null) })
+        alertUser(true, 'error', error.response?.data?.title || error, error.response?.data?.message || '');
         formCompleted = ''
       })
     }
@@ -229,7 +226,7 @@ const mapStateToProps = state => ({
   svSession: state.security.svSession
 })
 
-GroupUsersGrid.contextTypes = {
+UsersGroups.contextTypes = {
   intl: PropTypes.object.isRequired
 }
-export default connect(mapStateToProps)(GroupUsersGrid)
+export default connect(mapStateToProps)(UsersGroups)

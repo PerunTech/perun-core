@@ -5,7 +5,7 @@ import { svConfig } from '../../config';
 import { store, logoutUser } from '../../model';
 import { GridManager, ComponentManager, alertUser, InputElement } from '../../elements';
 // import AddUsersForm from './AddUsersForm'
-import GroupUsersGrid from './GroupUsersGrid'
+import UsersGroups from './UsersGroups'
 // import GroupUsersForm from './GroupUsersForm'
 import { iconManager } from '../../assets/svg/svgHolder'
 // import { Link } from 'react-router-dom';
@@ -827,7 +827,7 @@ class AppSettings extends React.Component {
             <div className={`content`}>
               {active === 'showUsers' && <ShowUsersDropDown changeUserPassword={this.changeUserPassword} rowClickFn={this.rowClickFn} editUser={this.editUser} showUsersFn={this.showUsersFn} changeUserStatus={this.changeUserStatus} />}
               {active === 'addUsers' && <UserForm />}
-              {active === 'showGroups' && <GroupUsersGrid />}
+              {active === 'showGroups' && <UsersGroups />}
               {showModal}
               {active === 'addGroups' && <UserGroupsForm />}
               {active === 'SvarogAclGrid' && <SvarogAclGrid />}
