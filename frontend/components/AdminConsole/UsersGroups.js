@@ -15,7 +15,8 @@ class UsersGroups extends React.Component {
     this.state = {
       grid: null,
       modalContentEdit: false,
-      modalContentGroupDetails: []
+      modalContentGroupDetails: [],
+      groupMembers: null
     }
     this.onRowClick = this.onRowClick.bind(this)
     this.showUserGroupsFn = this.showUserGroupsFn.bind(this)
@@ -67,11 +68,12 @@ class UsersGroups extends React.Component {
       hideBtns='closeAndDelete'
       inputWrapper={EditUserGroupWrapper}
     />
-    this.setState({ modalContentEdit: modalData })
+    this.setState({ modalContentEdit: modalData });
   }
   showUserGroupsFn(selectedGroupObjId, selectedGroupName) {
     this.setState({ selectedRowGroupObjId: selectedGroupObjId, selectedRowGroupName: selectedGroupName })
     if (selectedGroupName === 'USERS') {
+      this.setState({ groupMembers: false });
       return;
     } else {
       let type
@@ -81,7 +83,6 @@ class UsersGroups extends React.Component {
       let custmInput = undefined
       let modalContentArr = []
       const url = window.server + '/WsAdminConsole/getLinkedUsers/' + this.props.svSession + '/' + selectedGroupObjId
-      console.log(url);
       this.setState({ loading: <Loading /> })
       axios.get(url)
         .then((response) => {
@@ -112,7 +113,9 @@ class UsersGroups extends React.Component {
                 </table>
               custmInput = <InputElement id='searchInput' name='searchInput' placeholder={this.context.intl.formatMessage({ id: 'perun.admin_console.search_user', defaultMessage: 'perun.admin_console.search_user' })} onChange={() => this.props.tableSearch('customTableLinkedUsers', 'searchInput')} />
               modalContentArr.push(custmInput, customTable)
+              this.setState({ groupMembers: true });
             }
+            else if (response.data.type.toLowerCase() === 'warning') { this.setState({ groupMembers: false }); }
             let aclPerGroup = <AclPerGroup groupId={selectedGroupObjId} />
             modalContentArr.push(aclPerGroup)
             this.setState({ modalContentGroupDetails: modalContentArr, loading: false })
@@ -187,7 +190,6 @@ class UsersGroups extends React.Component {
     }
   }
 
-
   onRowClick(gridId, rowId, row) {
     const selectedGroupName = row['SVAROG_USER_GROUPS.GROUP_NAME']
     const selectedGroupObjId = row['SVAROG_USER_GROUPS.OBJECT_ID']
@@ -198,7 +200,7 @@ class UsersGroups extends React.Component {
   }
 
   render() {
-    const { grid, modalContentEdit, modalContentGroupDetails, loading } = this.state
+    const { grid, modalContentEdit, modalContentGroupDetails, loading, groupMembers } = this.state
     return (
       <React.Fragment >
         <div className='admin-console-grid-container'>
@@ -207,10 +209,13 @@ class UsersGroups extends React.Component {
           {modalContentEdit && (
             <Modal className='admin-console-unit-modal' show={modalContentEdit} onHide={() => { this.setState({ modalContentEdit: false, modalContentGroupDetails: false }) }}>
               <Modal.Header closeButton>
-                <Modal.Title>{this.context.intl.formatMessage({ id: 'perun.admin_console.user_group_edit', defaultMessage: 'perun.admin_console.user_group_edit' })}</Modal.Title>
+                <Modal.Title>{this.context.intl.formatMessage({ id: 'perun.admin_console.user_group_details', defaultMessage: 'perun.admin_console.user_group_details' })}</Modal.Title>
               </Modal.Header>
               <Modal.Body className='admin-console-unit-modal-body'>
                 {modalContentEdit}
+                <div className={`${groupMembers ? 'group_member' : 'no_group_member'}`}>
+                  {groupMembers ? this.context.intl.formatMessage({ id: 'perun.admin_console.group_members', defaultMessage: 'perun.admin_console.group_members' }) : this.context.intl.formatMessage({ id: 'perun.admin_console.not_found_group_members', defaultMessage: 'perun.admin_console.not_found_group_members' })}
+                </div>
                 {modalContentGroupDetails}
               </Modal.Body>
               <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
@@ -230,3 +235,4 @@ UsersGroups.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 export default connect(mapStateToProps)(UsersGroups)
+
