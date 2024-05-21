@@ -213,7 +213,7 @@ class UsersGroups extends React.Component {
               </Modal.Header>
               <Modal.Body className='admin-console-unit-modal-body'>
                 {modalContentEdit}
-                <div className={`${groupMembers ? 'group_member' : 'no_group_member'}`}>
+                <div className={`${groupMembers ? 'group-member' : 'no-group-member'}`}>
                   {groupMembers ? this.context.intl.formatMessage({ id: 'perun.admin_console.group_members', defaultMessage: 'perun.admin_console.group_members' }) : this.context.intl.formatMessage({ id: 'perun.admin_console.not_found_group_members', defaultMessage: 'perun.admin_console.not_found_group_members' })}
                 </div>
                 {modalContentGroupDetails}
