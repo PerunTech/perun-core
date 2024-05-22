@@ -208,7 +208,7 @@ class UsersGroups extends React.Component {
           {loading}
           {modalContentEdit && (
             <Modal className='admin-console-unit-modal' show={modalContentEdit} onHide={() => { this.setState({ modalContentEdit: false, modalContentGroupDetails: false }) }}>
-              <Modal.Header closeButton>
+              <Modal.Header className='admin-console-unit-modal-header' closeButton>
                 <Modal.Title>{this.context.intl.formatMessage({ id: 'perun.admin_console.user_group_details', defaultMessage: 'perun.admin_console.user_group_details' })}</Modal.Title>
               </Modal.Header>
               <Modal.Body className='admin-console-unit-modal-body'>
