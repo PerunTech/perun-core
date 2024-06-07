@@ -86,7 +86,7 @@ class AppSettings extends React.Component {
   }
 
   getMenu = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
+    const url = `http://dnfr.prtech.mk${window.assets}/json/config/AppSettings.json`
 
     fetch(url)
       .then(res => res.json())

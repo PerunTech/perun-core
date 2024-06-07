@@ -9,6 +9,7 @@ import EditUserGroupWrapper from './utils/EditUserGroupWrapper';
 import AclPerGroup from './AclPerGroup/AclPerGroup';
 import Loading from '../Loading/Loading';
 import md5 from 'md5'
+
 class UsersGroups extends React.Component {
   constructor(props) {
     super(props)
@@ -70,13 +71,13 @@ class UsersGroups extends React.Component {
     />
     this.setState({ modalContentEdit: modalData });
   }
+
   showUserGroupsFn(selectedGroupObjId, selectedGroupName) {
     this.setState({ selectedRowGroupObjId: selectedGroupObjId, selectedRowGroupName: selectedGroupName })
     if (selectedGroupName === 'USERS') {
       this.setState({ groupMembers: false });
       return;
     } else {
-      let type
       let content
       let contentArr = []
       let customTable = undefined
@@ -84,50 +85,48 @@ class UsersGroups extends React.Component {
       let modalContentArr = []
       const url = window.server + '/WsAdminConsole/getLinkedUsers/' + this.props.svSession + '/' + selectedGroupObjId
       this.setState({ loading: <Loading /> })
-      axios.get(url)
-        .then((response) => {
-          if (response.data.data) {
-            if (response.data.type.toLowerCase() === 'success') {
-              let arr = response.data.data
-              for (let i = 0; i < arr.length; i++) {
-                content = <tr key={arr[i] + arr[i].userName + arr[i].eMail} className={`customTr`}>
-                  <td key={arr[i].userName + arr[i]} className={`customTd`}>{arr[i].userName}</td>
-                  <td key={arr[i]} className={`customTd`}>{arr[i].pin}</td>
-                  <td key={arr[i].eMail + arr[i]} className={`customTd`}>{arr[i].eMail}</td>
-                </tr>
-                contentArr.push(content)
-              }
-              this.setState({ linkedUsersState: contentArr })
-              customTable =
-                <table id='customTableLinkedUsers' className={`customTable slowLoad`}>
-                  <thead>
-                    <tr className={`customTh`}>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.user_name', defaultMessage: 'perun.adminConsole.user_name' })}: </th>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.pin', defaultMessage: 'perun.adminConsole.pin' })}: </th>
-                      <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.e_mail', defaultMessage: 'perun.adminConsole.e_mail' })}: </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.state.linkedUsersState}
-                  </tbody>
-                </table>
-              custmInput = <InputElement id='searchInput' name='searchInput' placeholder={this.context.intl.formatMessage({ id: 'perun.admin_console.search_user', defaultMessage: 'perun.admin_console.search_user' })} onChange={() => this.props.tableSearch('customTableLinkedUsers', 'searchInput')} />
-              modalContentArr.push(custmInput, customTable)
-              this.setState({ groupMembers: true });
+      axios.get(url).then((response) => {
+        if (response.data.data) {
+          if (response.data.type.toLowerCase() === 'success') {
+            let arr = response.data.data
+            for (let i = 0; i < arr.length; i++) {
+              content = <tr key={arr[i] + arr[i].userName + arr[i].eMail} className={`customTr`}>
+                <td key={arr[i].userName + arr[i]} className={`customTd`}>{arr[i].userName}</td>
+                <td key={arr[i]} className={`customTd`}>{arr[i].pin}</td>
+                <td key={arr[i].eMail + arr[i]} className={`customTd`}>{arr[i].eMail}</td>
+              </tr>
+              contentArr.push(content)
             }
-            else if (response.data.type.toLowerCase() === 'warning') { this.setState({ groupMembers: false }); }
-            let aclPerGroup = <AclPerGroup groupId={selectedGroupObjId} />
-            modalContentArr.push(aclPerGroup)
-            this.setState({ modalContentGroupDetails: modalContentArr, loading: false })
-          } else {
-            this.setState({ loading: false })
-            alertUser(true, response.data.type.toLowerCase(), response.data.message, null)
+            this.setState({ linkedUsersState: contentArr })
+            customTable =
+              <table id='customTableLinkedUsers' className={`customTable slowLoad`}>
+                <thead>
+                  <tr className={`customTh`}>
+                    <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.user_name', defaultMessage: 'perun.adminConsole.user_name' })}: </th>
+                    <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.pin', defaultMessage: 'perun.adminConsole.pin' })}: </th>
+                    <th>{this.context.intl.formatMessage({ id: 'perun.adminConsole.e_mail', defaultMessage: 'perun.adminConsole.e_mail' })}: </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.linkedUsersState}
+                </tbody>
+              </table>
+            custmInput = <InputElement id='searchInput' name='searchInput' placeholder={this.context.intl.formatMessage({ id: 'perun.admin_console.search_user', defaultMessage: 'perun.admin_console.search_user' })} onChange={() => this.props.tableSearch('customTableLinkedUsers', 'searchInput')} />
+            modalContentArr.push(custmInput, customTable)
+            this.setState({ groupMembers: true });
           }
-        })
-        .catch((error) => {
-          console.error(error);
-          alertUser(true, 'error', error.response?.data?.title || error, error.response?.data?.message || '');
-        })
+          else if (response.data.type.toLowerCase() === 'warning') { this.setState({ groupMembers: false }); }
+          let aclPerGroup = <AclPerGroup groupId={selectedGroupObjId} />
+          modalContentArr.push(aclPerGroup)
+          this.setState({ modalContentGroupDetails: modalContentArr, loading: false })
+        } else {
+          this.setState({ loading: false })
+          alertUser(true, response.data.type.toLowerCase(), response.data.message, null)
+        }
+      }).catch((error) => {
+        console.error(error);
+        alertUser(true, 'error', error.response?.data?.title || error, error.response?.data?.message || '');
+      })
     }
   }
 
@@ -221,12 +220,12 @@ class UsersGroups extends React.Component {
               <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
             </Modal>
           )}
-
         </div>
       </React.Fragment>
     )
   }
 }
+
 const mapStateToProps = state => ({
   svSession: state.security.svSession
 })
@@ -234,5 +233,5 @@ const mapStateToProps = state => ({
 UsersGroups.contextTypes = {
   intl: PropTypes.object.isRequired
 }
-export default connect(mapStateToProps)(UsersGroups)
 
+export default connect(mapStateToProps)(UsersGroups)
