@@ -949,7 +949,7 @@ class GenericGrid extends React.Component {
                   // onMouseLeave={this.mouseOn}
                   enableFilter
                   hasLinkGridInModal={this.state.hasLinkGridInModal}
-                  {...this.state.toggleCustomButton && { buttonsArray: this.state.buttonsArray }}
+                  {...this.state.buttonsArray && { buttonsArray: this.state.buttonsArray }}
                   {...this.state.toggleCustomButton && { customButtonLabel: this.state.customButtonLabel }}
                   {...this.state.toggleCustomButton && { additionalButtonLabel: this.state.additionalButtonLabel }}
                   {...this.state.toggleCustomButton && { additionalButton: this.state.additionalButton }}
