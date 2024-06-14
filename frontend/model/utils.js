@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const switchServerLanguage = (lang, token) => {
   let url = window.server + `/SvSecurity/i18n/${lang}/perun/${token}`
-  axios.get(url).then(_res => {
+  axios.get(url).then(() => {
   }).catch(err => {
     console.error(err)
   })
