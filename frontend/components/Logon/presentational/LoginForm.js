@@ -128,27 +128,30 @@ const LoginForm = (props, context) => {
                 </div>
               )}
             </div>
-            {loginLinks?.length > 0 && <>
-              <div className='verticalLine'></div>
-              <div className='right'>
-                <div className='linkStyle'>
-                  {loginLinks.map((item, index) => {
-                    return < div key={`${item.id}_${index}`}>
-                      <Link to={item.href} key={item.id} className={item.className}>
-                        {labels.formatMessage({
-                          id: `perun.login.${item.id}`,
-                          defaultMessage: `perun.login.${item.id}`
-                        })}</Link>
-                    </div >
-                  })}
+            {loginLinks?.length > 0 && (
+              <>
+                <div className='verticalLine' />
+                <div className='right'>
+                  <div className='linkStyle'>
+                    {loginLinks.map((item, index) => {
+                      return (
+                        <div key={`${item.id}_${index}`}>
+                          <Link to={item.href} key={item.id} className={item.className}>
+                            {labels.formatMessage({
+                              id: `perun.login.${item.id}`,
+                              defaultMessage: `perun.login.${item.id}`
+                            })}
+                          </Link>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            </>
-            }
-
+              </>
+            )}
           </div>
         </form>
-      </div >
+      </div>
       {projectImgJson?.length > 0 && (
         <div id='imgProject' className='projectImg'>
           {projectImgJson.map(img => {
@@ -166,7 +169,7 @@ const LoginForm = (props, context) => {
           })}
         </div>
       )}
-    </div >
+    </div>
   )
 }
 
