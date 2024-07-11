@@ -4,12 +4,11 @@ export const labelBasePath = 'perun'
 // translate grid and forms
 export const translateComponents = true
 
-
 export const svConfig = {
   restSvcBaseUrl: window.server,
   isDebug: process.env.NODE_ENV !== 'production',
   // wsKeys: { to be changed when updaet in perun-redux is made
-  triglavRestVerbs: {  
+  triglavRestVerbs: {
     MAIN_LABELS: '/SvSecurity/i18n/%s1/%s2',
     GET_COMPONENT_CONFIGURATION: '/SvSecurity/configuration/getConfiguration/%session/%componentName',
     /* Delete records */
@@ -96,7 +95,7 @@ export const svConfig = {
     RERUN_JOB: '/SvBatch/reRunBatchJob/',
     // REPROCESS_RANKING: '/SvScore/'
 
-     /* Admin Console */
+    /* Admin Console */
     CHECK_SESSION: '/SvSecurity/checkSession/',
     SAVE_FORM_WIZARD: '/WsConf/saveFormWizard/',
     SAVE_FORM_CONF: '/WsConf/saveFormConf/',
@@ -110,10 +109,9 @@ export const svConfig = {
     SAVE_FORM_DATA_WITH_LINK: '/ReactElements/createTableRecord/',
     SAVE_FORM_DATA_2: '/SDM/basicServices/createTableRecord/',
     SAVE_FORM_DATA_LAST_STEP: '/ReactElements/linkObjects/',
-    GET_DROPDOWN_LAST_MULTISTEP:'/ElementBuilder/fetchCodeListItemsFromTable/',
+    GET_DROPDOWN_LAST_MULTISTEP: '/ElementBuilder/fetchCodeListItemsFromTable/',
     GET_BY_CUSTOM_LINK: '/ReactElements/getObjectsByParentId/%session/%objectId/%objectName/%rowlimit',
     DELETE_DOCUMENT: '/ReactElements/deleteObject/',
     DOCUMENT_CHANGE_STATUS: '/ReactElements/changeStatus/',
-    
   }
 }
