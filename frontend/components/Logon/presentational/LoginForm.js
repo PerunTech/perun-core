@@ -79,7 +79,7 @@ const LoginForm = (props, context) => {
   return (
     <div id='holder' className='holderLogon'>
       <div className='onlyLoginCustomHeight'>
-        <form id='submit_form' className='form fadeIn login-form' onSubmit={handleSubmit}>
+        <form id='submit_form' className='form fadeIn login-form' onSubmit={onSubmit}>
           {alert}
           <div className='grid'>
             <div className='left'>
