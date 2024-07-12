@@ -1055,6 +1055,21 @@ input[class*="input_error"] {
     width: 50% !important;
 }
 
+.saml-login {
+    border: none;
+    background: transparent;
+    font-weight: bold;
+    color: #0e4c90 !important;
+}
+
+.saml-login:hover {
+    color: #4f94e1 !important;
+}
+
+.saml-login:focus {
+    outline: none;
+}
+
 @media only screen and (min-width: 320px) and (max-width: 374px) {
     #modMainGridOneRow {
         grid-template-columns: 100%;

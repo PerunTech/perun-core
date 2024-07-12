@@ -1,9 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import axios from 'axios';
 import * as utils from '../utils'
 import * as config from 'config/config.js'
 import { alertUser } from '../../../elements';
 import Loading from 'components/Loading/Loading'
+import { isValidObject } from '../../../functions/utils';
 
 export default function LogonFunctions(TargetComponent, validationString, method, onSubmit) {
   class WrappedComponent extends React.Component {
@@ -21,11 +23,20 @@ export default function LogonFunctions(TargetComponent, validationString, method
         eMail: '',
         password: '',
         repeatPassword: '',
+        loading: false,
         farmer: false,
         showFarmReg: true,
         showUserReg: false,
+        showSsoLoginBtn: false,
         errors: {},
         alert: undefined
+      }
+    }
+
+    componentDidMount() {
+      const configuration = this.props.configuration.data
+      if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
+        this.setState({ showSsoLoginBtn: true })
       }
     }
 
@@ -74,19 +85,45 @@ export default function LogonFunctions(TargetComponent, validationString, method
       const newState = utils.resetValidateOnChange(e, this.state)
       this.setState({ [e.target.name]: newState.newKeyVal[e.target.name], errors: newState.errors })
     }
+
     onChangeFarmer = (value) => {
       this.setState({ farmer: value })
+    }
+
+    onSamlSubmit = () => {
+      const configuration = this.props.configuration.data
+      if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
+        const ssoConfig = configuration.sso_config
+        const ssoFormKey = ssoConfig.SSO_FORM_KEY
+        const ssoFormValue = ssoConfig.SSO_FORM_VALUE
+        const ssoMethod = ssoConfig.SSO_METHOD
+        const ssoUrl = ssoConfig.SSO_URL
+        this.setState({ loading: true })
+        axios.get(`${window.server}${ssoFormValue}`).then(res => {
+          this.setState({ loading: false })
+          if (res.data) {
+            const token = res.data
+            utils.submitForm(ssoUrl, ssoMethod, { [ssoFormKey]: token })
+          }
+        }).catch(err => {
+          console.error(err)
+          this.setState({ loading: false })
+        })
+      }
     }
 
     render() {
       const isEverythingLoaded = utils.displayLoader(this.props, method)
       return <React.Fragment>
         {!isEverythingLoaded && <Loading />}
+        {this.state.loading && <Loading />}
         <TargetComponent
           internalComponentState={this.state}
           {...this.props}
           context={this.context}
           onSubmit={this.onSubmit}
+          onSamlSubmit={this.onSamlSubmit}
+          showSsoLoginBtn={this.state.showSsoLoginBtn}
           onChange={this.onChange}
           onChangeFarmer={this.onChangeFarmer}
         />
