@@ -13,6 +13,7 @@ const LoginForm = (props, context) => {
   const [logonImgJson, setLogonImgJson] = useState([])
   const [projectImgJson, setProjectImgJson] = useState([])
   const [loginLinks, setLoginLinks] = useState([])
+  const [ssoData, setSsoData] = useState(null)
   // This is needed for keeping track when the component is mounted and performing state changes, so React doesn't complain
   const componentIsMounted = useRef(true)
   const [capsLockOn, setCapsLockOn] = useState(false);
@@ -21,7 +22,7 @@ const LoginForm = (props, context) => {
     getLogonImgJson()
     getLoginLinks()
     getProjectImgJson()
-
+    generateSsoBtn()
     return () => {
       componentIsMounted.current = false
     }
@@ -29,7 +30,6 @@ const LoginForm = (props, context) => {
 
   const getLoginLinks = () => {
     const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
-
     fetch(url).then(res => res.json()).then(json => {
       setLoginLinks(json)
     }).catch(err => { throw err });
@@ -65,6 +65,15 @@ const LoginForm = (props, context) => {
     } else {
       onSamlSubmit()
     }
+  }
+  const generateSsoBtn = () => {
+    const url = `${window.location.origin}${window.assets}/json/config/AltLogin.json`
+    fetch(url).then(res => res.json()).then(json => {
+      if (componentIsMounted.current) {
+        setSsoData(json)
+      }
+    }).catch(err => { throw err });
+
   }
 
   return (
@@ -126,14 +135,21 @@ const LoginForm = (props, context) => {
                     defaultMessage: `${config.labelBasePath}.login.login`
                   })}</span>
                 </button>
-                {props.showSsoLoginBtn && (
-                  <button id='login_submit_saml' className='nav-link saml-login' type='submit'>
-                    <span>{labels.formatMessage({
-                      id: `${config.labelBasePath}.login.login_saml`,
-                      defaultMessage: `${config.labelBasePath}.login.login_saml`
-                    })}</span>
-                  </button>
-                )}
+                {
+                  ssoData?.length > 0 && ssoData.map(data => (
+                    <button id={`login_submit_saml ${data.id}`} className={`nav-link saml-login ${data.className}`} type="button">
+                      <div className='sso-btn-container'>
+                        <div className='sso-img-container' >
+                          <img src={data.src} />
+                        </div>
+                        <p> {labels.formatMessage({
+                          id: `perun.login.${data.labelCode}`,
+                          defaultMessage: `perun.login.${data.labelCode}`
+                        })}</p>
+                      </div>
+                    </button>
+                  ))
+                }
               </div>
               {logonImgJson?.length > 0 && (
                 <div className='logonImg' onDoubleClick={function () { window.localStorage.clear(); }}>
