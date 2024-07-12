@@ -8,7 +8,7 @@ import { getCapsLockState } from '../../../functions/utils';
 
 const LoginForm = (props, context) => {
   const { alert, errors, username, password } = props.internalComponentState
-  const { onSubmit, onChange } = props
+  const { onSubmit, onSamlSubmit, onChange } = props
   const labels = context.intl
   const [logonImgJson, setLogonImgJson] = useState([])
   const [projectImgJson, setProjectImgJson] = useState([])
@@ -26,16 +26,15 @@ const LoginForm = (props, context) => {
       componentIsMounted.current = false
     }
   }, [])
+
   const getLoginLinks = () => {
     const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
 
-    fetch(url)
-      .then(res => res.json())
-      .then(json => {
-        setLoginLinks(json)
-      })
-      .catch(err => { throw err });
+    fetch(url).then(res => res.json()).then(json => {
+      setLoginLinks(json)
+    }).catch(err => { throw err });
   }
+
   const getLogonImgJson = () => {
     let url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
     // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
@@ -58,10 +57,20 @@ const LoginForm = (props, context) => {
     }).catch(err => { throw err })
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const submitBtnId = e.nativeEvent.submitter.id
+    if (submitBtnId === 'login_submit') {
+      onSubmit(e)
+    } else {
+      onSamlSubmit()
+    }
+  }
+
   return (
     <div id='holder' className='holderLogon'>
       <div className='onlyLoginCustomHeight'>
-        <form id='submit_form' className='form fadeIn login-form' onSubmit={onSubmit}>
+        <form id='submit_form' className='form fadeIn login-form' onSubmit={handleSubmit}>
           {alert}
           <div className='grid'>
             <div className='left'>
@@ -111,12 +120,20 @@ const LoginForm = (props, context) => {
                     })}
                   </p>
                 )}
-                <button id='login_submit' className='logonBtns' type='submit' >
+                <button id='login_submit' className='logonBtns' type='submit'>
                   <span>{labels.formatMessage({
                     id: `${config.labelBasePath}.login.login`,
                     defaultMessage: `${config.labelBasePath}.login.login`
                   })}</span>
                 </button>
+                {props.showSsoLoginBtn && (
+                  <button id='login_submit_saml' className='nav-link saml-login' type='submit'>
+                    <span>{labels.formatMessage({
+                      id: `${config.labelBasePath}.login.login_saml`,
+                      defaultMessage: `${config.labelBasePath}.login.login_saml`
+                    })}</span>
+                  </button>
+                )}
               </div>
               {logonImgJson?.length > 0 && (
                 <div className='logonImg' onDoubleClick={function () { window.localStorage.clear(); }}>
