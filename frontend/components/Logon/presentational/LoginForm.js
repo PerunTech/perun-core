@@ -57,15 +57,7 @@ const LoginForm = (props, context) => {
     }).catch(err => { throw err })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const submitBtnId = e.nativeEvent.submitter.id
-    if (submitBtnId === 'login_submit') {
-      onSubmit(e)
-    } else {
-      onSamlSubmit()
-    }
-  }
+
   const generateSsoBtn = () => {
     const url = `${window.location.origin}${window.assets}/json/config/AltLogin.json`
     fetch(url).then(res => res.json()).then(json => {
