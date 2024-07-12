@@ -57,20 +57,10 @@ const LoginForm = (props, context) => {
     }).catch(err => { throw err })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const submitBtnId = e.nativeEvent.submitter.id
-    if (submitBtnId === 'login_submit') {
-      onSubmit(e)
-    } else {
-      onSamlSubmit()
-    }
-  }
-
   return (
     <div id='holder' className='holderLogon'>
       <div className='onlyLoginCustomHeight'>
-        <form id='submit_form' className='form fadeIn login-form' onSubmit={handleSubmit}>
+        <form id='submit_form' className='form fadeIn login-form' onSubmit={onSubmit}>
           {alert}
           <div className='grid'>
             <div className='left'>
@@ -127,7 +117,7 @@ const LoginForm = (props, context) => {
                   })}</span>
                 </button>
                 {props.showSsoLoginBtn && (
-                  <button id='login_submit_saml' className='nav-link saml-login' type='submit'>
+                  <button id='login_submit_saml' className='nav-link saml-login' type='button' onClick={onSamlSubmit}>
                     <span>{labels.formatMessage({
                       id: `${config.labelBasePath}.login.login_saml`,
                       defaultMessage: `${config.labelBasePath}.login.login_saml`
