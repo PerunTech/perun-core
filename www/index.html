@@ -12,6 +12,10 @@
 <body id="body">
   <script src="../services/WsConf/getServer"></script>
   <script>
+    //Save sso session if alt login is used 
+    const searchParams = new URLSearchParams(window.location.search);
+    const session = searchParams.get('session');
+    window.sessionToken = session;
     const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
     fetch(assetsUrl).then(response => response.json()).then(res => {
       if (res.VALUE) {

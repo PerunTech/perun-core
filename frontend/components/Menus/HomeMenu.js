@@ -5,15 +5,44 @@ import { MainApp } from 'containers/ContainersIndex'
 import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import PropTypes from 'prop-types';
+import { store } from '../../model'
+import { isValidObject } from '../../functions/utils'
+import axios from 'axios'
 const External = (_props, context) => {
   const [json, setJson] = useState([])
   const [activeLanguage, setActiveLanguage] = useState('')
   useEffect(() => {
+    ssOAltLogin()
     getHeaderJson()
     getLocale()
   }, [])
 
+  const ssOAltLogin = () => {
+    axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
+      if (res.data.data.sso_config && isValidObject(res.data.data.sso_config, 1)) {
+        if (window.sessionToken) {
+          const data = {
+            "type": "SUCCESS",
+            "title": "login.success",
+            "message": "login.success",
+            "label_code": null,
+            "data": {
+              "token": `${window.sessionToken}`
+            }
+          }
+          store.dispatch({ type: 'LOGIN_FULFILLED', payload: data })
+          let currentURL = window.location.href;
 
+          // Remove the session parameter and hash fragment
+          let newURL = currentURL.replace(`?session=${window.sessionToken}#`, '');
+
+          // Replace the URL in the history without reloading the page
+          window.history.replaceState({}, document.title, newURL);
+          window.sessionToken = undefined
+        }
+      }
+    }).catch(err => { console.error(err) })
+  }
   const getLocale = () => {
     const locale = cookies.getCookie('defaultLocale')
     setActiveLanguage(locale)
