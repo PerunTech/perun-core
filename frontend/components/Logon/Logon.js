@@ -9,6 +9,7 @@ import ActivateUser from './composite/ActivateUser'
 import ActivationEmail from './presentational/ActivationEmail';
 import Announcements from './presentational/Announcements';
 import ReportApp from './presentational/ReportApp';
+import RegistrationSso from './presentational/RegisterSSo/RegistrationSso'
 
 const Logon = ({ match }) => {
   switch (match.params.logonComp) {
@@ -60,6 +61,11 @@ const Logon = ({ match }) => {
     case 'reportapp': {
       return <Configurator key='Configurator' type='LOGIN'>
         <ReportApp key='reportApp' />
+      </Configurator>
+    }
+    case 'register_sso': {
+      return <Configurator key='Configurator' type='LOGIN'>
+        <RegistrationSso key='RegistrationSso' />
       </Configurator>
     }
     default: {
