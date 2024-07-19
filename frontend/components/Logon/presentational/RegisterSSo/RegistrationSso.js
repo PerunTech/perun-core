@@ -15,9 +15,53 @@ import validator from '@rjsf/validator-ajv8';
 import getRegisterSsoForm from './RegisterSsoForm';
 
 const RegistrationSso = (props, context) => {
-    const labels = context.intl
+    const [data, setData] = useState({})
+    const [key, setKey] = useState('')
+    useEffect(() => {
+        if (window.userObject) {
+            axios.get(`${window.server}/WsConf/params/get/sys/SSO_POST_KEY`).then(res => {
+                if (res.data) {
+                    setKey(res.data['VALUE'])
+
+                }
+            })
+            setData(window.userObject || {})
+            const searchParams = new URLSearchParams(window.location.search);
+            searchParams.delete('userObject'); // Remove the userObject parameter
+            const newURL = `${window.location.pathname}${searchParams.toString() ? '?' + searchParams.toString() : ''}${window.location.hash}`;
+            window.history.replaceState({}, document.title, newURL);
+        }
+    }, [])
+
+
+    const submutSsoRegister = (e) => {
+        let url = window.server + '/SvSecurity/sso'
+
+        let data = new URLSearchParams()
+        data.append(`${key}`, JSON.stringify(e.formData)
+        )
+        axios({
+            method: "post",
+            data,
+            url,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        })
+            .then(function (response) {
+                if (response.data.type === "SUCCESS") {
+                    alertUser(true, "success", context.intl.formatMessage({ id: 'perun.admin_console.success_label', defaultMessage: 'perun.admin_console.success_label' }), "", () => {
+                    });
+                    GridManager.reloadGridData(prev);
+                    setShow(false);
+                }
+            }).catch(err => {
+                console.error(err)
+                const title = err.response?.data?.title || err
+                const msg = err.response?.data?.message || ''
+                alertUser(true, "error", title, msg);
+            });
+    }
     const renderForm = () => {
-        const { uiSchema, schema, formData } = getRegisterSsoForm(context)
+        const { uiSchema, schema, formData } = getRegisterSsoForm(context, data)
         return <Form
             uiSchema={uiSchema}
             schema={schema}
@@ -25,9 +69,7 @@ const RegistrationSso = (props, context) => {
             formData={formData}
             className={`customForm form registration-form registration-form-sso`}
             validator={validator}
-            onSubmit={(e) => {
-                console.log(e);
-            }}
+            onSubmit={submutSsoRegister}
         >
             <></>
             <div className='admin-console-label-form-btn-container'>

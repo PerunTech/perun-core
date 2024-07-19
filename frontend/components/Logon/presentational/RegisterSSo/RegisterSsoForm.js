@@ -1,5 +1,4 @@
-export default function getRegisterSsoForm(context) {
-
+export default function getRegisterSsoForm(context, data) {
     return {
         schema:
         {
@@ -40,11 +39,16 @@ export default function getRegisterSsoForm(context) {
                     "type": "string",
                     "title": "User type",
                     "maxLength": 50
+                },
+                "ID": {
+                    "type": "string",
+                    "title": "ID",
+                    "maxLength": 200
                 }
             },
             "dependencies": {},
             "required": [
-                // "USER_NAME",
+                "USER_NAME",
                 "FIRST_NAME",
                 "LAST_NAME",
                 "E_MAIL",
@@ -57,12 +61,25 @@ export default function getRegisterSsoForm(context) {
             "USER_TYPE": {
                 "ui:widget": "hidden"
             },
+            "ID": {
+                "ui:widget": "hidden"
+            },
             "USER_NAME": {
+                "ui:readonly": true
+            },
+            "PIN": {
                 "ui:readonly": true
             }
         },
         formData: {
-            "USER_TYPE": "External"
+            "USER_TYPE": "External",
+            "PIN": data['USER_NAME'],
+            "USER_NAME": data['USER_NAME'],
+            "FIRST_NAME": data['FIRST_NAME'] || undefined,
+            "LAST_NAME": data['LAST_NAME'] || undefined,
+            "TAX_ID": data['TAX_ID'] || undefined,
+            "E_MAIL": data['E_MAIL'] || undefined,
+            "ID": data['ID'] || undefined,
         }
     }
 }
