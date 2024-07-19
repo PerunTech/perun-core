@@ -53,7 +53,6 @@ export default function getRegisterSsoForm(context, data) {
                 "LAST_NAME",
                 "E_MAIL",
                 "PIN",
-                "TAX_ID",
                 "USER_TYPE"
             ]
         },
