@@ -16,6 +16,15 @@
     const searchParams = new URLSearchParams(window.location.search);
     const session = searchParams.get('session');
     window.sessionToken = session;
+    const encodedUserObject = searchParams.get('userObject');
+    if (encodedUserObject) {
+      // Decode the URL-encoded parameter
+      const decodedUserObject = decodeURIComponent(encodedUserObject);
+
+      // Parse the JSON string to an object
+      window.userObject = JSON.parse(decodedUserObject);
+    }
+
     const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
     fetch(assetsUrl).then(response => response.json()).then(res => {
       if (res.VALUE) {
