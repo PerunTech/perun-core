@@ -80,7 +80,7 @@ const changeLang = (locale, lang) => {
   changeLanguageAndLocale(locale, lang)
 }
 
-const ssOAltLogin = () => {
+const ssoAltLogin = () => {
   if (window.sessionToken) {
     axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
       if (res.data.data.sso_config && isValidObject(res.data.data.sso_config, 1)) {
@@ -104,6 +104,7 @@ const ssOAltLogin = () => {
 
         // Clear the session token
         window.sessionToken = undefined;
+        store.dispatch({ type: 'SAML_FLAG', payload: true })
       }
     }).catch(err => { console.error(err) })
   }
@@ -111,7 +112,7 @@ const ssOAltLogin = () => {
 
 const HomeMenu = (props) => {
   useEffect(() => {
-    ssOAltLogin()
+    ssoAltLogin()
   }, [])
 
   let className = 'navbar sticky-top justify-content-end navbar-styled fadeIn '
