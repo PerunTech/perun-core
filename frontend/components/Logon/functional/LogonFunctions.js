@@ -34,10 +34,13 @@ export default function LogonFunctions(TargetComponent, validationString, method
     }
 
     componentDidMount() {
-      const configuration = this.props.configuration.data || undefined
-      if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
-        this.setState({ showSsoLoginBtn: true })
+      if (this.props?.configuration?.data) {
+        const configuration = this.props.configuration.data || undefined
+        if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
+          this.setState({ showSsoLoginBtn: true })
+        }
       }
+
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {

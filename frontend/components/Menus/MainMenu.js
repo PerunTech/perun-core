@@ -80,33 +80,36 @@ class MainMenu extends React.Component {
 
   onSamlLogout = () => {
     axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
-      const configuration = res.data.data
-      if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
-        const sloConfig = configuration.sso_config
-        const sloFormKey = sloConfig.SLO_FORM_KEY
-        const sloFormValue = sloConfig.SLO_FORM_VALUE.replace('{session}', this.props.token);
-        const sloMethod = sloConfig.SLO_METHOD
-        const sloUrl = sloConfig.SLO_URL
-        axios.get(`${window.server}${sloFormValue}`).then(res => {
-          if (res.data) {
-            const token = res.data
-            submitForm(sloUrl, sloMethod, { [sloFormKey]: token })
-            const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.token
-            store.dispatch(logoutUser(restUrl))
-            this.hashHistory.push('/')
-          }
-        }).catch(err => {
-          console.error(err)
-          const title = err.response?.data?.title || err
-          const msg = err.response?.data?.message || ''
-          alertUser(true, 'error', title, msg)
-        })
+      if (res.data?.data) {
+        const configuration = res.data.data
+        if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
+          const sloConfig = configuration.sso_config
+          const sloFormKey = sloConfig.SLO_FORM_KEY
+          const sloFormValue = sloConfig.SLO_FORM_VALUE.replace('{session}', this.props.token);
+          const sloMethod = sloConfig.SLO_METHOD
+          const sloUrl = sloConfig.SLO_URL
+          axios.get(`${window.server}${sloFormValue}`).then(res => {
+            if (res.data) {
+              const token = res.data
+              submitForm(sloUrl, sloMethod, { [sloFormKey]: token })
+              const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.token
+              store.dispatch(logoutUser(restUrl))
+              this.hashHistory.push('/')
+            }
+          }).catch(err => {
+            console.error(err)
+            const title = err.response?.data?.title || err
+            const msg = err.response?.data?.message || ''
+            alertUser(true, 'error', title, msg)
+          })
+        }
       }
+
     })
   }
 
   logout = () => {
-    if (this.props.samlFlag) {
+    if (this.props?.samlFlag) {
       this.onSamlLogout()
     } else {
       const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.token
