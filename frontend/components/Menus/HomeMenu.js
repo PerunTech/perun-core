@@ -91,10 +91,11 @@ const ssoAltLogin = () => {
           "message": "login.success",
           "label_code": null,
           "data": {
-            "token": `${window.sessionToken}`
-          }
+            "token": `${window.sessionToken}`,
+          },
+          "saml": true
         }
-        store.dispatch({ type: 'LOGIN_FULFILLED', payload: data })
+        store.dispatch({ type: 'LOGIN_FULFILLED_SAML', payload: data })
         let currentURL = window.location.href;
         // Extract the session token and remove it from the URL
         let newURL = currentURL.replace(/(\?session=[^#]*)/, '');
@@ -104,7 +105,6 @@ const ssoAltLogin = () => {
 
         // Clear the session token
         window.sessionToken = undefined;
-        store.dispatch({ type: 'SAML_FLAG', payload: true })
       }
     }).catch(err => { console.error(err) })
   }
