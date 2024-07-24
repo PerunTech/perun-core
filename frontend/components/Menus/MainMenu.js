@@ -237,7 +237,7 @@ MainMenu.contextTypes = {
 const mapStateToProps = state => ({
   stateTooltip: state.stateTooltip.stateTooltip,
   token: state.security.svSession,
-  samlFlag: state.samlReducer.saml
+  samlFlag: state.security?.saml
 })
 
 export default connect(mapStateToProps)(MainMenu)
