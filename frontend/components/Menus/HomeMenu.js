@@ -21,10 +21,9 @@ const External = (_props, context) => {
   }
 
   const getHeaderJson = () => {
-    let url = `https://dnfr.perun.tech/mdfr-assets/json/config/Header.json`
-    // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
+    let url = `${window.location.origin}${window.assets}/json/config/Header.json`
     if (window.assetsContext) {
-      url = `https://dnfr.perun.tech/mdfr-assets/json/config/${window.assetsContext}/Header.json`
+      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/Header.json`
     }
     fetch(url)
       .then(res => res.json())
