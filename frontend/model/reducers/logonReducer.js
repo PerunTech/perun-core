@@ -90,7 +90,8 @@ export default function security(state = {
         svSession: undefined,
         svTitle: undefined,
         svMessage: undefined,
-        status: undefined
+        status: undefined,
+        saml: false
       }
     }
   }
