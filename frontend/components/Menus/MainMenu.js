@@ -92,9 +92,6 @@ class MainMenu extends React.Component {
             if (res.data) {
               const token = res.data
               submitForm(sloUrl, sloMethod, { [sloFormKey]: token })
-              const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.token
-              store.dispatch(logoutUser(restUrl))
-              this.hashHistory.push('/')
             }
           }).catch(err => {
             console.error(err)
