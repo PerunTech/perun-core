@@ -41,14 +41,14 @@ class MainMenu extends React.Component {
   }
 
   getNavbarImgJson() {
-    const url = `http://192.168.100.110:9096/mdfr-assets/json/config/NavbarImg.json`
+    const url = `${window.location.origin}${window.assetsLocation}/json/config/NavbarImg.json`
     fetch(url).then(res => res.json()).then(json => {
       this.setState({ navbarImgJson: json })
     }).catch(err => { throw err })
   }
 
   getLanguageOptions() {
-    const url = `http://192.168.100.110:9096/mdfr-assets/json/config/LanguageOptions.json`
+    const url = `${window.location.origin}${window.assetsLocation}/json/config/LanguageOptions.json`
     fetch(url).then(res => res.json()).then(json => {
       this.setState({ languageOptions: json })
     }).catch(err => { throw err })
