@@ -28,9 +28,9 @@ export const svConfig = {
     CUSTOM_GRID: '/ReactElements/getTableFieldList/%session/%gridConfigWeWant',
 
     /* Json schema form configuration and data */
-    GET_FORM_BUILDER: '/table/formStyleTableJsonSchema/%session/%formWeWant',
-    GET_UISCHEMA: '/table/formStyleTableUiSchema/%session/%formWeWant',
-    GET_TABLE_FORMDATA: '/table/formStyleTableData/%session/%object_id/%table_name',
+    GET_FORM_BUILDER: '/ReactElements/getTableJSONSchema/%session/%formWeWant',
+    GET_UISCHEMA: '/ReactElements/getTableUISchema/%session/%formWeWant',
+    GET_TABLE_FORMDATA: '/ReactElements/getTableFormData/%session/%object_id/%table_name',
     GET_DATA_FROM_FORM_MAVEN: '/ReactElements/getTableFormData/%session/%object_id/%table_name',
     GET_UISCHEMA_MAVEN: '/ReactElements/getTableUISchema/%session/%formWeWant',
     GET_FORM_BUILDER_MAVEN: '/ReactElements/getTableJSONSchema/%session/%formWeWant',

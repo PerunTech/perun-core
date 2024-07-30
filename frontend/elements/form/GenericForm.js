@@ -40,6 +40,8 @@ class GenericForm extends React.Component {
       uiSchemaConfigMethod: this.props.uiSchemaConfigMethod,
       tableFormDataMethod: this.props.tableFormDataMethod,
       ddVerbPath: this.props.ddVerbPath,
+      triggerAutoDependentDropdownOnChange: this.props.triggerAutoDependentDropdownOnChange,
+      disableInitialDependentDropdown: this.props.disableInitialDependentDropdown,
       hideBtns: this.props.hideBtns,
       dropLinkParams: {},
       saveExecuted: false,
@@ -83,6 +85,8 @@ class GenericForm extends React.Component {
         fieldCode={fieldCode}
         tableName={this.state.tableName}
         ddVerbPath={this.state.ddVerbPath}
+        triggerAutoDependentDropdownOnChange={this.state.triggerAutoDependentDropdownOnChange}
+        disableInitialDependentDropdown={this.state.disableInitialDependentDropdown}
         spread='right'
       />
     )
