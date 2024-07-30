@@ -4,19 +4,19 @@ import { store, cloneObject, isValidObject } from '..';
 
 export function getFormData(id, reduxKey, formName, uiSchema, formTableData, session, params) {
   let verbPath
-  if (params === 'FORM_DATA' && typeof formTableData !== 'string') {
+  if (params === 'FORM_DATA' && typeof formName !== 'string') {
     store.dispatch({
       id: id,
       type: id + '/FETCH_FORM_FULFILLED',
-      payload: formTableData,
-      payloadExcludedFields: {},
+      payload: formName,
+      payloadExcludedFields: cloneObject(formName),
     })
   } else {
     if (params === 'READ_URL') {
       verbPath = replaceParams(formName, '', session, params)
     } else {
       if (params) {
-        verbPath = svConfig.triglavRestVerbs[formName]
+        verbPath = svConfig.triglavRestVerbs[formName] || formName
         verbPath = replaceParams(verbPath, formName, session, params)
       }
     }
