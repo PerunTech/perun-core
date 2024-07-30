@@ -149,27 +149,25 @@ const LoginForm = (props, context) => {
                 </div>
               )}
             </div>
-            {loginLinks?.length > 0 && (
-              <>
-                <div className='verticalLine' />
-                <div className='right'>
-                  <div className='linkStyle'>
-                    {loginLinks.map((item, index) => {
-                      return (
-                        <div key={`${item.id}_${index}`}>
-                          <Link to={item.href} key={item.id} className={item.className}>
-                            {labels.formatMessage({
-                              id: `perun.login.${item.id}`,
-                              defaultMessage: `perun.login.${item.id}`
-                            })}
-                          </Link>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
+            {loginLinks?.length > 0 && <div className='verticalLine' />}
+            <div className='right'>
+              <div className='linkStyle'>
+                {loginLinks.map((item, index) => {
+                  return (
+                    <div key={`${item.id}_${index}`}>
+                      {item?.href ? <Link to={item.href} key={item.id} className={item.className}>
+                        {labels.formatMessage({
+                          id: `perun.login.${item.id}`,
+                          defaultMessage: `perun.login.${item.id}`
+                        })}
+                      </Link> : <div id={item.id} key={item.id} className={item.className}>
+                        <img src={item.src} className={item.className + '-img'} />
+                      </div>}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </form>
       </div>
