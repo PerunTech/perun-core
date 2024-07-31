@@ -126,7 +126,7 @@ const LoginForm = (props, context) => {
                   })}</span>
                 </button>
                 {ssoData?.length > 0 && ssoData.map(data => (
-                  <button id={`login_submit_saml ${data.id}`} className={`nav-link saml-login ${data.className}`} type='button' onClick={onSamlSubmit}>
+                  <button key={data.id} id={`login_submit_saml ${data.id}`} className={`nav-link saml-login ${data.className}`} type='button' onClick={onSamlSubmit}>
                     <div className='sso-btn-container'>
                       <div className='sso-img-container'>
                         <img src={data.src} />
