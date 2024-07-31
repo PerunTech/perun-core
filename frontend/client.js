@@ -245,6 +245,21 @@ export function persistBundleReducers(listOfBundleReducers) {
 ReactGA.initialize('UA-138995187-1');
 ReactGA.pageview('/');
 
+function getAdditionalLabels(allLabels, locale, language) {
+  // Check if any additional labels should be fetched
+  const additionalLabels = cookies.getCookie('additionalLabels')
+  if (additionalLabels) {
+    redux.dataToRedux((response) => {
+      redux.store.dispatch(updateIntl({ locale: locale, messages: { ...allLabels, ...response } }));
+    },
+      'security',
+      'temp',
+      'MAIN_LABELS',
+      language,
+      additionalLabels
+    );
+  }
+}
 
 export function changeLanguageAndLocale(locale, language) {
   ReactDOM.render(<Loading />, app);
@@ -252,6 +267,7 @@ export function changeLanguageAndLocale(locale, language) {
     redux.dataToRedux((response) => {
       document.cookie = `defaultLocale=${language};max-age=${(365 * 24 * 60 * 60)}`
       redux.store.dispatch(updateIntl({ locale: locale, messages: response }));
+      getAdditionalLabels(response, locale, language)
       app && ReactDOM.render(<App />, app);
     },
       'security',
