@@ -301,13 +301,28 @@ class DependentElements extends React.Component {
       groupPath = elementProperties[0]
     }
     const coreType = elementProperties[1]
-    const elementOrder = formSchema[coreType]?.order
+    let elementOrder = formSchema[coreType]?.order
+    if (groupPath) {
+      elementOrder = formSchema[groupPath][coreType]?.order
+    }
     let nextElementObj
     let newElement
     Object.keys(formSchema).forEach(key => {
-      if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
-        nextElementObj = formSchema[key]
-        newElement = key
+      if (groupPath) {
+        if (key === groupPath) {
+          const sectionFormSchema = formSchema[groupPath]
+          Object.keys(sectionFormSchema).forEach(nestedKey => {
+            if (sectionFormSchema[nestedKey]?.dependentOnField && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
+              nextElementObj = sectionFormSchema[nestedKey]
+              newElement = nestedKey
+            }
+          })
+        }
+      } else {
+        if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
+          nextElementObj = formSchema[key]
+          newElement = key
+        }
       }
     })
     const codelistName = nextElementObj?.codelistName || ''
