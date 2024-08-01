@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { store } from '../../../model'
 import { svConfig } from '../../../config';
 import { Dropdown, findWidget, $, ComponentManager } from '../..';
+import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject } from '../../../functions/utils';
 
 const right = {
@@ -24,6 +25,7 @@ class DependentElements extends React.Component {
   constructor(props) {
     super(props)
     const initialState = {
+      loading: false,
       initialDropdown: null,
       dynamicDropdowns: [],
       spread: this.props.spread || 'right'
@@ -105,12 +107,15 @@ class DependentElements extends React.Component {
     verbPath = verbPath.replace('%searchForValue', codelistName)
     verbPath = verbPath.replace('%rowlimit', '0')
     const restUrl = svConfig.restSvcBaseUrl + verbPath
+    this.setState({ loading: true })
     axios.get(restUrl).then((response) => {
+      this.setState({ loading: false })
       if (response.data) {
         this.generateInitialDropdown(response.data, elementId, selectedVal, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown)
       }
     }).catch((error) => {
       console.log(error)
+      this.setState({ loading: false })
     })
   }
 
@@ -253,7 +258,9 @@ class DependentElements extends React.Component {
         wsPath = wsPath.replace('%selectedVal', parentVal)
       }
       const url = `${window.server}/${wsPath}`
+      this.setState({ loading: true })
       axios.get(url).then((response) => {
+        this.setState({ loading: false })
         if (response.data) {
           let finalResponse = response.data
           // Check if the data is nested
@@ -264,6 +271,7 @@ class DependentElements extends React.Component {
         }
       }).catch((error) => {
         console.log(error)
+        this.setState({ loading: false })
       })
     }
   }
@@ -414,8 +422,10 @@ class DependentElements extends React.Component {
           wsPath = wsPath.replace('%tableName', tableName)
           wsPath = wsPath.replace('%selectedVal', selectedVal)
         }
+        this.setState({ loading: true })
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
+          this.setState({ loading: false })
           if (response.data) {
             if (getAdditionalData && additionalDataKey && response.data[additionalDataKey]) {
               store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data[additionalDataKey] })
@@ -429,6 +439,7 @@ class DependentElements extends React.Component {
           }
         }).catch((error) => {
           console.log(error)
+          this.setState({ loading: false })
         })
       }
     }
@@ -508,6 +519,7 @@ class DependentElements extends React.Component {
   render() {
     return (
       <React.Fragment>
+        {this.state.loading && <Loading />}
         {this.state.initialDropdown}
         {this.state.dynamicDropdowns}
       </React.Fragment>
