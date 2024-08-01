@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { svConfig } from '../../../config';
+import { Loading } from '../../../components/ComponentsIndex';
 import DependentElements from './DependentElements';
 import { findWidget, findSectionName } from '../..';
 
@@ -10,6 +11,7 @@ class DependencyDropdown extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      loading: false,
       component: null
     }
   }
@@ -45,7 +47,7 @@ class DependencyDropdown extends React.Component {
       /* The dropdowns are external, so we need to fetch the config and schema
       for the svarog table before generating the elements */
       // c is for component
-
+      c.setState({ loading: true })
       axios.all([this.getUiSchema(c), this.getConfig(c)])
         .then(axios.spread(function (uischema, formConfig) {
           // Both requests are now complete
@@ -59,17 +61,24 @@ class DependencyDropdown extends React.Component {
               fieldCode={fieldCode}
               elementId={'root_' + sectionName + '_' + fieldCode}
               spread={c.props.spread}
-            />
+            />,
+            loading: false
           })
         })).catch((error) => {
           // error in one or multiple requests
           console.warn(error)
+          c.setState({ loading: false })
         })
     }
   }
 
   render() {
-    return this.state.component
+    return (
+      <React.Fragment>
+        {this.state.loading && <Loading />}
+        {this.state.component}
+      </React.Fragment>
+    )
   }
 }
 
