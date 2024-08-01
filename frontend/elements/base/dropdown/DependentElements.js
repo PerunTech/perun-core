@@ -203,7 +203,7 @@ class DependentElements extends React.Component {
   }
 
   generateExisting = (elementId, selectedVal, parentVal) => {
-    const { formSchema, svSession } = this.props
+    const { formSchema, svSession, tableName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -245,6 +245,13 @@ class DependentElements extends React.Component {
 
     if (codelistName) {
       const wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${parentVal}`
+      if (ddVerbPath) {
+        // Replace some of the params in the provided WS path
+        wsPath = ddVerbPath
+        wsPath = wsPath.replace('%session', svSession)
+        wsPath = wsPath.replace('%tableName', tableName)
+        wsPath = wsPath.replace('%selectedVal', parentVal)
+      }
       const url = `${window.server}/${wsPath}`
       axios.get(url).then((response) => {
         if (response.data) {
@@ -293,7 +300,7 @@ class DependentElements extends React.Component {
   }
 
   onChange = (elementId, isInitial) => {
-    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession } = this.props
+    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -399,7 +406,14 @@ class DependentElements extends React.Component {
       }
 
       if (codelistName) {
-        const wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${selectedVal}`
+        let wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${selectedVal}`
+        if (ddVerbPath) {
+          // Replace some of the params in the provided WS path
+          wsPath = ddVerbPath
+          wsPath = wsPath.replace('%session', svSession)
+          wsPath = wsPath.replace('%tableName', tableName)
+          wsPath = wsPath.replace('%selectedVal', selectedVal)
+        }
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
           if (response.data) {
