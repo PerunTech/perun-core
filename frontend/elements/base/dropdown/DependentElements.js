@@ -208,7 +208,7 @@ class DependentElements extends React.Component {
   }
 
   generateExisting = (elementId, selectedVal, parentVal) => {
-    const { formSchema, svSession, tableName } = this.props
+    const { formSchema, svSession, tableName, ddVerbPath } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
