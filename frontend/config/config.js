@@ -2,7 +2,7 @@
 export const labelBasePath = 'perun'
 
 // translate grid and forms
-export const translateComponents = window.translateGridLabels?.toLowerCase() === 'true' || false
+export const translateComponents = window.translateGridLabels?.toLowerCase() === 'true' ? true : false
 export const svConfig = {
   restSvcBaseUrl: window.server,
   isDebug: process.env.NODE_ENV !== 'production',
