@@ -117,6 +117,9 @@ axios.interceptors.response.use(
           alertUser(true, 'error', title, msg);
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
+        case 403:
+          alertUser(true, 'error', title, msg);
+          break;
         case 502:
           alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
           break;
