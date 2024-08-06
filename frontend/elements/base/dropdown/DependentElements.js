@@ -249,7 +249,7 @@ class DependentElements extends React.Component {
     }
 
     if (codelistName) {
-      const wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${parentVal}`
+      let wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${parentVal}`
       if (ddVerbPath) {
         // Replace some of the params in the provided WS path
         wsPath = ddVerbPath
