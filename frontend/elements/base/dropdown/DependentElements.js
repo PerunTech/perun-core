@@ -40,21 +40,24 @@ class DependentElements extends React.Component {
   }
 
   componentDidMount() {
-    const { formConfig, formSchema } = this.props
+    const { formConfig, formSchema, sectionName } = this.props
     const formData = Object.assign({}, this.props.formData)
-    const sectionName = this.props.sectionName
     if (formData && formData.constructor === Object && Object.keys(formData).length > 0) {
       if (formData[sectionName]) {
         const subEls = Object.keys(formData[sectionName])
         for (let i = 0; i < subEls.length; i++) {
-          if (subEls[i] === findWidget(this.props.formSchema, 'ui:widget', 'DependencyDropdown')) {
+          if (subEls[i] === findWidget(formSchema, 'ui:widget', 'DependencyDropdown')) {
             this.fetchInitialCodelist(subEls[i], formData[sectionName][subEls[i]])
-          } else if (findWidget(this.props.formSchema, 'dependentOn', subEls[i - 1])) {
-            this.generateExisting(
-              'root_' + sectionName + '_' + subEls[i - 1],
-              formData[sectionName][subEls[i]],
-              formData[sectionName][subEls[i - 1]]
-            )
+          } else if (formSchema[sectionName]?.[subEls[i]]?.dependentOnField) {
+            const parentElement = formSchema[sectionName]?.[subEls[i]]?.dependentOnField
+            const elementOrder = formSchema[sectionName]?.[parentElement]?.order
+            if (formSchema[sectionName]?.[subEls[i]]?.order === elementOrder + 1) {
+              this.generateExisting(
+                'root_' + sectionName + subEls[i],
+                formData[sectionName]?.[subEls[i]],
+                formData[sectionName]?.[subEls[i - 1]]
+              )
+            }
           }
         }
       } else {
@@ -77,7 +80,7 @@ class DependentElements extends React.Component {
               this.generateExisting(
                 'root_' + subEls[i],
                 formData[subEls[i]],
-                formData[this.props.formSchema?.[subEls[i]]?.dependentOnField]
+                formData[formSchema?.[subEls[i]]?.dependentOnField]
               )
             }
           }
@@ -208,23 +211,35 @@ class DependentElements extends React.Component {
   }
 
   generateExisting = (elementId, selectedVal, parentVal) => {
-    const { formSchema, svSession, tableName, ddVerbPath } = this.props
+    const { formSchema, svSession, tableName, ddVerbPath, sectionName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
-    if (this.props.sectionName) {
+    if (sectionName) {
       groupPath = elementProperties[0]
     }
     const coreType = elementProperties[1]
-    const elementOrder = formSchema[coreType]?.order
+    let elementOrder = formSchema[coreType]?.order
     let nextElementObj
     let newElement
-    Object.keys(formSchema).forEach(key => {
-      if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder) {
-        nextElementObj = formSchema[key]
-        newElement = key
-      }
-    })
+
+    if (groupPath) {
+      Object.keys(formSchema[groupPath]).forEach(key => {
+        elementOrder = formSchema[groupPath][key]?.order
+        if (formSchema[groupPath][key]?.dependentOnField && formSchema[groupPath][key]?.order === elementOrder) {
+          nextElementObj = formSchema[groupPath][key]
+          newElement = key
+        }
+      })
+    } else {
+      Object.keys(formSchema).forEach(key => {
+        if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder) {
+          nextElementObj = formSchema[key]
+          newElement = key
+        }
+      })
+    }
+
     const codelistName = nextElementObj?.codelistName || ''
 
     if (this.props.formInstance) {
