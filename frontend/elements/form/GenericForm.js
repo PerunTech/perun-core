@@ -683,7 +683,7 @@ class GenericForm extends React.Component {
     if (this.props.bypassInputChange) {
       this.state.bypassInputChange(event.formData, fieldName, fieldValue)
     } else {
-      this.setState({ formTableData: event.formData })
+      this.setState({ formTableData: { ...this.state.formTableData, ...event.formData } })
     }
   }
 
