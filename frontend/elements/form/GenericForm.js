@@ -39,6 +39,7 @@ class GenericForm extends React.Component {
       addDocument: this.props.addDocument,
       uiSchemaConfigMethod: this.props.uiSchemaConfigMethod,
       tableFormDataMethod: this.props.tableFormDataMethod,
+      customDependencyDropdownComponent: this.props.customDependencyDropdownComponent,
       ddVerbPath: this.props.ddVerbPath,
       triggerAutoDependentDropdownOnChange: this.props.triggerAutoDependentDropdownOnChange,
       disableInitialDependentDropdown: this.props.disableInitialDependentDropdown,
@@ -75,6 +76,7 @@ class GenericForm extends React.Component {
     const sectionName = findSectionName(this.state.uischema, fieldCode)
     return (
       <DependencyDropdown
+        customDependencyDropdownComponent={this.state.customDependencyDropdownComponent}
         formInstance={this}
         formId={this.state.id}
         formSchema={this.state.uischema}
