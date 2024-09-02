@@ -33,7 +33,7 @@ function reInitPlugins(storageBundles) {
     })
     setTimeout(() => {
         store.dispatch({ type: 'fetchingRoutes', payload: false })
-    }, 30000)
+    }, 15000)
 }
 
 function reRegisterRouter(name, plugin) {
