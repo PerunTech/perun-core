@@ -10,32 +10,32 @@ import * as localRoutes from '.';
  */
 let storageBundles
 
-/* reload plugins and append scripts in body f.r  */
 function loadPlugin(name, url) {
-        return new Promise((resolve, reject) => {
-            // Create a script element.
-            const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
+    return new Promise((resolve, reject) => {
+        // Create a script element.
+        const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
 
-            script.onload = () => // revise compatibility(IE) and window[name] gimmick.
-                resolve({ id: name, value: reRegisterRouter(name, (window[name][name] || window[name])) });
-            script.onerror = () => // Do better messages.
-                reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
+        script.onload = () => // revise compatibility(IE) and window[name] gimmick.
+            resolve({ id: name, value: reRegisterRouter(name, (window[name][name] || window[name])) });
+        script.onerror = () => // Do better messages.
+            reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
 
-            script.src = url; // images load on this line. Browser implementaion specific.
-            document.body.appendChild(script); // JS scripts load on this line.
-        });
+        script.src = url; // images load on this line. Browser implementaion specific.
+        document.body.appendChild(script); // JS scripts load on this line.
+    });
 }
 
 function reInitPlugins(storageBundles) {
+    store.dispatch({ type: 'fetchingRoutes', payload: true })
     storageBundles.map(bundle => {
-        /* tmp exception for edbar, until it gets replaced with iacs.claims f.r */
         if (bundle.id !== 'edbar')
             loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js);
     })
+    setTimeout(() => {
+        store.dispatch({ type: 'fetchingRoutes', payload: false })
+    }, 30000)
 }
 
-
-/* after refresh register is empty, this action will load all plugin routes + local from perun-core f.r */
 function reRegisterRouter(name, plugin) {
     plugin.routes && [...plugin.routes].map(route => router.registerRoute(route.name, route));
     plugin.id = name;
@@ -49,14 +49,13 @@ function reRegisterRouter(name, plugin) {
 const _registry = {};
 
 export const router = (function () {
-    // Route templater.
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage'));
-    /* if in storage bundles are already loaded, that means that inital login has passed and this is window reload action f.r */
-    if (storageBundles) {
+    const navigationType = window.performance.getEntriesByType('navigation')[0]
+    if (navigationType.type === 'reload') {
         reInitPlugins(storageBundles)
     }
 
-
+    // Route templater.
     const createRoute = (name, config) => {
         const { path, render, isExact } = config;
 

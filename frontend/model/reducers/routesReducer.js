@@ -1,11 +1,14 @@
-export function routesReducer (state = {
-// add inital routes.
+export function routesReducer(state = {
+  loading: false,
 }, action) {
-    switch (action.type) {
-        case 'refreshRoutes': {
-            return {...state, ...action.value};
-        } 
+  switch (action.type) {
+    case 'fetchingRoutes': {
+      return { ...state, loading: action.payload }
     }
+    case 'refreshRoutes': {
+      return { ...state, ...action.value };
+    }
+  }
 
-    return state;
+  return state;
 }
