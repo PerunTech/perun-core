@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { MainApp } from 'containers/ContainersIndex';
-import { changeLanguageAndLocale } from '../../client';
-import * as cookies from '../../functions/cookies';
+import React, { useEffect, useState } from 'react'
+import { connect } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { MainApp } from 'containers/ContainersIndex'
+import { changeLanguageAndLocale } from '../../client'
+import * as cookies from '../../functions/cookies'
 import PropTypes from 'prop-types';
-import { store } from '../../model';
-import { isValidObject } from '../../functions/utils';
-import axios from 'axios';
+import { store } from '../../model'
+import { isValidObject } from '../../functions/utils'
+import axios from 'axios'
 
-const HomeMenu = ({ svSession, intl }) => {
+const HomeMenu = (props, context) => {
   const [menuItems, setMenuItems] = useState([]);
   const [activeLanguage, setActiveLanguage] = useState('');
 
   useEffect(() => {
-    if (!svSession) {
+    if (!props.svSession) {
       fetchHeaderJson();
       setActiveLanguage(cookies.getCookie('defaultLocale'));
       ssoAltLogin();
     }
-  }, [svSession]);
+  }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
     let url = `https://dnfr.perun.tech/mdfr-assets/json/config/Header.json`;
@@ -82,7 +82,7 @@ const HomeMenu = ({ svSession, intl }) => {
               id={element.id}
               className={`nav-link ${element.className || 'link-default'}`}
             >
-              {intl.formatMessage({ id: `perun.login.${element.label}`, defaultMessage: `perun.login.${element.label}` })}
+              {context.intl.formatMessage({ id: `perun.login.${element.label}`, defaultMessage: `perun.login.${element.label}` })}
             </Link>
           </li>
         );
@@ -121,13 +121,13 @@ const HomeMenu = ({ svSession, intl }) => {
   };
 
   let className = 'navbar sticky-top justify-content-end navbar-styled fadeIn ';
-  if (!svSession) className += 'hide-navbar';
+  if (!props.svSession) className += 'hide-navbar';
 
   return (
     <React.Fragment>
-      {!svSession && <div id='header' className='header fadeIn'></div>}
+      {!props.svSession && <div id='header' className='header fadeIn'></div>}
       <div id='navbar' className={className}>
-        {!svSession ? <ul className='nav'>{renderMenuItems()}</ul> : <MainApp />}
+        {!props.svSession ? <ul className='nav'>{renderMenuItems()}</ul> : <MainApp />}
       </div>
     </React.Fragment>
   );
@@ -135,8 +135,10 @@ const HomeMenu = ({ svSession, intl }) => {
 
 HomeMenu.propTypes = {
   svSession: PropTypes.object,
-  intl: PropTypes.object.isRequired,
 };
+HomeMenu.contextTypes = {
+  intl: PropTypes.object.isRequired
+}
 
 const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
