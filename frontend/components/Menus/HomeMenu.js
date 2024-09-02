@@ -23,10 +23,10 @@ const HomeMenu = (props, context) => {
   }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
-    let url = `https://dnfr.perun.tech/mdfr-assets/json/config/Header.json`;
+    let url = `${window.location.origin}${window.assets}/json/config/Header.json`;
 
     if (window.assetsContext) {
-      url = `https://dnfr.perun.tech/mdfr-assets/json/config/${window.assetsContext}/Header.json`;
+      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/Header.json`;
     }
 
     try {
