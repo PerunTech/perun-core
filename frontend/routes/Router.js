@@ -44,7 +44,7 @@ function reRegisterRouter(name, plugin) {
     plugin.routes && [...plugin.routes].map(route => router.registerRoute(route.name, route));
     plugin.id = name;
     storageBundles[name] = plugin;
-    if (counter === storageBundles?.length) {
+    if (counter === storageBundles?.length - 1) {
         store.dispatch({ type: 'fetchingRoutes', payload: false })
         counter = 0
     }
