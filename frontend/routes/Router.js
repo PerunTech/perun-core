@@ -51,7 +51,7 @@ const _registry = {};
 export const router = (function () {
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage'));
     const navigationType = window.performance.getEntriesByType('navigation')[0]
-    if (navigationType.type === 'reload') {
+    if (navigationType.type === 'reload' && storageBundles) {
         reInitPlugins(storageBundles)
     }
 
