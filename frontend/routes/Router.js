@@ -9,7 +9,7 @@ import * as localRoutes from '.';
  * and App integrity is preserved. 
  */
 let storageBundles
-
+let counter = 0
 function loadPlugin(name, url) {
     return new Promise((resolve, reject) => {
         // Create a script element.
@@ -22,6 +22,7 @@ function loadPlugin(name, url) {
 
         script.src = url; // images load on this line. Browser implementaion specific.
         document.body.appendChild(script); // JS scripts load on this line.
+        counter++
     });
 }
 
@@ -31,15 +32,15 @@ function reInitPlugins(storageBundles) {
         if (bundle.id !== 'edbar')
             loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js);
     })
-    setTimeout(() => {
-        store.dispatch({ type: 'fetchingRoutes', payload: false })
-    }, 15000)
 }
 
 function reRegisterRouter(name, plugin) {
     plugin.routes && [...plugin.routes].map(route => router.registerRoute(route.name, route));
     plugin.id = name;
     storageBundles[name] = plugin;
+    if (counter === storageBundles?.length) {
+        store.dispatch({ type: 'fetchingRoutes', payload: false })
+    }
     return plugin;
 }
 
@@ -52,6 +53,7 @@ export const router = (function () {
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage'));
     const navigationType = window.performance.getEntriesByType('navigation')[0]
     if (navigationType.type === 'reload' && storageBundles) {
+        counter = 0
         reInitPlugins(storageBundles)
     }
 
