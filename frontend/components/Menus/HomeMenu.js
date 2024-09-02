@@ -13,6 +13,7 @@ const HomeMenu = (props, context) => {
   const [menuItems, setMenuItems] = useState([]);
   const [activeLanguage, setActiveLanguage] = useState('');
 
+  // if (!props.svSession) is the new flag used to determine if the component should behave like <Internal,<External. This was the old way of rendering changed after 01.09.2024
   useEffect(() => {
     if (!props.svSession) {
       fetchHeaderJson();
