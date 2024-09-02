@@ -16,13 +16,19 @@ function loadPlugin(name, url) {
         const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
 
         script.onload = () => // revise compatibility(IE) and window[name] gimmick.
+        {
             resolve({ id: name, value: reRegisterRouter(name, (window[name][name] || window[name])) });
+            counter++
+        }
         script.onerror = () => // Do better messages.
+        {
             reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
+            counter++
+        }
 
         script.src = url; // images load on this line. Browser implementaion specific.
         document.body.appendChild(script); // JS scripts load on this line.
-        counter++
+
     });
 }
 
@@ -40,6 +46,7 @@ function reRegisterRouter(name, plugin) {
     storageBundles[name] = plugin;
     if (counter === storageBundles?.length) {
         store.dispatch({ type: 'fetchingRoutes', payload: false })
+        counter = 0
     }
     return plugin;
 }
@@ -53,7 +60,6 @@ export const router = (function () {
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage'));
     const navigationType = window.performance.getEntriesByType('navigation')[0]
     if (navigationType.type === 'reload' && storageBundles) {
-        counter = 0
         reInitPlugins(storageBundles)
     }
 
