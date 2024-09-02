@@ -1,5 +1,5 @@
 import React from 'react'
-import { MainMenu, Loading, Tour } from 'components/ComponentsIndex'
+import { MainMenu } from 'components/ComponentsIndex'
 
 const MainApp = () => {
   return (
