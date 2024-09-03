@@ -9,31 +9,40 @@ import * as localRoutes from '.';
  * and App integrity is preserved. 
  */
 let storageBundles
+let counter = 0
 
 function loadPlugin(name, url) {
     return new Promise((resolve, reject) => {
+        ++counter
         // Create a script element.
         const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
 
-        script.onload = () => // revise compatibility(IE) and window[name] gimmick.
-            resolve({ id: name, value: reRegisterRouter(name, (window[name][name] || window[name])) });
-        script.onerror = () => // Do better messages.
+        script.onload = () => {// revise compatibility(IE) and window[name] gimmick.
+            resolve({ id: name, value: reRegisterRouter(name, (window?.[name]?.[name] || window?.[name])) });
+        }
+        script.onerror = () => {// Do better messages.
             reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
+        }
 
         script.src = url; // images load on this line. Browser implementaion specific.
         document.body.appendChild(script); // JS scripts load on this line.
+
+        if (counter === storageBundles?.length - 1) {
+            setTimeout(() => {
+                store.dispatch({ type: 'fetchingRoutes', payload: false })
+                counter = 0
+            }, 1000)
+        }
     });
 }
 
 function reInitPlugins(storageBundles) {
     store.dispatch({ type: 'fetchingRoutes', payload: true })
     storageBundles.map(bundle => {
-        if (bundle.id !== 'edbar')
+        if (bundle.id !== 'edbar' && bundle.id !== 'perun-core') {
             loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js);
+        }
     })
-    setTimeout(() => {
-        store.dispatch({ type: 'fetchingRoutes', payload: false })
-    }, 10000)
 }
 
 function reRegisterRouter(name, plugin) {
