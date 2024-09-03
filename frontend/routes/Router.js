@@ -31,13 +31,13 @@ function loadPlugin(name, url) {
             reject(new Error(`Script failed to load for plugin ${name}.`));
         };
 
-        script.src = `http://192.168.100.159:9089${url}`;
+        script.src = url
         document.body.appendChild(script);
     });
 }
 
 /**
- * Initializes and loads plugins based on the provided storageBundles.
+ * Initializes and loads plug   ins based on the provided storageBundles.
  * Ensures plugins are loaded in the correct order according to their dependencies.
  * @param {Array} storageBundles - The list of plugin bundles to load.
  */
@@ -50,7 +50,11 @@ function reInitPlugins(storageBundles) {
     // Create a list of promises for loading plugins
     const loadPromises = sortedBundles.map(bundle => {
         if (bundle.id !== 'edbar' && bundle.id !== 'perun-core') {
-            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js);
+            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js)
+                .catch(error => {
+                    console.error(`Error loading plugin ${bundle.id}:`, error);
+                    return null; // Continue with other plugins even if one fails
+                });
         }
         return Promise.resolve();
     });
@@ -75,6 +79,7 @@ function sortBundlesByDependencies(bundles) {
     const bundleMap = new Map();
     const sorted = [];
     const visited = new Set();
+    const visiting = new Set();
 
     bundles.forEach(bundle => {
         bundleMap.set(bundle.id, bundle);
@@ -86,11 +91,15 @@ function sortBundlesByDependencies(bundles) {
      */
     const visit = (bundle) => {
         if (!bundle || visited.has(bundle.id)) return;
-        visited.add(bundle.id);
+        if (visiting.has(bundle.id)) throw new Error(`Circular dependency detected: ${bundle.id}`);
+
+        visiting.add(bundle.id);
 
         const dependencies = JSON.parse(bundle.deps || '[]');
         dependencies.forEach(dep => visit(bundleMap.get(dep)));
 
+        visiting.delete(bundle.id);
+        visited.add(bundle.id);
         sorted.push(bundle);
     };
 
