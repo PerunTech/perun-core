@@ -50,24 +50,21 @@ function reInitPlugins(storageBundles) {
     // Create a list of promises for loading plugins
     const loadPromises = sortedBundles.map(bundle => {
         if (bundle.id !== 'edbar' && bundle.id !== 'perun-core') {
-            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js)
-                .catch(error => {
-                    console.error(`Error loading plugin ${bundle.id}:`, error);
-                    return null; // Continue with other plugins even if one fails
-                });
+            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
+                console.error(`Error loading plugin ${bundle.id}:`, error);
+                return null; // Continue with other plugins even if one fails
+            });
         }
         return Promise.resolve();
     });
 
     // Wait for all plugins to load
-    Promise.all(loadPromises)
-        .then(() => {
-            store.dispatch({ type: 'fetchingRoutes', payload: false });
-        })
-        .catch((error) => {
-            console.error('Error loading plugins:', error);
-            store.dispatch({ type: 'fetchingRoutes', payload: false });
-        });
+    Promise.all(loadPromises).then(() => {
+        store.dispatch({ type: 'fetchingRoutes', payload: false });
+    }).catch((error) => {
+        console.error('Error loading plugins:', error);
+        store.dispatch({ type: 'fetchingRoutes', payload: false });
+    });
 }
 
 /**
