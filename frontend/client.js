@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { Provider, connect } from 'react-redux'; // these should be represented in /model and imported from there.
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
-import PerunCoreErrorHanlder from './functions/PerunCoreErrorHanlder'
 /* assets */
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
@@ -38,7 +37,7 @@ import * as cookies from './functions/cookies'
 /* -------- */
 export {
   React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
-  axios, Loading, createHashHistory, PerunCoreErrorHanlder
+  axios, Loading, createHashHistory,
 };
 
 /* elements-base */
