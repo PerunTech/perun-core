@@ -51,6 +51,7 @@ class ModuleMenu extends React.Component {
         } else {
           if (data) {
             store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
+            localStorage.setItem('bundleStorage', JSON.stringify(data.data));
             for (let i = 0; i < data.data.length; i++) {
               const plugin = data.data[i]
               // Check if the plugin should be directly accessed
@@ -69,7 +70,6 @@ class ModuleMenu extends React.Component {
                       localStorage.setItem('indexReducers', i);
                     }
                   })
-                  localStorage.setItem('bundleStorage', JSON.stringify(arrayOfBundels));
                   this.loadPlugins(data.data);
                 }
               }
@@ -159,7 +159,6 @@ class ModuleMenu extends React.Component {
     if (deps.length > 0) {
       depsObjects = this.depsFinder(plugins, deps);
     }
-    localStorage.setItem('bundleStorage', JSON.stringify(depsObjects));
     depsObjects.push(directAccessPlugin)
     this.loadPluginsForDirectAccess(depsObjects);
   }
