@@ -17,9 +17,7 @@ class Landing extends React.Component {
   render() {
     return (
       <React.Fragment>
-        {/* <div id='main' className={'main ' + style['grid-container'] + ' ' + style.fadeIn}> */}
         <Route path='/home/:logonComp' render={props => <Logon {...props} />} />
-        {/* </div> */}
       </React.Fragment>
     )
   }
