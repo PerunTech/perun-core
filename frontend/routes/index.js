@@ -17,6 +17,5 @@
 export { Home } from './local/Home';
 export { Main } from './local/Main';
 export { AdminConsole } from './local/AdminConsole';
-export { DocumentManagerRoute } from './local/DocumentManagerRoute';
 export { UserGuideRoute } from './local/UserGuideRoute';
 export { NotFoundRoute } from './local/404'

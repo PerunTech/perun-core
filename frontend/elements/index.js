@@ -22,9 +22,6 @@ export { default as FormManager } from './form/FormManager';
 export { default as GridManager } from './grid/GridManager';
 export { default as ExportableGrid } from './grid/ExportableGrid';
 
-/* navigator, required by menu */
-export { default as ReduxNavigator } from './navigator/ReduxNavigator';
-
 /* These should be moved to client.js */
 export { default as Draggable, DraggableCore } from 'react-draggable';
 // export { Select } from 'react-select';

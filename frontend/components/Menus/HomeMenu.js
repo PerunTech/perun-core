@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { MainApp } from 'containers/ContainersIndex'
+import { MainMenu } from 'components/ComponentsIndex'
 import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import PropTypes from 'prop-types';
@@ -128,7 +128,7 @@ const HomeMenu = (props, context) => {
     <React.Fragment>
       {!props.svSession && <div id='header' className='header fadeIn'></div>}
       <div id='navbar' className={className}>
-        {!props.svSession ? <ul className='nav'>{renderMenuItems()}</ul> : <MainApp />}
+        {!props.svSession ? <ul className='nav'>{renderMenuItems()}</ul> : <MainMenu />}
       </div>
     </React.Fragment>
   );
