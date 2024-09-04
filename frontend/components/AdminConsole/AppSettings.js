@@ -67,6 +67,9 @@ class AppSettings extends React.Component {
 
   componentDidMount() {
     if (this.props) {
+      if (!this.props.accessAdminConsole) {
+        window.history.back()
+      }
       if (this.props.svSession) {
         this.setState({ sessionIsGranted: true }, () => this.getMenu())
         if (document.getElementById('identificationScreen')) {
@@ -851,7 +854,8 @@ class AppSettings extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  svSession: state.security.svSession
+  svSession: state.security.svSession,
+  accessAdminConsole: state.security.accessAdminConsole
 })
 
 AppSettings.contextTypes = {

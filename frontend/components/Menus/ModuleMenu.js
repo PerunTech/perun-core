@@ -58,6 +58,9 @@ class ModuleMenu extends React.Component {
         store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
         localStorage.setItem('bundleStorage', JSON.stringify(data.data));
         for (let i = 0; i < data.data.length; i++) {
+          if (data.data[i]?.id === 'perun-core') {
+            store.dispatch({ type: 'accessAdminConsole', payload: true });
+          }
           const plugin = data.data[i]
           // Check if the plugin should be directly accessed
           if (plugin.cardDirectAccess) {
