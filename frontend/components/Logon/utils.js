@@ -291,7 +291,7 @@ export function submitForm(path, method, params) {
   form.method = method;
   form.action = path;
   for (const key in params) {
-    if (params.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
       const hiddenField = document.createElement('input');
       hiddenField.type = 'hidden';
       hiddenField.name = key;

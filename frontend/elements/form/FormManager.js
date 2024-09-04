@@ -1,4 +1,6 @@
 import React from 'react';
+import GenericForm from './GenericForm'
+
 export default class FormManager extends React.Component {
   static generateForm(
     id, configFormName, params, reducer, method, uiSchemaConfigMethod, tableFormDataMethod,
