@@ -358,22 +358,10 @@ class GenericGrid extends React.Component {
 
     if (this.props.gridDataLoaded !== nextProps.gridDataLoaded || this.props.gridData !== nextProps.gridData) {
       if (nextProps.gridDataLoaded === false && nextProps.gridData.constructor !== Array) {
-        let errorMessage = 'A system error occured, please contact the IT administrator.'
-        try {
-          errorMessage = nextProps.gridData.response.data
-        } catch (error) {
-          console.log(error)
-        } finally {
-          this.setState({
-            hideLoader: true,
-            alert: alertUser(
-              true, 'error',
-              this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.load_data_failed`, defaultMessage: `${labelBasePath}.main.grids.load_data_failed` }),
-              errorMessage,
-              () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, undefined
-            )
-          })
-        }
+        const title = nextProps.gridData?.response?.data?.title || nextProps.gridData
+        const msg = nextProps.gridData?.response?.data?.message || ''
+        alertUser(true, 'error', title, msg)
+        this.setState({ hideLoader: true })
       }
     }
 
