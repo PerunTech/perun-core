@@ -7,6 +7,7 @@ export default function security(state = {
   svMessage: undefined,
   status: undefined,
   saml: false,
+  accessAdminConsole: false,
   data: new Object
 }, action) {
   switch (action.type) {
@@ -91,8 +92,12 @@ export default function security(state = {
         svTitle: undefined,
         svMessage: undefined,
         status: undefined,
-        saml: false
+        saml: false,
+        accessAdminConsole: false
       }
+    }
+    case 'accessAdminConsole': {
+      return { ...state, accessAdminConsole: action.payload };
     }
   }
   return state
