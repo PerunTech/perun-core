@@ -4,7 +4,6 @@ import { store } from '../model';
 import * as localRoutes from '.';
 
 let storageBundles = [];
-
 /**
  * Loads a plugin by dynamically creating a script element.
  * @param {string} name - The name of the plugin.
@@ -131,10 +130,7 @@ const _registry = {};
 export const router = (function () {
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage')) || [];
 
-    const navigationType = window.performance.getEntriesByType('navigation')[0];
-    if (navigationType.type === 'reload') {
-        reInitPlugins(storageBundles);
-    }
+    reInitPlugins(storageBundles);
 
     /**
      * Creates a Route component based on the provided configuration.
