@@ -4,14 +4,14 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import { svConfig } from '../../config';
-import { store, logoutUser } from '../../model';
-import { alertUser } from '../../elements';
-import { pluginManager } from '../../routes/PluginManager';
-import { Loading } from '../ComponentsIndex';
 import queryString from 'query-string';
+import { Loading } from '../ComponentsIndex';
+import { store } from '../../model';
+import { pluginManager } from '../../routes/PluginManager';
+import { alertUser } from '../../elements';
+import { svConfig } from '../../config';
 
-let arrayOfBundels
+let arrayOfBundles
 class ModuleMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -37,52 +37,55 @@ class ModuleMenu extends React.Component {
   }
 
   componentDidMount() {
-    if (document.getElementById('identificationScreen')) {
-      document.getElementById('identificationScreen').className = 'identificationScreen'
-      document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
+    this.transformIdScreen()
+    this.getConfigCards()
+  }
+
+  transformIdScreen = () => {
+    const idScreen = document.getElementById('identificationScreen')
+    if (idScreen) {
+      idScreen.className = 'identificationScreen'
+      idScreen.innerText = this.context.intl.formatMessage({
         id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
       })
     }
+  }
 
-    axios.get(svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB + this.props.svSession)
-      .then(({ data }) => {
-        if (data.title === 'error.invalid_session') {
-          alertUser(true, data.type.toLowerCase(), data.message, null, this.closeAlert)
-        } else {
-          if (data) {
-            store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
-            localStorage.setItem('bundleStorage', JSON.stringify(data.data));
-            for (let i = 0; i < data.data.length; i++) {
-              const plugin = data.data[i]
-              // Check if the plugin should be directly accessed
-              if (plugin.cardDirectAccess) {
-                // Break out of the loop and prepare the plugin (and its dependencies) for the direct access
-                this.setState({ loading: true, hasCardForDirectAccess: true }, () => this.preparePluginsForDirectAccess(plugin, data.data))
-                break;
-              } else {
-                // If the loop is finished, continue loading all available plugins
-                if (i === data.data.length - 1) {
-                  let i = 0;
-                  arrayOfBundels = data.data
-                  arrayOfBundels.map(item => {
-                    if (item.hasPersistReducer) {
-                      i++
-                      localStorage.setItem('indexReducers', i);
-                    }
-                  })
-                  this.loadPlugins(data.data);
+  getConfigCards = () => {
+    const url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`
+    axios.get(url).then(({ data }) => {
+      if (data) {
+        store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
+        localStorage.setItem('bundleStorage', JSON.stringify(data.data));
+        for (let i = 0; i < data.data.length; i++) {
+          const plugin = data.data[i]
+          // Check if the plugin should be directly accessed
+          if (plugin.cardDirectAccess) {
+            // Break out of the loop and prepare the plugin (and its dependencies) for the direct access
+            this.setState({ loading: true, hasCardForDirectAccess: true }, () => this.preparePluginsForDirectAccess(plugin, data.data))
+            break;
+          } else {
+            // If the loop is finished, continue loading all available plugins
+            if (i === data.data.length - 1) {
+              let i = 0;
+              arrayOfBundles = data.data
+              arrayOfBundles.map(item => {
+                if (item.hasPersistReducer) {
+                  i++
+                  localStorage.setItem('indexReducers', i);
                 }
-              }
+              })
+              this.loadPlugins(data.data);
             }
           }
-          //data && this.loadPlugins(data.data); // go to processing / script execution.
         }
-      })
-      .catch((err) => {
-        console.log(err)  // always print the error first!
-        alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
-      })
-    // }
+      }
+    }).catch((err) => {
+      console.error(err)
+      const title = err.response?.data?.title || err
+      const msg = err.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    })
   }
 
   /**
@@ -491,24 +494,12 @@ class ModuleMenu extends React.Component {
     });
   }
 
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
-  }
-
-  logout = () => {
-    const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.svSession
-    store.dispatch(logoutUser(restUrl))
-  }
-
-
   render() {
-    const { cards, loading, hasCardForDirectAccess, alert } = this.state;
+    const { cards, loading, hasCardForDirectAccess } = this.state;
 
     return (this.routeGsaa || loading)
       ? <Loading />
       : <div id='holderCards' className='holderCards'>
-        {alert}
         {!hasCardForDirectAccess ? Object.keys(cards).length < 5
           ? <div id='modMainGridOneRow' className='modMainGridOneRow' >{Object.values(cards)}</div>
           : <div id='modMainGrid' className={'modMainGrid'}>{Object.values(cards)}</div> : <></>}
