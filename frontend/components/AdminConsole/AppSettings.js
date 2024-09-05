@@ -169,11 +169,6 @@ class AppSettings extends React.Component {
     store.dispatch(logoutUser(restUrl))
   }
 
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
-  }
-
   showUsersFn() {
     if (this.state.selectedRowStatus && this.state.selectedRowObjId) {
       this.getUserGroups()
