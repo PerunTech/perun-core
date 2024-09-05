@@ -45,8 +45,9 @@ class ModuleMenu extends React.Component {
 
   getConfigCards = () => {
     const url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`
-    axios.get(url).then(({ data }) => {
-      if (data) {
+    axios.get(url).then(res => {
+      if (res.data?.data) {
+        const data = res.data
         store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
         localStorage.setItem('bundleStorage', JSON.stringify(data.data));
         for (let i = 0; i < data.data.length; i++) {
