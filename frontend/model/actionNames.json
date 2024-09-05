@@ -3,7 +3,7 @@
   "loginPending": "LOGIN_PENDING",
   "loginFulfilled": "LOGIN_FULFILLED",
   "loginSAML": "LOGIN_FULFILLED_SAML",
-  "loginIacs": "LOGIN_IACS_FULFILLED",
+  "loginCustom": "LOGIN_CUSTOM_FULFILLED",
   "loginRejected": "LOGIN_REJECTED",
   "registerPending": "REGISTER_PENDING",
   "registerFulfilled": "REGISTER_FULFILLED",

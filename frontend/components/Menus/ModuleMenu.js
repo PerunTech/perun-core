@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import queryString from 'query-string';
 import { Loading } from '../ComponentsIndex';
 import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
@@ -26,14 +25,7 @@ class ModuleMenu extends React.Component {
     this.self = pkg.name;
 
     this.showHambMenu = this.showHambMenu.bind(this)
-    this.setLegacyEdbar = this.setLegacyEdbar.bind(this)
     this.setLegacyNaits = this.setLegacyNaits.bind(this)
-
-    this.routeGsaa = (function (superProps) {
-      const params = queryString.parse(superProps.location.search);
-
-      return params && params.comp && params.comp === 'gsaa';
-    })(this.props);
   }
 
   componentDidMount() {
@@ -270,9 +262,6 @@ class ModuleMenu extends React.Component {
     // If we're working locally, do the redirect without the /perun/index.html part
     if (url.includes('localhost'))
       finalUrl = currentUrl + `#/main/${plugin.id}`
-    // tmp transition for old edbar module
-    if (plugin.id === 'edbar')
-      finalUrl = currentUrl + '/edbar/indexedbar.html'
 
     // tmp transition for old naits module 
     if (plugin.id === 'naits')
@@ -385,17 +374,7 @@ class ModuleMenu extends React.Component {
    * @return JSX, the class content cards;
    */
   loadPlugins = data => {
-    let edbarPlugin = data.filter(el => el.id === 'edbar')[0]
     let naitsPlugin = data.filter(el => el.id === 'naits')[0]
-    if (edbarPlugin) {
-      if (edbarPlugin.cardDirectAccess) {
-        this.goDirectToRoute(edbarPlugin);
-      }
-      this.setLegacyEdbar(edbarPlugin);
-      const index = data.findIndex(x => x.id === "edbar");
-      if (index !== undefined) data.splice(index, 1);
-    }
-
     if (naitsPlugin) {
       if (naitsPlugin.cardDirectAccess) {
         this.goDirectToRoute(naitsPlugin);
@@ -425,50 +404,17 @@ class ModuleMenu extends React.Component {
             this.recalcExecutables(data, resolutions));
 
           // call self with recalculated executables and go for another round, if pending scripts are found.
-          next.length > 0
-            ? this.loadPlugins(next)
-            : (this.routeGsaa // When script executiuon ends, check hardcoded route to gsaa and re-route.
-              && location.replace(finalUrl));
+          next.length > 0 && this.loadPlugins(next)
         })
         .catch(err => {
           console.log(err)
           localStorage.setItem('hasError', true)
         })
-    } else {
-      (this.routeGsaa // When script executiuon ends, check hardcoded route to gsaa and re-route.
-        && location.replace(finalUrl)
-      );
     }
   }
 
   showHambMenu() {
     document.getElementById('hideHamb').className = 'showHambMenu';
-  }
-
-  setLegacyEdbar(plugin) {
-    return plugin && this.setState({
-      cards: {
-        ...this.state.cards, [plugin.id]: <a
-          id={plugin.id}
-          className='card modWindow'
-          key={plugin.id}
-          onClick={() => {
-            let url = window.location.href
-            let arr = url.split("/");
-            let currentUrl = arr[0] + "//" + arr[2]
-            location.replace(currentUrl + '/edbar/indexedbar.html');
-          }} >
-          <div className='box'>
-            <div className='card-img-top'>
-              <img src={plugin.imgPath} className='card-img-top' alt='...' />
-            </div>
-            <div title={plugin.text} className='card-body' >
-              <h5 className='card-title'>{plugin.title}</h5>
-            </div>
-          </div>
-        </a>
-      }
-    });
   }
 
   setLegacyNaits(plugin) {
@@ -500,13 +446,13 @@ class ModuleMenu extends React.Component {
   render() {
     const { cards, loading, hasCardForDirectAccess } = this.state;
 
-    return (this.routeGsaa || loading)
-      ? <Loading />
-      : <div id='holderCards' className='holderCards'>
+    return loading ? <Loading /> : (
+      <div id='holderCards' className='holderCards'>
         {!hasCardForDirectAccess ? Object.keys(cards).length < 5
           ? <div id='modMainGridOneRow' className='modMainGridOneRow' >{Object.values(cards)}</div>
           : <div id='modMainGrid' className={'modMainGrid'}>{Object.values(cards)}</div> : <></>}
       </div>
+    )
   }
 }
 

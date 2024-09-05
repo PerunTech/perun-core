@@ -36,7 +36,7 @@ function loadPlugin(name, url) {
 }
 
 /**
- * Initializes and loads plug   ins based on the provided storageBundles.
+ * Initializes and loads plugins based on the provided storageBundles.
  * Ensures plugins are loaded in the correct order according to their dependencies.
  * @param {Array} storageBundles - The list of plugin bundles to load.
  */
@@ -48,7 +48,7 @@ function reInitPlugins(storageBundles) {
 
     // Create a list of promises for loading plugins
     const loadPromises = sortedBundles.map(bundle => {
-        if (bundle.id !== 'edbar' && bundle.id !== 'perun-core') {
+        if (bundle.id !== 'perun-core') {
             return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
                 console.error(`Error loading plugin ${bundle.id}:`, error);
                 return null; // Continue with other plugins even if one fails

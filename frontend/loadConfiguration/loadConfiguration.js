@@ -18,15 +18,7 @@ export function loadConfiguration(componentName, configPath) {
    * @param {string} configPath - Class path to get component configuration
    */
 
-  /* workaround/fastest way to integrate edbar architecture in perun-core */
-  let session = null
-  let sessionCheck = document.cookie.match(new RegExp('(^| )' + 'sessionedbar' + '=([^;]+)'));
-  if (sessionCheck) {
-    session = sessionCheck[2]
-  } else {
-    session = store.getState().security.svSession
-  }
-
+  const session = store.getState().security.svSession
   let verbPath
   if (configPath) {
     verbPath = configPath
@@ -43,6 +35,6 @@ export function loadConfiguration(componentName, configPath) {
       console.error(err)
       const title = err.response?.data?.title || err
       const msg = err.response?.data?.message || ''
-      alertUser(true, "error", title, msg);
+      alertUser(true, 'error', title, msg);
     });
 }
