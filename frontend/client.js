@@ -10,15 +10,11 @@ import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
 import { generatePath } from 'react-router'
 import createHashHistory from 'history/createHashHistory';
-
 /* i18n */
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
-
-
 /* Google Analytics */
 import ReactGA from 'react-ga';
-
 /* Local modules */
 import * as redux from './model';
 import * as elements from './elements';
@@ -27,7 +23,6 @@ import { router } from './routes/Router';
 import Routes from './routes/Routes';
 import { Loading } from 'components/ComponentsIndex';
 import { pluginManager } from './routes/PluginManager';
-
 /* Utility functions */
 import * as utils from './functions/utils'
 import * as cookies from './functions/cookies'
@@ -40,10 +35,7 @@ export {
   axios, Loading, createHashHistory,
 };
 
-/* elements-base */
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUser } from './elements'
-
-/* elements-form & grid*/
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
@@ -57,16 +49,13 @@ import { ComponentManager } from './elements/ComponentManager'
 import Modal from './components/Modal/Modal.js'
 import MenuHolder from './components/MenuBuilder/MenuHolder'
 import ContextMenuHolder from './components/Menus/ContextMenu/ContextMenuHolder'
-import RuleEngineModal from './components/RuleEngineModal/RuleEngineModal'
 
 export {
   Form, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
-  ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, MenuHolder, ContextMenuHolder, RuleEngineModal,
-  validator
+  ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, MenuHolder, ContextMenuHolder, validator
 };
 
-
-/* exception for arraybuffer response types f.r */
+/* check for arraybuffer response types */
 function validResponse(res) {
   if (!res) {
     return false
@@ -146,14 +135,13 @@ axios.interceptors.response.use(
   }, { runWhen: validResponse }
 );
 
-
-const App = () =>
+const App = () => (
   <Provider store={redux.store}>
     <IntlProvider>
       <Routes />
     </IntlProvider>
   </Provider>
-
+)
 /* if user acces fr route memorize it */
 let memorizeFrMapRoute
 if (window.location.href.includes('farm-registry/map')) {
@@ -191,7 +179,6 @@ if (utils.isJSON(cookies.getCookie('localeData'))) {
   localeData = JSON.parse(cookies.getCookie('localeData'))
 }
 localeData.forEach((locale) => loadLocaleData(locale))
-
 
 async function loadLocaleData(locale) {
   try {
