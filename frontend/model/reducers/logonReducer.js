@@ -73,7 +73,7 @@ export default function security(state = {
         saml: action.payload.saml
       }
     }
-    case a.loginIacs: {
+    case a.loginCustom: {
       return {
         ...state,
         isBusy: false,
