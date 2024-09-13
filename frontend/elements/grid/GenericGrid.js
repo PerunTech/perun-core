@@ -919,7 +919,6 @@ class GenericGrid extends React.Component {
         {this.state.gridConfigLoaded && this.state.gridDataLoaded && this.state.gridConfig &&
           <div id={className} className={className}>
             <div id='separateText' className='separator' />
-            {/* <div id='dataHolderCss' className='dataHolderCss' /* onMouseEnter={this.mouseOn} onMouseLeave={this.mouseOff}> */}
             <ReactDataGrid
               enableCellSelect
               rowKey={this.state.rowKey}
@@ -933,8 +932,6 @@ class GenericGrid extends React.Component {
               headerRowHeight={50}
               toolbar={
                 <CustomGridToolbar
-                  // onMouseEnter={this.mouseOff}
-                  // onMouseLeave={this.mouseOn}
                   enableFilter
                   hasLinkGridInModal={this.state.hasLinkGridInModal}
                   {...this.state.buttonsArray && { buttonsArray: this.state.buttonsArray }}
@@ -952,27 +949,37 @@ class GenericGrid extends React.Component {
                   filterRowsButtonText={
                     this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.search`, defaultMessage: `${labelBasePath}.main.grids.search` })
                   }
-                >{this.state.saveAllRecords &&
-                  <button id='saveAllRecords' className='btn' onClick={this.saveAllRecords}>
-                    {this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.apply_all`, defaultMessage: `${labelBasePath}.main.grids.apply_all` })}
-                  </button>
-                  }
-                  {this.state.refreshData &&
-                    <span id='refreshData' className='refreshData' onClick={this.refreshData}>
-                      {/* {this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.refreshData`, defaultMessage: `${labelBasePath}.main.grids.refreshData` })} */}
-                      {iconManager.getIcon('refreshGrid')}
-                    </span>
-                  }
+                >
+                  {this.state.saveAllRecords && (
+                    <button id='saveAllRecords' className='btn' onClick={this.saveAllRecords}>
+                      {this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.apply_all`, defaultMessage: `${labelBasePath}.main.grids.apply_all` })}
+                    </button>
+                  )}
+                  {this.state.refreshData && (
+                    <div className='refresh-data-container'>
+                      <span id='refreshData' className='refreshData' onClick={this.refreshData}>
+                        {iconManager.getIcon('refreshGrid')}
+                      </span>
+                    </div>
+                  )}
                   {(this.state.filteredRows && this.state.filteredRows.length > 0 && this.state.rows)
-                    ? <span id='reactGridspan1'>{this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.rowcount`, defaultMessage: `${labelBasePath}.main.grids.rowcount` })} {this.state.filteredRows.length}</span>
-                    : <span id='reactGridspan2'>{this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.rowcount`, defaultMessage: `${labelBasePath}.main.grids.rowcount` })} {this.state.rows.length}</span>
+                    ? <div className='rowcount-container'>
+                      <span id='reactGridspan1'>{this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.rowcount`, defaultMessage: `${labelBasePath}.main.grids.rowcount` })} {this.state.filteredRows.length}</span>
+                    </div>
+                    : <div className='rowcount-container'>
+                      <span id='reactGridspan2'>{this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.rowcount`, defaultMessage: `${labelBasePath}.main.grids.rowcount` })} {this.state.rows.length}</span>
+                    </div>
                   }
-                  {this.props.customToolbarDescription &&
-                    <span id='customToolbarMsg' style={{ paddingLeft: '2px' }}>{this.props.customToolbarDescription}</span>}
-
-                  {this.state.enableMultiSelect === true &&
-                    <span id='reactGridspan3' style={{ paddingLeft: '10px' }}>{`${this.state.selectedIndexes.length} ${rowText}`}</span>
-                  }
+                  {this.state.enableMultiSelect === true && (
+                    <div className='selected-rows-container'>
+                      <span id='reactGridspan3' style={{ paddingLeft: '10px' }}>{`${this.state.selectedIndexes.length} ${rowText}`}</span>
+                    </div>
+                  )}
+                  {this.props.customToolbarDescription && (
+                    <div className='custom-toolbar-description'>
+                      <p className='custom-toolbar-msg'>{this.props.customToolbarDescription}</p>
+                    </div>
+                  )}
                 </CustomGridToolbar>
               }
               onAddFilter={this.handleFilterChange}
@@ -1002,7 +1009,6 @@ class GenericGrid extends React.Component {
               }
               emptyRowsView={NoData}
             />
-            {/* </div> */}
           </div>
         }
       </div>
