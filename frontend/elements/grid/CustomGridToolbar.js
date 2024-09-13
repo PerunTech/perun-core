@@ -131,9 +131,8 @@ export default class CustomGridToolbar extends Toolbar {
 
   render() {
     return (
-      <div className='react-grid-Toolbar'
-        onMouseEnter={this.props.onMouseEnter && this.props.onMouseEnter}
-        onMouseLeave={this.props.onMouseLeave && this.props.onMouseLeave}>
+      <div className='react-grid-Toolbar'>
+        {this.props.children}
         <div className='tools fadeIn'>
           {this.state.additionalButtonJsx}
           {this.state.customButtonJsx}
@@ -141,7 +140,6 @@ export default class CustomGridToolbar extends Toolbar {
           {this.renderAddRowButton()}
           {this.renderToggleFilterButton()}
         </div>
-        {this.props.children}
       </div>
     )
   }
