@@ -88,13 +88,12 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
-    const url = error.response.config.url || ''
     const title = error.response?.data?.title || error
     const msg = error.response?.data?.message || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found', url)
+          alertUser(true, 'error', 'The server responsed with a status code 302 Found')
           break;
         case 401:
           createHashHistory().push('/home/login')
@@ -102,8 +101,6 @@ axios.interceptors.response.use(
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 502:
-          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
-          break;
         case 503:
           alertUser(true, 'info', 'The server is temporarily down for maintenance', 'Please try again soon')
           break;
