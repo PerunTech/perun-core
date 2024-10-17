@@ -388,11 +388,6 @@ class ModuleMenu extends React.Component {
     let config = this.initConfig(data);
     // Generate iterable of promises, include plugins with zero dependencies only.
     let plugins = this.initPlugins(config);
-
-    let url = window.location.href
-    let arr = url.split("/");
-    let currentUrl = arr[0] + "//" + arr[2]
-    let finalUrl = currentUrl + '/perun/index.html#/main/gsaa'
     // If there are no pending promises, exit, otherwise execute.
     if (plugins.length > 0) {
       this.atomiclyExecute(plugins)
