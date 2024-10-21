@@ -441,9 +441,9 @@ class DependentElements extends React.Component {
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
           this.setState({ loading: false })
-          if (response.data) {
-            if (getAdditionalData && additionalDataKey && response.data[additionalDataKey]) {
-              store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data[additionalDataKey] })
+          if (response.data?.data) {
+            if (getAdditionalData && additionalDataKey && response?.data?.data?.[additionalDataKey]) {
+              store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data?.data?.[additionalDataKey] })
             }
             let finalResponse = response.data
             // Check if the data is nested
