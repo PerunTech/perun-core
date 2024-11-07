@@ -49,7 +49,7 @@ class GenericForm extends React.Component {
       saveExecuted: false,
       deleteExecuted: false,
       alert: undefined,
-      bypassInputChange: this.props.bypassInputChange, // callback function to fetch (formdata, target-fieldName, target-fieldValue) f.r
+      bypassInputChange: this.props.bypassInputChange, // callback function to fetch (formdata, target-fieldName, target-fieldValue)
       noValidate: this.props.noValidate || false,
       disabled: this.props.disabled
     }
@@ -238,7 +238,7 @@ class GenericForm extends React.Component {
     )
   }
 
-  /* get config data for forms. f.r */
+  /* get config data for forms. */
   componentDidMount() {
     getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod, this.state.tableFormDataMethod, this.state.session, this.props.params)
     this.props.refFunction(this)
@@ -489,7 +489,7 @@ class GenericForm extends React.Component {
     //   }
     // }
 
-    /* if flag customSave = true then escape default save f.r  */
+    /* if flag customSave = true then escape default save  */
     if (this.state.customSave) {
       this.state.addSaveFunction(formData, this)
     } else {
@@ -610,7 +610,7 @@ class GenericForm extends React.Component {
       PARAM_NAME: 'jsonString',
       PARAM_VALUE: JSON.stringify(currentRecord)
     })
-    /* created customDeleteCallBack to handle closing modal or to extend logic of delete action f.r */
+    /* created customDeleteCallBack to handle closing modal or to extend logic of delete action */
     if (this.state.addDeleteFunction) {
       this.state.addDeleteFunction(this.state.id, 'DELETE_TABLE_OBJECT', this.state.session, params)
     } else {
@@ -626,14 +626,14 @@ class GenericForm extends React.Component {
     }
   }
 
-  /* on close button close only popup window. f.r */
+  /* on close button close only popup window. */
   windowClose(data) {
     if (this.state.addCloseFunction && this.state.addCloseFunction instanceof Function) {
       this.state.addCloseFunction(data)
     }
   }
 
-  /* translates errors under field in form f.r */
+  /* translates errors under field in form */
   transformErrors(errors) {
     return errors.map((error) => {
       if (error.name === "type") {
@@ -643,7 +643,7 @@ class GenericForm extends React.Component {
     })
   }
 
-  /* custom error list on top of screen f.r */
+  /* custom error list on top of screen */
   errorListTemplate(props) {
     const { errors } = props;
     return (
@@ -677,7 +677,7 @@ class GenericForm extends React.Component {
   }
 
   /* Makes form inputs persistent after saving data */
-  /* include bypass onChange func to fetch formData, targeted fieldName and fieldValue into local comp. f.r */
+  /* include bypass onChange func to fetch formData, targeted fieldName and fieldValue into local comp. */
   onInputChange(event) {
     if (this.props.bypassInputChange) {
       this.state.bypassInputChange(event.formData, fieldName, fieldValue)
@@ -687,7 +687,7 @@ class GenericForm extends React.Component {
   }
 
   /* check for existing className for buttons and form
-  and add function on submit f.r */
+  and add function on submit */
   render() {
     const {
       id, formWithExcluded, enableExcludedFields, saveExecuted, deleteExecuted,
@@ -737,9 +737,6 @@ class GenericForm extends React.Component {
         </div>
       }
       {/* <DependencyDropdown /> */}
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
       {hideBtns !== true &&
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
@@ -764,11 +761,26 @@ class GenericForm extends React.Component {
               </button>
             }
           </div>
-          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' && (formTableData && formTableData.OBJECT_ID) &&
+          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' &&
             <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={this.initiateDeleteAction}>
               {this.props.customDeleteButtonName ? this.props.customDeleteButtonName : this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
             </button>
           }
+          {this.props.buttonsArray && (
+            <>
+              {this.props.buttonsArray.map((element) => (
+                <button
+                  type={element.type}
+                  key={element.id}
+                  id={element.id}
+                  className={element.className ? `${element.className}` : 'btn'}
+                  onClick={element.action instanceof Function ? element.action : null}
+                >
+                  {element.label}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       }
     </Form>
