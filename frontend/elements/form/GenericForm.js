@@ -764,11 +764,26 @@ class GenericForm extends React.Component {
               </button>
             }
           </div>
-          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' && (formTableData && formTableData.OBJECT_ID) &&
+          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' &&
             <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={this.initiateDeleteAction}>
               {this.props.customDeleteButtonName ? this.props.customDeleteButtonName : this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
             </button>
           }
+          {this.props.buttonsArray && (
+            <>
+              {this.props.buttonsArray.map((element) => (
+                <button
+                  type={element.type}
+                  key={element.id}
+                  id={element.id}
+                  className={element.className ? `btn ${element.className}` : 'btn'}
+                  onClick={element.action instanceof Function ? element.action : null}
+                >
+                  {element.name}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       }
     </Form>
