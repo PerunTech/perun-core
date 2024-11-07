@@ -737,9 +737,6 @@ class GenericForm extends React.Component {
         </div>
       }
       {/* <DependencyDropdown /> */}
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
       {hideBtns !== true &&
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
@@ -776,10 +773,10 @@ class GenericForm extends React.Component {
                   type={element.type}
                   key={element.id}
                   id={element.id}
-                  className={element.className ? `btn ${element.className}` : 'btn'}
+                  className={element.className ? `${element.className}` : 'btn'}
                   onClick={element.action instanceof Function ? element.action : null}
                 >
-                  {element.name}
+                  {element.label}
                 </button>
               ))}
             </>
