@@ -336,29 +336,18 @@ class GenericGrid extends React.Component {
       }
     }
 
-    if ((this.props.gridConfigLoaded !== nextProps.gridConfigLoaded || this.props.gridConfig !== nextProps.gridConfig) &&
-      nextProps.gridConfigLoaded === false) {
-      let errorMessage = 'A system error occured, please contact the IT administrator.'
-      try {
-        errorMessage = nextProps.gridConfig.response.data
-      } catch (error) {
-        console.log(error)
-      } finally {
-        this.setState({
-          hideLoader: true,
-          alert: alertUser(
-            true, 'error',
-            this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.load_config_failed`, defaultMessage: `${labelBasePath}.main.grids.load_config_failed` }),
-            errorMessage,
-            () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, undefined
-          )
-        })
+    if (this.props.gridConfigLoaded !== nextProps.gridConfigLoaded || this.props.gridConfig !== nextProps.gridConfig) {
+      if (nextProps.gridConfigLoaded === false && nextProps.gridConfig.constructor !== Array) {
+        const title = nextProps.gridConfig?.response?.data?.title || ''
+        const msg = nextProps.gridConfig?.response?.data?.message || ''
+        alertUser(true, 'error', title, msg)
+        this.setState({ hideLoader: true })
       }
     }
 
     if (this.props.gridDataLoaded !== nextProps.gridDataLoaded || this.props.gridData !== nextProps.gridData) {
       if (nextProps.gridDataLoaded === false && nextProps.gridData.constructor !== Array) {
-        const title = nextProps.gridData?.response?.data?.title || nextProps.gridData
+        const title = nextProps.gridData?.response?.data?.title || ''
         const msg = nextProps.gridData?.response?.data?.message || ''
         alertUser(true, 'error', title, msg)
         this.setState({ hideLoader: true })
