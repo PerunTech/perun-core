@@ -246,17 +246,17 @@ class DependentElements extends React.Component {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
       if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
-          newTableData[groupPath][coreType] = parentVal
+          newTableData[groupPath][coreType] = selectedVal
         } else {
           newTableData[groupPath] = {}
-          newTableData[groupPath][coreType] = parentVal
+          newTableData[groupPath][coreType] = selectedVal
         }
       } else {
         if (newTableData && newTableData.constructor === Object) {
-          newTableData[coreType] = parentVal
+          newTableData[coreType] = selectedVal
         } else {
           newTableData = {}
-          newTableData[coreType] = parentVal
+          newTableData[coreType] = selectedVal
         }
       }
       ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
