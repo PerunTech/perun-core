@@ -769,7 +769,7 @@ class GenericForm extends React.Component {
           </div>
           {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' && (formTableData && formTableData.OBJECT_ID) &&
             <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={this.initiateDeleteAction}>
-              {this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
+              {this.props.customDeleteButtonName ? this.props.customDeleteButtonName : this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
             </button>
           }
         </div>
