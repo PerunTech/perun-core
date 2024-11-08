@@ -414,16 +414,10 @@ class GenericForm extends React.Component {
       }
     }
 
-    if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) &&
-      nextProps.formConfigLoaded === false) {
-      this.setState({
-        alert: alertUser(
-          true, 'error',
-          this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.load_config_failed`, defaultMessage: `${labelBasePath}.main.forms.load_config_failed` }),
-          nextProps.formData,
-          () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-        )
-      })
+    if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
+      const title = nextProps.formData?.response?.data?.title || ''
+      const msg = nextProps.formData?.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     }
 
     if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
@@ -432,15 +426,10 @@ class GenericForm extends React.Component {
       alertUser(true, 'error', title, msg)
     }
 
-    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) &&
-      nextProps.formDataLoaded === false) {
-      const errorResponse = nextProps.formTableData
-      const title = errorResponse.response?.data?.title || errorResponse
-      const msg = errorResponse.response?.data?.message || ''
-      alertUser(
-        true, 'error', title, msg,
-        () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-      )
+    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formTableData === false) {
+      const title = nextProps.formTableData?.response?.data?.title || ''
+      const msg = nextProps.formTableData?.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     }
 
     if (this.props.uischema !== nextProps.uischema) {
