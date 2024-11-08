@@ -426,7 +426,7 @@ class GenericForm extends React.Component {
       alertUser(true, 'error', title, msg)
     }
 
-    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formTableData === false) {
+    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
       const title = nextProps.formTableData?.response?.data?.title || ''
       const msg = nextProps.formTableData?.response?.data?.message || ''
       alertUser(true, 'error', title, msg)
