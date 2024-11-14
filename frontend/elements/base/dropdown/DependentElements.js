@@ -154,7 +154,11 @@ class DependentElements extends React.Component {
     // try to delete the original first item label
     try {
       const nodeList = document.querySelectorAll(`[for='${elementId}']`)
-      nodeList[0].parentNode.removeChild(nodeList[0].parentNode.childNodes[0])
+      nodeList.forEach(node => {
+        if (node.parentNode) {
+          node.parentNode.removeChild(node.parentNode.childNodes[0])
+        }
+      })
     } catch (error) {
       // could not find an element
       console.info(error)
