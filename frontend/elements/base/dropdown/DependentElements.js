@@ -191,6 +191,7 @@ class DependentElements extends React.Component {
     }
 
     const newElement = <Dropdown
+      className='dependent-dropdown'
       id={elementId}
       key={elementId + '_depddl'}
       labelText={labelText}
@@ -516,6 +517,7 @@ class DependentElements extends React.Component {
         className={`icon-caret-${this.state.spread}`}
       />,
       <Dropdown
+        className='dependent-dropdown'
         id={elementId}
         style={this.additionalStyle}
         labelText={labelText}
