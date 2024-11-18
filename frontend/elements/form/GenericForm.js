@@ -170,7 +170,7 @@ class GenericForm extends React.Component {
     return (
       <div id={props.id + 'CustomDateWithNowButton'} className='custom-date'>
         {widgets.DateWidget(props)}
-        <button type='button' onClick={setCurrentDate} className='btn-success btn_save_form'>
+        <button type='button' onClick={setCurrentDate} className='btn-success btn_save_form custom-date-btn'>
           {
             this.context.intl.formatMessage(
               {
