@@ -45,20 +45,27 @@ class DependentElements extends React.Component {
     if (formData && formData.constructor === Object && Object.keys(formData).length > 0) {
       if (formData[sectionName]) {
         const subEls = Object.keys(formData[sectionName])
-        for (let i = 0; i < subEls.length; i++) {
-          if (subEls[i] === findWidget(formSchema, 'ui:widget', 'DependencyDropdown')) {
-            this.fetchInitialCodelist(subEls[i], formData[sectionName][subEls[i]])
-          } else if (formSchema[sectionName]?.[subEls[i]]?.dependentOnField) {
-            const parentElement = formSchema[sectionName]?.[subEls[i]]?.dependentOnField
-            const elementOrder = formSchema[sectionName]?.[parentElement]?.order
-            if (formSchema[sectionName]?.[subEls[i]]?.order === elementOrder + 1) {
-              this.generateExisting(
-                'root_' + sectionName + subEls[i],
-                formData[sectionName]?.[subEls[i]],
-                formData[sectionName]?.[subEls[i - 1]]
-              )
+        if (subEls.length > 0) {
+          for (let i = 0; i < subEls.length; i++) {
+            if (subEls[i] === findWidget(formSchema, 'ui:widget', 'DependencyDropdown')) {
+              this.fetchInitialCodelist(subEls[i], formData[sectionName][subEls[i]])
+            } else if (formSchema[sectionName]?.[subEls[i]]?.dependentOnField) {
+              const parentElement = formSchema[sectionName]?.[subEls[i]]?.dependentOnField
+              const elementOrder = formSchema[sectionName]?.[parentElement]?.order
+              if (formSchema[sectionName]?.[subEls[i]]?.order === elementOrder + 1) {
+                this.generateExisting(
+                  'root_' + sectionName + subEls[i],
+                  formData[sectionName]?.[subEls[i]],
+                  formData[sectionName]?.[subEls[i - 1]]
+                )
+              }
+              break;
+            } else {
+              this.fetchInitialCodelist()
             }
           }
+        } else {
+          this.fetchInitialCodelist()
         }
       } else {
         const formFields = Object.keys(formConfig.properties)
