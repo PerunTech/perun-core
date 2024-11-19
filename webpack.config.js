@@ -62,11 +62,8 @@ module.exports = (mode) => {
                     ],
                 },
                 {
-                    test: /\.(|gif|svg|eot|ttf|woff|woff2)$/,
-                    loader: 'file-loader',
-                    options: {
-                        name: '[path][name].[ext]'
-                    }
+                    test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+                    type: 'asset/resource',
                 },
             ]
         },
