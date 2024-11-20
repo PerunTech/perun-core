@@ -47,7 +47,7 @@ function replaceParams(path, gridid, session, params) {
 
 export function getGridConfig(gridid, gridName, session, params, gridType) {
   return function (dispatch) {
-    // Check if the gridType is SEARCH_GRID_DATA and is not of type string (backwards compatibility with the same param for passing the gridData directly)
+    // Check if the gridType is SEARCH_GRID_DATA and is not of type string
     if (gridType === 'SEARCH_GRID_DATA' && typeof gridName !== 'string') {
       dispatch({
         id: gridid,
@@ -89,9 +89,8 @@ export function getGridConfig(gridid, gridName, session, params, gridType) {
 
 export function getGridData(gridid, gridNameOrData, session, params, gridType) {
   return function (dispatch) {
-    /* if gridType param is SEARCH_GRID_DATA 
-       then pass gridData directly through param gridNameOrData in reducer f.r   */
-    if (gridType === 'SEARCH_GRID_DATA') {
+    // Check if the gridType is SEARCH_GRID_DATA and is not of type string
+    if (gridType === 'SEARCH_GRID_DATA' && typeof gridNameOrData !== 'string') {
       dispatch({
         id: gridid,
         type: gridid + '/FETCH_GRID_DATA_FULFILLED',
