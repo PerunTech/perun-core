@@ -78,6 +78,7 @@ class GenericForm extends React.Component {
     return (
       <DependencyDropdown
         customDependencyDropdownComponent={this.state.customDependencyDropdownComponent}
+        isSearchForm={this.props.isSearchForm}
         formInstance={this}
         formId={this.state.id}
         formSchema={this.state.uischema}

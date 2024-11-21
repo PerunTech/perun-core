@@ -198,7 +198,7 @@ class DependentElements extends React.Component {
       style={this.style}
       defaultValue='default'
       name='initialDropdown'
-      onChange={() => this.onChange(elementId)}
+      onChange={() => this.onChange(elementId, true)}
       options={options}
       required={requiredAttr}
       disabled={isDisabled}
@@ -322,7 +322,7 @@ class DependentElements extends React.Component {
   }
 
   onChange = (elementId, isInitial) => {
-    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName } = this.props
+    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName, isSearchForm } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -360,23 +360,34 @@ class DependentElements extends React.Component {
       // check if element exists
       const ddls = document.getElementsByTagName('SELECT')
       let nextElement
+      let nextElementId
       if (groupPath) {
-        nextElement = $('root_' + groupPath + '_' + newElement)
+        nextElementId = 'root_' + groupPath + '_' + newElement
+        if (isSearchForm) {
+          nextElementId += '_SEARCH'
+        }
       } else {
         nextElement = $('root_' + newElement)
       }
       for (let i = 0; i < ddls.length; i++) {
-        if (nextElement?.id === ddls[i].id) {
+        if (nextElementId === ddls[i].id) {
           for (let j = i; j < ddls.length; j++) {
             const el = this.findCoreType(ddls[j].id)[1]
-            if (el === newElement) {
+            let newElementId = newElement
+            if (isSearchForm) {
+              newElementId += '_SEARCH'
+            }
+            if (el === newElementId) {
               let parentNode = ddls[j].parentNode
               ddls[j].value = ''
               this.removeElements(parentNode, ddls, j)
               this.clearFormData(newElement, groupPath)
             }
           }
-          const el = this.findCoreType(ddls[i].id)[1]
+          let el = this.findCoreType(ddls[i].id)[1]
+          if (isSearchForm) {
+            el = el.replace('_SEARCH', '')
+          }
           if (this.props.formSchema?.[this.props.sectionName]?.[el]?.dependentOnField) {
             let parentNode = ddls[i].parentNode
             ddls[i].value = ''
@@ -397,8 +408,12 @@ class DependentElements extends React.Component {
       IDs prsent in the document - from configuration */
       let el
       const list = document.getElementsByTagName('SELECT')
+      let dropdownId = elementId
+      if (isSearchForm && !isInitial) {
+        dropdownId += '_SEARCH'
+      }
       for (let i = 0; i < list.length; i++) {
-        if (list[i].id === elementId) {
+        if (list[i].id === dropdownId) {
           el = list[i]
         }
       }
@@ -510,6 +525,10 @@ class DependentElements extends React.Component {
       requiredAttr = true
     }
 
+    let dropdownId = elementId
+    if (this.props.isSearchForm) {
+      dropdownId += '_SEARCH'
+    }
     ddlList.push(
       <i
         id={elementId + '_after'}
@@ -518,7 +537,7 @@ class DependentElements extends React.Component {
       />,
       <Dropdown
         className='dependent-dropdown'
-        id={elementId}
+        id={dropdownId}
         style={this.additionalStyle}
         labelText={labelText}
         key={elementId + '_depddl'}
