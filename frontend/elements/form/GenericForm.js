@@ -446,6 +446,10 @@ class GenericForm extends React.Component {
   }
 
   saveObject(formData) {
+    const { hideBtns } = this.state
+    if (hideBtns === 'all' || hideBtns === true) {
+      return;
+    }
 
     let saved = false
     // check if all dependecy dropdowns have values
