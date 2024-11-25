@@ -448,7 +448,7 @@ class GenericForm extends React.Component {
   saveObject(formData) {
     const { hideBtns } = this.state
     if (hideBtns === 'all' || hideBtns === true) {
-      return;
+      return null;
     }
 
     let saved = false
