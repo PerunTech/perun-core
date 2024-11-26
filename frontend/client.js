@@ -93,7 +93,7 @@ axios.interceptors.response.use(
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found')
+          alertUser(true, 'info', 'The server responsed with a status code 302 Found')
           break;
         case 401:
           createHashHistory().push('/home/login')
