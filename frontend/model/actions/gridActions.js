@@ -153,18 +153,6 @@ export function lastSelectedItem(gridId, row, gridConfig) {
   }
 }
 
-export function createControls(session, application) {
-  return function (dispatch) {
-    const gridConfig = svConfig.restSvcBaseUrl + '/CallGenerator/createControlApplication/' + session + '/' + 20257345 + '/' + 20257340 + '/' + application + '/' + 3449
-
-    axios.post(gridConfig).then((response) => {
-      dispatch({ type: 'CREATE_CONTROLS_FULFILLED', payload: response.data })
-    }).catch((err) => {
-      dispatch({ type: 'CREATE_CONTROLS_REJECTED', payload: err })
-    })
-  }
-}
-
 export function addGrid(gridid, grid, groupId) {
   return function (dispatch) {
     if (groupId === null || groupId === undefined) {
@@ -243,24 +231,5 @@ export function publishState(gridid, state) {
 export function updateSelectedRows(selectedRows, gridId) {
   return function (dispatch) {
     dispatch({ type: 'UPDATE_SELECTED_GRID_ROWS', payload: [selectedRows, gridId] })
-  }
-}
-
-export function executeActionOnObjects(session, gridType, actionType,
-  actionName, subActionName, objectArray, actionParam, dateOfMovement,
-  dateOfAdmittance, transporterPerson, transportType, transporterLicense) {
-  return function (dispatch) {
-    const server = svConfig.restSvcBaseUrl
-    const verbPath = svConfig.triglavRestVerbs[actionType]
-    const url = server + `${verbPath}/${session}/${gridType}/${actionName}/${subActionName}/${actionParam}/${dateOfMovement}/${dateOfAdmittance}/${transporterPerson}/${transportType}/${transporterLicense}`
-    axios({
-      method: 'post',
-      url: url,
-      data: JSON.stringify({ objectArray })
-    }).then((response) => {
-      dispatch({ type: actionType, payload: response.data })
-    }).catch((error) => {
-      console.log(error)
-    })
   }
 }
