@@ -34,7 +34,7 @@ const OrgSearch = (props, context) => {
     const basicData = {
       OBJECT_TYPE: 57,
       ROW_NUM: 1000,
-      ORT_ORDER: "DESC",
+      SORT_ORDER: "DESC",
       SORT_BY_FIELD: "PKID",
     };
     const { svSession } = props;
