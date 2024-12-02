@@ -416,19 +416,19 @@ class GenericForm extends React.Component {
     }
 
     if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
-      const title = nextProps.formData?.response?.data?.title || ''
+      const title = nextProps.formData?.response?.data?.title || nextProps.formData?.response?.data || ''
       const msg = nextProps.formData?.response?.data?.message || ''
       alertUser(true, 'error', title, msg)
     }
 
     if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
-      const title = nextProps.uischema?.response?.data?.title || ''
+      const title = nextProps.uischema?.response?.data?.title || nextProps.uischema?.response?.data || ''
       const msg = nextProps.uischema?.response?.data?.message || ''
       alertUser(true, 'error', title, msg)
     }
 
     if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
-      const title = nextProps.formTableData?.response?.data?.title || ''
+      const title = nextProps.formTableData?.response?.data?.title || nextProps.formTableData?.response?.data || ''
       const msg = nextProps.formTableData?.response?.data?.message || ''
       alertUser(true, 'error', title, msg)
     }
