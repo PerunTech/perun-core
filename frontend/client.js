@@ -166,7 +166,8 @@ let whitelistRoot = [
   'stateTooltip',
   'userInfo',
   'clickedMenuReducer',
-  'moduleLinks'
+  'moduleLinks',
+  'businessLogicReducer'
 ]
 
 // Use the default locale defined in the assets project
