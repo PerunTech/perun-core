@@ -29,6 +29,7 @@ import UserGroupsForm from './UserGroupsForm';
 import UserForm from './UserForm';
 import EditUserWrapper from './utils/EditUserWrapper';
 import PerunPluginTable from './PerunPluginTable'
+import SvarogMenu from './SvarogMenu'
 class AppSettings extends React.Component {
   constructor(props) {
     super(props)
@@ -840,6 +841,7 @@ class AppSettings extends React.Component {
               {active === 'LabelEditor' && <LabelEditor />}
               {active === 'CodeListEditor' && <CodeListEditor />}
               {active === 'PerunPluginTable' && <PerunPluginTable />}
+              {active === 'SvarogMenu' && <SvarogMenu />}
             </div >
           </div >
         </>}
