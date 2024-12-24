@@ -53,6 +53,7 @@ export const Dropdown = ({
       {
         labelText && <label className='control-label' htmlFor={id}>
           {labelText}
+          {required && <span className='required'>*</span>}
         </label>
       }
       <select
