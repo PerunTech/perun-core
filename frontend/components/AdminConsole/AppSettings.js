@@ -30,6 +30,7 @@ import UserForm from './UserForm';
 import EditUserWrapper from './utils/EditUserWrapper';
 import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
+import BusinessType from './BusinessType'
 class AppSettings extends React.Component {
   constructor(props) {
     super(props)
@@ -842,6 +843,7 @@ class AppSettings extends React.Component {
               {active === 'CodeListEditor' && <CodeListEditor />}
               {active === 'PerunPluginTable' && <PerunPluginTable />}
               {active === 'SvarogMenu' && <SvarogMenu />}
+              {active === 'BusinessType' && <BusinessType />}
             </div >
           </div >
         </>}
