@@ -3,16 +3,13 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
 import { alertUser, ReactBootstrap } from '../../elements'
-const { useState, useEffect } = React
+const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const BusinessType = (props, context) => {
-  const [loading, setLoading] = useState(false)
-  const [canRender, setCanRender] = useState(false)
-  const [businessObjectTypeName, setBusinessObjectTypeName] = useState(undefined)
-  const [gridId, setGridId] = useState(undefined)
-  const [show, setShow] = useState(false)
-  const [objectId, setObjectId] = useState(undefined)
+  const initialState = { loading: false, canRender: false, businessObjectTypeName: undefined, gridId: undefined, show: false, objectId: 0 }
+  const reducer = (currState, update) => ({ ...currState, ...update })
+  const [{ loading, canRender, businessObjectTypeName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     // Get the name of the table
@@ -26,18 +23,16 @@ const BusinessType = (props, context) => {
   }, [gridId])
 
   const getBusinessObjectTypeName = () => {
-    setLoading(true)
+    setState({ loading: true })
     const url = `${window.server}/WsConf/params/get/sys/BUSINESS_OBJECT_TYPE_NAME`
     axios.get(url).then(res => {
-      setLoading(false)
+      setState({ loading: false })
       if (res?.data?.VALUE) {
         const objectTypeName = res.data.VALUE
-        setBusinessObjectTypeName(objectTypeName)
-        setGridId(`${objectTypeName}_GRID`)
-        setCanRender(true)
+        setState({ businessObjectTypeName: objectTypeName, gridId: `${objectTypeName}_GRID`, canRender: true })
       }
     }).catch(err => {
-      setLoading(false)
+      setState({ loading: false })
       console.error(err)
       const title = err.response?.data?.title || err
       const msg = err.response?.data?.message || ''
@@ -46,8 +41,7 @@ const BusinessType = (props, context) => {
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
-    setObjectId(row[`${businessObjectTypeName}.OBJECT_ID`] || 0)
-    setShow(true)
+    setState({ objectId: row[`${businessObjectTypeName}.OBJECT_ID`] || 0, show: true })
   }
 
   const generateBusinessTypeGrid = () => {
@@ -63,8 +57,7 @@ const BusinessType = (props, context) => {
         refreshData={true}
         toggleCustomButton={true}
         customButton={() => {
-          setShow(true)
-          setObjectId(0)
+          setState({ show: true, objectId: 0 })
         }}
         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
         heightRatio={0.75}
@@ -88,7 +81,7 @@ const BusinessType = (props, context) => {
         const msg = res.data.message || ''
         alertUser(true, resType, title, msg)
         GridManager.reloadGridData(gridId)
-        setShow(false)
+        setState({ show: false })
       }
     }).catch(err => {
       console.error(err)
@@ -129,7 +122,7 @@ const BusinessType = (props, context) => {
     }).then((res) => {
       if (res.data.type === 'SUCCESS') {
         alertUser(true, 'success', res.data.title, res.data.message)
-        setShow(false)
+        setState({ show: false })
         ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, {
           deleteExecuted: false,
         })
@@ -157,7 +150,7 @@ const BusinessType = (props, context) => {
         </div>
       )}
       {show && (
-        <Modal className='admin-console-unit-modal' show={show} onHide={() => setShow(false)}>
+        <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
             <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
           </Modal.Header>
