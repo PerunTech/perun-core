@@ -124,9 +124,6 @@ class AppSettings extends React.Component {
       .catch(err => { throw err });
   }
 
-  /* show card conf grid for entry point module f.r */
-
-  /* show/hide user management */
   showUserMng = () => {
     if (this.state.showUserMng) {
       this.setState({ userArrowId: '' })
