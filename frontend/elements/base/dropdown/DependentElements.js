@@ -530,11 +530,6 @@ class DependentElements extends React.Component {
       dropdownId += '_SEARCH'
     }
     ddlList.push(
-      <i
-        id={elementId + '_after'}
-        key={elementId + '_after'}
-        className={`icon-caret-${this.state.spread}`}
-      />,
       <Dropdown
         className='dependent-dropdown'
         id={dropdownId}
