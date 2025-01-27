@@ -320,7 +320,7 @@ class DependentElements extends React.Component {
   }
 
   onChange = (elementId, isInitial) => {
-    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName, isSearchForm } = this.props
+    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -360,21 +360,21 @@ class DependentElements extends React.Component {
       let nextElementId
       if (groupPath) {
         nextElementId = 'root_' + groupPath + '_' + newElement
-        if (isSearchForm) {
-          nextElementId += '_SEARCH'
-        }
       } else {
         nextElement = $('root_' + newElement)
       }
+      const form = document.getElementById(this.props.formId)
       const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
       const index = ddls.findIndex(el => el.id === elementId);
 
       if (index > -1) {
         ddls.slice(index + 1).forEach((el, i) => {
-          const parentNode = el.parentNode;
-          el.value = '';
-          this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
-          this.clearFormData(this.findCoreType(el.id)[1], groupPath);
+          if (form?.contains(el)) {
+            const parentNode = el.parentNode;
+            el.value = '';
+            this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            this.clearFormData(this.findCoreType(el.id)[1], groupPath);
+          }
         });
       }
 
@@ -386,9 +386,6 @@ class DependentElements extends React.Component {
       let el
       const list = document.getElementsByTagName('SELECT')
       let dropdownId = elementId
-      if (isSearchForm && !isInitial) {
-        dropdownId += '_SEARCH'
-      }
       for (let i = 0; i < list.length; i++) {
         if (list[i].id === dropdownId) {
           el = list[i]
@@ -503,9 +500,6 @@ class DependentElements extends React.Component {
     }
 
     let dropdownId = elementId
-    if (this.props.isSearchForm) {
-      dropdownId += '_SEARCH'
-    }
     ddlList.push(
       <Dropdown
         className='dependent-dropdown'
