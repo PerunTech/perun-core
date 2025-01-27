@@ -314,8 +314,6 @@ class DependentElements extends React.Component {
   }
 
   removeElements = (parentNode, ddls, index) => {
-    const arrow = parentNode.previousElementSibling
-    parentNode.parentNode.removeChild(arrow)
     parentNode.removeChild(ddls[index])
     parentNode.removeChild(parentNode.childNodes[0])
     parentNode.parentNode.removeChild(parentNode)
