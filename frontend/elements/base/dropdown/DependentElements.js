@@ -356,7 +356,6 @@ class DependentElements extends React.Component {
 
     try {
       // check if element exists
-      const ddls = document.getElementsByTagName('SELECT')
       let nextElement
       let nextElementId
       if (groupPath) {
@@ -367,38 +366,18 @@ class DependentElements extends React.Component {
       } else {
         nextElement = $('root_' + newElement)
       }
-      for (let i = 0; i < ddls.length; i++) {
-        if (nextElementId === ddls[i].id) {
-          for (let j = i; j < ddls.length; j++) {
-            const el = this.findCoreType(ddls[j].id)[1]
-            let newElementId = newElement
-            if (isSearchForm) {
-              newElementId += '_SEARCH'
-            }
-            if (el === newElementId) {
-              let parentNode = ddls[j].parentNode
-              ddls[j].value = ''
-              this.removeElements(parentNode, ddls, j)
-              this.clearFormData(newElement, groupPath)
-            }
-          }
-          let el = this.findCoreType(ddls[i].id)[1]
-          if (isSearchForm) {
-            el = el.replace('_SEARCH', '')
-          }
-          if (this.props.formSchema?.[this.props.sectionName]?.[el]?.dependentOnField) {
-            let parentNode = ddls[i].parentNode
-            ddls[i].value = ''
-            this.removeElements(parentNode, ddls, i)
-            break
-          } else if (this.props.formSchema?.[el]?.dependentOnField) {
-            let parentNode = ddls[i].parentNode
-            ddls[i].value = ''
-            this.removeElements(parentNode, ddls, i)
-            break
-          }
-        }
+      const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
+      const index = ddls.findIndex(el => el.id === elementId);
+
+      if (index > -1) {
+        ddls.slice(index + 1).forEach((el, i) => {
+          const parentNode = el.parentNode;
+          el.value = '';
+          this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+          this.clearFormData(this.findCoreType(el.id)[1], groupPath);
+        });
       }
+
     } catch (error) { // eslint-disable-line
       throw error
     } finally {
