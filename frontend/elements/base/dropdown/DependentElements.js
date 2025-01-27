@@ -320,7 +320,7 @@ class DependentElements extends React.Component {
   }
 
   onChange = (elementId, isInitial) => {
-    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName, isSearchForm } = this.props
+    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -360,9 +360,6 @@ class DependentElements extends React.Component {
       let nextElementId
       if (groupPath) {
         nextElementId = 'root_' + groupPath + '_' + newElement
-        if (isSearchForm) {
-          nextElementId += '_SEARCH'
-        }
       } else {
         nextElement = $('root_' + newElement)
       }
@@ -389,9 +386,6 @@ class DependentElements extends React.Component {
       let el
       const list = document.getElementsByTagName('SELECT')
       let dropdownId = elementId
-      if (isSearchForm && !isInitial) {
-        dropdownId += '_SEARCH'
-      }
       for (let i = 0; i < list.length; i++) {
         if (list[i].id === dropdownId) {
           el = list[i]
@@ -506,9 +500,6 @@ class DependentElements extends React.Component {
     }
 
     let dropdownId = elementId
-    if (this.props.isSearchForm) {
-      dropdownId += '_SEARCH'
-    }
     ddlList.push(
       <Dropdown
         className='dependent-dropdown'

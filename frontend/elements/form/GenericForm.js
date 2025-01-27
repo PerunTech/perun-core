@@ -709,7 +709,7 @@ class GenericForm extends React.Component {
 
     const loading = <div><Loading /></div>
     let form = <Form
-        id={id}
+      id={id}
       validator={validator}
       noValidate={this.state.noValidate}
       className={className}
