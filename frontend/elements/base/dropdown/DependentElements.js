@@ -3,7 +3,7 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { store } from '../../../model'
 import { svConfig } from '../../../config';
-import { Dropdown, findWidget, $, ComponentManager } from '../..';
+import { Dropdown, $, ComponentManager } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject } from '../../../functions/utils';
 
@@ -334,18 +334,9 @@ class DependentElements extends React.Component {
     const codelistName = nextElementObj?.codelistName || ''
 
     try {
-      // check if element exists
-      let nextElement
-      let nextElementId
-      if (groupPath) {
-        nextElementId = 'root_' + groupPath + '_' + newElement
-      } else {
-        nextElement = $('root_' + newElement)
-      }
       const form = document.getElementById(this.props.formId)
       const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
       const index = ddls.findIndex(el => el.id === elementId);
-
       if (index > -1) {
         ddls.slice(index + 1).forEach((el, i) => {
           if (form?.contains(el)) {
@@ -356,7 +347,6 @@ class DependentElements extends React.Component {
           }
         });
       }
-
     } catch (error) { // eslint-disable-line
       throw error
     } finally {
