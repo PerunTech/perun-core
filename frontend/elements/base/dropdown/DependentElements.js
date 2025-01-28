@@ -232,7 +232,7 @@ class DependentElements extends React.Component {
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data;
             }
-            this.generateDropdown(finalResponse, coreType, groupPath, selectedVal, coreType);
+            this.generateDropdown(finalResponse, coreType, groupPath, selectedVal);
           }
           resolve();
         }).catch((error) => {
