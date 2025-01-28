@@ -232,7 +232,7 @@ class DependentElements extends React.Component {
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data;
             }
-            this.generateDropdown(finalResponse, codelistName, groupPath, selectedVal, coreType);
+            this.generateDropdown(finalResponse, coreType, groupPath, selectedVal, coreType);
           }
           resolve();
         }).catch((error) => {
@@ -417,7 +417,7 @@ class DependentElements extends React.Component {
     }
   }
 
-  generateDropdown = (dbDataArray, newElement, groupPath, selectedVal, coreTypeExisting) => {
+  generateDropdown = (dbDataArray, newElement, groupPath, selectedVal) => {
     let prefix = 'root'
     if (groupPath) {
       prefix = 'root_' + groupPath
@@ -453,7 +453,7 @@ class DependentElements extends React.Component {
 
     // Generate the dropdown selector, labels and icons
     const ddlList = this.state.dynamicDropdowns.slice()
-    const coreType = coreTypeExisting || this.findCoreType(elementId)[1]
+    const coreType = newElement || this.findCoreType(elementId)[1]
 
     let labelText
     let requiredFieldsArr
