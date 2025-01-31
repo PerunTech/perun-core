@@ -71,16 +71,8 @@ function validResponse(res) {
 axios.interceptors.response.use(
   (res) => {
     if (res?.status === 200) {
-      if (res.data.type === 'ERROR' && (res.data.title === 'Невалидна сесија' || res.data.title === 'error.invalid_session')) {
-        alertUser(true, 'error', 'Invalid session', 'Please log in again', () => {
-          createHashHistory().push('/home/login')
-          // location.reload();
-          return res;
-        })
-      }
       if (res.data && res.data.type === 'EXCEPTION') {
         alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
-          // location.reload();
           return res;
         })
       }
