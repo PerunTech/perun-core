@@ -29,17 +29,17 @@ const LoginForm = (props, context) => {
   }, [])
 
   const getLoginLinks = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
+    const url = `${window.json}${window.assets}/json/config/LoginLinks.json`
     fetch(url).then(res => res.json()).then(json => {
       setLoginLinks(json)
     }).catch(err => { throw err });
   }
 
   const getLogonImgJson = () => {
-    let url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
+    let url = `${window.json}${window.assets}/json/config/LogonImg.json`
     // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
     if (window.assetsContext) {
-      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/LogonImg.json`
+      url = `${window.json}${window.assets}/json/config/${window.assetsContext}/LogonImg.json`
     }
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
@@ -49,7 +49,7 @@ const LoginForm = (props, context) => {
   }
 
   const getProjectImgJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/ProjectImg.json`
+    const url = `${window.json}${window.assets}/json/config/ProjectImg.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setProjectImgJson(json)
@@ -58,7 +58,7 @@ const LoginForm = (props, context) => {
   }
 
   const generateSsoBtn = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/AltLogin.json`
+    const url = `${window.json}${window.assets}/json/config/AltLogin.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setSsoData(json)

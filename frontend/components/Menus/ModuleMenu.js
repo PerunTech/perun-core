@@ -23,8 +23,6 @@ class ModuleMenu extends React.Component {
     this.registry = pluginManager.getRegistry();
     // self id
     this.self = pkg.name;
-
-    this.showHambMenu = this.showHambMenu.bind(this)
     this.setLegacyNaits = this.setLegacyNaits.bind(this)
   }
 
@@ -231,10 +229,10 @@ class ModuleMenu extends React.Component {
         id={plugin.id}
         className='card modWindow'
         key={plugin.id}
-        onClick={this.showHambMenu} >
+      >
         <div className='box'>
           <div className='card-img-top'>
-            <img src={window.location.origin + plugin.imgPath} className='card-img-top' alt='...' />
+            <img src={window.json + plugin.imgPath} className='card-img-top' alt='...' />
           </div>
           <div title={plugin.text} className='card-body' >
             <h5 className='card-title'>{plugin.title}</h5>
@@ -408,11 +406,6 @@ class ModuleMenu extends React.Component {
         })
     }
   }
-
-  showHambMenu() {
-    document.getElementById('hideHamb').className = 'showHambMenu';
-  }
-
   setLegacyNaits(plugin) {
     return plugin && this.setState({
       cards: {

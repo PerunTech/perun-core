@@ -23,10 +23,10 @@ const HomeMenu = (props, context) => {
   }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
-    let url = `${window.location.origin}${window.assets}/json/config/Header.json`;
+    let url = `${window.json}${window.assets}/json/config/Header.json`;
 
     if (window.assetsContext) {
-      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/Header.json`;
+      url = `${window.json}${window.assets}/json/config/${window.assetsContext}/Header.json`;
     }
 
     try {
@@ -121,8 +121,8 @@ const HomeMenu = (props, context) => {
     });
   };
 
-  let className = 'navbar sticky-top justify-content-end navbar-styled fadeIn ';
-  if (!props.svSession) className += 'hide-navbar';
+  let className
+  if (!props.svSession) className = 'hide-navbar';
 
   return (
     <React.Fragment>

@@ -33,7 +33,7 @@ class TopNavMenu extends React.Component {
   }
 
   getTopMenuJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/TopNavMenu.json`
+    const url = `${window.json}${window.assets}/json/config/TopNavMenu.json`
     fetch(url)
       .then(res => res.json())
       .then(json => this.setState({ json }))

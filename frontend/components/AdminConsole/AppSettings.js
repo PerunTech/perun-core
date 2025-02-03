@@ -31,6 +31,7 @@ import EditUserWrapper from './utils/EditUserWrapper';
 import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
 import BusinessType from './BusinessType'
+import UserManagement from '../User Management/UserManagement';
 class AppSettings extends React.Component {
   constructor(props) {
     super(props)
@@ -91,7 +92,7 @@ class AppSettings extends React.Component {
   }
 
   getMenu = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
+    const url = `${window.json}${window.assets}/json/config/AppSettings.json`
 
     fetch(url)
       .then(res => res.json())
@@ -777,6 +778,7 @@ class AppSettings extends React.Component {
                               tabIndex='1'
                               onClick={() => {
                                 if (!el['sub-menu'] && isSubMenuActive) { this.handleSubMenuClick(activeId) } else { !el['sub-menu'] && this.handleSubMenuClick(activeId) }
+                                this[el.action](el.actionParam, el.id)
                               }}>
                               <div className={`link_bg`}></div>
                               <div className={`link_title`}>
@@ -785,7 +787,7 @@ class AppSettings extends React.Component {
                                     {iconManager.getIcon(el.icon)}
                                   </i>
                                 </div>
-                                <div className={`menu-links`} onClick={() => this[el.action](el.actionParam, el.id)}><a><span className={`list-span`}>{el.labelCode}</span></a></div>
+                                <div className={`menu-links`} ><a><span className={`list-span`}>{el.labelCode}</span></a></div>
                               </div>
                             </li>
                             <div>
@@ -822,7 +824,7 @@ class AppSettings extends React.Component {
               </div>
             </div>
             <div className={`content`}>
-              {active === 'showUsers' && <ShowUsersDropDown changeUserPassword={this.changeUserPassword} rowClickFn={this.rowClickFn} editUser={this.editUser} showUsersFn={this.showUsersFn} changeUserStatus={this.changeUserStatus} />}
+              {/* {active === 'showUsers' && <ShowUsersDropDown changeUserPassword={this.changeUserPassword} rowClickFn={this.rowClickFn} editUser={this.editUser} showUsersFn={this.showUsersFn} changeUserStatus={this.changeUserStatus} />}
               {active === 'addUsers' && <UserForm />}
               {active === 'showGroups' && <UsersGroups />}
               {showModal}
@@ -840,7 +842,8 @@ class AppSettings extends React.Component {
               {active === 'CodeListEditor' && <CodeListEditor />}
               {active === 'PerunPluginTable' && <PerunPluginTable />}
               {active === 'SvarogMenu' && <SvarogMenu />}
-              {active === 'BusinessType' && <BusinessType />}
+              {active === 'BusinessType' && <BusinessType />} */}
+              <UserManagement />
             </div >
           </div >
         </>}

@@ -10,7 +10,7 @@ const Footer = (props) => {
   }, [])
 
   const getFooterJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/Footer.json`
+    const url = `${window.json}${window.assets}/json/config/Footer.json`
     fetch(url)
       .then(res => res.json())
       .then(json => setJson(json))

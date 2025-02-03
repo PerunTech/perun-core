@@ -19,7 +19,7 @@ class Announcement extends React.Component {
    * @date 5/15/2023 - 1:22:37 PM
    */
   simpleAxios = () => {
-    const url = `${window.location.origin}${window.assets}/json/guide/external/AnnouncementJson.json`
+    const url = `${window.json}${window.assets}/json/guide/external/AnnouncementJson.json`
     fetch(url)
       .then(res => res.json())
       .then(json => this.iterateDocs(json))

@@ -1,5 +1,5 @@
 /* Base libraries */
-import React from 'react';
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { Provider, connect } from 'react-redux'; // these should be represented in /model and imported from there.
@@ -125,13 +125,23 @@ axios.interceptors.response.use(
   }, { runWhen: validResponse }
 );
 
-const App = () => (
-  <Provider store={redux.store}>
-    <IntlProvider>
-      <Routes />
-    </IntlProvider>
-  </Provider>
-)
+const App = () => {
+  useEffect(() => {
+    const unlisten = createHashHistory().listen((location) => {
+      console.log(`The current URL is ${location.pathname}${location.search}${location.hash}`)
+      redux.store.dispatch({ type: "WRITE_IDSCREEN", payload: location.pathname })
+    })
+    return unlisten
+  }, [])
+
+  return (
+    < Provider store={redux.store} >
+      <IntlProvider>
+        <Routes />
+      </IntlProvider>
+    </Provider >
+  )
+}
 /* if user acces fr route memorize it */
 let memorizeFrMapRoute
 if (window.location.href.includes('farm-registry/map')) {
@@ -159,7 +169,8 @@ let whitelistRoot = [
   'userInfo',
   'clickedMenuReducer',
   'moduleLinks',
-  'businessLogicReducer'
+  'businessLogicReducer',
+  'identificationScreen'
 ]
 
 // Use the default locale defined in the assets project
