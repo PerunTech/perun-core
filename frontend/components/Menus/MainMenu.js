@@ -59,21 +59,40 @@ class MainMenu extends React.Component {
     const url = `${window.server}/${verbPath}`
     axios.get(url).then(res => {
       if (res?.data && res?.data?.data) {
-        if (res.data.data['com.prtech.svarog_common.DbDataObject'] && res.data.data['com.prtech.svarog_common.DbDataObject'].values) {
-          const values = res.data.data['com.prtech.svarog_common.DbDataObject'].values
+        const resData = res.data.data?.['com.prtech.svarog_common.DbDataObject'] || {}
+        const defaultUserGroupData = res.data.data?.default_user_group || {}
+        const userData = {}
+        // Get the individual user values, since they're a bit nested
+        if (resData && resData.values) {
+          const values = resData.values
           values.forEach(value => {
             if (value.USER_NAME) {
-              store.dispatch({ type: 'GET_CURRENT_USER_NAME', payload: value.USER_NAME })
+              Object.assign(userData, { username: value.USER_NAME })
               this.setState({ currentUser: value.USER_NAME })
             }
           })
         }
+
+        // Get the individual system user values (ex. object ID, parent ID), since they're returned separately from the non-system values
+        if (isValidObject(resData, 1)) {
+          Object.assign(userData, { userObjectId: resData?.object_id || 0 })
+        }
+
+        // Get the individual values for the default user group
+        if (isValidObject(defaultUserGroupData, 1)) {
+          const defaultUserGroup = {
+            groupName: defaultUserGroupData.GROUP_NAME || '',
+            groupType: defaultUserGroupData.GROUP_TYPE || '',
+            groupObjectId: defaultUserGroupData.object_id || 0,
+          }
+          Object.assign(userData, { defaultUserGroup })
+        }
+
+        store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: userData })
       }
     }).catch(err => {
-      const title = err.response?.data?.title || this.context.intl.formatMessage({
-        id: 'perun.something_went_wrong', defaultMessage: 'perun.something_went_wrong'
-      })
-      const message = err.response?.data?.message || err
+      const title = err.response?.data?.title || ''
+      const message = err.response?.data?.message || ''
       alertUser(true, 'error', title, message)
     })
   }
