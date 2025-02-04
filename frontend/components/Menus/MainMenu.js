@@ -62,6 +62,7 @@ class MainMenu extends React.Component {
       if (res?.data && res?.data?.data) {
         const resData = res.data.data?.['com.prtech.svarog_common.DbDataObject'] || {}
         const defaultUserGroupData = res.data.data?.default_user_group || {}
+        const userAvatarData = res.data.data?.user_avatar_file_info || {}
         const userData = {}
         // Get the individual user values, since they're a bit nested
         if (resData && resData.values) {
@@ -87,6 +88,15 @@ class MainMenu extends React.Component {
             groupObjectId: defaultUserGroupData.object_id || 0,
           }
           Object.assign(userData, { defaultUserGroup })
+        }
+
+        // Get the individual values for the user avatar
+        if (isValidObject(userAvatarData, 1)) {
+          const avatar = {
+            objectId: userAvatarData.objectId || 0,
+            fileName: userAvatarData.fileName || '',
+          }
+          Object.assign(userData, { avatar })
         }
 
         store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: userData })
