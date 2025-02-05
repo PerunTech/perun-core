@@ -2,19 +2,20 @@ import Swal from 'sweetalert2'
 
 export const alertUserV2 = (params) => {
   const {
-    type, title, message, allowOutsideClick, allowEscapeKey,
+    type, title, message, allowOutsideClick, allowEscapeKey, html,
     showConfirm, onConfirm, confirmButtonColor, confirmButtonText,
     showCancel, onCancel, cancelButtonColor, cancelButtonText,
     showDeny, onDeny, denyButtonColor, denyButtonText
   } = params
 
   return Swal.fire({
-    icon: type || 'info',
+    icon: type,
     title,
     text: message,
     allowOutsideClick: allowOutsideClick || false,
     allowEscapeKey: allowEscapeKey || true,
-    showConfirmButton: showConfirm || true,
+    html,
+    showConfirmButton: Boolean(showConfirm),
     confirmButtonText: confirmButtonText || 'OK',
     confirmButtonColor: confirmButtonColor || '#7cd1f9',
     showCancelButton: showCancel,
@@ -37,7 +38,7 @@ export const alertUserV2 = (params) => {
 }
 
 export const alertUserResponse = (response, alertType, onConfirm) => {
-  const type = alertType || response?.type?.toLowerCase() || 'info'
+  const type = alertType || response?.type?.toLowerCase() || ''
   const title = response?.title || response
   const message = response?.message || ''
   Swal.fire({ icon: type, title, text: message, allowOutsideClick: false }).then(value => {
