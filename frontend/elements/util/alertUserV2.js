@@ -8,7 +8,7 @@ export const alertUserV2 = (params) => {
     showDeny, onDeny, denyButtonColor, denyButtonText
   } = params
 
-  return Swal.fire({
+  Swal.fire({
     icon: type,
     title,
     text: message,
