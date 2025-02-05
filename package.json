@@ -39,6 +39,7 @@
     "redux-thunk": "^2.3.0",
     "redux-updeep": "^0.1.1",
     "sweetalert": "^2.1.2",
+    "sweetalert2": "^11.15.10",
     "validator": "9.1.1",
     "xlsx": "^0.17.3"
   },
