@@ -70,13 +70,6 @@ function validResponse(res) {
 
 axios.interceptors.response.use(
   (res) => {
-    if (res?.status === 200) {
-      if (res.data && res.data.type === 'EXCEPTION') {
-        alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
-          return res;
-        })
-      }
-    }
     return res;
   },
   (error) => {
