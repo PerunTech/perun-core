@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { store } from '../../model';
 import PasswordForm from './PasswordForm';
 
-const MyProfile = (props) => {
+const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [img, setImg] = useState(undefined);
     useEffect(() => {
@@ -25,23 +25,21 @@ const MyProfile = (props) => {
             ReactDOM.render(<div className='my-profile-preview-img'>
                 <img src={fileReader.result} />
             </div>, customElement)
-            alertUser(true, '', '', '', () => { uploadFile(file) }, () => { }, true, 'set new Avatar', 'cancel', false, '', false, customElement)
+            alertUser(true, '', '', '', () => { uploadFile(file) }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement)
         }
         fileReader.readAsDataURL(file)
     }
 
     const handlePhotoSelection = (e) => {
-        const largerThan15MbLabel = 'file to large'
-        const notAPhotoLabel = 'not a photo'
+        const largerThan15MbLabel = context.intl.formatMessage({ id: 'perun.my_profile.file_too_large', defaultMessage: 'perun.my_profile.file_too_large' });
+        const notAPhotoLabel = context.intl.formatMessage({ id: 'perun.my_profile.not_a_photo', defaultMessage: 'perun.my_profile.not_a_photo' });
         const photoHeadersArr = ['89504e47', '47494638', 'ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8']
         e.preventDefault()
         const selectedFiles = []
 
         Object.values(e.target.files).forEach(file => {
-            // Check if the selected file is not larger than 200kb
             if ((file.size / 1024).toFixed(2) < 200) {
                 selectedFiles.push(file)
-
                 let header = ''
 
                 const fileReader = new FileReader()
@@ -52,7 +50,6 @@ const MyProfile = (props) => {
                     }
                     if (header && photoHeadersArr.includes(header)) {
                         previewAndUpload(file)
-                        // This will reset the header variable, so it doesn't just keep appending the headers onto each other
                         header = ''
                     } else {
                         alertUser(true, 'info', notAPhotoLabel)
@@ -67,8 +64,7 @@ const MyProfile = (props) => {
     }
 
     const deleteDownload = (e) => {
-        alertUser(true, 'warning', 'Remove current avatar', '', () => {
-
+        alertUser(true, 'warning', context.intl.formatMessage({ id: 'perun.my_profile.remove_current_avatar', defaultMessage: 'perun.my_profile.remove_current_avatar' }), '', () => {
             e.preventDefault()
             let deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
             let url = window.server + `/ReactElements/deleteObject/${props.svSession}`
@@ -92,8 +88,7 @@ const MyProfile = (props) => {
                     const msg = err.response?.data?.message || ''
                     alertUser(true, "error", title, msg);
                 });
-        }, () => { }, true, 'confirm', 'cancel', false, '', false)
-
+        }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.confirm', defaultMessage: 'perun.my_profile.confirm' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false)
     }
 
     const uploadFile = (file) => {
@@ -118,34 +113,33 @@ const MyProfile = (props) => {
 
     const changePassword = () => {
         const customElement = document.createElement('div')
-        ReactDOM.render(<PasswordForm />, customElement)
-        alertUser(true, '', '', '', () => { }, () => { }, true, 'set new Avatar', 'cancel', false, '', false, customElement, true)
+        ReactDOM.render(<PasswordForm context={context} />, customElement)
+        alertUser(true, '', '', '', () => { }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement, true)
     }
     return (
         <div className="my-profile">
             <div className="my-profile-form-container">
                 <div className="my-profile-icon-holder">
                     <div className="my-profile-avatar">
-                        <p className="my-profile-title-large">User avatar</p>
-                        <p>You can change your avatar here or remove the current avatar.</p>
+                        <p className="my-profile-title-large">{context.intl.formatMessage({ id: 'perun.my_profile.user_avatar', defaultMessage: 'perun.my_profile.user_avatar' })}</p>
+                        <p>{context.intl.formatMessage({ id: 'perun.my_profile.change_or_remove_avatar', defaultMessage: 'perun.my_profile.change_or_remove_avatar' })}</p>
                     </div>
                     <div className="my-profile-icon">
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : iconManager.getIcon('currentUserIcon')}
+                        {img ? <img className="my-profile-icon-avatar" src={img} alt={context.intl.formatMessage({ id: 'perun.my_profile.user_avatar_alt', defaultMessage: 'perun.my_profile.user_avatar_alt' })} /> : iconManager.getIcon('currentUserIcon')}
                     </div>
                     <div className="my-profile-upload">
-                        <p className="my-profile-title-medium">Upload new avatar</p>
-                        {/* <input type="file" onChange={handleUploadedFiles} /> */}
+                        <p className="my-profile-title-medium">{context.intl.formatMessage({ id: 'perun.my_profile.upload_new_avatar', defaultMessage: 'perun.my_profile.upload_new_avatar' })}</p>
                         <input type="file" onChange={handlePhotoSelection} />
-                        <p className="my-profile-title-small">The maximum file size allowed is 200KB.</p>
+                        <p className="my-profile-title-small">{context.intl.formatMessage({ id: 'perun.my_profile.max_file_size', defaultMessage: 'perun.my_profile.max_file_size' })}</p>
                         <div onClick={(e) => deleteDownload(e)} className="my-profile-remove">
-                            <p>Remove avatar</p>
+                            <p>{context.intl.formatMessage({ id: 'perun.my_profile.remove_avatar', defaultMessage: 'perun.my_profile.remove_avatar' })}</p>
                         </div>
                     </div>
                 </div>
                 <div className="my-profile-edit">
-                    <p className="my-profile-title-large">Edit Profile</p>
+                    <p className="my-profile-title-large">{context.intl.formatMessage({ id: 'perun.my_profile.edit_profile', defaultMessage: 'perun.my_profile.edit_profile' })}</p>
                     <div className="my-profile-remove" onClick={() => changePassword()}>
-                        <p>Change password</p>
+                        <p>{context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}</p>
                     </div>
                 </div>
                 <GenericForm
@@ -159,7 +153,7 @@ const MyProfile = (props) => {
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"
                 />
-                <div className='my-profile-back-btn' onClick={() => { history.goBack(), console.log('log') }}><div className='my-profile-back-btn-icon'> <i className='fas fa-chevron-left' /></div><p>Back</p></div>
+                <div className='my-profile-back-btn' onClick={() => { history.goBack() }}><div className='my-profile-back-btn-icon'> <i className='fas fa-chevron-left' /></div><p>{context.intl.formatMessage({ id: 'perun.my_profile.back', defaultMessage: 'perun.my_profile.back' })}</p></div>
             </div>
         </div>
     );

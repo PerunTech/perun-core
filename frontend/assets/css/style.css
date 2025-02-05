@@ -1808,6 +1808,7 @@ logout .user-mng-form .field-string {
 
 .my-profile-title-large {
     font-size: 2rem;
+    margin: 0;
 }
 
 .my-profile-upload {
@@ -2082,18 +2083,22 @@ logout .user-mng-form .field-string {
     background: #1f75cb !important;
     box-shadow: inset 0 0 0 1px #1068bf;
     transition: box-shadow 0.15s ease, background-color 0.15s ease;
+    box-shadow: rgb(0 0 0 / 64%) 0px 1px 4px;
 }
 
 .dont-match {
     color: red;
 }
 
-.my-profile-change-password .btn-info.cancel {
-    background: #e9e9e9 !important;
-    box-shadow: inset 0 0 0 1px #595959;
-    transition: box-shadow 0.15s ease, background-color 0.15s ease;
-    color: black;
-    border-color: gray
+.my-profile-change-password .cancel-btn {
+    background: #f2f5f4;
+    border-radius: 5px;
+    font-size: 18px;
+    box-shadow: rgb(0 0 0 / 64%) 0px 1px 4px;
+    border: 0;
+    padding: 7px;
+    cursor: pointer;
+    color: #333;
 }
 
 .my-profile-change-password .my-profile-alert-btns {
@@ -2127,4 +2132,9 @@ logout .user-mng-form .field-string {
 .my-profile-back-btn:focus,
 .my-profile-back-btn:active {
     transform: scale(0.98);
+}
+
+.my-profile-form .hidden,
+.user-mng-form .hidden {
+    display: none !important;
 }

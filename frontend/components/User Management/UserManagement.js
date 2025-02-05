@@ -20,17 +20,21 @@ const UserManagement = (props, context) => {
     return (
         <div className='user-mng'>
             <div className='user-mng-header'>
-                <p>User Management</p>
+                <p>{context.intl.formatMessage({ id: 'perun.user_mng', defaultMessage: 'perun.user_mng' })}</p>
             </div>
             <div className='user-mng-tabs'>
                 <div onClick={() => setActiveFunc('USERS')} className={getTabClass('USERS')}>
-                    <p>Users</p>
+                    <p>{context.intl.formatMessage({ id: 'perun.adminConsole.users', defaultMessage: 'perun.adminConsole.users' })}</p>
                 </div>
                 <div onClick={() => setActiveFunc('GROUPS')} className={getTabClass('GROUPS')}>
-                    <p>Groups</p>
+                    <p>
+                        {context.intl.formatMessage({ id: 'perun.user_mng_groups', defaultMessage: 'perun.user_mng_groups' })}
+                    </p>
                 </div>
                 <div onClick={() => setActiveFunc('PRIVILEGES')} className={getTabClass('PRIVILEGES')}>
-                    <p>Privileges</p>
+                    <p>
+                        {context.intl.formatMessage({ id: 'perun.admin_console.manage_priviledges', defaultMessage: 'perun.admin_console.manage_priviledges' })}
+                    </p>
                 </div>
             </div>
             <div>

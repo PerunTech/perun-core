@@ -4,30 +4,6 @@ import validator from '@rjsf/validator-ajv8';
 import { iconManager } from '../../assets/svg/svgHolder';
 import { strcmp } from '../../model/utils';
 import swal from 'sweetalert';
-const schema = {
-    title: 'Password Form',
-    type: 'object',
-    properties: {
-        password: {
-            type: 'string',
-            title: 'Password'
-        },
-        confirmPassword: {
-            type: 'string',
-            title: 'Confirm Password'
-        },
-    },
-    required: ['password', 'confirmPassword']
-};
-
-const uiSchema = {
-    password: {
-        'ui:widget': 'passwordWidget'
-    },
-    confirmPassword: {
-        'ui:widget': 'passwordWidget'
-    }
-};
 
 const PasswordWidget = ({ value, onChange }) => {
     const [visible, setVisible] = useState(false);
@@ -66,6 +42,31 @@ const PasswordForm = (props) => {
     const [passwordMatch, setDontMatch] = useState(false)
     const [formDat, setDat] = useState({})
 
+    const schema = {
+        title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
+        type: 'object',
+        properties: {
+            password: {
+                type: 'string',
+                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
+            },
+            confirmPassword: {
+                type: 'string',
+                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.confirm_password', defaultMessage: 'perun.my_profile.confirm_password' })}`
+            },
+        },
+        required: ['password', 'confirmPassword']
+    };
+
+    const uiSchema = {
+        password: {
+            'ui:widget': 'passwordWidget'
+        },
+        confirmPassword: {
+            'ui:widget': 'passwordWidget'
+        }
+    };
+
     const handleSubmit = ({ formData }) => {
         setDat(formData)
         if (strcmp(formData.password, formData.confirmPassword)) {
@@ -81,14 +82,13 @@ const PasswordForm = (props) => {
             schema={schema}
             uiSchema={uiSchema}
             widgets={widgets}
-            validate={validate}
             onSubmit={handleSubmit}
             formData={formDat}
         >
-            <div><p className='dont-match'>{passwordMatch ? 'Passwords dont match' : ''}</p></div>
+            <div><p className='dont-match'>{passwordMatch ? `${props.context.intl.formatMessage({ id: 'perun.my_profile.password_dont', defaultMessage: 'perun.my_profile.password_dont' })}` : ''}</p></div>
             <div className='my-profile-alert-btns'>
-                <button className='btn btn-info cancel' onClick={() => swal.close()} type='button'>Cancel</button>
-                <button className='btn btn-info' type='submit'>Submit</button></div>
+                <div className='cancel-btn' onClick={() => swal.close()} >{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
+                <button className='btn btn-info' type='submit'>{props.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}</button></div>
         </Form>
     );
 };
