@@ -72,7 +72,16 @@ const Groups = (props, context) => {
                             </div>
                             <div className='user-dash-content'>
                                 {active === 'EDIT' && generateForm('SVAROG_USER_GROUPS', row['SVAROG_USER_GROUPS.OBJECT_ID'])}
-                                {active === 'PRIVILEGES' && <ExportableGrid
+                                {active === 'MEMBERS' && <ExportableGrid
+                                    key={'testid111'}
+                                    id={'testid111'}
+                                    gridType={'READ_URL'}
+                                    configTableName={`/WsAdminConsole/get-acl-by-group-field-list/sid/${props.svSession}`}
+                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/${'SVAROG_USER_GROUPS'}/${'USER_GROUP'}/${1000}/VALID`}
+                                    minHeight={500}
+                                    refreshData={true}
+                                />}
+                                {/* {active === 'PRIVILEGES' && <ExportableGrid
                                     key={'testid'}
                                     id={'testid'}
                                     gridType={'READ_URL'}
@@ -80,7 +89,7 @@ const Groups = (props, context) => {
                                     dataTableName={`/WsAdminConsole/get-acl-by-group/sid/${props.svSession}/group_object_id/${row['SVAROG_USER_GROUPS.OBJECT_ID']}`}
                                     minHeight={500}
                                     refreshData={true}
-                                />}
+                                />} */}
                             </div>
                         </div>
                     </Modal.Body>

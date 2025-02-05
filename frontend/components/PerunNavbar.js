@@ -3,25 +3,21 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { iconManager } from '../assets/svg/svgHolder';
 import { createHashHistory } from 'history';
-
+import axios from 'axios';
+import { downloadFile } from '../functions/utils';
 const PerunNavbar = (props) => {
     const history = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
     const [menuBurger, setMenuBurger] = useState(undefined)
     const [toggleBurger, setToggleBurger] = useState(false)
-    // function extractSegment(url) {
-    //     if (url) {
-    //         const regex = /\/main\/([^/]+)/;
-    //         if (url.includes('/main')) {
-    //             const match = url.match(regex);
-    //             return match ? match[1] : 'main-menu';
-    //         }
-    //         return url.split('/').pop() || '404';
-    //     }
-    // }
+    const [img, setImg] = useState(undefined);
     const navOptRef = useRef(null);
     const burgerRef = useRef(null);
+
     useEffect(() => {
+        if (props.userInfo.avatar) {
+            downloadFile(props.userInfo.avatar, props.svSession, setImg)
+        }
         function handleClickOutside(event) {
             if (navOptRef.current && !navOptRef.current.contains(event.target)) {
                 setToggleNavOpt(false)
@@ -35,6 +31,16 @@ const PerunNavbar = (props) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        if (props.userInfo.avatar && props.userInfo.avatar.objectId) {
+            downloadFile(props.userInfo.avatar, props.svSession, setImg)
+        } else {
+            setImg(undefined)
+        }
+    }, [props.userInfo])
+
+
 
     const showBurgerMenu = () => {
         setMenuBurger(JSON.parse(localStorage.getItem('bundleStorage')))
@@ -60,7 +66,7 @@ const PerunNavbar = (props) => {
                 {/* navbar end */}
                 <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
                     <div className='nav-icon-with-title' >
-                        {iconManager.getIcon('currentUserIcon')} <p>{props.userInfo.username}</p> </div>
+                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : iconManager.getIcon('currentUserIcon')} <p>{props.userInfo.username}</p> </div>
                     <div className='perun-navbar-arrow'>{iconManager.getIcon('arrowDown')}</div>
                 </div>
                 {/* navbar end toggle */}
@@ -84,6 +90,7 @@ const PerunNavbar = (props) => {
 
 const mapStateToProps = (state) => ({
     // location: state.identificationScreenReducer.idScreenLocation,
+    svSession: state.security.svSession,
     userInfo: state.userInfo
 })
 
