@@ -132,9 +132,9 @@ export function getCapsLockState(event, callback) {
   }
 }
 
-export const downloadFile = (avatar, svSession, stateSet) => {
-  if (avatar['objectId'] && avatar['fileName']) {
-    const url = `${window.server}/ReactElements/downloadFile/sid/${svSession}/object-id/${avatar['objectId']}/file-name/${avatar['fileName']}`;
+export const downloadFile = (file, svSession, stateSet) => {
+  if (file['objectId'] && file['fileName']) {
+    const url = `${window.server}/ReactElements/downloadFile/sid/${svSession}/object-id/${file['objectId']}/file-name/${file['fileName']}`;
     axios
       .get(url, { responseType: 'blob' })
       .then(res => {
