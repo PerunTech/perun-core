@@ -37,7 +37,8 @@ export const alertUserV2 = (params) => {
   })
 }
 
-export const alertUserResponse = (response, alertType, onConfirm) => {
+export const alertUserResponse = (params) => {
+  const { response, alertType, onConfirm } = params
   const type = alertType || response?.type?.toLowerCase() || ''
   const title = response?.title || response
   const message = response?.message || ''
