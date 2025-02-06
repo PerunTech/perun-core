@@ -60,9 +60,14 @@ const GeoLayerTypes = (props, context) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).then((res) => {
         if (res.data) {
-          alertUserResponse(res.data)
-          GridManager.reloadGridData(gridId)
-          setState({ show: false })
+          const resType = res.data?.type?.toLowerCase() || 'info'
+          const title = res.data?.title || ''
+          const msg = res.data?.message || ''
+          alertUser(true, resType, title, msg, onConfirm)
+          if (resType === 'success') {
+            GridManager.reloadGridData(gridId)
+            setState({ show: false })
+          }
         }
       }).catch(err => {
         console.error(err)
