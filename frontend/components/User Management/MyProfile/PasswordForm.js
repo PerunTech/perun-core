@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
-import { iconManager } from '../../assets/svg/svgHolder';
-import { strcmp } from '../../model/utils';
+import { iconManager } from '../../../assets/svg/svgHolder';
+import { strcmp } from '../../../model/utils';
 import swal from 'sweetalert';
 
 const PasswordWidget = ({ value, onChange }) => {

@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from '../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { alertUser, ReactBootstrap } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
+// id cleanups
 // development note: refresh grids,add group menagement
 const Groups = (props, context) => {
     const [show, setShow] = useState(false)
@@ -12,7 +13,9 @@ const Groups = (props, context) => {
     const [active, setActive] = useState('EDIT')
     useEffect(() => {
         return () => {
-            ComponentManager.cleanComponentReducerState('SEARCH_GROUPS_GRID');
+            ComponentManager.cleanComponentReducerState('GROUP_MAIN_GRID');
+            ComponentManager.cleanComponentReducerState('GROUP_MEMBERS_GRID');
+            ComponentManager.cleanComponentReducerState('GROUP_ACL_GRID');
         }
     }, [])
 
@@ -45,15 +48,14 @@ const Groups = (props, context) => {
                 <div className='user-mng-grid'>
                     <ExportableGrid
                         gridType='READ_URL'
-                        key={'SEARCH_GROUPS_GRID'}
-                        id={'SEARCH_GROUPS_GRID'}
+                        key={'GROUP_MAIN_GRID'}
+                        id={'GROUP_MAIN_GRID'}
                         configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
                         dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_USER_GROUPS/0`}
                         onRowClickFunct={handleRowClick}
                         refreshData={true}
                         toggleCustomButton={true}
-                        customButton={() => {
-                        }}
+                        customButton={() => { }}
                         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
                         heightRatio={0.55}
                     />
@@ -73,23 +75,23 @@ const Groups = (props, context) => {
                             <div className='user-dash-content'>
                                 {active === 'EDIT' && generateForm('SVAROG_USER_GROUPS', row['SVAROG_USER_GROUPS.OBJECT_ID'])}
                                 {active === 'MEMBERS' && <ExportableGrid
-                                    key={'testid111'}
-                                    id={'testid111'}
+                                    key={'GROUP_MEMBERS_GRID'}
+                                    id={'GROUP_MEMBERS_GRID'}
                                     gridType={'READ_URL'}
-                                    configTableName={`/WsAdminConsole/get-acl-by-group-field-list/sid/${props.svSession}`}
-                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/${'SVAROG_USER_GROUPS'}/${'USER_GROUP'}/${1000}/VALID`}
+                                    configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USERS`}
+                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/SVAROG_USERS/USER_DEFAULT_GROUP/0/VALID`}
                                     minHeight={500}
                                     refreshData={true}
                                 />}
-                                {/* {active === 'PRIVILEGES' && <ExportableGrid
-                                    key={'testid'}
-                                    id={'testid'}
+                                {active === 'PRIVILEGES' && <ExportableGrid
+                                    key={'GROUP_ACL_GRID'}
+                                    id={'GROUP_ACL_GRID'}
                                     gridType={'READ_URL'}
                                     configTableName={`/WsAdminConsole/get-acl-by-group-field-list/sid/${props.svSession}`}
                                     dataTableName={`/WsAdminConsole/get-acl-by-group/sid/${props.svSession}/group_object_id/${row['SVAROG_USER_GROUPS.OBJECT_ID']}`}
                                     minHeight={500}
                                     refreshData={true}
-                                />} */}
+                                />}
                             </div>
                         </div>
                     </Modal.Body>

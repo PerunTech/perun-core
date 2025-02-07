@@ -1,25 +1,39 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from '../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
-// development note: refresh grids,add group menagement
+import ReactDOM from 'react-dom'
+import UsersAddGroup from './UsersAddGroup'
+// development note: Needed features search, add,edit,chage user group, show privileges(done),
+//add user to group
+// http://192.168.100.110:9096/services/WsAdminConsole/updateUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/495924/563826/add
+//remove user from group http://192.168.100.110:9096/services/WsAdminConsole/updateUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/495924/564067/remove
+// params userid/groupid
+// set default group http://192.168.100.110:9096/services/WsAdminConsole/addDefaultUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/494994/563826/true
+// id cleanups
+
 const Users = (props, context) => {
     const [show, setShow] = useState(false)
     const [row, setRow] = useState(undefined)
     const [active, setActive] = useState('EDIT')
-
+    const [hideControls, setHideControls] = useState(false)
+    const [addGroupFlag, setAddGroupFlag] = useState(false)
     useEffect(() => {
         return () => {
-            ComponentManager.cleanComponentReducerState('SEARCH_USERS_GRID');
+            ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
+            ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
+            ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
         }
     }, [])
 
     const handleRowClick = (_id, _rowIdx, row) => {
         setShow(true)
         setRow(row)
+        setActive('EDIT')
+        setHideControls(false)
     }
     const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
 
@@ -40,39 +54,51 @@ const Users = (props, context) => {
                 const msg = err.response?.data?.message || ''
                 alertUser(true, "error", title, msg);
             });
-        }, () => { }, true, 'yessss', 'nooo')
+        }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
     }
-    const generateForm = (tableName, objectId, search) => {
-        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test'
+    const generateForm = (tableName, objectId, search, gridId) => {
+        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test add-edit-users-form'
         return <GenericForm
             params={'READ_URL'}
-            key={`${tableName}_SEARCH_FORM`}
-            id={`${tableName}_SEARCH_FORM`}
+            key={gridId}
+            id={gridId}
             method={`/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
             uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
             tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
             addSaveFunction={(e) => console.log(e)}
-            hideBtns={'all'}
+            hideBtns={'closeAndDelete'}
             className={classNames}
         />
     }
+    const generateGroupContorls = () => {
+        const customElement = document.createElement('div')
+        ReactDOM.render(<div>
+            <button>Remove</button>
+            <button>Basic Group</button>
+        </div>, customElement)
+        return customElement
+    }
+
     return (
         <>
             <div className='user-mng-users'>
                 <div className='user-mng-search'>
-                    {generateForm('FLOCK', 0, true)}
+                    {generateForm('FLOCK', 0, true, 'USERS_SEARCH_FORM')}
                 </div>
                 <div className='user-mng-grid'>
                     <ExportableGrid
                         gridType='READ_URL'
-                        key={'SEARCH_USERS_GRID'}
-                        id={'SEARCH_USERS_GRID'}
+                        key={'USERS_MAIN_GRID'}
+                        id={'USERS_MAIN_GRID'}
                         configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USERS`}
                         dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/0`}
                         onRowClickFunct={handleRowClick}
                         refreshData={true}
                         toggleCustomButton={true}
                         customButton={() => {
+                            setShow(true)
+                            setHideControls(true)
+                            setActive('ADD')
                         }}
                         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
                         heightRatio={0.55}
@@ -85,17 +111,39 @@ const Users = (props, context) => {
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>
                         <div className='user-mng-dashboard user-mng'>
-                            <div className='user-dash-controls'>
+                            {/* ADD USER */}
+                            {active === 'ADD' && generateForm('SVAROG_USERS', 0, false, 'USERS_ADD_FORM')}
+                            {/* USER DASH CONTROLS */}
+                            {!hideControls && <div className='user-dash-controls'>
                                 <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT') }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
                                 <div className={'user-control'} onClick={() => changeUserStatus()}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_status', defaultMessage: 'perun.user_mng.chg_status' })}</div>
                                 <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP') }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
                                 <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES') }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
-                            </div>
+                            </div>}
+                            {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
-                                {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'])}
+                                {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'], false, 'USERS_EDIT_FORM')}
+                                {active === 'GROUP' && <ExportableGrid
+                                    key={'USER_GROUP_GRID'}
+                                    id={'USER_GROUP_GRID'}
+                                    gridType={'READ_URL'}
+                                    configTableName={`/WsAdminConsole/get-acl-by-user-field-list/sid/${props.svSession}`}
+                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/SVAROG_USERS/USER_DEFAULT_GROUP/0/VALID`}
+                                    minHeight={500}
+                                    refreshData={true}
+                                    toggleCustomButton={true}
+                                    customButton={() => {
+                                        setAddGroupFlag(true)
+                                    }}
+                                    customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
+                                    onRowClickFunct={() => alertUserV2({
+                                        html: generateGroupContorls(),
+                                        allowOutsideClick: true
+                                    })}
+                                />}
                                 {active === 'PRIVILEGES' && <ExportableGrid
-                                    key={'testid'}
-                                    id={'testid'}
+                                    key={'USERS_ACL_GRID'}
+                                    id={'USERS_ACL_GRID'}
                                     gridType={'READ_URL'}
                                     configTableName={`/WsAdminConsole/get-acl-by-user-field-list/sid/${props.svSession}`}
                                     dataTableName={`/WsAdminConsole/get-acl-by-user/sid/${props.svSession}/user_object_id/${row['SVAROG_USERS.OBJECT_ID']}`}
@@ -108,16 +156,14 @@ const Users = (props, context) => {
                     <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
                 </Modal>
             )}
+            {addGroupFlag && <UsersAddGroup setAddGroupFlag={setAddGroupFlag} userId={row['SVAROG_USERS.OBJECT_ID']} />}
         </>
     )
 }
-
 const mapStateToProps = (state) => ({
     svSession: state.security.svSession,
 })
-
 Users.contextTypes = {
     intl: PropTypes.object.isRequired
 }
-
 export default connect(mapStateToProps)(Users)

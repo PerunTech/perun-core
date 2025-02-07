@@ -76,7 +76,6 @@ class AppSettings extends React.Component {
       if (this.props.svSession) {
         this.setState({ sessionIsGranted: true }, () => this.getMenu())
         if (document.getElementById('identificationScreen')) {
-          document.getElementById('identificationScreen').className = 'identificationScreen'
           document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({ id: 'perun.admin_console.settings', defaultMessage: 'perun.admin_console.settings' })
         }
       } else {

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { GenericForm, axios, createHashHistory } from '../../client';
-import { iconManager } from '../../assets/svg/svgHolder';
-import { downloadFile } from '../../functions/utils';
-import { alertUser } from '../../elements';
+import { GenericForm, axios, createHashHistory } from '../../../client';
+import { iconManager } from '../../../assets/svg/svgHolder';
+import { downloadFile } from '../../../functions/utils';
+import { alertUser } from '../../../elements';
 import ReactDOM from 'react-dom';
-import { store } from '../../model';
+import { store } from '../../../model';
 import PasswordForm from './PasswordForm';
 
 const MyProfile = (props, context) => {

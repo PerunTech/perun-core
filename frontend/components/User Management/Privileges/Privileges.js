@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from '../../elements'
-import CreateAclCodes from '../AdminConsole/CreateAclCodes'
+import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { alertUser, ReactBootstrap } from '../../../elements'
+import CreateAclCodes from '../../AdminConsole/CreateAclCodes'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 // development note: refresh grids,add group menagement
+// id cleanups
 const Privileges = (props, context) => {
     const [show, setShow] = useState(false)
     const [row, setRow] = useState(undefined)
@@ -26,14 +27,15 @@ const Privileges = (props, context) => {
         let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test'
         return <GenericForm
             params={'READ_URL'}
-            key={`${tableName}_SEARCH_FORM`}
-            id={`${tableName}_SEARCH_FORM`}
+            key={`${tableName}_${objectId}_FORM`}
+            id={`${tableName}_${objectId}_FORM`}
             method={`/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
             uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
             tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
             addSaveFunction={(e) => console.log(e)}
-            hideBtns={'closeAndDelete'}
+            hideBtns={'all'}
             className={classNames}
+            disabled
         />
     }
     return (

@@ -16,7 +16,6 @@ import { modalReducer } from './reducers/modalReducer';
 import businessLogicReducer from './reducers/businessLogicReducer'
 import { userInfoReducer } from './reducers/userInfoReducer';
 import moduleLinksReducer from './reducers/moduleLinksReducer';
-import identificationScreenReducer from './reducers/identificationScreen';
 
 export default function createReducers(asyncReducers) {
   const appReducer = combineReducers({
@@ -37,7 +36,6 @@ export default function createReducers(asyncReducers) {
     modal: modalReducer,
     userInfo: userInfoReducer,
     businessLogicReducer: businessLogicReducer,
-    identificationScreenReducer: identificationScreenReducer,
     moduleLinks: moduleLinksReducer,
     ...asyncReducers
   })

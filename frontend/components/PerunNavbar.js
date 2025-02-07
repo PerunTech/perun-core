@@ -5,7 +5,7 @@ import { iconManager } from '../assets/svg/svgHolder';
 import { createHashHistory } from 'history';
 import axios from 'axios';
 import { downloadFile } from '../functions/utils';
-const PerunNavbar = (props) => {
+const PerunNavbar = (props, context) => {
     const history = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
     const [menuBurger, setMenuBurger] = useState(undefined)
@@ -61,7 +61,7 @@ const PerunNavbar = (props) => {
                 </div>
                 {/* idscreen */}
                 <div className='nav-title'>
-                    {/* {props.location} */}
+                    <p id='identificationScreen'></p>
                 </div>
                 {/* navbar end */}
                 <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
@@ -71,9 +71,9 @@ const PerunNavbar = (props) => {
                 </div>
                 {/* navbar end toggle */}
                 {toggleNavOpt && <div ref={navOptRef} className='nav-options'>
-                    <div className='nav-option no-event'> <p>User Group:</p><p>{props.userInfo.defaultUserGroup.groupName}</p></div>
-                    <div className='nav-option' onClick={() => { history.push('/main/my-profile'), setToggleNavOpt(false) }} title='edit-profile'> {iconManager.getIcon('edit')} <p>Edit profile</p></div>
-                    <div className='nav-option' onClick={() => { props.logout(), setToggleNavOpt(false) }}> {iconManager.getIcon('logout')}  <p>Log out</p></div>
+                    <div className='nav-option no-event'> <p>{context.intl.formatMessage({ id: 'perun.navbar.usergr', defaultMessage: 'perun.navbar.usergr' })}</p><p>{props.userInfo.defaultUserGroup.groupName}</p></div>
+                    <div className='nav-option' onClick={() => { history.push('/main/my-profile'), setToggleNavOpt(false) }} title='edit-profile'> {iconManager.getIcon('edit')} <p>{context.intl.formatMessage({ id: 'perun.navbar.edit', defaultMessage: 'perun.navbar.edit' })}</p></div>
+                    <div className='nav-option' onClick={() => { props.logout(), setToggleNavOpt(false) }}> {iconManager.getIcon('logout')}  <p>{context.intl.formatMessage({ id: 'perun.navbar.logout', defaultMessage: 'perun.navbar.logout' })}</p></div>
                 </div>}
             </div>
             {/* burger menu */}
@@ -89,7 +89,6 @@ const PerunNavbar = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-    // location: state.identificationScreenReducer.idScreenLocation,
     svSession: state.security.svSession,
     userInfo: state.userInfo
 })

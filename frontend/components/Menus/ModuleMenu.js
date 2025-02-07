@@ -34,7 +34,6 @@ class ModuleMenu extends React.Component {
   transformIdScreen = () => {
     const idScreen = document.getElementById('identificationScreen')
     if (idScreen) {
-      idScreen.className = 'identificationScreen'
       idScreen.innerText = this.context.intl.formatMessage({
         id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
       })
