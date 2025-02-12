@@ -6,6 +6,7 @@ import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 import ReactDOM from 'react-dom'
+import { alertUserResponse } from '../../../elements'
 import UsersAddGroup from './UsersAddGroup'
 // development note: Needed features search, add,edit,chage user group, show privileges(done),
 //add user to group
@@ -21,13 +22,61 @@ const Users = (props, context) => {
     const [active, setActive] = useState('EDIT')
     const [hideControls, setHideControls] = useState(false)
     const [addGroupFlag, setAddGroupFlag] = useState(false)
+    const [usersData, setUsersData] = useState(undefined)
     useEffect(() => {
+        axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/100/PKID`).then(res => {
+            console.log(res);
+            setUsersData(res.data)
+        })
         return () => {
-            ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
-            ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
-            ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
+            cleanUpGrids()
         }
     }, [])
+
+    const cleanUpGrids = () => {
+        ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
+        ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
+        ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
+    }
+    const generateForm = (tableName, objectId, search, gridId) => {
+        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test add-edit-users-form'
+        let searchMethod = `/ReactElements/getTableSearchJSONSchema/${props.svSession}/${tableName}`
+        return <GenericForm
+            params={'READ_URL'}
+            key={gridId}
+            id={gridId}
+            method={search ? searchMethod : `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
+            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
+            tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
+            addSaveFunction={(e) => { search ? searchData(e, gridId) : handleSave(e, gridId) }}
+            hideBtns={'closeAndDelete'}
+            className={classNames}
+        />
+    }
+    const searchData = (e, gridId) => {
+        const url = `${window.server}/WsAdminConsole/searchUsers/${props.svSession}`
+        axios({
+            method: "post",
+            data: e.formData,
+            url: url,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }).then(res => {
+            cleanUpGrids()
+            setUsersData(undefined)
+            setUsersData(res.data)
+            ComponentManager.setStateForComponent(gridId, null, {
+                saveExecuted: false,
+            });
+        }).catch(err => {
+            alertUserResponse({ 'response': err })
+        })
+    }
+    const handleSave = (e, gridId) => {
+
+        ComponentManager.setStateForComponent(gridId, null, {
+            saveExecuted: false,
+        });
+    }
 
     const handleRowClick = (_id, _rowIdx, row) => {
         setShow(true)
@@ -36,7 +85,6 @@ const Users = (props, context) => {
         setHideControls(false)
     }
     const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
-
     const changeUserStatus = () => {
         const initialStatus = row['SVAROG_USERS.STATUS']
         const objectId = row['SVAROG_USERS.OBJECT_ID']
@@ -56,20 +104,6 @@ const Users = (props, context) => {
             });
         }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
     }
-    const generateForm = (tableName, objectId, search, gridId) => {
-        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test add-edit-users-form'
-        return <GenericForm
-            params={'READ_URL'}
-            key={gridId}
-            id={gridId}
-            method={`/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
-            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
-            tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
-            addSaveFunction={(e) => console.log(e)}
-            hideBtns={'closeAndDelete'}
-            className={classNames}
-        />
-    }
     const generateGroupContorls = () => {
         const customElement = document.createElement('div')
         ReactDOM.render(<div>
@@ -78,20 +112,19 @@ const Users = (props, context) => {
         </div>, customElement)
         return customElement
     }
-
     return (
         <>
             <div className='user-mng-users'>
                 <div className='user-mng-search'>
-                    {generateForm('FLOCK', 0, true, 'USERS_SEARCH_FORM')}
+                    {generateForm('SVAROG_USERS', 0, true, 'USERS_SEARCH_FORM')}
                 </div>
-                <div className='user-mng-grid'>
+                {usersData && <div className='user-mng-grid'>
                     <ExportableGrid
-                        gridType='READ_URL'
+                        gridType='SEARCH_GRID_DATA'
                         key={'USERS_MAIN_GRID'}
                         id={'USERS_MAIN_GRID'}
                         configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USERS`}
-                        dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/0`}
+                        dataTableName={usersData}
                         onRowClickFunct={handleRowClick}
                         refreshData={true}
                         toggleCustomButton={true}
@@ -103,7 +136,7 @@ const Users = (props, context) => {
                         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
                         heightRatio={0.55}
                     />
-                </div>
+                </div>}
             </div>
             {show && (
                 <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false), setActive('EDIT') }}>
@@ -111,8 +144,6 @@ const Users = (props, context) => {
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>
                         <div className='user-mng-dashboard user-mng'>
-                            {/* ADD USER */}
-                            {active === 'ADD' && generateForm('SVAROG_USERS', 0, false, 'USERS_ADD_FORM')}
                             {/* USER DASH CONTROLS */}
                             {!hideControls && <div className='user-dash-controls'>
                                 <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT') }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
@@ -122,13 +153,15 @@ const Users = (props, context) => {
                             </div>}
                             {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
+                                {/* ADD USER */}
+                                {active === 'ADD' && generateForm('SVAROG_USERS', 0, false, 'USERS_ADD_FORM')}
                                 {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'], false, 'USERS_EDIT_FORM')}
                                 {active === 'GROUP' && <ExportableGrid
                                     key={'USER_GROUP_GRID'}
                                     id={'USER_GROUP_GRID'}
                                     gridType={'READ_URL'}
-                                    configTableName={`/WsAdminConsole/get-acl-by-user-field-list/sid/${props.svSession}`}
-                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/SVAROG_USERS/USER_DEFAULT_GROUP/0/VALID`}
+                                    configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
+                                    dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}`}
                                     minHeight={500}
                                     refreshData={true}
                                     toggleCustomButton={true}

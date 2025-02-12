@@ -39,8 +39,8 @@ const UsersAddGroup = (props, context) => {
                                     key={'USER_ADD_GROUP_GRID'}
                                     id={'USER_ADD_GROUP_GRID'}
                                     gridType={'READ_URL'}
-                                    configTableName={`/WsAdminConsole/get-acl-by-user-field-list/sid/${props.svSession}`}
-                                    dataTableName={`/ReactElements/getObjectByLink/${props.svSession}/${props.userId}/SVAROG_USERS/USER_DEFAULT_GROUP/0/VALID`}
+                                    configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
+                                    dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_USER_GROUPS/0`}
                                     minHeight={600}
                                     refreshData={true}
                                     onRowClickFunct={handleRowClick}

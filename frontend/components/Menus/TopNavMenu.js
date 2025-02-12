@@ -21,7 +21,6 @@ class TopNavMenu extends React.Component {
     let mainroute = window.location.hash
     mainroute = mainroute.split('/').pop()
     if (mainroute === 'main') {
-      document.getElementById('hideHamb').className = 'hideHambMenu';
     }
     this.getTopMenuJson()
   }

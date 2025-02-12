@@ -149,7 +149,6 @@ class MainMenu extends React.Component {
   }
 
   unmountRegister() {
-    document.getElementById('hideHamb').className = 'hideHambMenu';
     document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
       id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
     });

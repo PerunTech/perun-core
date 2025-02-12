@@ -1439,7 +1439,7 @@ input[class*="input_error"] {
 .user-mng-tabs {
     display: flex;
     gap: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 .user-tab-title {
@@ -1491,6 +1491,7 @@ logout .user-mng-form .field-string {
 .user-mng-form fieldset {
     display: flex;
     gap: 20px;
+    align-items: flex-end;
 }
 
 .user-mng-form #btnSeparator {
@@ -1520,10 +1521,7 @@ logout .user-mng-form .field-string {
     color: white !important;
 }
 
-.user-dash-content .field-string input,
-.user-dash-content .field-boolean input,
-.user-dash-content .field-integer input,
-.user-dash-content .field-number input,
+.user-dash-content input,
 .user-dash-content select {
     box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em !important;
 }
@@ -2160,4 +2158,19 @@ logout .user-mng-form .field-string {
     box-shadow: 0 0 0 0.2rem rgba(72, 115, 180, 0.336);
     background: #1c558d !important;
     border: none;
+}
+
+.user-mng-form input:active,
+.user-mng-form select:active,
+.user-dash-content input:active,
+.user-dash-content select:active,
+.user-mng-form input:focus,
+.user-mng-form select:focus,
+.user-dash-content input:focus,
+.user-dash-content select:focus {
+    background: #efefefb0;
+}
+
+body.swal2-height-auto {
+    height: 100vh !important;
 }

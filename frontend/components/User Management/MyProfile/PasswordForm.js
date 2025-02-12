@@ -4,7 +4,9 @@ import validator from '@rjsf/validator-ajv8';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { strcmp } from '../../../model/utils';
 import swal from 'sweetalert';
-
+import md5 from 'md5'
+import { alertUserResponse, alertUserV2 } from '../../../elements';
+import axios from 'axios';
 const PasswordWidget = ({ value, onChange }) => {
     const [visible, setVisible] = useState(false);
 
@@ -27,12 +29,7 @@ const PasswordWidget = ({ value, onChange }) => {
     );
 };
 
-const validate = (formData, errors) => {
-    if (formData.password !== formData.confirmPassword) {
-        errors.confirmPassword.addError('Passwords do not match');
-    }
-    return errors;
-};
+
 
 const widgets = {
     passwordWidget: PasswordWidget
@@ -46,31 +43,56 @@ const PasswordForm = (props) => {
         title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
         type: 'object',
         properties: {
-            password: {
+            oldPassword: {
+                type: 'string',
+                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.old_password', defaultMessage: 'perun.my_profile.old_password' })}`
+            },
+            userPassword: {
                 type: 'string',
                 title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
             },
-            confirmPassword: {
+            confUserPassword: {
                 type: 'string',
                 title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.confirm_password', defaultMessage: 'perun.my_profile.confirm_password' })}`
             },
         },
-        required: ['password', 'confirmPassword']
+        required: ['userPassword', 'confUserPassword', 'oldPassword']
     };
 
     const uiSchema = {
-        password: {
+        userPassword: {
             'ui:widget': 'passwordWidget'
         },
-        confirmPassword: {
+        confUserPassword: {
             'ui:widget': 'passwordWidget'
-        }
+        },
+        oldPassword: {
+            'ui:widget': 'passwordWidget'
+        },
     };
-
+    //post method, form with userName, oldPassword, userPassword, confUserPassword
     const handleSubmit = ({ formData }) => {
+        swal.close()
         setDat(formData)
-        if (strcmp(formData.password, formData.confirmPassword)) {
-            swal.close()
+        let data = formData
+        data.userName = props.userInfo.username
+        data.userPassword = md5(data.userPassword).toUpperCase()
+        data.confUserPassword = md5(data.confUserPassword).toUpperCase()
+        data.oldPassword = md5(data.oldPassword).toUpperCase()
+        if (strcmp(formData.confUserPassword, formData.userPassword)) {
+            let url = window.server + `/WsAdminConsole/changePassword/${props.svSession}`
+            axios({
+                method: "post",
+                data,
+                url: url,
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            }).then(res => {
+                console.log(res);
+                alertUserResponse({ 'response': res })
+            }).catch(err => {
+                alertUserResponse({ 'response': err })
+            })
+
         } else setDontMatch(true)
     };
 

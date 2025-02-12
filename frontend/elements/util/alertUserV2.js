@@ -39,10 +39,10 @@ export const alertUserV2 = (params) => {
 
 export const alertUserResponse = (params) => {
   const { response, alertType, onConfirm } = params
-  const type = alertType || response?.type?.toLowerCase() || ''
-  const title = response?.title || response
-  const message = response?.message || ''
-  Swal.fire({ icon: type, title, text: message, allowOutsideClick: false }).then(value => {
+  const type = alertType || response?.type?.toLowerCase() || response.data?.type?.toLowerCase() || ''
+  const title = response?.title || response?.data?.title || response
+  const message = response?.message || response?.data?.message || ''
+  Swal.fire({ icon: type, title, text: message, allowOutsideClick: false, heightAuto: false }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
     }

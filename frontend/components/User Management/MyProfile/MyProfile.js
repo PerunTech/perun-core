@@ -13,6 +13,9 @@ const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [img, setImg] = useState(undefined);
     useEffect(() => {
+        document.getElementById('identificationScreen').innerText = context.intl.formatMessage({
+            id: 'perun.my_profile', defaultMessage: 'perun.my_profile'
+        });
         if (props.userInfo.avatar) {
             downloadFile(props.userInfo.avatar, props.svSession, setImg)
         }
@@ -113,7 +116,7 @@ const MyProfile = (props, context) => {
 
     const changePassword = () => {
         const customElement = document.createElement('div')
-        ReactDOM.render(<PasswordForm context={context} />, customElement)
+        ReactDOM.render(<PasswordForm userInfo={props.userInfo} svSession={props.svSession} context={context} />, customElement)
         alertUser(true, '', '', '', () => { }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement, true)
     }
     return (
