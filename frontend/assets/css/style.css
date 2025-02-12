@@ -1522,8 +1522,11 @@ logout .user-mng-form .field-string {
 }
 
 .user-dash-content input,
-.user-dash-content select {
-    box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em !important;
+.user-dash-content select,
+.user-dash-content textarea {
+    box-shadow: rgb(29 29 29) 0px 0px 2px, rgba(90, 125, 188, 0.05) 0px 0.25em 1em !important;
+    border-bottom-color: #2196f3 !important;
+    border-bottom-width: 2px !important;
 }
 
 .user-mng-search {

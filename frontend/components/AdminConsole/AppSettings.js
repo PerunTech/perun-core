@@ -15,7 +15,6 @@ import PropTypes from 'prop-types'
 import Loading from '../Loading/Loading';
 import NotificationsComponent from './NotificationsComponent';
 import SvarogAclGrid from './SvarogAclGrid';
-import AssignAcl from './AssignAcl';
 import CreateAclCodes from './CreateAclCodes'
 import DirectAccess from './DirectAccess'
 import SystemConfLogs from './SystemConfLogs'
@@ -833,7 +832,6 @@ class AppSettings extends React.Component {
               {active === 'SvarogSystemParams' && <SvarogSystemParams />}
               {active === 'NotificationsComponent' && <NotificationsComponent />}
               {active === 'CreateAclCodes' && <CreateAclCodes />}
-              {active === 'AssignAcl' && <AssignAcl />}
               {active === 'DirectAccess' && <DirectAccess />}
               {active === 'SystemConfLogs' && <SystemConfLogs />}
               {active === 'OrganizationalUnit' && <OrganizationalUnit />}

@@ -21,7 +21,7 @@ const UsersAddGroup = (props, context) => {
         axios.get(url).then(res => {
             console.log(res);
             setShow(false)
-            props.setAddGroupFlag(false)
+            props.setAssignFlag(false)
         })
 
     }
@@ -29,7 +29,7 @@ const UsersAddGroup = (props, context) => {
     return (
         <>
             {show && (
-                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false), props.setAddGroupFlag(false) }}>
+                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false), props.setAssignFlag(false) }}>
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>

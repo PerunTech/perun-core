@@ -4,7 +4,9 @@ import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
 import { alertUser, ReactBootstrap } from '../../../elements'
 import CreateAclCodes from '../../AdminConsole/CreateAclCodes'
+import AssignAcl from '../../AdminConsole/AssignAcl'
 const { useReducer, useEffect } = React
+
 const { Modal } = ReactBootstrap
 // development note: refresh grids,add group menagement
 // id cleanups
@@ -12,6 +14,7 @@ const Privileges = (props, context) => {
     const [show, setShow] = useState(false)
     const [row, setRow] = useState(undefined)
     const [active, setActive] = useState('EDIT')
+    const [assignFlag, setAssignFlag] = useState(false)
     useEffect(() => {
         return () => {
             ComponentManager.cleanComponentReducerState('SVAROG_ACL_GRID');
@@ -38,6 +41,7 @@ const Privileges = (props, context) => {
             disabled
         />
     }
+
     return (
         <>
             <div className='user-mng-users'>
@@ -50,12 +54,20 @@ const Privileges = (props, context) => {
                         dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_ACL/0`}
                         onRowClickFunct={handleRowClick}
                         refreshData={true}
-                        toggleCustomButton={true}
-                        customButton={() => {
-                            setShow(true)
-                            setActive('ADD')
-                        }}
-                        customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+                        buttonsArray={[
+                            {
+                                "name": context.intl.formatMessage({ id: 'perun.admin_console.assign_acl', defaultMessage: 'perun.admin_console.assign_acl' }),
+                                "action": () => setAssignFlag(true),
+                                "id": "second"
+                            }, {
+                                "name": context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' }),
+                                "action": () => {
+                                    setShow(true)
+                                    setActive('ADD')
+                                },
+                                "id": "first"
+                            }]
+                        }
                         heightRatio={0.65}
                     />
                 </div>
@@ -75,6 +87,7 @@ const Privileges = (props, context) => {
                     <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
                 </Modal >
             )}
+            {assignFlag && <AssignAcl setAssignFlag={setAssignFlag} />}
         </>
     )
 }

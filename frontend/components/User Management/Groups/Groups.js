@@ -6,6 +6,7 @@ import { alertUser, ReactBootstrap } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 import { alertUserResponse } from '../../../elements'
+import AssignAcl from '../../AdminConsole/AssignAcl'
 // id cleanups
 // development note: refresh grids,add group menagement
 const Groups = (props, context) => {
@@ -13,11 +14,18 @@ const Groups = (props, context) => {
     const [row, setRow] = useState(undefined)
     const [active, setActive] = useState('EDIT')
     const [hideControls, setHideControls] = useState(false)
+    const [assignFlag, setAssignFlag] = useState(false)
     useEffect(() => {
         return () => {
             cleanUpGrids()
         }
     }, [])
+    useEffect(() => {
+        if (!assignFlag) {
+            GridManager.reloadGridData('GROUP_ACL_GRID')
+        }
+    }, [assignFlag])
+
     const cleanUpGrids = () => {
         ComponentManager.cleanComponentReducerState('GROUP_MAIN_GRID');
         ComponentManager.cleanComponentReducerState('GROUP_MEMBERS_GRID');
@@ -115,6 +123,11 @@ const Groups = (props, context) => {
                                     dataTableName={`/WsAdminConsole/get-acl-by-group/sid/${props.svSession}/group_object_id/${row['SVAROG_USER_GROUPS.OBJECT_ID']}`}
                                     minHeight={500}
                                     refreshData={true}
+                                    toggleCustomButton={true}
+                                    customButton={() => {
+                                        setAssignFlag(true)
+                                    }}
+                                    customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.assign_acl', defaultMessage: 'perun.admin_console.assign_acl' })}
                                 />}
                             </div>
                         </div>
@@ -122,6 +135,7 @@ const Groups = (props, context) => {
                     <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
                 </Modal >
             )}
+            {assignFlag && <AssignAcl setAssignFlag={setAssignFlag} groupType={row['SVAROG_USER_GROUPS.OBJECT_ID']} groupName={row['SVAROG_USER_GROUPS.GROUP_NAME']} />}
         </>
     )
 }
