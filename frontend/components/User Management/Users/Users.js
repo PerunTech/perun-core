@@ -8,6 +8,7 @@ const { Modal } = ReactBootstrap
 import ReactDOM from 'react-dom'
 import { alertUserResponse } from '../../../elements'
 import UsersAddGroup from './UsersAddGroup'
+import AddUserWrapper from './AddUserWrapper'
 // development note: Needed features search, add,edit,chage user group, show privileges(done),
 //add user to group
 // http://192.168.100.110:9096/services/WsAdminConsole/updateUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/495924/563826/add
@@ -24,33 +25,55 @@ const Users = (props, context) => {
     const [addGroupFlag, setAddGroupFlag] = useState(false)
     const [usersData, setUsersData] = useState(undefined)
     useEffect(() => {
-        axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/100/PKID`).then(res => {
-            console.log(res);
-            setUsersData(res.data)
-        })
+        refreshGrid()
         return () => {
             cleanUpGrids()
         }
     }, [])
 
+    const refreshGrid = () => {
+        axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/100/PKID`).then(res => {
+            setUsersData(res.data)
+        })
+    }
     const cleanUpGrids = () => {
         ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
         ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
         ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
     }
-    const generateForm = (tableName, objectId, search, gridId) => {
-        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test add-edit-users-form'
+    const generateForm = (tableName, objectId, formType, gridId) => {
+        let inputWrapper
+        let classNames
+        switch (formType) {
+            case 'search':
+                inputWrapper = undefined
+                classNames = 'user-mng-form hide-all-form-legends'
+                break;
+            case 'add':
+                inputWrapper = AddUserWrapper
+                classNames = 'form-test add-edit-users-form add-user-wrapper'
+                break;
+            case 'edit':
+                inputWrapper = undefined
+                classNames = 'form-test add-edit-users-form edit-user-wrapper'
+                break;
+            default:
+                break;
+        }
+
         let searchMethod = `/ReactElements/getTableSearchJSONSchema/${props.svSession}/${tableName}`
         return <GenericForm
             params={'READ_URL'}
             key={gridId}
             id={gridId}
-            method={search ? searchMethod : `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
+            method={formType === 'search' ? searchMethod : `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
             uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
             tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
-            addSaveFunction={(e) => { search ? searchData(e, gridId) : handleSave(e, gridId) }}
+            addSaveFunction={(e) => { formType === 'search' ? searchData(e, gridId) : handleSave(e, gridId) }}
             hideBtns={'closeAndDelete'}
             className={classNames}
+            inputWrapper={inputWrapper}
+            afterSaveCleanUp={() => { refreshGrid(), setShow(false) }}
         />
     }
     const searchData = (e, gridId) => {
@@ -116,7 +139,7 @@ const Users = (props, context) => {
         <>
             <div className='user-mng-users'>
                 <div className='user-mng-search'>
-                    {generateForm('SVAROG_USERS', 0, true, 'USERS_SEARCH_FORM')}
+                    {generateForm('SVAROG_USERS', 0, 'search', 'USERS_SEARCH_FORM')}
                 </div>
                 {usersData && <div className='user-mng-grid'>
                     <ExportableGrid
@@ -154,8 +177,8 @@ const Users = (props, context) => {
                             {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
                                 {/* ADD USER */}
-                                {active === 'ADD' && generateForm('SVAROG_USERS', 0, false, 'USERS_ADD_FORM')}
-                                {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'], false, 'USERS_EDIT_FORM')}
+                                {active === 'ADD' && generateForm('SVAROG_USERS', 0, 'add', 'USERS_ADD_FORM')}
+                                {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'], 'edit', 'USERS_EDIT_FORM')}
                                 {active === 'GROUP' && <ExportableGrid
                                     key={'USER_GROUP_GRID'}
                                     id={'USER_GROUP_GRID'}

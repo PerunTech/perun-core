@@ -4,9 +4,10 @@ import validator from '@rjsf/validator-ajv8';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { strcmp } from '../../../model/utils';
 import swal from 'sweetalert';
-import md5 from 'md5'
-import { alertUserResponse, alertUserV2 } from '../../../elements';
+import md5 from 'md5';
+import { alertUserResponse } from '../../../elements';
 import axios from 'axios';
+
 const PasswordWidget = ({ value, onChange }) => {
     const [visible, setVisible] = useState(false);
 
@@ -29,24 +30,18 @@ const PasswordWidget = ({ value, onChange }) => {
     );
 };
 
-
-
 const widgets = {
     passwordWidget: PasswordWidget
 };
 
 const PasswordForm = (props) => {
-    const [passwordMatch, setDontMatch] = useState(false)
-    const [formDat, setDat] = useState({})
+    const [passwordMatch, setDontMatch] = useState(false);
+    const [formDat, setDat] = useState({});
 
     const schema = {
-        title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
+        title: `${props.isNewUser ? props.context.intl.formatMessage({ id: 'perun.my_profile.set_user_password', defaultMessage: 'perun.my_profile.set_user_password' }) : props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
         type: 'object',
         properties: {
-            oldPassword: {
-                type: 'string',
-                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.old_password', defaultMessage: 'perun.my_profile.old_password' })}`
-            },
             userPassword: {
                 type: 'string',
                 title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
@@ -56,8 +51,16 @@ const PasswordForm = (props) => {
                 title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.confirm_password', defaultMessage: 'perun.my_profile.confirm_password' })}`
             },
         },
-        required: ['userPassword', 'confUserPassword', 'oldPassword']
+        required: ['userPassword', 'confUserPassword']
     };
+
+    if (!props.isNewUser) {
+        schema.properties.oldPassword = {
+            type: 'string',
+            title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.old_password', defaultMessage: 'perun.my_profile.old_password' })}`
+        };
+        schema.required.push('oldPassword');
+    }
 
     const uiSchema = {
         userPassword: {
@@ -66,40 +69,45 @@ const PasswordForm = (props) => {
         confUserPassword: {
             'ui:widget': 'passwordWidget'
         },
-        oldPassword: {
-            'ui:widget': 'passwordWidget'
-        },
     };
-    //post method, form with userName, oldPassword, userPassword, confUserPassword
-    const handleSubmit = ({ formData }) => {
-        swal.close()
-        setDat(formData)
-        let data = formData
-        data.userName = props.userInfo.username
-        data.userPassword = md5(data.userPassword).toUpperCase()
-        data.confUserPassword = md5(data.confUserPassword).toUpperCase()
-        data.oldPassword = md5(data.oldPassword).toUpperCase()
-        if (strcmp(formData.confUserPassword, formData.userPassword)) {
-            let url = window.server + `/WsAdminConsole/changePassword/${props.svSession}`
-            axios({
-                method: "post",
-                data,
-                url: url,
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            }).then(res => {
-                console.log(res);
-                alertUserResponse({ 'response': res })
-            }).catch(err => {
-                alertUserResponse({ 'response': err })
-            })
 
-        } else setDontMatch(true)
+    if (!props.isNewUser) {
+        uiSchema.oldPassword = { 'ui:widget': 'passwordWidget' };
+    }
+
+    const handleSubmit = ({ formData }) => {
+
+        setDat(formData);
+
+        if (!strcmp(formData.confUserPassword, formData.userPassword)) {
+            setDontMatch(true);
+            return;
+        } else {
+            setDontMatch(false);
+            props.onSave(formData);
+        }
+
+        if (!props.isNewUser) {
+
+            swal.close();
+            let data = {
+                ...formData,
+                userName: props.userInfo.username,
+                userPassword: md5(formData.userPassword).toUpperCase(),
+                confUserPassword: md5(formData.confUserPassword).toUpperCase(),
+                oldPassword: md5(formData.oldPassword).toUpperCase()
+            };
+
+            let url = window.server + `/WsAdminConsole/changePassword/${props.svSession}`;
+            axios.post(url, data, { headers: { "Content-Type": "application/x-www-form-urlencoded" } })
+                .then(res => alertUserResponse({ response: res }))
+                .catch(err => alertUserResponse({ response: err }));
+        }
     };
 
     return (
-
         <Form
-            className='my-profile-change-password'
+            className={`my-profile-change-password ${props.isNewUser && 'add-user-password-form'}`}
             validator={validator}
             schema={schema}
             uiSchema={uiSchema}
@@ -107,10 +115,13 @@ const PasswordForm = (props) => {
             onSubmit={handleSubmit}
             formData={formDat}
         >
-            <div><p className='dont-match'>{passwordMatch ? `${props.context.intl.formatMessage({ id: 'perun.my_profile.password_dont', defaultMessage: 'perun.my_profile.password_dont' })}` : ''}</p></div>
+            <div>
+                <p className='dont-match'>{passwordMatch ? props.context.intl.formatMessage({ id: 'perun.my_profile.password_dont', defaultMessage: 'perun.my_profile.password_dont' }) : ''}</p>
+            </div>
             <div className='my-profile-alert-btns'>
-                <div className='cancel-btn' onClick={() => swal.close()} >{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
-                <button className='btn btn-info' type='submit'>{props.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}</button></div>
+                <div className='cancel-btn' onClick={() => swal.close()}>{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
+                <button className='btn btn-info' type='submit'>{props.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}</button>
+            </div>
         </Form>
     );
 };

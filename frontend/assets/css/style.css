@@ -2177,3 +2177,31 @@ logout .user-mng-form .field-string {
 body.swal2-height-auto {
     height: 100vh !important;
 }
+
+.add-user-password-form .my-profile-alert-btns {
+    justify-content: flex-end;
+}
+
+.add-user-password-form .my-profile-alert-btns .cancel-btn {
+    display: none;
+}
+
+.add-user-wrapper #buttonHolder {
+    display: none;
+
+}
+
+.add-user-wrapper {
+    padding: 0 !important;
+}
+
+.add-user-password-form .field-string {
+    width: 50% !important;
+}
+
+.add-user-wrapper-button {
+    background: #1f75cb !important;
+    transition: box-shadow 0.15s ease, background-color 0.15s ease;
+    box-shadow: rgb(0 0 0 / 64%) 0px 1px 4px;
+    float: right;
+}
