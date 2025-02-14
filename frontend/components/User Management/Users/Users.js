@@ -9,13 +9,7 @@ import ReactDOM from 'react-dom'
 import { alertUserResponse } from '../../../elements'
 import UsersAddGroup from './UsersAddGroup'
 import AddUserWrapper from './AddUserWrapper'
-// development note: Needed features search, add,edit,chage user group, show privileges(done),
-//add user to group
-// http://192.168.100.110:9096/services/WsAdminConsole/updateUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/495924/563826/add
-//remove user from group http://192.168.100.110:9096/services/WsAdminConsole/updateUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/495924/564067/remove
-// params userid/groupid
-// set default group http://192.168.100.110:9096/services/WsAdminConsole/addDefaultUserGroup/809f06e8-d9d4-4489-98c3-430ab8468ff7/494994/563826/true
-// id cleanups
+import EditUserWrapper from './EditUserWrapper'
 
 const Users = (props, context) => {
     const [show, setShow] = useState(false)
@@ -34,7 +28,7 @@ const Users = (props, context) => {
     const refreshGrid = () => {
         axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/100/PKID`).then(res => {
             setUsersData(res.data)
-        })
+        }).catch(err => alertUserResponse({ response: err }));
     }
     const cleanUpGrids = () => {
         ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
@@ -54,7 +48,7 @@ const Users = (props, context) => {
                 classNames = 'form-test add-edit-users-form add-user-wrapper'
                 break;
             case 'edit':
-                inputWrapper = undefined
+                inputWrapper = EditUserWrapper
                 classNames = 'form-test add-edit-users-form edit-user-wrapper'
                 break;
             default:
@@ -117,23 +111,31 @@ const Users = (props, context) => {
         alertUser(true, 'info', question, label, () => {
             const url = `${window.server}/WsAdminConsole/changeUserStatus/${props.svSession}/${objectId}/${status}`
             axios.get(url).then(res => {
-                alertUser(true, res.data.type.toLowerCase(), res.data.title, res.data.message)
-            }).catch(err => {
-                // setLoading(false)
-                console.error(err)
-                const title = err.response?.data?.title || err
-                const msg = err.response?.data?.message || ''
-                alertUser(true, "error", title, msg);
-            });
+                alertUserResponse({ response: res })
+            }).catch(err => alertUserResponse({ response: err }));
         }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
     }
-    const generateGroupContorls = () => {
+    const generateGroupContorls = (_id, _rowIdx, row) => {
         const customElement = document.createElement('div')
         ReactDOM.render(<div>
-            <button>Remove</button>
-            <button>Basic Group</button>
+            <button onClick={() => removeGroup(row)}>Remove</button>
+            <button onClick={() => setBasicGroup(row)}>Basic Group</button>
         </div>, customElement)
         return customElement
+    }
+    const setBasicGroup = (gridRow) => {
+        const url = `${window.server}/WsAdminConsole/addDefaultUserGroup/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/${gridRow['SVAROG_USER_GROUPS.OBJECT_ID']}/true`
+        axios.get(url).then(res => {
+            alertUserResponse({ response: res })
+            GridManager.reloadGridData('USER_GROUP_GRID')
+        }).catch(err => alertUserResponse({ response: err }));
+    }
+    const removeGroup = (gridRow) => {
+        const url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/${gridRow['SVAROG_USER_GROUPS.OBJECT_ID']}/remove`
+        axios.get(url).then(res => {
+            alertUserResponse({ response: res })
+            GridManager.reloadGridData('USER_GROUP_GRID')
+        }).catch(err => alertUserResponse({ response: err }));
     }
     return (
         <>
@@ -169,10 +171,10 @@ const Users = (props, context) => {
                         <div className='user-mng-dashboard user-mng'>
                             {/* USER DASH CONTROLS */}
                             {!hideControls && <div className='user-dash-controls'>
-                                <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT') }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
+                                <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
                                 <div className={'user-control'} onClick={() => changeUserStatus()}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_status', defaultMessage: 'perun.user_mng.chg_status' })}</div>
-                                <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP') }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
-                                <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES') }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
+                                <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
+                                <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
                             </div>}
                             {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
@@ -192,8 +194,8 @@ const Users = (props, context) => {
                                         setAddGroupFlag(true)
                                     }}
                                     customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
-                                    onRowClickFunct={() => alertUserV2({
-                                        html: generateGroupContorls(),
+                                    onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
+                                        html: generateGroupContorls(_id, _rowIdx, row),
                                         allowOutsideClick: true
                                     })}
                                 />}
@@ -215,6 +217,7 @@ const Users = (props, context) => {
             {addGroupFlag && <UsersAddGroup setAddGroupFlag={setAddGroupFlag} userId={row['SVAROG_USERS.OBJECT_ID']} />}
         </>
     )
+
 }
 const mapStateToProps = (state) => ({
     svSession: state.security.svSession,

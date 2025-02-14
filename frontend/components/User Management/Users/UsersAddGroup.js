@@ -20,6 +20,7 @@ const UsersAddGroup = (props, context) => {
         let url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${props.userId}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/add`
         axios.get(url).then(res => {
             console.log(res);
+            GridManager.reloadGridData('USER_GROUP_GRID')
             setShow(false)
             props.setAssignFlag(false)
         })
@@ -29,7 +30,7 @@ const UsersAddGroup = (props, context) => {
     return (
         <>
             {show && (
-                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false), props.setAssignFlag(false) }}>
+                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false) }}>
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>

@@ -84,12 +84,17 @@ const PasswordForm = (props) => {
             return;
         } else {
             setDontMatch(false);
-            props.onSave(formData);
+            if (props.isNewUser) {
+                props.onSave(formData);
+            }
         }
 
+        if (!props.isNewUser && !props.isEdit) {
+            swal.close();
+        }
         if (!props.isNewUser) {
 
-            swal.close();
+
             let data = {
                 ...formData,
                 userName: props.userInfo.username,

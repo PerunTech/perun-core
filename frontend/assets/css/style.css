@@ -2205,3 +2205,13 @@ body.swal2-height-auto {
     box-shadow: rgb(0 0 0 / 64%) 0px 1px 4px;
     float: right;
 }
+
+.edit-user-wrapper {
+    padding-bottom: 0;
+}
+
+.user-dash-content .my-profile-remove {
+    position: absolute;
+    top: 86%;
+    left: 80%;
+}
