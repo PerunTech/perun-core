@@ -8,11 +8,12 @@ import { getCapsLockState } from '../../../functions/utils';
 
 const LoginForm = (props, context) => {
   const { alert, errors, username, password } = props.internalComponentState
-  const { onSubmit, onChange } = props
+  const { onSubmit, onSamlSubmit, onChange } = props
   const labels = context.intl
   const [logonImgJson, setLogonImgJson] = useState([])
   const [projectImgJson, setProjectImgJson] = useState([])
   const [loginLinks, setLoginLinks] = useState([])
+  const [ssoData, setSsoData] = useState([])
   // This is needed for keeping track when the component is mounted and performing state changes, so React doesn't complain
   const componentIsMounted = useRef(true)
   const [capsLockOn, setCapsLockOn] = useState(false);
@@ -21,21 +22,19 @@ const LoginForm = (props, context) => {
     getLogonImgJson()
     getLoginLinks()
     getProjectImgJson()
-
+    generateSsoBtn()
     return () => {
       componentIsMounted.current = false
     }
   }, [])
+
   const getLoginLinks = () => {
     const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
-
-    fetch(url)
-      .then(res => res.json())
-      .then(json => {
-        setLoginLinks(json)
-      })
-      .catch(err => { throw err });
+    fetch(url).then(res => res.json()).then(json => {
+      setLoginLinks(json)
+    }).catch(err => { throw err });
   }
+
   const getLogonImgJson = () => {
     let url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
     // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
@@ -56,6 +55,15 @@ const LoginForm = (props, context) => {
         setProjectImgJson(json)
       }
     }).catch(err => { throw err })
+  }
+
+  const generateSsoBtn = () => {
+    const url = `${window.location.origin}${window.assets}/json/config/AltLogin.json`
+    fetch(url).then(res => res.json()).then(json => {
+      if (componentIsMounted.current) {
+        setSsoData(json)
+      }
+    }).catch(err => { throw err });
   }
 
   return (
@@ -111,12 +119,25 @@ const LoginForm = (props, context) => {
                     })}
                   </p>
                 )}
-                <button id='login_submit' className='logonBtns' type='submit' >
+                <button id='login_submit' className='logonBtns' type='submit'>
                   <span>{labels.formatMessage({
                     id: `${config.labelBasePath}.login.login`,
                     defaultMessage: `${config.labelBasePath}.login.login`
                   })}</span>
                 </button>
+                {ssoData?.length > 0 && ssoData.map(data => (
+                  <button key={data.id} id={`login_submit_saml ${data.id}`} className={`nav-link saml-login ${data.className}`} type='button' onClick={onSamlSubmit}>
+                    <div className='sso-btn-container'>
+                      <div className='sso-img-container'>
+                        <img src={data.src} />
+                      </div>
+                      <p>{labels.formatMessage({
+                        id: `perun.login.${data.labelCode}`,
+                        defaultMessage: `perun.login.${data.labelCode}`
+                      })}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
               {logonImgJson?.length > 0 && (
                 <div className='logonImg' onDoubleClick={function () { window.localStorage.clear(); }}>
@@ -128,27 +149,28 @@ const LoginForm = (props, context) => {
                 </div>
               )}
             </div>
-            {loginLinks?.length > 0 && <>
-              <div className='verticalLine'></div>
-              <div className='right'>
-                <div className='linkStyle'>
-                  {loginLinks.map((item, index) => {
-                    return < div key={`${item.id}_${index}`}>
-                      <Link to={item.href} key={item.id} className={item.className}>
+            {loginLinks?.length > 0 && <div className='verticalLine' />}
+            <div className='right'>
+              <div className='linkStyle'>
+                {loginLinks.map((item, index) => {
+                  return (
+                    <div key={`${item.id}_${index}`}>
+                      {item?.href ? <Link to={item.href} key={item.id} className={item.className}>
                         {labels.formatMessage({
                           id: `perun.login.${item.id}`,
                           defaultMessage: `perun.login.${item.id}`
-                        })}</Link>
-                    </div >
-                  })}
-                </div>
+                        })}
+                      </Link> : <div id={item.id} key={item.id} className={item.className}>
+                        <img src={item.src} className={item.className + '-img'} />
+                      </div>}
+                    </div>
+                  )
+                })}
               </div>
-            </>
-            }
-
+            </div>
           </div>
         </form>
-      </div >
+      </div>
       {projectImgJson?.length > 0 && (
         <div id='imgProject' className='projectImg'>
           {projectImgJson.map(img => {
@@ -166,7 +188,7 @@ const LoginForm = (props, context) => {
           })}
         </div>
       )}
-    </div >
+    </div>
   )
 }
 

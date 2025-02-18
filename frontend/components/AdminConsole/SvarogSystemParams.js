@@ -1,211 +1,168 @@
 import React from 'react'
-import axios from 'axios'
-import { ComponentManager, GenericForm, ExportableGrid, Modal, PropTypes } from '../../client'
-import { alertUser, GridManager } from '../../elements'
+import { ComponentManager, ExportableGrid, GridManager, PropTypes, axios } from '../../client'
 import { connect } from 'react-redux'
+import Modal from '../Modal/Modal'
+import GenericForm from '../../elements/form/GenericForm'
+import { alertUser } from '../../elements'
 
-/* name of the table, if needed change only here */
 const tableName = 'SVAROG_SYS_PARAMS'
+const formId = tableName + '_FORM'
+const gridId = tableName + '_GRID'
+
 class SvarogSystemParams extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      showAclModal: '',
+      grid: undefined,
+      svarogSysParamsFormModal: undefined,
     }
   }
 
   componentDidMount() {
-    this.showInitGrid()
+    this.getInitGrid()
   }
 
   componentWillUnmount() {
-    ComponentManager.cleanComponentReducerState(tableName + '_GRID')
+    this.setState({ grid: undefined })
+    ComponentManager.cleanComponentReducerState(gridId)
   }
 
-  showInitGrid = () => {
-    let grid = <ExportableGrid
-      gridType={'READ_URL'}
-      key={tableName + '_GRID'}
-      id={tableName + '_GRID'}
-      configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getObjectsByParentId/%session/0/' + tableName + '/0'}
-      onRowClickFunct={this.onRowClickFn}
-      customButton={() => this.addSysParam('add')}
-      customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
-      toggleCustomButton={true}
-      heightRatio={0.75}
-      refreshData={true}
-    />
-    ComponentManager.setStateForComponent(tableName + '_GRID', null, {
-      onRowClickFunct: this.onRowClickFn,
-      customButton: () => this.addSysParam('add'),
+  getInitGrid = () => {
+    const { session } = this.props
+    const grid = (
+      <ExportableGrid
+        gridType={'READ_URL'}
+        key={gridId}
+        id={gridId}
+        configTableName={`/ReactElements/getTableFieldList/${session}/${tableName}`}
+        dataTableName={`/ReactElements/getTableData/${session}/${tableName}/0`}
+        onRowClickFunct={this.onRowClick}
+        toggleCustomButton
+        customButton={this.showModal}
+        refreshData={true}
+        heightRatio={0.75}
+        customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+      />
+    )
 
-    })
-    this.setState({ showGrid: grid })
+    ComponentManager.setStateForComponent(gridId, null, { onRowClickFunct: this.onRowClick, customButton: this.showModal })
+    this.setState({ grid })
   }
 
-  /* notification type add or edit/delete */
-  addSysParam = (actionType) => {
-    if (actionType) {
-      let urlSaveForm
-      let objectId = 0
-      let isForDelete = false
-      let modalTitle
-      switch (actionType) {
-        case 'add': {
-          urlSaveForm = window.server + '/ReactElements/createTableRecordFormData/' + this.props.svSession + '/' + tableName + '/' + objectId
-          modalTitle = this.context.intl.formatMessage({ id: 'perun.generalLabel.add', defaultMessage: 'perun.generalLabel.add' })
+  onRowClick = (_gridId, _rowId, row) => {
+    const selectedObjId = row[`${tableName}.OBJECT_ID`]
+    this.showModal(selectedObjId)
+  }
+
+  saveSvarogSysParam = (formData, url) => {
+    axios({ method: 'post', data: encodeURIComponent(JSON.stringify(formData)), url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(res => {
+      if (res.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        const title = res.data?.title || ''
+        const msg = res.data?.message || ''
+        alertUser(true, resType, title, msg, () => ComponentManager.setStateForComponent(formId, null, { saveExecuted: false }))
+        if (resType === 'success') {
+          this.closeModal()
+          GridManager.reloadGridData(gridId)
         }
-          break;
-        case 'edit': {
-          if (this.state.objId) {
-            isForDelete = true
-            objectId = this.state.objId
-            urlSaveForm = window.server + '/ReactElements/createTableRecordFormData/' + this.props.svSession + '/' + tableName + '/' + 0
-            modalTitle = this.context.intl.formatMessage({ id: 'perun.admin_console.change_delete', defaultMessage: 'perun.admin_console.change_delete' })
-          }
-        }
-          break;
       }
+    }).catch(err => {
+      console.error(err)
+      alertUser(true, 'error', err, '', () => ComponentManager.setStateForComponent(formId, null, { saveExecuted: false }))
+    })
+  }
 
-      let form = <GenericForm
+  deleteSvarogSysParam = (_id, _method, _session, params) => {
+    const { session } = this.props
+    const formData = params[4].PARAM_VALUE
+    const data = encodeURIComponent(JSON.stringify(JSON.parse(formData)))
+    const url = `${window.server}/ReactElements/deleteObject/${session}`
+    axios({ method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(res => {
+      if (res.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        const title = res.data?.title || ''
+        const msg = res.data?.message || ''
+        alertUser(true, resType, title, msg, () => ComponentManager.setStateForComponent(formId, null, { saveExecuted: false }))
+        if (resType === 'success') {
+          this.closeModal()
+          GridManager.reloadGridData(gridId)
+        }
+      }
+    }).catch(err => {
+      const title = err.response?.data?.title || err
+      const msg = err.response?.data?.message || ''
+      alertUser(true, 'error', title, msg, () => ComponentManager.setStateForComponent(formId, null, { saveExecuted: false }))
+    })
+  }
+
+  showModal = (objectId) => {
+    const { session } = this.props
+    const svarogSysParamObjId = objectId || 0
+    const modalTitle = objectId ? this.context.intl.formatMessage({ id: 'perun.admin_console.svarog_system_params', defaultMessage: 'perun.admin_console.svarog_system_params' })
+      : this.context.intl.formatMessage({ id: 'perun.admin_console.add_svarog_system_params', defaultMessage: 'perun.admin_console.add_svarog_system_params' })
+    const hideBtns = objectId ? 'close' : 'closeAndDelete'
+    const addDeleteFunction = objectId ? this.deleteSvarogSysParam : null
+
+    const addSaveFunction = () => {
+      const formData = ComponentManager.getStateForComponent(formId, 'formTableData')
+      const isEmpty = Object.values(formData).every(v => v === null || v === undefined)
+      if (!formData || isEmpty) {
+        const label = this.context.intl.formatMessage({ id: 'perun.admin_console.input_data_error', defaultMessage: 'perun.admin_console.input_data_error' })
+        alertUser(true, 'info', label, '', () => ComponentManager.setStateForComponent(formId, null, { saveExecuted: false }))
+      } else {
+        const url = `${window.server}/ReactElements/createTableRecordFormData/${session}/${tableName}/0`
+        this.saveSvarogSysParam(formData, url)
+      }
+    }
+
+    const form = (
+      <GenericForm
         params={'READ_URL'}
-        key={tableName + '_FORM'}
-        id={tableName + '_FORM'}
-        method={'/ReactElements/getTableJSONSchema/%session/' + tableName}
-        uiSchemaConfigMethod={'/ReactElements/getTableUISchema/%session/' + tableName}
-        tableFormDataMethod={'/ReactElements/getTableFormData/%session/' + objectId + '/' + tableName}
-        addSaveFunction={(e) => this.getFormData(e, urlSaveForm, actionType)}
-        customSave={true}
-        customSaveButtonName={this.context.intl.formatMessage({ id: 'perun.generalLabel.save', defaultMessage: 'perun.generalLabel.save' })}
-        hideBtns='close'
-        addDeleteFunction={isForDelete && this.deleteFormCallback}
+        key={formId}
+        id={formId}
+        method={`/ReactElements/getTableJSONSchema/${session}/${tableName}`}
+        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${session}/${tableName}`}
+        tableFormDataMethod={`/ReactElements/getTableFormData/${session}/${svarogSysParamObjId}/${tableName}`}
+        hideBtns={hideBtns}
+        addSaveFunction={addSaveFunction}
+        addDeleteFunction={addDeleteFunction}
       />
+    )
 
-      let modal = <Modal
-        key={'NotificationEditForm_Modal'}
-        modalTitle={modalTitle}
+    const svarogSysParamsFormModal = (
+      <Modal customClassBtnModal='customClassBtnModal'
         closeModal={this.closeModal}
+        closeAction={this.closeModal}
         modalContent={form}
+        modalTitle={modalTitle}
+        nameCloseBtn={this.context.intl.formatMessage({ id: 'perun.adminConsole.close', defaultMessage: 'perun.adminConsole.close' })}
       />
-      this.setState({ setModal: modal })
-    }
+    )
+
+    this.setState({ svarogSysParamsFormModal })
   }
 
-  resetFormDeleteState = (formId) => {
-    ComponentManager.setStateForComponent(formId, null, { deleteExecuted: false })
-  }
-
-  resetFormSaveState = (formId) => {
-    ComponentManager.setStateForComponent(formId, null, { saveExecuted: false })
-  }
-
-  /* delete callback function from genericForm, prepare delete params */
-  deleteFormCallback = (_id, _method, _session, params) => {
-    let valueToSend = params[4].PARAM_VALUE
-    this.deleteAxiosPost(valueToSend)
-  }
-
-  /* simple axios post delete method from prepared params from deleteFormCallback */
-  deleteAxiosPost(valueToSend) {
-    let restUrl = window.server + '/ReactElements/deleteObject/' + this.props.svSession
-    axios({
-      method: 'post',
-      data: encodeURIComponent(valueToSend),
-      url: restUrl,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then((res) => {
-      if (res.data) {
-        const resType = res.data.type
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType?.toLowerCase() || 'info', title, msg, () => this.resetFormDeleteState(`${tableName}_FORM`))
-        if (resType?.toLowerCase() === 'success') {
-          this.setState({ setModal: false })
-          GridManager.reloadGridData(tableName + '_GRID')
-        }
-      }
-    }).catch((error) => {
-      console.error(error)
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg, () => this.resetFormDeleteState(`${tableName}_FORM`))
-    })
-  }
-
-  /* form callback prepare formData*/
-  getFormData = (e, url) => {
-    let restUrl = url
-    let form_params = e.formData
-    this.saveFormData(form_params, restUrl)
-  }
-
-  /* simple axios post method with prepared e.formData */
-  saveFormData = (form_params, restUrl) => {
-    axios({
-      method: 'post',
-      data: encodeURIComponent(JSON.stringify(form_params)),
-      url: restUrl,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then((res) => {
-      if (res.data) {
-        const resType = res.data.type
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType?.toLowerCase() || 'info', title, msg, () => this.resetFormSaveState(`${tableName}_FORM`))
-        if (resType?.toLowerCase() === 'success') {
-          this.setState({ setModal: false })
-          GridManager.reloadGridData(tableName + '_GRID')
-        }
-      }
-    }).catch((error) => {
-      console.error(error)
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg, () => this.resetFormSaveState(`${tableName}_FORM`))
-    })
-  }
-
-  /* hide modal */
   closeModal = () => {
-    this.setState({ setModal: false })
-  }
-
-  /* check if row is clicked, objId is recieved */
-  editSysParam = (whatCase) => {
-    if (this.state.objId) {
-      this.addSysParam(whatCase)
-    } else {
-      alertUser(true, 'info', this.context.intl.formatMessage({ id: 'perun.generalLabel.choose_row_change', defaultMessage: 'perun.generalLabel.choose_row_change' }), null)
-    }
-  }
-
-  /* on rowClick callback from grid, sets objId */
-  onRowClickFn = (_id, _idx, row) => {
-    let objectId = row[`${tableName}.OBJECT_ID`]
-    this.setState({ objId: objectId }, () => {
-      this.editSysParam('edit');
-    });
+    this.setState({ svarogSysParamsFormModal: undefined })
   }
 
   render() {
-    const { showGrid, setModal } = this.state
+    const { grid, svarogSysParamsFormModal } = this.state
     return (
       <React.Fragment>
-        <div className='admin-console-grid-container'>{showGrid}</div>
-        {setModal}
+        <div className='admin-console-grid-container'>{grid}</div>
+        {svarogSysParamsFormModal}
       </React.Fragment>
     )
   }
 }
 
 const mapStateToProps = state => ({
-  svSession: state.security.svSession
+  session: state.security.svSession
 })
 
 SvarogSystemParams.contextTypes = {
   intl: PropTypes.object.isRequired
 }
-
 
 export default connect(mapStateToProps)(SvarogSystemParams)

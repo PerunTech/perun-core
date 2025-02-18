@@ -9,7 +9,7 @@ export function loginUser(restUrl, method, formData, customData) {
     dispatch({ type: a.loginPending, payload: undefined })
     // make the call
     if (customData) {
-      dispatch({ type: a.loginIacs, payload: customData })
+      dispatch({ type: a.loginCustom, payload: customData })
     } else {
       axios({
         method: method,
@@ -18,9 +18,7 @@ export function loginUser(restUrl, method, formData, customData) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       }).then((response) => {
         if (svSessionRegxp(response.data.data.token)) {
-          // success, session returned
-          // dispatch({ type: a.loginFulfilled, payload: response.data })
-          dispatch({ type: a.loginIacs, payload: response.data })
+          dispatch({ type: a.loginFulfilled, payload: response.data })
           switchServerLanguage(cookies.getCookie('defaultLocale'), response.data.data.token)
         } else {
           dispatch({ type: a.loginRejected, payload: response.data })

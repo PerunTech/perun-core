@@ -12,6 +12,19 @@
 <body id="body">
   <script src="../services/WsConf/getServer"></script>
   <script>
+    //Save sso session if alt login is used 
+    const searchParams = new URLSearchParams(window.location.search);
+    const session = searchParams.get('session');
+    window.sessionToken = session;
+    const encodedUserObject = searchParams.get('userObject');
+    if (encodedUserObject) {
+      // Decode the URL-encoded parameter
+      const decodedUserObject = decodeURIComponent(encodedUserObject);
+
+      // Parse the JSON string to an object
+      window.userObject = JSON.parse(decodedUserObject);
+    }
+
     const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
     fetch(assetsUrl).then(response => response.json()).then(res => {
       if (res.VALUE) {
@@ -34,6 +47,14 @@
       type: 'text/javascript', src: `${currentServer}/perun-assets/js/geospatial.js`
     });
     document.body.appendChild(geospatialScript);
+    const gridLabelsUrl = `${window.server}/WsConf/params/get/sys/TRANSLATE_GRID_LABELS`
+    fetch(gridLabelsUrl).then(response => response.json()).then(res => {
+      if (res.VALUE) {
+        window.translateGridLabels = res.VALUE
+      }
+    }).catch(err => {
+      console.log(err)
+    })
   </script>
   <script src="perun-core.js"></script>
   <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer>

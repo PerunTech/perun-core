@@ -29,6 +29,8 @@ import UserGroupsForm from './UserGroupsForm';
 import UserForm from './UserForm';
 import EditUserWrapper from './utils/EditUserWrapper';
 import PerunPluginTable from './PerunPluginTable'
+import SvarogMenu from './SvarogMenu'
+import BusinessType from './BusinessType'
 class AppSettings extends React.Component {
   constructor(props) {
     super(props)
@@ -67,6 +69,9 @@ class AppSettings extends React.Component {
 
   componentDidMount() {
     if (this.props) {
+      if (!this.props.accessAdminConsole) {
+        window.history.back()
+      }
       if (this.props.svSession) {
         this.setState({ sessionIsGranted: true }, () => this.getMenu())
         if (document.getElementById('identificationScreen')) {
@@ -119,9 +124,6 @@ class AppSettings extends React.Component {
       .catch(err => { throw err });
   }
 
-  /* show card conf grid for entry point module f.r */
-
-  /* show/hide user management */
   showUserMng = () => {
     if (this.state.showUserMng) {
       this.setState({ userArrowId: '' })
@@ -164,11 +166,6 @@ class AppSettings extends React.Component {
   logout = () => {
     const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.svSession
     store.dispatch(logoutUser(restUrl))
-  }
-
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
   }
 
   showUsersFn() {
@@ -842,6 +839,8 @@ class AppSettings extends React.Component {
               {active === 'LabelEditor' && <LabelEditor />}
               {active === 'CodeListEditor' && <CodeListEditor />}
               {active === 'PerunPluginTable' && <PerunPluginTable />}
+              {active === 'SvarogMenu' && <SvarogMenu />}
+              {active === 'BusinessType' && <BusinessType />}
             </div >
           </div >
         </>}
@@ -851,7 +850,8 @@ class AppSettings extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  svSession: state.security.svSession
+  svSession: state.security.svSession,
+  accessAdminConsole: state.security.accessAdminConsole
 })
 
 AppSettings.contextTypes = {

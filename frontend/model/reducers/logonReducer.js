@@ -6,6 +6,8 @@ export default function security(state = {
   svTitle: undefined,
   svMessage: undefined,
   status: undefined,
+  saml: false,
+  accessAdminConsole: false,
   data: new Object
 }, action) {
   switch (action.type) {
@@ -55,10 +57,23 @@ export default function security(state = {
         config: action.payload.data.configuration,
         svTitle: action.payload.title,
         svMessage: action.payload.message,
-        status: action.payload.type
+        status: action.payload.type,
       }
     }
-    case a.loginIacs: {
+    case a.loginSAML: {
+      return {
+        ...state,
+        isBusy: false,
+        svSession: action.payload.data.token,
+        data: action.payload.data.farmer,
+        config: action.payload.data.configuration,
+        svTitle: action.payload.title,
+        svMessage: action.payload.message,
+        status: action.payload.type,
+        saml: action.payload.saml
+      }
+    }
+    case a.loginCustom: {
       return {
         ...state,
         isBusy: false,
@@ -76,8 +91,13 @@ export default function security(state = {
         svSession: undefined,
         svTitle: undefined,
         svMessage: undefined,
-        status: undefined
+        status: undefined,
+        saml: false,
+        accessAdminConsole: false
       }
+    }
+    case 'accessAdminConsole': {
+      return { ...state, accessAdminConsole: action.payload };
     }
   }
   return state

@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { ComponentManager, GenericGrid, GenericForm, GridManager, axios } from '../../client'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../client'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 const { useState, useEffect } = React;
@@ -30,7 +30,7 @@ const PerunPluginTable = (props, context) => {
         const { svSession } = props;
         gridId = `${tableName}_GRID`;
         let grid = (
-            <GenericGrid
+            <ExportableGrid
                 gridType={"READ_URL"}
                 key={gridId}
                 id={gridId}
@@ -45,7 +45,7 @@ const PerunPluginTable = (props, context) => {
                     setObjectId(0)
                 }}
                 customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
-                heightRatio={0.7}
+                heightRatio={0.75}
                 editContextFunc={handleRowClick}
             />
         );
@@ -106,7 +106,7 @@ const PerunPluginTable = (props, context) => {
         let url = window.server + `/ReactElements/deleteObject/${svSession}`;
         axios({
             method: "post",
-            data: encodeURIComponent(JSON.stringify(formData[4]["PARAM_VALUE"])),
+            data: encodeURIComponent(formData[4]["PARAM_VALUE"]),
             url: url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         })

@@ -7,7 +7,7 @@ import { isJSON } from '../../functions/utils';
 import axios from 'axios';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
-const CofigMenuWrapper = (props, context) => {
+const ConfigMenuWrapper = (props, context) => {
     const [show, setShow] = useState(false);
     const [shouldRender, setRender] = useState(false)
     const [fieldJson, setFieldJson] = useState({})
@@ -16,14 +16,11 @@ const CofigMenuWrapper = (props, context) => {
         changeField()
     }, [])
 
-
     useEffect(() => {
         if (shouldRender) {
             handleInput()
         }
     }, [shouldRender])
-
-
 
     const handleInput = () => {
         const firstInput = document.getElementById("root_MENU_CONF");
@@ -114,6 +111,7 @@ const CofigMenuWrapper = (props, context) => {
     const jsonManipulation = (obj) => {
         setJson(obj['updated_src'])
     }
+
     const changeJson = (editedJson) => {
         const { formid } = props
         const formData = ComponentManager.getStateForComponent(
@@ -126,14 +124,13 @@ const CofigMenuWrapper = (props, context) => {
             props.formInstance.setState({ formTableData: formData });
         })
     }
+
     return (
         <>
             {shouldRender &&
                 <>
                     {props.children}
                 </>
-
-
             }
             {show && (
                 <Modal
@@ -144,7 +141,7 @@ const CofigMenuWrapper = (props, context) => {
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body  menu-editor-body'>
                         <div>
-                            <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} />
+                            <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} collapsed />
                             <div>
                                 <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson(editedJson) }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
                             </div>
@@ -160,8 +157,9 @@ const CofigMenuWrapper = (props, context) => {
 const mapStateToProps = (state) => ({
     svSession: state.security.svSession,
 });
-CofigMenuWrapper.contextTypes = {
+
+ConfigMenuWrapper.contextTypes = {
     intl: PropTypes.object.isRequired,
 };
 
-export default connect(mapStateToProps)(CofigMenuWrapper);
+export default connect(mapStateToProps)(ConfigMenuWrapper);

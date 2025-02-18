@@ -11,6 +11,7 @@ import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSection
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
+import { isValidObject } from '../../functions/utils';
 let fieldName
 let fieldValue
 
@@ -39,13 +40,16 @@ class GenericForm extends React.Component {
       addDocument: this.props.addDocument,
       uiSchemaConfigMethod: this.props.uiSchemaConfigMethod,
       tableFormDataMethod: this.props.tableFormDataMethod,
+      customDependencyDropdownComponent: this.props.customDependencyDropdownComponent,
       ddVerbPath: this.props.ddVerbPath,
+      triggerAutoDependentDropdownOnChange: this.props.triggerAutoDependentDropdownOnChange,
+      disableInitialDependentDropdown: this.props.disableInitialDependentDropdown,
       hideBtns: this.props.hideBtns,
       dropLinkParams: {},
       saveExecuted: false,
       deleteExecuted: false,
       alert: undefined,
-      bypassInputChange: this.props.bypassInputChange, // callback function to fetch (formdata, target-fieldName, target-fieldValue) f.r
+      bypassInputChange: this.props.bypassInputChange, // callback function to fetch (formdata, target-fieldName, target-fieldValue)
       noValidate: this.props.noValidate || false,
       disabled: this.props.disabled
     }
@@ -73,6 +77,8 @@ class GenericForm extends React.Component {
     const sectionName = findSectionName(this.state.uischema, fieldCode)
     return (
       <DependencyDropdown
+        customDependencyDropdownComponent={this.state.customDependencyDropdownComponent}
+        isSearchForm={this.props.isSearchForm}
         formInstance={this}
         formId={this.state.id}
         formSchema={this.state.uischema}
@@ -83,6 +89,8 @@ class GenericForm extends React.Component {
         fieldCode={fieldCode}
         tableName={this.state.tableName}
         ddVerbPath={this.state.ddVerbPath}
+        triggerAutoDependentDropdownOnChange={this.state.triggerAutoDependentDropdownOnChange}
+        disableInitialDependentDropdown={this.state.disableInitialDependentDropdown}
         spread='right'
       />
     )
@@ -163,7 +171,7 @@ class GenericForm extends React.Component {
     return (
       <div id={props.id + 'CustomDateWithNowButton'} className='custom-date'>
         {widgets.DateWidget(props)}
-        <button type='button' onClick={setCurrentDate} className='btn-success btn_save_form'>
+        <button type='button' onClick={setCurrentDate} className='btn-success btn_save_form custom-date-btn'>
           {
             this.context.intl.formatMessage(
               {
@@ -231,7 +239,7 @@ class GenericForm extends React.Component {
     )
   }
 
-  /* get config data for forms. f.r */
+  /* get config data for forms. */
   componentDidMount() {
     getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod, this.state.tableFormDataMethod, this.state.session, this.props.params)
     this.props.refFunction(this)
@@ -407,52 +415,41 @@ class GenericForm extends React.Component {
       }
     }
 
-    if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) &&
-      nextProps.formConfigLoaded === false) {
-      this.setState({
-        alert: alertUser(
-          true, 'error',
-          this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.load_config_failed`, defaultMessage: `${labelBasePath}.main.forms.load_config_failed` }),
-          nextProps.formData,
-          () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-        )
-      })
+    if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
+      const title = nextProps.formData?.response?.data?.title || nextProps.formData?.response?.data || ''
+      const msg = nextProps.formData?.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     }
 
-    if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) &&
-      nextProps.uischemaLoaded === false) {
-      this.setState({
-        alert: alertUser(
-          true, 'error',
-          this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.load_schema_failed`, defaultMessage: `${labelBasePath}.main.forms.load_schema_failed` }),
-          nextProps.uischema,
-          () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-        )
-      })
+    if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
+      const title = nextProps.uischema?.response?.data?.title || nextProps.uischema?.response?.data || ''
+      const msg = nextProps.uischema?.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     }
 
-    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) &&
-      nextProps.formDataLoaded === false) {
-      const errorResponse = nextProps.formTableData
-      const title = errorResponse.response?.data?.title || errorResponse
-      const msg = errorResponse.response?.data?.message || ''
-      alertUser(
-        true, 'error', title, msg,
-        () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined
-      )
+    if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
+      const title = nextProps.formTableData?.response?.data?.title || nextProps.formTableData?.response?.data || ''
+      const msg = nextProps.formTableData?.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
     }
 
     if (this.props.uischema !== nextProps.uischema) {
-      const whereIsMyWidget = findWidget(nextProps.uischema, 'ui:widget', 'CustomMultiSelectDropdown')
-      if (whereIsMyWidget) {
-        this.setState({
-          noValidate: true
-        })
+      if (isValidObject(nextProps.uischema, 1)) {
+        const whereIsMyWidget = findWidget(nextProps.uischema, 'ui:widget', 'CustomMultiSelectDropdown')
+        if (whereIsMyWidget) {
+          this.setState({
+            noValidate: true
+          })
+        }
       }
     }
   }
 
   saveObject(formData) {
+    const { hideBtns } = this.state
+    if (!this.props.buttonsArray && (hideBtns === 'all' || hideBtns === true)) {
+      return null;
+    }
 
     let saved = false
     // check if all dependecy dropdowns have values
@@ -486,7 +483,7 @@ class GenericForm extends React.Component {
     //   }
     // }
 
-    /* if flag customSave = true then escape default save f.r  */
+    /* if flag customSave = true then escape default save  */
     if (this.state.customSave) {
       this.state.addSaveFunction(formData, this)
     } else {
@@ -607,7 +604,7 @@ class GenericForm extends React.Component {
       PARAM_NAME: 'jsonString',
       PARAM_VALUE: JSON.stringify(currentRecord)
     })
-    /* created customDeleteCallBack to handle closing modal or to extend logic of delete action f.r */
+    /* created customDeleteCallBack to handle closing modal or to extend logic of delete action */
     if (this.state.addDeleteFunction) {
       this.state.addDeleteFunction(this.state.id, 'DELETE_TABLE_OBJECT', this.state.session, params)
     } else {
@@ -623,14 +620,14 @@ class GenericForm extends React.Component {
     }
   }
 
-  /* on close button close only popup window. f.r */
+  /* on close button close only popup window. */
   windowClose(data) {
     if (this.state.addCloseFunction && this.state.addCloseFunction instanceof Function) {
       this.state.addCloseFunction(data)
     }
   }
 
-  /* translates errors under field in form f.r */
+  /* translates errors under field in form */
   transformErrors(errors) {
     return errors.map((error) => {
       if (error.name === "type") {
@@ -640,7 +637,7 @@ class GenericForm extends React.Component {
     })
   }
 
-  /* custom error list on top of screen f.r */
+  /* custom error list on top of screen */
   errorListTemplate(props) {
     const { errors } = props;
     return (
@@ -674,17 +671,17 @@ class GenericForm extends React.Component {
   }
 
   /* Makes form inputs persistent after saving data */
-  /* include bypass onChange func to fetch formData, targeted fieldName and fieldValue into local comp. f.r */
+  /* include bypass onChange func to fetch formData, targeted fieldName and fieldValue into local comp. */
   onInputChange(event) {
     if (this.props.bypassInputChange) {
       this.state.bypassInputChange(event.formData, fieldName, fieldValue)
     } else {
-      this.setState({ formTableData: event.formData })
+      this.setState({ formTableData: { ...this.state.formTableData, ...event.formData } })
     }
   }
 
   /* check for existing className for buttons and form
-  and add function on submit f.r */
+  and add function on submit */
   render() {
     const {
       id, formWithExcluded, enableExcludedFields, saveExecuted, deleteExecuted,
@@ -712,6 +709,7 @@ class GenericForm extends React.Component {
 
     const loading = <div><Loading /></div>
     let form = <Form
+      id={id}
       validator={validator}
       noValidate={this.state.noValidate}
       className={className}
@@ -734,9 +732,6 @@ class GenericForm extends React.Component {
         </div>
       }
       {/* <DependencyDropdown /> */}
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
-      <div id='separate' className='separator' />
       {hideBtns !== true &&
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
@@ -761,11 +756,26 @@ class GenericForm extends React.Component {
               </button>
             }
           </div>
-          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' && (formTableData && formTableData.OBJECT_ID) &&
+          {hideBtns !== 'delete' && hideBtns !== 'closeAndDelete' && hideBtns !== 'all' &&
             <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={this.initiateDeleteAction}>
-              {this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
+              {this.props.customDeleteButtonName ? this.props.customDeleteButtonName : this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })}
             </button>
           }
+          {this.props.buttonsArray && (
+            <>
+              {this.props.buttonsArray.map((element) => (
+                <button
+                  type={element.type}
+                  key={element.id}
+                  id={element.id}
+                  className={element.className ? `${element.className}` : 'btn'}
+                  onClick={element.action instanceof Function ? element.action : null}
+                >
+                  {element.label}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       }
     </Form>

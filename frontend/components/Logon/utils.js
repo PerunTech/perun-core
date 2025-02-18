@@ -285,3 +285,20 @@ export function getURLParameterByName(name, url) {
   if (!results[2]) return ''
   return decodeURIComponent(results[2].replace(/\+/g, ' '))
 }
+
+export function submitForm(path, method, params) {
+  const form = document.createElement('form');
+  form.method = method;
+  form.action = path;
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      const hiddenField = document.createElement('input');
+      hiddenField.type = 'hidden';
+      hiddenField.name = key;
+      hiddenField.value = params[key];
+      form.appendChild(hiddenField);
+    }
+  }
+  document.body.appendChild(form);
+  form.submit();
+}

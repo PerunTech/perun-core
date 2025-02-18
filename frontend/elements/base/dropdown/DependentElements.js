@@ -3,7 +3,8 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { store } from '../../../model'
 import { svConfig } from '../../../config';
-import { Dropdown, findWidget, $, ComponentManager } from '../..';
+import { Dropdown, ComponentManager } from '../..';
+import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject } from '../../../functions/utils';
 
 const right = {
@@ -24,6 +25,7 @@ class DependentElements extends React.Component {
   constructor(props) {
     super(props)
     const initialState = {
+      loading: false,
       initialDropdown: null,
       dynamicDropdowns: [],
       spread: this.props.spread || 'right'
@@ -38,24 +40,17 @@ class DependentElements extends React.Component {
   }
 
   componentDidMount() {
-    const { formConfig, formSchema } = this.props
+    const { formConfig, sectionName } = this.props
     const formData = Object.assign({}, this.props.formData)
-    const sectionName = this.props.sectionName
     if (formData && formData.constructor === Object && Object.keys(formData).length > 0) {
-      if (formData[sectionName]) {
+      if (formData[sectionName]) { //section
         const subEls = Object.keys(formData[sectionName])
-        for (let i = 0; i < subEls.length; i++) {
-          if (subEls[i] === findWidget(this.props.formSchema, 'ui:widget', 'DependencyDropdown')) {
-            this.fetchInitialCodelist(subEls[i], formData[sectionName][subEls[i]])
-          } else if (findWidget(this.props.formSchema, 'dependentOn', subEls[i - 1])) {
-            this.generateExisting(
-              'root_' + sectionName + '_' + subEls[i - 1],
-              formData[sectionName][subEls[i]],
-              formData[sectionName][subEls[i - 1]]
-            )
-          }
+        if (subEls.length > 0) {
+          this.generateExisting()
+        } else {
+          this.fetchInitialCodelist()
         }
-      } else {
+      } else { //no section
         const formFields = Object.keys(formConfig.properties)
         const finalFormData = Object.assign({}, formData)
         // Append an empty string as the value of each field that doesn't have a value
@@ -65,32 +60,22 @@ class DependentElements extends React.Component {
           }
         })
         const subEls = Object.keys(finalFormData)
-        for (let i = 0; i < subEls.length; i++) {
-          if (subEls[i] === findWidget(formSchema, 'ui:widget', 'DependencyDropdown')) {
-            this.fetchInitialCodelist(subEls[i], formData[subEls[i]])
-          } else if (formSchema?.[subEls[i]]?.dependentOnField) {
-            const parentElement = formSchema?.[subEls[i]]?.dependentOnField
-            const elementOrder = formSchema[parentElement]?.order
-            if (formSchema[subEls[i]]?.order === elementOrder + 1) {
-              this.generateExisting(
-                'root_' + subEls[i],
-                formData[subEls[i]],
-                formData[this.props.formSchema?.[subEls[i]]?.dependentOnField]
-              )
-            }
-          }
+        if (subEls.length > 0) {
+          this.generateExisting()
+        } else {
+          this.fetchInitialCodelist()
         }
       }
-    } else {
+    } else { //generate empty input intial
       this.fetchInitialCodelist()
     }
   }
 
-  fetchInitialCodelist = (selectedId, selectedVal) => {
+  fetchInitialCodelist = (selectedVal) => {
     const { elementId, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown } = this.props
     let verbPath = svConfig.triglavRestVerbs.GET_TABLE_WITH_FILTER
     if (!verbPath) {
-      console.log('Missing GET TABLE WS in configuration')
+      console.warn('Missing GET TABLE WS in configuration')
       return
     }
     let codelistName
@@ -105,12 +90,15 @@ class DependentElements extends React.Component {
     verbPath = verbPath.replace('%searchForValue', codelistName)
     verbPath = verbPath.replace('%rowlimit', '0')
     const restUrl = svConfig.restSvcBaseUrl + verbPath
+    this.setState({ loading: true })
     axios.get(restUrl).then((response) => {
+      this.setState({ loading: false })
       if (response.data) {
         this.generateInitialDropdown(response.data, elementId, selectedVal, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown)
       }
     }).catch((error) => {
       console.log(error)
+      this.setState({ loading: false })
     })
   }
 
@@ -141,15 +129,6 @@ class DependentElements extends React.Component {
         disabled: true,
         hidden: true
       })
-    }
-
-    // try to delete the original first item label
-    try {
-      const nodeList = document.querySelectorAll(`[for='${elementId}']`)
-      nodeList[0].parentNode.removeChild(nodeList[0].parentNode.childNodes[0])
-    } catch (error) {
-      // could not find an element
-      console.info(error)
     }
 
     const coreType = this.findCoreType(elementId)[1]
@@ -185,13 +164,14 @@ class DependentElements extends React.Component {
     }
 
     const newElement = <Dropdown
+      className='dependent-dropdown'
       id={elementId}
       key={elementId + '_depddl'}
       labelText={labelText}
       style={this.style}
       defaultValue='default'
       name='initialDropdown'
-      onChange={() => this.onChange(elementId)}
+      onChange={() => this.onChange(elementId, true)}
       options={options}
       required={requiredAttr}
       disabled={isDisabled}
@@ -202,62 +182,90 @@ class DependentElements extends React.Component {
     }
   }
 
-  generateExisting = (elementId, selectedVal, parentVal) => {
-    const { formSchema, svSession } = this.props
+  generateExisting = async () => {
+    const { formSchema, sectionName, formData } = this.props;
+    let formObjectsArray = [];
 
-    const elementProperties = this.findCoreType(elementId)
-    let groupPath
-    if (this.props.sectionName) {
-      groupPath = elementProperties[0]
+    if (sectionName) {
+      Object.keys(formSchema[sectionName]).forEach(key => {
+        if (formSchema[sectionName][key]?.order) {
+          formObjectsArray.push({ ...formSchema[sectionName][key], value: formData[sectionName][key], parentVal: formData[sectionName][formSchema[sectionName][key]['dependentOnField']], coreType: key });
+        } else if (formSchema[sectionName][key]?.order === 0) {
+          this.fetchInitialCodelist(formData[sectionName][key])
+        }
+      });
+    } else {
+      Object.keys(formSchema).forEach(key => {
+        if (formSchema[key]?.order) {
+          formObjectsArray.push({ ...formSchema[key], value: formData[key], parentVal: formData[formSchema[key]['dependentOnField']], coreType: key });
+        } else if (formSchema[key]?.order === 0) {
+          this.fetchInitialCodelist(formData[key])
+        }
+      });
     }
-    const coreType = elementProperties[1]
-    const elementOrder = formSchema[coreType]?.order
-    let nextElementObj
-    let newElement
-    Object.keys(formSchema).forEach(key => {
-      if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder) {
-        nextElementObj = formSchema[key]
-        newElement = key
-      }
-    })
-    const codelistName = nextElementObj?.codelistName || ''
 
+    const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order);
+
+    for (const el of sortedArr) {
+      await this.generateDropdownInOrder(el.codelistName, sectionName, el.value, el.parentVal, el.coreType);
+      this.setFormData(sectionName, el.coreType, el.value);
+    }
+  };
+
+  generateDropdownInOrder = (codelistName, groupPath, selectedVal, parentVal, coreType) => {
+    return new Promise((resolve, reject) => {
+      const { svSession, tableName, ddVerbPath } = this.props;
+      if (codelistName) {
+        let wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${parentVal}`;
+        if (ddVerbPath) {
+          wsPath = ddVerbPath
+            .replace('%session', svSession)
+            .replace('%tableName', tableName)
+            .replace('%selectedVal', parentVal);
+        }
+        const url = `${window.server}/${wsPath}`;
+        this.setState({ loading: true });
+        axios.get(url).then((response) => {
+          this.setState({ loading: false });
+          if (response.data) {
+            let finalResponse = response.data;
+            if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
+              finalResponse = finalResponse.data;
+            }
+            this.generateDropdown(finalResponse, coreType, groupPath, selectedVal);
+          }
+          resolve();
+        }).catch((error) => {
+          console.error(error);
+          this.setState({ loading: false });
+          reject(error);
+        });
+      } else {
+        resolve();
+      }
+    });
+  };
+
+  setFormData = (groupPath, coreType, selectedVal) => {
     if (this.props.formInstance) {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
       if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
-          newTableData[groupPath][coreType] = parentVal
+          newTableData[groupPath][coreType] = selectedVal
         } else {
           newTableData[groupPath] = {}
-          newTableData[groupPath][coreType] = parentVal
+          newTableData[groupPath][coreType] = selectedVal
         }
       } else {
         if (newTableData && newTableData.constructor === Object) {
-          newTableData[coreType] = parentVal
+          newTableData[coreType] = selectedVal
         } else {
           newTableData = {}
-          newTableData[coreType] = parentVal
+          newTableData[coreType] = selectedVal
         }
       }
       ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
       this.props.formInstance.setState({ formTableData: newTableData })
-    }
-
-    if (codelistName) {
-      const wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${parentVal}`
-      const url = `${window.server}/${wsPath}`
-      axios.get(url).then((response) => {
-        if (response.data) {
-          let finalResponse = response.data
-          // Check if the data is nested
-          if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
-            finalResponse = finalResponse.data
-          }
-          this.generateDropdown(finalResponse, newElement, groupPath, selectedVal)
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
     }
   }
 
@@ -285,15 +293,13 @@ class DependentElements extends React.Component {
   }
 
   removeElements = (parentNode, ddls, index) => {
-    const arrow = parentNode.previousElementSibling
-    parentNode.parentNode.removeChild(arrow)
     parentNode.removeChild(ddls[index])
     parentNode.removeChild(parentNode.childNodes[0])
     parentNode.parentNode.removeChild(parentNode)
   }
 
   onChange = (elementId, isInitial) => {
-    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession } = this.props
+    const { getAdditionalData, additionalDataKey, selectedInitialValue, formSchema, svSession, ddVerbPath, tableName } = this.props
 
     const elementProperties = this.findCoreType(elementId)
     let groupPath
@@ -301,50 +307,45 @@ class DependentElements extends React.Component {
       groupPath = elementProperties[0]
     }
     const coreType = elementProperties[1]
-    const elementOrder = formSchema[coreType]?.order
+    let elementOrder = formSchema[coreType]?.order
+    if (groupPath) {
+      elementOrder = formSchema[groupPath][coreType]?.order
+    }
     let nextElementObj
     let newElement
     Object.keys(formSchema).forEach(key => {
-      if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
-        nextElementObj = formSchema[key]
-        newElement = key
+      if (groupPath) {
+        if (key === groupPath) {
+          const sectionFormSchema = formSchema[groupPath]
+          Object.keys(sectionFormSchema).forEach(nestedKey => {
+            if (sectionFormSchema[nestedKey]?.dependentOnField && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
+              nextElementObj = sectionFormSchema[nestedKey]
+              newElement = nestedKey
+            }
+          })
+        }
+      } else {
+        if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
+          nextElementObj = formSchema[key]
+          newElement = key
+        }
       }
     })
     const codelistName = nextElementObj?.codelistName || ''
 
     try {
-      // check if element exists
-      const ddls = document.getElementsByTagName('SELECT')
-      let nextElement
-      if (groupPath) {
-        nextElement = $('root_' + groupPath + '_' + newElement)
-      } else {
-        nextElement = $('root_' + newElement)
-      }
-      for (let i = 0; i < ddls.length; i++) {
-        if (nextElement?.id === ddls[i].id) {
-          for (let j = i; j < ddls.length; j++) {
-            const el = this.findCoreType(ddls[j].id)[1]
-            if (el === newElement) {
-              let parentNode = ddls[j].parentNode
-              ddls[j].value = ''
-              this.removeElements(parentNode, ddls, j)
-              this.clearFormData(newElement, groupPath)
-            }
+      const form = document.getElementById(this.props.formId)
+      const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
+      const index = ddls.findIndex(el => el.id === elementId);
+      if (index > -1) {
+        ddls.slice(index + 1).forEach((el, i) => {
+          if (form?.contains(el)) {
+            const parentNode = el.parentNode;
+            el.value = '';
+            this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            this.clearFormData(this.findCoreType(el.id)[1], groupPath);
           }
-          const el = this.findCoreType(ddls[i].id)[1]
-          if (this.props.formSchema?.[this.props.sectionName]?.[el]?.dependentOnField) {
-            let parentNode = ddls[i].parentNode
-            ddls[i].value = ''
-            this.removeElements(parentNode, ddls, i)
-            break
-          } else if (this.props.formSchema?.[el]?.dependentOnField) {
-            let parentNode = ddls[i].parentNode
-            ddls[i].value = ''
-            this.removeElements(parentNode, ddls, i)
-            break
-          }
-        }
+        });
       }
     } catch (error) { // eslint-disable-line
       throw error
@@ -353,8 +354,9 @@ class DependentElements extends React.Component {
       IDs prsent in the document - from configuration */
       let el
       const list = document.getElementsByTagName('SELECT')
+      let dropdownId = elementId
       for (let i = 0; i < list.length; i++) {
-        if (list[i].id === elementId) {
+        if (list[i].id === dropdownId) {
           el = list[i]
         }
       }
@@ -384,12 +386,21 @@ class DependentElements extends React.Component {
       }
 
       if (codelistName) {
-        const wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${selectedVal}`
+        let wsPath = `ReactElements/getDependentDropdown/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${selectedVal}`
+        if (ddVerbPath) {
+          // Replace some of the params in the provided WS path
+          wsPath = ddVerbPath
+          wsPath = wsPath.replace('%session', svSession)
+          wsPath = wsPath.replace('%tableName', tableName)
+          wsPath = wsPath.replace('%selectedVal', selectedVal)
+        }
+        this.setState({ loading: true })
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
-          if (response.data) {
-            if (getAdditionalData && additionalDataKey && response.data[additionalDataKey]) {
-              store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data[additionalDataKey] })
+          this.setState({ loading: false })
+          if (response.data?.data) {
+            if (getAdditionalData && additionalDataKey && response?.data?.data?.[additionalDataKey]) {
+              store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data?.data?.[additionalDataKey] })
             }
             let finalResponse = response.data
             // Check if the data is nested
@@ -400,6 +411,7 @@ class DependentElements extends React.Component {
           }
         }).catch((error) => {
           console.log(error)
+          this.setState({ loading: false })
         })
       }
     }
@@ -441,14 +453,15 @@ class DependentElements extends React.Component {
 
     // Generate the dropdown selector, labels and icons
     const ddlList = this.state.dynamicDropdowns.slice()
-    const coreType = this.findCoreType(elementId)[1]
+    const coreType = newElement || this.findCoreType(elementId)[1]
+
     let labelText
     let requiredFieldsArr
     if (!this.props.sectionName) {
       labelText = this.props.formConfig.properties[coreType].title
       requiredFieldsArr = this.props.formConfig.required
     } else {
-      labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType].title
+      labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType]?.title
       requiredFieldsArr = this.props.formConfig.properties[this.props.sectionName].required
     }
     let requiredAttr = false
@@ -457,12 +470,8 @@ class DependentElements extends React.Component {
     }
 
     ddlList.push(
-      <i
-        id={elementId + '_after'}
-        key={elementId + '_after'}
-        className={`icon-caret-${this.state.spread}`}
-      />,
       <Dropdown
+        className='dependent-dropdown'
         id={elementId}
         style={this.additionalStyle}
         labelText={labelText}
@@ -479,6 +488,7 @@ class DependentElements extends React.Component {
   render() {
     return (
       <React.Fragment>
+        {this.state.loading && <Loading />}
         {this.state.initialDropdown}
         {this.state.dynamicDropdowns}
       </React.Fragment>

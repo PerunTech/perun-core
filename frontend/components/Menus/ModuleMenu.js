@@ -4,14 +4,13 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import { svConfig } from '../../config';
-import { store, logoutUser } from '../../model';
-import { alertUser } from '../../elements';
-import { pluginManager } from '../../routes/PluginManager';
 import { Loading } from '../ComponentsIndex';
-import queryString from 'query-string';
+import { store } from '../../model';
+import { pluginManager } from '../../routes/PluginManager';
+import { alertUser } from '../../elements';
+import { svConfig } from '../../config';
 
-let arrayOfBundels
+let arrayOfBundles
 class ModuleMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -26,63 +25,63 @@ class ModuleMenu extends React.Component {
     this.self = pkg.name;
 
     this.showHambMenu = this.showHambMenu.bind(this)
-    this.setLegacyEdbar = this.setLegacyEdbar.bind(this)
     this.setLegacyNaits = this.setLegacyNaits.bind(this)
-
-    this.routeGsaa = (function (superProps) {
-      const params = queryString.parse(superProps.location.search);
-
-      return params && params.comp && params.comp === 'gsaa';
-    })(this.props);
   }
 
   componentDidMount() {
-    if (document.getElementById('identificationScreen')) {
-      document.getElementById('identificationScreen').className = 'identificationScreen'
-      document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
+    this.transformIdScreen()
+    this.getConfigCards()
+  }
+
+  transformIdScreen = () => {
+    const idScreen = document.getElementById('identificationScreen')
+    if (idScreen) {
+      idScreen.className = 'identificationScreen'
+      idScreen.innerText = this.context.intl.formatMessage({
         id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
       })
     }
+  }
 
-    axios.get(svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB + this.props.svSession)
-      .then(({ data }) => {
-        if (data.title === 'error.invalid_session') {
-          alertUser(true, data.type.toLowerCase(), data.message, null, this.closeAlert)
-        } else {
-          if (data) {
-            store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
-            for (let i = 0; i < data.data.length; i++) {
-              const plugin = data.data[i]
-              // Check if the plugin should be directly accessed
-              if (plugin.cardDirectAccess) {
-                // Break out of the loop and prepare the plugin (and its dependencies) for the direct access
-                this.setState({ loading: true, hasCardForDirectAccess: true }, () => this.preparePluginsForDirectAccess(plugin, data.data))
-                break;
-              } else {
-                // If the loop is finished, continue loading all available plugins
-                if (i === data.data.length - 1) {
-                  let i = 0;
-                  arrayOfBundels = data.data
-                  arrayOfBundels.map(item => {
-                    if (item.hasPersistReducer) {
-                      i++
-                      localStorage.setItem('indexReducers', i);
-                    }
-                  })
-                  localStorage.setItem('bundleStorage', JSON.stringify(arrayOfBundels));
-                  this.loadPlugins(data.data);
+  getConfigCards = () => {
+    const url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`
+    axios.get(url).then(res => {
+      if (res?.data?.data) {
+        const data = res.data
+        store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
+        localStorage.setItem('bundleStorage', JSON.stringify(data.data));
+        for (let i = 0; i < data.data.length; i++) {
+          if (data.data[i]?.id === 'perun-core') {
+            store.dispatch({ type: 'accessAdminConsole', payload: true });
+          }
+          const plugin = data.data[i]
+          // Check if the plugin should be directly accessed
+          if (plugin.cardDirectAccess) {
+            // Break out of the loop and prepare the plugin (and its dependencies) for the direct access
+            this.setState({ loading: true, hasCardForDirectAccess: true }, () => this.preparePluginsForDirectAccess(plugin, data.data))
+            break;
+          } else {
+            // If the loop is finished, continue loading all available plugins
+            if (i === data.data.length - 1) {
+              let i = 0;
+              arrayOfBundles = data.data
+              arrayOfBundles.map(item => {
+                if (item.hasPersistReducer) {
+                  i++
+                  localStorage.setItem('indexReducers', i);
                 }
-              }
+              })
+              this.loadPlugins(data.data);
             }
           }
-          //data && this.loadPlugins(data.data); // go to processing / script execution.
         }
-      })
-      .catch((err) => {
-        console.log(err)  // always print the error first!
-        alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
-      })
-    // }
+      }
+    }).catch((err) => {
+      console.error(err)
+      const title = err.response?.data?.title || err
+      const msg = err.response?.data?.message || ''
+      alertUser(true, 'error', title, msg)
+    })
   }
 
   /**
@@ -159,7 +158,6 @@ class ModuleMenu extends React.Component {
     if (deps.length > 0) {
       depsObjects = this.depsFinder(plugins, deps);
     }
-    localStorage.setItem('bundleStorage', JSON.stringify(depsObjects));
     depsObjects.push(directAccessPlugin)
     this.loadPluginsForDirectAccess(depsObjects);
   }
@@ -265,9 +263,6 @@ class ModuleMenu extends React.Component {
     // If we're working locally, do the redirect without the /perun/index.html part
     if (url.includes('localhost'))
       finalUrl = currentUrl + `#/main/${plugin.id}`
-    // tmp transition for old edbar module
-    if (plugin.id === 'edbar')
-      finalUrl = currentUrl + '/edbar/indexedbar.html'
 
     // tmp transition for old naits module 
     if (plugin.id === 'naits')
@@ -380,17 +375,7 @@ class ModuleMenu extends React.Component {
    * @return JSX, the class content cards;
    */
   loadPlugins = data => {
-    let edbarPlugin = data.filter(el => el.id === 'edbar')[0]
     let naitsPlugin = data.filter(el => el.id === 'naits')[0]
-    if (edbarPlugin) {
-      if (edbarPlugin.cardDirectAccess) {
-        this.goDirectToRoute(edbarPlugin);
-      }
-      this.setLegacyEdbar(edbarPlugin);
-      const index = data.findIndex(x => x.id === "edbar");
-      if (index !== undefined) data.splice(index, 1);
-    }
-
     if (naitsPlugin) {
       if (naitsPlugin.cardDirectAccess) {
         this.goDirectToRoute(naitsPlugin);
@@ -403,11 +388,6 @@ class ModuleMenu extends React.Component {
     let config = this.initConfig(data);
     // Generate iterable of promises, include plugins with zero dependencies only.
     let plugins = this.initPlugins(config);
-
-    let url = window.location.href
-    let arr = url.split("/");
-    let currentUrl = arr[0] + "//" + arr[2]
-    let finalUrl = currentUrl + '/perun/index.html#/main/gsaa'
     // If there are no pending promises, exit, otherwise execute.
     if (plugins.length > 0) {
       this.atomiclyExecute(plugins)
@@ -420,50 +400,17 @@ class ModuleMenu extends React.Component {
             this.recalcExecutables(data, resolutions));
 
           // call self with recalculated executables and go for another round, if pending scripts are found.
-          next.length > 0
-            ? this.loadPlugins(next)
-            : (this.routeGsaa // When script executiuon ends, check hardcoded route to gsaa and re-route.
-              && location.replace(finalUrl));
+          next.length > 0 && this.loadPlugins(next)
         })
         .catch(err => {
           console.log(err)
           localStorage.setItem('hasError', true)
         })
-    } else {
-      (this.routeGsaa // When script executiuon ends, check hardcoded route to gsaa and re-route.
-        && location.replace(finalUrl)
-      );
     }
   }
 
   showHambMenu() {
     document.getElementById('hideHamb').className = 'showHambMenu';
-  }
-
-  setLegacyEdbar(plugin) {
-    return plugin && this.setState({
-      cards: {
-        ...this.state.cards, [plugin.id]: <a
-          id={plugin.id}
-          className='card modWindow'
-          key={plugin.id}
-          onClick={() => {
-            let url = window.location.href
-            let arr = url.split("/");
-            let currentUrl = arr[0] + "//" + arr[2]
-            location.replace(currentUrl + '/edbar/indexedbar.html');
-          }} >
-          <div className='box'>
-            <div className='card-img-top'>
-              <img src={plugin.imgPath} className='card-img-top' alt='...' />
-            </div>
-            <div title={plugin.text} className='card-body' >
-              <h5 className='card-title'>{plugin.title}</h5>
-            </div>
-          </div>
-        </a>
-      }
-    });
   }
 
   setLegacyNaits(plugin) {
@@ -492,28 +439,16 @@ class ModuleMenu extends React.Component {
     });
   }
 
-  closeAlert = () => {
-    this.setState({ alert: alertUser(false, 'info', '') })
-    this.logout()
-  }
-
-  logout = () => {
-    const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.svSession
-    store.dispatch(logoutUser(restUrl))
-  }
-
-
   render() {
-    const { cards, loading, hasCardForDirectAccess, alert } = this.state;
+    const { cards, loading, hasCardForDirectAccess } = this.state;
 
-    return (this.routeGsaa || loading)
-      ? <Loading />
-      : <div id='holderCards' className='holderCards'>
-        {alert}
+    return loading ? <Loading /> : (
+      <div id='holderCards' className='holderCards'>
         {!hasCardForDirectAccess ? Object.keys(cards).length < 5
           ? <div id='modMainGridOneRow' className='modMainGridOneRow' >{Object.values(cards)}</div>
           : <div id='modMainGrid' className={'modMainGrid'}>{Object.values(cards)}</div> : <></>}
       </div>
+    )
   }
 }
 

@@ -5,21 +5,17 @@ import PropTypes from 'prop-types';
 import { Provider, connect } from 'react-redux'; // these should be represented in /model and imported from there.
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
-import PerunCoreErrorHanlder from './functions/PerunCoreErrorHanlder'
+import md5 from 'md5'
 /* assets */
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
 import { generatePath } from 'react-router'
 import createHashHistory from 'history/createHashHistory';
-
 /* i18n */
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
-
-
 /* Google Analytics */
 import ReactGA from 'react-ga';
-
 /* Local modules */
 import * as redux from './model';
 import * as elements from './elements';
@@ -28,7 +24,6 @@ import { router } from './routes/Router';
 import Routes from './routes/Routes';
 import { Loading } from 'components/ComponentsIndex';
 import { pluginManager } from './routes/PluginManager';
-
 /* Utility functions */
 import * as utils from './functions/utils'
 import * as cookies from './functions/cookies'
@@ -38,41 +33,30 @@ import * as cookies from './functions/cookies'
 /* -------- */
 export {
   React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
-  axios, Loading, createHashHistory, PerunCoreErrorHanlder
+  axios, Loading, createHashHistory, md5
 };
 
-/* elements-base */
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUser } from './elements'
-
-/* elements-form & grid*/
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
-import DownloadableForm from './elements/form/DownloadableForm'
 import FormManager from './elements/form/FormManager'
 import GenericForm from './elements/form/GenericForm'
-import StructuredForm from './elements/form/StructuredForm'
 import ContextMenuPopup from './elements/grid/ContextMenuPopup'
 import CustomGridToolbar from './elements/grid/CustomGridToolbar'
 import ExportableGrid from './elements/grid/ExportableGrid'
 import GenericGrid from './elements/grid/GenericGrid'
 import GridManager from './elements/grid/GridManager'
-import JsonToExcel from './elements/grid/JsonToExcel'
 import { ComponentManager } from './elements/ComponentManager'
 import Modal from './components/Modal/Modal.js'
 import MenuHolder from './components/MenuBuilder/MenuHolder'
 import ContextMenuHolder from './components/Menus/ContextMenu/ContextMenuHolder'
-import RuleEngineModal from './components/RuleEngineModal/RuleEngineModal'
-import { attachmentButtons } from './elements/upload_download/AttachmentData'
-import AttachmentInput from './elements/upload_download/AttachmentInput';
 
 export {
-  Form, Button, DependencyDropdown, Dropdown, InputElement, DownloadableForm, FormManager, GenericForm, StructuredForm, ContextMenuPopup, CustomGridToolbar,
-  ExportableGrid, GenericGrid, GridManager, JsonToExcel, ComponentManager, Modal, MenuHolder, ContextMenuHolder, RuleEngineModal, attachmentButtons, AttachmentInput,
-  validator
+  Form, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
+  ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, MenuHolder, ContextMenuHolder, validator
 };
 
-
-/* exception for arraybuffer response types f.r */
+/* check for arraybuffer response types */
 function validResponse(res) {
   if (!res) {
     return false
@@ -86,31 +70,15 @@ function validResponse(res) {
 
 axios.interceptors.response.use(
   (res) => {
-    if (res?.status === 200) {
-      if (res.data.type === 'ERROR' && (res.data.title === 'Невалидна сесија' || res.data.title === 'error.invalid_session')) {
-        alertUser(true, 'error', 'Invalid session', 'Please log in again', () => {
-          createHashHistory().push('/home/login')
-          // location.reload();
-          return res;
-        })
-      }
-      if (res.data && res.data.type === 'EXCEPTION') {
-        alertUser(true, 'error', res.data.title || '', res.data.message || '', () => {
-          // location.reload();
-          return res;
-        })
-      }
-    }
     return res;
   },
   (error) => {
-    const url = error.response.config.url || ''
     const title = error.response?.data?.title || error
     const msg = error.response?.data?.message || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'error', 'The server responsed with a status code 302 Found', url)
+          alertUser(true, 'info', 'The server responsed with a status code 302 Found')
           break;
         case 401:
           createHashHistory().push('/home/login')
@@ -118,8 +86,6 @@ axios.interceptors.response.use(
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 502:
-          alertUser(true, 'error', 'The server responsed with a status code 502 Bad Gateway', url)
-          break;
         case 503:
           alertUser(true, 'info', 'The server is temporarily down for maintenance', 'Please try again soon')
           break;
@@ -152,14 +118,13 @@ axios.interceptors.response.use(
   }, { runWhen: validResponse }
 );
 
-
-const App = () =>
+const App = () => (
   <Provider store={redux.store}>
     <IntlProvider>
       <Routes />
     </IntlProvider>
   </Provider>
-
+)
 /* if user acces fr route memorize it */
 let memorizeFrMapRoute
 if (window.location.href.includes('farm-registry/map')) {
@@ -186,7 +151,8 @@ let whitelistRoot = [
   'stateTooltip',
   'userInfo',
   'clickedMenuReducer',
-  'moduleLinks'
+  'moduleLinks',
+  'businessLogicReducer'
 ]
 
 // Use the default locale defined in the assets project
@@ -197,7 +163,6 @@ if (utils.isJSON(cookies.getCookie('localeData'))) {
   localeData = JSON.parse(cookies.getCookie('localeData'))
 }
 localeData.forEach((locale) => loadLocaleData(locale))
-
 
 async function loadLocaleData(locale) {
   try {
@@ -245,6 +210,18 @@ export function persistBundleReducers(listOfBundleReducers) {
 ReactGA.initialize('UA-138995187-1');
 ReactGA.pageview('/');
 
+function getAdditionalLabels(allLabels, locale, language, additionalLabels) {
+  redux.dataToRedux((response) => {
+    redux.store.dispatch(updateIntl({ locale: locale, messages: { ...allLabels, ...response } }));
+    app && ReactDOM.render(<App />, app);
+  },
+    'security',
+    'temp',
+    'MAIN_LABELS',
+    language,
+    additionalLabels
+  );
+}
 
 export function changeLanguageAndLocale(locale, language) {
   ReactDOM.render(<Loading />, app);
@@ -252,7 +229,13 @@ export function changeLanguageAndLocale(locale, language) {
     redux.dataToRedux((response) => {
       document.cookie = `defaultLocale=${language};max-age=${(365 * 24 * 60 * 60)}`
       redux.store.dispatch(updateIntl({ locale: locale, messages: response }));
-      app && ReactDOM.render(<App />, app);
+      // Check if any additional labels should be fetched
+      const additionalLabels = cookies.getCookie('additionalLabels')
+      if (additionalLabels) {
+        getAdditionalLabels(response, locale, language, additionalLabels)
+      } else {
+        app && ReactDOM.render(<App />, app);
+      }
     },
       'security',
       'temp',

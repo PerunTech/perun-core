@@ -49,10 +49,11 @@ export const Dropdown = ({
     htmlOptions = generateHtmlOptions(options)
   }
   return (
-    <div className={classnames(`form-group ${containerClassName}`, { 'has-error': error })} style={style} >
+    <div className={classnames(`form-group custom-dropdown-container ${containerClassName}`, { 'has-error': error })} style={style} >
       {
         labelText && <label className='control-label' htmlFor={id}>
           {labelText}
+          {required && <span className='required'>*</span>}
         </label>
       }
       <select

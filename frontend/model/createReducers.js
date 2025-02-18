@@ -13,6 +13,7 @@ import { selectedGridRows } from './reducers/selectedGridRows';
 import { historyReducer } from './reducers/historyReducer';
 import { routesReducer } from './reducers/routesReducer';
 import { modalReducer } from './reducers/modalReducer';
+import businessLogicReducer from './reducers/businessLogicReducer'
 import { userInfoReducer } from './reducers/userInfoReducer';
 import moduleLinksReducer from './reducers/moduleLinksReducer';
 
@@ -34,6 +35,7 @@ export default function createReducers(asyncReducers) {
     routes: routesReducer,
     modal: modalReducer,
     userInfo: userInfoReducer,
+    businessLogicReducer: businessLogicReducer,
     moduleLinks: moduleLinksReducer,
     ...asyncReducers
   })
