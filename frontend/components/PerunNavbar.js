@@ -80,7 +80,7 @@ const PerunNavbar = (props, context) => {
             {toggleBurger && <div ref={burgerRef} className='nav-burger-menu'>
                 {menuBurger.map(el => (
                     !el['cardHidden'] && <div className='nav-burger-option' onClick={() => { history.push(`/main/${el.id}`), setToggleBurger(false) }}>
-                        <div className='nav-burger-img'><img src={`${window.json}${el.imgPath}`} /></div>
+                        <div className='nav-burger-img'><img src={`${window.location.origin}${el.imgPath}`} /></div>
                         <p>{el.title}</p></div>
                 ))}
             </div >}
