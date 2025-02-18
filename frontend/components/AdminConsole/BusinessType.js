@@ -146,6 +146,9 @@ const BusinessType = (props, context) => {
       {loading && <Loading />}
       {canRender && (
         <div className='admin-console-grid-container'>
+          <div className='admin-console-component-header'>
+            <p>{context.intl.formatMessage({ id: 'perun.admin_console.business_type', defaultMessage: 'perun.admin_console.business_type' })}</p>
+          </div>
           {generateBusinessTypeGrid()}
         </div>
       )}

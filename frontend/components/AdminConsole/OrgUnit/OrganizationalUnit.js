@@ -55,7 +55,7 @@ const OrganizationalUnit = (props, context) => {
 
     let grid = (
       <div style={{ width: "60%" }}>
-        <p className='admin-console-grid-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.choose_user', defaultMessage: 'perun.admin_console.choose_user' })}</p>
+        <p className='admin-console-grid-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.choose_user', defaultMessage: 'perun.admin_console.choose_user' })}</p>
         <ExportableGrid
           gridType={"READ_URL"}
           key={gridId2}
@@ -144,7 +144,7 @@ const OrganizationalUnit = (props, context) => {
     <React.Fragment>
       <div className='admin-console-org-unit'>
         <div style={{ width: "100%" }}>
-          <p className='admin-console-unit-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.unit_legend', defaultMessage: 'perun.admin_console.unit_legend' })}</p>
+          <p className='admin-console-unit-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.unit_legend', defaultMessage: 'perun.admin_console.unit_legend' })}</p>
         </div>
         <div
           style={{
@@ -154,7 +154,7 @@ const OrganizationalUnit = (props, context) => {
           }}
         >
           <div style={{ width: "35%" }}>
-            <p className='admin-console-grid-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_name', defaultMessage: 'perun.admin_console.svarog_unit_name' })}</p>
+            <p className='admin-console-grid-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_name', defaultMessage: 'perun.admin_console.svarog_unit_name' })}</p>
             {grid}
           </div>
 

@@ -207,7 +207,7 @@ const CodeListEditor = (props, context) => {
             {loading && <Loading />}
             <div className='admin-console-code-list-div'>
                 <div className='admin-console-code-list-content-holder'>
-                    {prevO?.length > 1 && <legend className='admin-console-code-list-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.change_code_list', defaultMessage: 'perun.admin_console.change_code_list' })} {arrOP[arrOP?.length - 1]}</legend>}
+                    {prevO?.length > 1 && <legend className='admin-console-code-list-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.change_code_list', defaultMessage: 'perun.admin_console.change_code_list' })} {arrOP[arrOP?.length - 1]}</legend>}
                     {prevO?.length > 1 && editChildForm}
                     {innerGrid}
                     {prevO?.length > 1 && (

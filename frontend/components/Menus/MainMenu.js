@@ -1,12 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import ReactTooltip from 'react-tooltip'
 import axios from 'axios'
 import createHashHistory from 'history/createHashHistory'
 import { store, logoutUser } from '../../model';
-import TopNavMenu from './TopNavMenu'
 import { alertUser } from '../../elements'
 import { svConfig } from '../../config';
 import { iconManager } from '../../assets/svg/svgHolder'
@@ -14,6 +11,7 @@ import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
 import { isValidObject } from '../../model'
+import PerunNavbar from '../PerunNavbar'
 // main menu top- tells the Main app parent which function needs to be dispatched
 // or which grid should be shown in the main content
 class MainMenu extends React.Component {
@@ -101,8 +99,10 @@ class MainMenu extends React.Component {
         store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: userData })
       }
     }).catch(err => {
-      const title = err.response?.data?.title || ''
-      const message = err.response?.data?.message || ''
+      const title = err.response?.data?.title || this.context.intl.formatMessage({
+        id: 'perun.something_went_wrong', defaultMessage: 'perun.something_went_wrong'
+      })
+      const message = err.response?.data?.message || err
       alertUser(true, 'error', title, message)
     })
   }
@@ -146,8 +146,6 @@ class MainMenu extends React.Component {
   }
 
   unmountRegister() {
-    document.getElementById('hideHamb').className = 'hideHambMenu';
-    document.getElementById('identificationScreen').className = 'identificationScreen';
     document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
       id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
     });
@@ -176,81 +174,7 @@ class MainMenu extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <ReactTooltip />
-        <div id='mainMenu' className='nav-flex'>
-          <div className='top-nav-holder nav-flex'>
-            {this.state.navbarImgJson?.length > 0 && (
-              <React.Fragment>
-                {this.state.navbarImgJson.map((item, i) => {
-                  return (
-                    <React.Fragment key={`${item.id}_${i}`}>
-                      {item.href ? (
-                        <a key={item.id} href={item.href} target='_blank' rel='noopener noreferrer' id={item.id} className={item.linkClassName}>
-                          {item.children?.length > 0 ? (
-                            <React.Fragment>
-                              {item.children.map(child => {
-                                return <img key={child.id} id={child.id} src={child.src} className={child.className} />
-                              })}
-                            </React.Fragment>
-                          ) : (
-                            <React.Fragment>
-                              {item.text}
-                            </React.Fragment>
-                          )}
-                        </a>
-                      ) : (
-                        <img key={item.id} src={item.src} className={item.imgClassName} />
-                      )}
-                    </React.Fragment>
-                  )
-                })}
-              </React.Fragment>
-            )}
-            <Link onClick={this.unmountRegister} to='/main' id='to-home-link'>
-              <div id='to-home' className='btn btn_background' data-toggle='tooltip' data-placement='right' title='Home'>
-                {iconManager.getIcon('home')}
-              </div>
-            </Link>
-            <div className='display-inline-block'>
-              <TopNavMenu />
-            </div>
-          </div>
-          <div className='identificationScreen'>
-            <p id='identificationScreen'></p>
-          </div>
-          <div className='lang-container'>
-            {this.state.languageOptions?.length > 0 && this.state.languageOptions.map((element) => {
-              return (
-                <p
-                  key={element.id}
-                  id={element.id}
-                  onClick={() => {
-                    this.changeLang(element.locale, element.language)
-                    this.getLocale()
-                  }}
-                  className={element.className ? `${element.className} ${this.state.activeLanguage === element.language && 'active-language-internal'}` : 'header-item'}
-                >{element.label}
-                </p>
-              )
-            }) || <></>}
-          </div>
-          <div className='nav-flex' style={{ marginRight: '5px' }}>
-            <div className='btn btn_background custom-icon-width' style={{ width: '50px' }} data-toggle='tooltip' data-placement='right' title='Current user'>
-              {iconManager.getIcon('currentUserIcon')}
-            </div>
-            <span className='current-user'>{this.state.currentUser}</span>
-          </div>
-          <div className='nav-flex'>
-            <Link to='/main/user_guide'>
-              <div className='btn btn_background custom-icon-width' data-toggle='tooltip' data-placement='right' title='documents'>
-                {iconManager.getIcon('documentIcon')}
-              </div>
-            </Link>
-            <div onClick={this.logout} className='btn btn_background' data-toggle='tooltip' data-placement='right' title='Logout'>
-              {iconManager.getIcon('logout')}
-            </div>
-          </div>
-        </div>
+        <PerunNavbar logout={this.logout} location={window.location} />
       </React.Fragment>
     )
   }

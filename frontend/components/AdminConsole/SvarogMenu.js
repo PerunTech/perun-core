@@ -128,6 +128,9 @@ const SvarogMenu = (props, context) => {
   return (
     <>
       <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_menus_editor', defaultMessage: 'perun.admin_console.svarog_menus_editor' })}</p>
+        </div>
         {generateSvarogMenuGrid()}
       </div>
       {show && (

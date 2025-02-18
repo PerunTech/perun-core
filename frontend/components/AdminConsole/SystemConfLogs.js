@@ -22,6 +22,7 @@ class SystemConfLogs extends React.Component {
 
   generateSystemLogsGrid = () => {
     let grid = <ExportableGrid
+      className={'hide-all-form-legends'}
       gridType={'READ_URL'}
       key={tableName}
       id={tableName}
@@ -73,7 +74,11 @@ class SystemConfLogs extends React.Component {
     return (
       <React.Fragment>
         {showLogModal}
-        <div className='admin-console-grid-container'>{grid}</div>
+        <div className='admin-console-grid-container'>
+          <div className='admin-console-component-header'>
+            <p>{this.context.intl.formatMessage({ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' })}</p>
+          </div>
+          {grid}</div>
       </React.Fragment>
     );
   }

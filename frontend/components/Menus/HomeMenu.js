@@ -121,8 +121,8 @@ const HomeMenu = (props, context) => {
     });
   };
 
-  let className = 'navbar sticky-top justify-content-end navbar-styled fadeIn ';
-  if (!props.svSession) className += 'hide-navbar';
+  let className
+  if (!props.svSession) className = 'hide-navbar';
 
   return (
     <React.Fragment>

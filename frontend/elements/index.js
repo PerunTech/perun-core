@@ -3,6 +3,7 @@ import Form from '@rjsf/core';
 /* util */
 export { findWidget, findSectionName, replaceConfigParamsWithFieldVals, $ } from './util/utils';
 export { alertUser } from './util/alertUser';
+export { alertUserV2, alertUserResponse } from './util/alertUserV2';
 
 /* root */
 export { ComponentManager } from './ComponentManager.js';

@@ -1,6 +1,7 @@
 import { ComponentManager } from '../elements'
 import { store, updateSelectedRows, lastSelectedItem } from '../model'
 import { strcmp } from '../model/utils'
+import axios from 'axios'
 export const replaceParamsWithBoundPropVals = (string, props) => {
   let array = string.split('/')
   for (let i = 0; i < array.length; i++) {
@@ -130,3 +131,19 @@ export function getCapsLockState(event, callback) {
     callback(false);
   }
 }
+
+export const downloadFile = (file, svSession, callback) => {
+  if (file['objectId'] && file['fileName']) {
+    const url = `${window.server}/ReactElements/downloadFile/sid/${svSession}/object-id/${file['objectId']}/file-name/${file['fileName']}`;
+    axios
+      .get(url, { responseType: 'blob' })
+      .then(res => {
+        const blob = new Blob([res.data], { type: res.data.type });
+        const objectUrl = URL.createObjectURL(blob);
+        callback(objectUrl)
+      })
+      .catch(err => {
+        console.error('Download error:', err);
+      });
+  }
+};

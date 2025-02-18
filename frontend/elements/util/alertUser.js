@@ -30,17 +30,17 @@ import swal from 'sweetalert';
 * @param {boolean} buttonsFlag - when true hides all buttons in the alert
 */
 
-export function alertUser (
+export function alertUser(
   show, type, title, text, onConfirm, onCancel, showCancelButton,
   confirmButtonText, cancelButtonText, showLoaderOnConfirm, confirmButtonColor, disableOutsideClick, content, buttonsFlag
 ) {
-  function alertWithoutReact () {
+  function alertWithoutReact() {
     show && swal({
       title,
       text,
       icon: type,
       buttons: buttonsFlag ? false : {
-        ...showCancelButton && {cancel: cancelButtonText},
+        ...showCancelButton && { cancel: cancelButtonText },
         confirm: confirmButtonText || 'OK'
       },
       dangerMode: type === 'warning',

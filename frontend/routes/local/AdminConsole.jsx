@@ -1,11 +1,11 @@
 import React from 'react';
-import AppSettings from '../../components/AdminConsole/AppSettings'
+import AdminConsole from '../../components/AdminConsole/AdminConsole'
 
 const Component = props => {
-    return <AppSettings {...props} />
+    return <AdminConsole {...props} />
 };
 
-export const AdminConsole = {
+export const AdminConsoleRoute = {
     path: '/main/perun-core',
     render: Component,
     isExact: true
