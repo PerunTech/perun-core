@@ -26,7 +26,7 @@ const AddUserWrapper = (props, context) => {
                 );
                 afterSaveCleanUp()
             })
-            .catch(err => alertUserResponse({ response: err }));
+            .catch(err => alertUserResponse({ response: err, alertType: 'error' }));
     }
     return (
         <>
