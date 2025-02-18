@@ -738,7 +738,6 @@ class GenericForm extends React.Component {
             {addCustomFunction instanceof Function &&
               <button id='custom_btn_generic_form' type='button' onClick={addCustomFunction} style={{ margin: '0 .5rem', float: 'left' }} className='btn-success btn_save_form'>
                 {addCustomButtonName}
-                {console.log(addCustomButtonName)}
               </button>
             }
             {hideBtns !== 'submit' && hideBtns !== 'all' && customSave !== true &&
