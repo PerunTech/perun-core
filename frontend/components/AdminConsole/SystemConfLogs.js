@@ -22,7 +22,6 @@ class SystemConfLogs extends React.Component {
 
   generateSystemLogsGrid = () => {
     let grid = <ExportableGrid
-      className={'hide-all-form-legends'}
       gridType={'READ_URL'}
       key={tableName}
       id={tableName}
@@ -53,6 +52,7 @@ class SystemConfLogs extends React.Component {
       uiSchemaConfigMethod={'/ReactElements/getTableUISchema/%session/' + formName}
       tableFormDataMethod={'/ReactElements/getFormDataByParentId/%session/' + parentId + '/' + formName}
       hideBtns='all'
+      className={'hide-all-form-legends'}
       inputWrapper={SystemConfLogsWrapper}
     />
     let loginfo = <Modal customClassBtnModal='customClassBtnModal'
