@@ -22,6 +22,7 @@ class SystemConfLogs extends React.Component {
 
   generateSystemLogsGrid = () => {
     let grid = <ExportableGrid
+      className={'hide-all-form-legends'}
       gridType={'READ_URL'}
       key={tableName}
       id={tableName}

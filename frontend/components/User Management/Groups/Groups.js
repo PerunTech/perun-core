@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, ReactBootstrap } from '../../../elements'
-const { useReducer, useEffect } = React
+import { ReactBootstrap } from '../../../elements'
+const { useEffect } = React
 const { Modal } = ReactBootstrap
 import { alertUserResponse } from '../../../elements'
 import AssignAcl from '../../AdminConsole/AssignAcl'

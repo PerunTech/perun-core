@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { GenericForm, axios, createHashHistory } from '../../../client';
+import { GenericForm, axios, createHashHistory, ComponentManager } from '../../../client';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { downloadFile } from '../../../functions/utils';
-import { alertUser } from '../../../elements';
+import { alertUser, alertUserResponse } from '../../../elements';
 import ReactDOM from 'react-dom';
 import { store } from '../../../model';
 import PasswordForm from './PasswordForm';
@@ -119,6 +119,26 @@ const MyProfile = (props, context) => {
         ReactDOM.render(<PasswordForm userInfo={props.userInfo} svSession={props.svSession} context={context} />, customElement)
         alertUser(true, '', '', '', () => { }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement, true)
     }
+
+    const handleEditProfile = (e) => {
+        let url = `${window.server}/ReactElements/createTableRecordFormData/${props.svSession}/SVAROG_USERS/${props.userInfo.userObjectId}`
+        axios({
+            method: "post",
+            data: encodeURIComponent(JSON.stringify(e.formData)),
+            url,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }).then((res) => {
+            alertUserResponse({ response: res })
+            ComponentManager.setStateForComponent('MY_PROFILE_FORM', null, {
+                saveExecuted: false,
+            });
+        }).catch(err => {
+            alertUserResponse({ response: err })
+            ComponentManager.setStateForComponent('MY_PROFILE_FORM', null, {
+                saveExecuted: false,
+            });
+        });
+    };
     return (
         <div className="my-profile">
             <div className="my-profile-form-container">
@@ -147,14 +167,15 @@ const MyProfile = (props, context) => {
                 </div>
                 <GenericForm
                     params="READ_URL"
-                    key="FORM"
-                    id="FORM"
+                    key="MY_PROFILE_FORM"
+                    id="MY_PROFILE_FORM"
                     method={`/ReactElements/getTableJSONSchema/${props.svSession}/SVAROG_USERS`}
                     uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/SVAROG_USERS`}
                     tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId}/SVAROG_USERS`}
-                    addSaveFunction={(e) => console.log(e)}
+                    addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"
+                    noValidate={true}
                 />
                 <div className='my-profile-back-btn' onClick={() => { history.goBack() }}><div className='my-profile-back-btn-icon'> <i className='fas fa-chevron-left' /></div><p>{context.intl.formatMessage({ id: 'perun.my_profile.back', defaultMessage: 'perun.my_profile.back' })}</p></div>
             </div>

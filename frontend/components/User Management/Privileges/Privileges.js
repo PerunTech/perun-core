@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, ReactBootstrap } from '../../../elements'
+import { ComponentManager, ExportableGrid, GenericForm } from '../../../client'
+import { ReactBootstrap } from '../../../elements'
 import CreateAclCodes from '../../AdminConsole/CreateAclCodes'
 import AssignAcl from '../../AdminConsole/AssignAcl'
-const { useReducer, useEffect } = React
+const { useEffect } = React
 
 const { Modal } = ReactBootstrap
 // development note: refresh grids,add group menagement
@@ -27,7 +27,7 @@ const Privileges = (props, context) => {
     }
 
     const generateForm = (tableName, objectId, search) => {
-        let classNames = search ? 'user-mng-form hide-all-form-legends' : 'form-test'
+        let classNames = search ? 'admin-console-search-from hide-all-form-legends' : 'form-test'
         return <GenericForm
             params={'READ_URL'}
             key={`${tableName}_${objectId}_FORM`}

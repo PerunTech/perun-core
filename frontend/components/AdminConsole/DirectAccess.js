@@ -160,7 +160,7 @@ class DirectAccess extends React.Component {
     return (
       <div className='admin-console-direct-access'>
         <div id='dropDownContainer' className='admin-console-dropdown-container'>
-          <div id='title' className='admin-console-dropdown-title'>
+          <div id='title' className='admin-console-dropdown-title admin-console-legend'>
             <p style={{ marginBottom: '0.5vh' }}>{this.context.intl.formatMessage({ id: 'perun.adminConsole.direct_access_module', defaultMessage: 'perun.adminConsole.direct_access_module' })}</p>
           </div>
           <div id='dropDownHolder' className='admin-console-dropdown-holder'>

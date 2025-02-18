@@ -1,25 +1,20 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
-const { useReducer, useEffect } = React
+import { ComponentManager } from '../../../client'
+import { ReactBootstrap } from '../../../elements'
 const { Modal } = ReactBootstrap
-import ReactDOM from 'react-dom'
-import { alertUserResponse } from '../../../elements'
 import PasswordForm from '../MyProfile/PasswordForm'
-import md5 from 'md5';
+
 const EditUserWrapper = (props, context) => {
     const [show, setShow] = useState(false)
-    const [username, setUsername] = useState(undefined)
     const generatePasswordForm = () => {
         const { formid } = props
         const formData = ComponentManager.getStateForComponent(
             formid,
             "formTableData"
         );
-        console.log(formData?.['USER_NAME']);
-        return <PasswordForm isEdit={true} userInfo={{ username: formData?.['USER_NAME'] }} svSession={props.svSession} context={context} />
+        return <PasswordForm isEdit={true} userInfo={{ username: formData?.['USER_NAME'] }} setShow={setShow} svSession={props.svSession} context={context} />
     }
     return (
         <>
@@ -29,7 +24,7 @@ const EditUserWrapper = (props, context) => {
             </div>
 
             {show && (
-                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false) }}>
+                <Modal className='admin-console-unit-modal edit-user-password-modal' show={show} onHide={() => { setShow(false) }}>
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>

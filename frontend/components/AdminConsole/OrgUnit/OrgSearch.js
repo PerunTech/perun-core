@@ -118,7 +118,7 @@ const OrgSearch = (props, context) => {
     <React.Fragment>
       <div className='admin-console-show-user-container'>
         <div className='admin-console-show-user-customform'>
-          <legend className='admin-console-show-user-legend'>
+          <legend className='admin-console-show-user-legend admin-console-legend'>
             {context.intl.formatMessage({ id: 'perun.admin_console.search_user_legend', defaultMessage: 'perun.admin_console.search_user_legend' })}
           </legend>
           <div className='admin-console-show-user-inputholder'>{generateForm()}</div>

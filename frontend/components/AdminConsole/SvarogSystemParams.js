@@ -120,6 +120,7 @@ class SvarogSystemParams extends React.Component {
         params={'READ_URL'}
         key={formId}
         id={formId}
+        className={'hide-all-form-legends'}
         method={`/ReactElements/getTableJSONSchema/${session}/${tableName}`}
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${session}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${session}/${svarogSysParamObjId}/${tableName}`}
@@ -150,6 +151,9 @@ class SvarogSystemParams extends React.Component {
     const { grid, svarogSysParamsFormModal } = this.state
     return (
       <React.Fragment>
+        <div className='user-mng-header'>
+          <p>{this.context.intl.formatMessage({ id: 'perun.user_mng', defaultMessage: 'perun.user_mng' })}</p>
+        </div>
         <div className='admin-console-grid-container'>{grid}</div>
         {svarogSysParamsFormModal}
       </React.Fragment>

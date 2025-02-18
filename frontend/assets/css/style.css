@@ -1322,97 +1322,149 @@ input[class*="input_error"] {
 }
 
 /* COPY UNDER */
-.sidebar {
-    min-width: 20% !important;
-    background: #192c5b;
+/* ADMIN CONSOLE */
+:root {
+    --adm-menu-bg: #192c5b;
+    --adm-item-hover-bg: #0d2d6e;
+    --adm-item-active-bg: #183B7F;
+    --adm-active-border: #2672FB;
+    --adm-text-color: white;
+    --adm-content-bg: rgba(255, 255, 255, 0.918);
+    --nav-bar: #183B7F;
+    --legend-color: white;
+    --legend-bg: #448fddd1;
+    --scroll-bg: #192c5b;
+    /* grid colors */
+    --grid-toolbar-bg: #1f75cb;
+    --grid-toolbar-color: white;
+    --grid-toolbar-btn-bg: #f1f1f1;
+    --grid-toolbar-btn-color: #1d1d1d;
+    --grid-header-cell-bg: #448fddd1;
+    --gird-selected-row-color: #183b7f;
+    --grid-btn-bg: #1f75cb;
+    --grid-btn-bg-hover: #4063a7;
+    /* modal */
+    --modal-bg: #183B7F;
+    --modal-border: #2196F3;
+    --modal-color: white;
+    /* buttons */
+    --default-btn: #1f75cb;
+    --default-btn-color: white;
+    --default-btn-hover: #1c558d;
+    --default-btn-box-shadow: rgba(72, 115, 180, 0.336);
+}
+
+/* TESTTT1!!!!!!!!!!!!!!! */
+legend {
+    background-color: var(--legend-bg) !important;
+    color: var(--legend-color) !important;
+}
+
+.btn-success.btn_save_form {
+    background: var(--default-btn) !important;
+    color: var(--default-btn-color) !important;
+    border-color: var(--default-btn-hover) !important;
+}
+
+.btn-success.btn_save_form:hover,
+.btn-success.btn_save_form:active,
+.btn-success.btn_save_form:focus {
+    background: var(--default-btn-hover) !important;
+    color: var(--default-btn-color) !important;
+    box-shadow: 0 0 0 .2rem var(--default-btn-box-shadow) !important;
+}
+
+
+/* TEST!!!!!!!!!!!!!1 */
+
+.admin-console-main-container {
+    height: calc(100% - 40px);
+    display: flex;
+}
+
+.admin-console-side-menu {
+    color: var(--adm-text-color);
+    background: var(--adm-menu-bg);
+    min-width: 18%;
+    max-width: 23%;
     width: auto;
-
-}
-
-.link_bg {
-    display: none;
-}
-
-.var_nav_arrow:hover,
-.var_nav:hover {
-    padding-left: 10px !important;
-    background: #0d2d6e;
-    border-radius: 0;
-}
-
-.var_nav_arrow .link_title:hover {
-    padding-left: 0 !important;
-}
-
-.var_nav_arrow.active,
-.var_nav.active {
-    background: #183B7F;
-    border-radius: 0;
-    border-left: 5px solid #2672FB;
-    margin-left: 0;
-
-}
-
-.var_nav.active {
-    padding-left: 10px !important;
-}
-
-.var_nav:not(.active) .link_title:hover {
-    padding-left: 0;
-    color: #fff;
-}
-
-.var_nav,
-.var_nav_arrow {
-    width: 100% !important;
-    height: max-content;
-    padding: 10px 0 10px 10px;
-}
-
-.link_title {
-    height: max-content;
     display: flex;
-    justify-content: start;
-    align-items: center;
-}
-
-.icon i {
-    width: 100%;
+    flex-direction: column;
     height: 100%;
-    display: block;
 }
 
-.icon {
-    margin: 0;
+.admin-console-side-item {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
 }
 
-.menu-links {
-    margin-left: 10px;
+.admin-console-side-item p {
+    margin: 0;
 }
 
-.sub_menu.active {
-    background-color: #183B7F;
-    border-left: 4px solid #fff;
-    padding-left: 2%;
+.admin-console-side-item:hover {
+    background: var(--adm-item-hover-bg);
 }
 
-.var_nav.active {
-    height: max-content;
+.admin-console-side-item.active {
+    background: var(--adm-item-active-bg);
+    border-left: 5px solid var(--adm-active-border);
     padding-left: 10px;
 }
 
-
-.var_nav.active .icon {
-    margin-top: 0;
+.admin-console-content {
+    flex: 1;
+    background: var(--adm-content-bg);
+    height: 100%;
+    padding: 1vh;
 }
 
-.sub_menu {
-    margin-left: 2rem;
+/* OLD ADM OVERRIDE */
+.admin-console-label-editor-div,
+.admin-console-grid-container,
+.admin-console-direct-access,
+.admin-console-acl-create,
+.admin-console-user-form-container,
+.admin-console-org-unit {
+    height: 100%;
+    width: 100%;
 }
 
+.admin-console-legend {
+    color: var(--legend-color);
+    background-color: var(--legend-bg);
+}
+
+/* MASTER CSS */
+.exportBtnsHolder {
+    justify-content: flex-end;
+}
+
+.exportBtnsHolder button {
+    background-color: var(--grid-btn-bg)
+}
+
+.react-grid-Toolbar {
+    background-color: var(--grid-toolbar-bg)
+}
+
+.react-grid-HeaderCell {
+    background-color: var(--grid-header-cell-bg)
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-bg);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-bg);
+    border-radius: 5px;
+}
+
+/* USER MNG */
 .user-mng {
     width: 100%;
     height: 100%;
@@ -1455,57 +1507,57 @@ input[class*="input_error"] {
     border-bottom: solid 3px #1f75cb;
 }
 
-.user-mng-form {
+.admin-console-search-from {
     display: flex;
 }
 
-logout .user-mng-form .field-string {
+logout .admin-console-search-from .field-string {
     margin: 0;
     float: none;
     margin: 0;
     padding: 0;
 }
 
-.user-mng-form .control-label {
+.admin-console-search-from .control-label {
     text-indent: 0;
     padding: 0;
 }
 
-.user-mng-form .field-string input,
-.user-mng-form .field-string select {
+.admin-console-search-from .field-string input,
+.admin-console-search-from .field-string select {
     background-color: white;
     border: 1px solid #a5a2a27a !important;
     border-radius: 0;
     box-shadow: rgb(0 0 0 / 0%) 0px 2px 4px, rgb(0 0 0 / 11%) 0px 7px 13px -3px, rgb(66 116 251) 0px -3px 0px inset;
 }
 
-.user-mng-form .form-group {
+.admin-console-search-from .form-group {
     margin: 0;
     padding: 0;
 }
 
-.user-mng-form .form-group.field.field-object {
+.admin-console-search-from .form-group.field.field-object {
     width: 100%;
 }
 
-.user-mng-form fieldset {
+.admin-console-search-from fieldset {
     display: flex;
     gap: 20px;
     align-items: flex-end;
 }
 
-.user-mng-form #btnSeparator {
+.admin-console-search-from #btnSeparator {
     width: auto;
     float: none;
 }
 
-.user-mng-form #buttonHolder {
+.admin-console-search-from #buttonHolder {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.user-mng-form button {
+.admin-console-search-from button {
     margin: 24px 0.5rem 0 0.5rem !important;
     background: #4274fb;
     box-shadow: none;
@@ -1516,7 +1568,8 @@ logout .user-mng-form .field-string {
     font-weight: bold;
 }
 
-.user-dash-content legend {
+.user-dash-content legend,
+.edit-user-wrapper legend {
     background-color: #448fddd1 !important;
     color: white !important;
 }
@@ -1534,37 +1587,22 @@ logout .user-mng-form .field-string {
     margin-bottom: 20px;
 }
 
-.user-mng-form button:active {
+.admin-console-search-from button:active {
     background-color: #4777fc !important;
     border-color: #4274fb !important;
     box-shadow: 0 0 0 .2rem rgba(72, 115, 180, 0.336) !important;
 }
 
-.user-mng-form button:hover {
+.admin-console-search-from button:hover {
     background-color: #4274fb !important;
     border-color: #4274fb !important;
 }
 
-.user-mng-form button:focus {
+.admin-console-search-from button:focus {
     box-shadow: 0 0 0 .2rem rgba(72, 115, 180, 0.336);
 }
 
-.user-mng .exportBtnsHolder {
-    justify-content: flex-end;
-}
 
-.user-mng .exportBtnsHolder button {
-    background-color: #1f75cb !important;
-
-}
-
-.user-mng .react-grid-Toolbar {
-    background-color: #1f75cb !important;
-}
-
-.user-mng .react-grid-HeaderCell {
-    background-color: #448fddd1 !important;
-}
 
 .parent-margin {
     height: calc(100% - 40px);
@@ -1671,7 +1709,7 @@ logout .user-mng-form .field-string {
 }
 
 .user-mng .react-grid-Row-selected {
-    color: #183b7f;
+    color: var(--gird-selected-row-color)
 }
 
 .user-control.active {
@@ -2145,7 +2183,7 @@ logout .user-mng-form .field-string {
 }
 
 .my-profile-form .hidden,
-.user-mng-form .hidden {
+.admin-console-search-from .hidden {
     display: none !important;
 }
 
@@ -2163,12 +2201,12 @@ logout .user-mng-form .field-string {
     border: none;
 }
 
-.user-mng-form input:active,
-.user-mng-form select:active,
+.admin-console-search-from input:active,
+.admin-console-search-from select:active,
 .user-dash-content input:active,
 .user-dash-content select:active,
-.user-mng-form input:focus,
-.user-mng-form select:focus,
+.admin-console-search-from input:focus,
+.admin-console-search-from select:focus,
 .user-dash-content input:focus,
 .user-dash-content select:focus {
     background: #efefefb0;
@@ -2214,4 +2252,43 @@ body.swal2-height-auto {
     position: absolute;
     top: 86%;
     left: 80%;
+}
+
+.edit-user-wrapper .my-profile-change-password .field-string {
+    width: max-content !important;
+}
+
+.edit-user-password-modal .modal-content {
+    width: max-content;
+}
+
+.edit-user-password-modal .admin-console-unit-modal-body {
+    width: max-content;
+}
+
+.edit-user-password-modal .my-profile-alert-btns {
+    justify-content: flex-end;
+    gap: 20px;
+}
+
+.edit-user-wrapper .my-profile-change-password input {
+    width: 80%;
+}
+
+.group-controls.add-edit-users-form {
+    display: flex;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.group-controls .cancel-btn {
+    background: #ededed !important;
+    color: #6c6c6c;
+    border: 1px solid #909090;
+}
+
+.group-controls .cancel-btn:hover {
+    background: #ededed !important;
+    color: #6c6c6c;
+    border: 1px solid #909090;
 }

@@ -3,14 +3,14 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
 import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
-const { useReducer, useEffect } = React
+const { useEffect } = React
 const { Modal } = ReactBootstrap
 import ReactDOM from 'react-dom'
 import { alertUserResponse } from '../../../elements'
 import UsersAddGroup from './UsersAddGroup'
 import AddUserWrapper from './AddUserWrapper'
 import EditUserWrapper from './EditUserWrapper'
-
+import Swal from 'sweetalert2'
 const Users = (props, context) => {
     const [show, setShow] = useState(false)
     const [row, setRow] = useState(undefined)
@@ -26,6 +26,8 @@ const Users = (props, context) => {
     }, [])
 
     const refreshGrid = () => {
+        setUsersData(false)
+        ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
         axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/100/PKID`).then(res => {
             setUsersData(res.data)
         }).catch(err => alertUserResponse({ response: err }));
@@ -41,7 +43,7 @@ const Users = (props, context) => {
         switch (formType) {
             case 'search':
                 inputWrapper = undefined
-                classNames = 'user-mng-form hide-all-form-legends'
+                classNames = 'admin-console-search-from hide-all-form-legends'
                 break;
             case 'add':
                 inputWrapper = AddUserWrapper
@@ -89,12 +91,26 @@ const Users = (props, context) => {
         })
     }
     const handleSave = (e, gridId) => {
-
-        ComponentManager.setStateForComponent(gridId, null, {
-            saveExecuted: false,
+        let url = `${window.server}/ReactElements/createTableRecordFormData/${props.svSession}/SVAROG_USERS/${row['SVAROG_USERS.OBJECT_ID']}`
+        axios({
+            method: "post",
+            data: encodeURIComponent(JSON.stringify(e.formData)),
+            url,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }).then((res) => {
+            alertUserResponse({ response: res })
+            refreshGrid()
+            ComponentManager.setStateForComponent(gridId, null, {
+                saveExecuted: false,
+            });
+        }).catch(err => {
+            alertUserResponse({ response: err })
+            refreshGrid()
+            ComponentManager.setStateForComponent(gridId, null, {
+                saveExecuted: false,
+            });
         });
-    }
-
+    };
     const handleRowClick = (_id, _rowIdx, row) => {
         setShow(true)
         setRow(row)
@@ -112,14 +128,16 @@ const Users = (props, context) => {
             const url = `${window.server}/WsAdminConsole/changeUserStatus/${props.svSession}/${objectId}/${status}`
             axios.get(url).then(res => {
                 alertUserResponse({ response: res })
+                refreshGrid()
             }).catch(err => alertUserResponse({ response: err }));
         }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
     }
     const generateGroupContorls = (_id, _rowIdx, row) => {
         const customElement = document.createElement('div')
-        ReactDOM.render(<div>
-            <button onClick={() => removeGroup(row)}>Remove</button>
-            <button onClick={() => setBasicGroup(row)}>Basic Group</button>
+        ReactDOM.render(<div className='add-edit-users-form group-controls'>
+            <button className='btn-success btn_save_form' onClick={() => removeGroup(row)}>Remove</button>
+            <button className='btn-success btn_save_form' onClick={() => setBasicGroup(row)}>Basic Group</button>
+            <button className='btn-success btn_save_form cancel-btn' onClick={() => Swal.close()}>Cancel</button>
         </div>, customElement)
         return customElement
     }
@@ -214,7 +232,7 @@ const Users = (props, context) => {
                     <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
                 </Modal>
             )}
-            {addGroupFlag && <UsersAddGroup setAddGroupFlag={setAddGroupFlag} userId={row['SVAROG_USERS.OBJECT_ID']} />}
+            {addGroupFlag && <UsersAddGroup addGroupFlag={addGroupFlag} setAddGroupFlag={setAddGroupFlag} userId={row['SVAROG_USERS.OBJECT_ID']} />}
         </>
     )
 

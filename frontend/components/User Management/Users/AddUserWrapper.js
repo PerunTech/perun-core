@@ -1,11 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
-const { useReducer, useEffect } = React
-const { Modal } = ReactBootstrap
-import ReactDOM from 'react-dom'
+import { ComponentManager, axios } from '../../../client'
 import { alertUserResponse } from '../../../elements'
 import PasswordForm from '../MyProfile/PasswordForm'
 import md5 from 'md5';

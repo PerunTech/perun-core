@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
+import { ComponentManager, ExportableGrid, GridManager, axios } from '../../../client'
+import { alertUserResponse, ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
 
 const UsersAddGroup = (props, context) => {
-    const [show, setShow] = useState(true)
 
     useEffect(() => {
         return () => {
@@ -16,21 +15,21 @@ const UsersAddGroup = (props, context) => {
     }, [])
 
     const handleRowClick = (_id, _rowIdx, row) => {
-        console.log(row);
         let url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${props.userId}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/add`
         axios.get(url).then(res => {
-            console.log(res);
             GridManager.reloadGridData('USER_GROUP_GRID')
-            setShow(false)
-            props.setAssignFlag(false)
+            alertUserResponse({ response: res })
+            props.setAddGroupFlag(false)
+        }).catch(err => {
+            alertUserResponse({ response: err })
         })
 
     }
 
     return (
         <>
-            {show && (
-                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false) }}>
+            {props.addGroupFlag && (
+                <Modal className='admin-console-unit-modal' show={props.addGroupFlag} onHide={() => { props.setAddGroupFlag(false) }}>
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>

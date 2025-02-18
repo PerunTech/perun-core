@@ -1,12 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import ReactTooltip from 'react-tooltip'
 import axios from 'axios'
 import createHashHistory from 'history/createHashHistory'
 import { store, logoutUser } from '../../model';
-import TopNavMenu from './TopNavMenu'
 import { alertUser } from '../../elements'
 import { svConfig } from '../../config';
 import { iconManager } from '../../assets/svg/svgHolder'

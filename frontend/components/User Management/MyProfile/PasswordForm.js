@@ -87,6 +87,9 @@ const PasswordForm = (props) => {
             if (props.isNewUser) {
                 props.onSave(formData);
             }
+            if (props.isEdit) {
+                props.setShow(false)
+            }
         }
 
         if (!props.isNewUser && !props.isEdit) {
@@ -124,7 +127,13 @@ const PasswordForm = (props) => {
                 <p className='dont-match'>{passwordMatch ? props.context.intl.formatMessage({ id: 'perun.my_profile.password_dont', defaultMessage: 'perun.my_profile.password_dont' }) : ''}</p>
             </div>
             <div className='my-profile-alert-btns'>
-                <div className='cancel-btn' onClick={() => swal.close()}>{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
+                <div className='cancel-btn' onClick={() => {
+                    if (!props.isEdit) {
+                        swal.close()
+                    } else {
+                        props.setShow(false)
+                    }
+                }}>{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
                 <button className='btn btn-info' type='submit'>{props.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}</button>
             </div>
         </Form>
