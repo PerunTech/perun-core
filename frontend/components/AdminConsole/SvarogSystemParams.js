@@ -151,10 +151,12 @@ class SvarogSystemParams extends React.Component {
     const { grid, svarogSysParamsFormModal } = this.state
     return (
       <React.Fragment>
-        <div className='user-mng-header'>
-          <p>{this.context.intl.formatMessage({ id: 'perun.user_mng', defaultMessage: 'perun.user_mng' })}</p>
-        </div>
-        <div className='admin-console-grid-container'>{grid}</div>
+
+        <div className='admin-console-grid-container'>
+          <div className='admin-console-component-header'>
+            <p>{this.context.intl.formatMessage({ id: 'perun.admin_console.svarog_system_params', defaultMessage: 'perun.admin_console.svarog_system_params' })}</p>
+          </div>
+          {grid}</div>
         {svarogSysParamsFormModal}
       </React.Fragment>
     )

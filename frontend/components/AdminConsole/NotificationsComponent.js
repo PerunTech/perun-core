@@ -163,7 +163,11 @@ class NotificationsComponent extends React.Component {
     const { showGrid, setModal } = this.state
     return (
       <React.Fragment>
-        <div className='admin-console-grid-container'>{showGrid}</div>
+        <div className='admin-console-grid-container'>
+          <div className='admin-console-component-header'>
+            <p>{this.context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}</p>
+          </div>
+          {showGrid}</div>
         {setModal}
       </React.Fragment>
     )

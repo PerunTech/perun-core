@@ -138,6 +138,9 @@ const PerunPluginTable = (props, context) => {
     return (
         <>
             <div className='admin-console-grid-container'>
+                <div className='admin-console-component-header'>
+                    <p>{context.intl.formatMessage({ id: 'perun.admin_console.perun_plugin_table_editor', defaultMessage: 'perun.admin_console.perun_plugin_table_editor' })}</p>
+                </div>
                 {generatePluginTable()}
             </div>
             {show && <Modal className='admin-console-unit-modal' show={show} onHide={() => setShow(false)}>

@@ -130,6 +130,9 @@ const GeoLayerTypes = (props, context) => {
     <>
       {loading && <Loading />}
       <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.geo_layer_types', defaultMessage: 'perun.admin_console.geo_layer_types' })}</p>
+        </div>
         {generateGeoLayerTypeGrid()}
       </div>
       {show && (
