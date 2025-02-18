@@ -241,7 +241,7 @@ class ModuleMenu extends React.Component {
 
       plugin.id === this.self
         ? render(plugin.id, accessCard)
-        : isRoutable(plugin.id) && render(plugin.id, accessCard);
+        : isRoutable(plugin.id) && !plugin.cardHidden && render(plugin.id, accessCard);
     }
   }
 
