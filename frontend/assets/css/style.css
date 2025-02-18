@@ -973,17 +973,7 @@ input[class*="input_error"] {
     box-shadow: 0 0 0 0.2rem rgba(236, 240, 243, 0.521) !important;
 }
 
-.identificationScreen {
-    color: white;
-    margin: auto;
-    margin-right: 11%;
-    width: 80%;
-    background: linear-gradient(60deg, #304040, #52655b, #304040);
-    mix-blend-mode: lighten;
-    padding: 0;
-    font-size: 19px;
-    text-align: center;
-}
+
 
 .addGroupIcon {
     margin-right: 10px;
