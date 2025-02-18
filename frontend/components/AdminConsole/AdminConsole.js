@@ -17,6 +17,7 @@ import BusinessType from './BusinessType'
 
 const AdminConsole = (props, context) => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
+    const [json, setJson] = useState([])
     const setDynamicComponentFunction = (comp) => {
         setDynamicComponent(comp)
     }
