@@ -121,7 +121,7 @@ const MyProfile = (props, context) => {
     }
 
     const handleEditProfile = (e) => {
-        let url = `${window.server}/ReactElements/createTableRecordFormData/${props.svSession}/SVAROG_USERS/${props.userInfo.userObjectId}`
+        let url = `${window.server}/WsAdminConsole/editUser/${props.svSession}/${props.userInfo.userObjectId}`
         axios({
             method: "post",
             data: encodeURIComponent(JSON.stringify(e.formData)),

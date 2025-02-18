@@ -38,40 +38,54 @@ const Users = (props, context) => {
         ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
     }
     const generateForm = (tableName, objectId, formType, gridId) => {
-        let inputWrapper
-        let classNames
+        let inputWrapper = null;
+        let classNames = '';
+        let label = '';
+        let method = '';
+
         switch (formType) {
             case 'search':
-                inputWrapper = undefined
-                classNames = 'admin-console-search-from hide-all-form-legends'
+                classNames = 'admin-console-search-from hide-all-form-legends';
+                label = context.intl.formatMessage({ id: 'perun.generalLabel.search', defaultMessage: 'perun.generalLabel.search' });
+                method = `/ReactElements/getTableSearchJSONSchema/${props.svSession}/${tableName}`;
                 break;
             case 'add':
-                inputWrapper = AddUserWrapper
-                classNames = 'form-test add-edit-users-form add-user-wrapper'
+                inputWrapper = AddUserWrapper;
+                classNames = 'form-test add-edit-users-form add-user-wrapper';
+                label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
+                method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
             case 'edit':
-                inputWrapper = EditUserWrapper
-                classNames = 'form-test add-edit-users-form edit-user-wrapper'
+                inputWrapper = EditUserWrapper;
+                classNames = 'form-test add-edit-users-form edit-user-wrapper';
+                label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
+                method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
             default:
-                break;
+                return null;
         }
 
-        let searchMethod = `/ReactElements/getTableSearchJSONSchema/${props.svSession}/${tableName}`
-        return <GenericForm
-            params={'READ_URL'}
-            key={gridId}
-            id={gridId}
-            method={formType === 'search' ? searchMethod : `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
-            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
-            tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
-            addSaveFunction={(e) => { formType === 'search' ? searchData(e, gridId) : handleSave(e, gridId) }}
-            hideBtns={'closeAndDelete'}
-            className={classNames}
-            inputWrapper={inputWrapper}
-            afterSaveCleanUp={() => { refreshGrid(), setShow(false) }}
-        />
-    }
+        const saveFunction = formType === 'search' ? searchData : handleSave;
+
+        return (
+            <GenericForm
+                params="READ_URL"
+                key={gridId}
+                id={gridId}
+                method={method}
+                uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
+                tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
+                addSaveFunction={(e) => saveFunction(e, gridId)}
+                hideBtns="closeAndDelete"
+                className={classNames}
+                inputWrapper={inputWrapper}
+                afterSaveCleanUp={() => { refreshGrid(); setShow(false); }}
+                customSaveButtonName={label}
+                customSave
+            />
+        );
+    };
+
     const searchData = (e, gridId) => {
         const url = `${window.server}/WsAdminConsole/searchUsers/${props.svSession}`
         axios({
@@ -91,7 +105,7 @@ const Users = (props, context) => {
         })
     }
     const handleSave = (e, gridId) => {
-        let url = `${window.server}/ReactElements/createTableRecordFormData/${props.svSession}/SVAROG_USERS/${row['SVAROG_USERS.OBJECT_ID']}`
+        let url = `${window.server}/WsAdminConsole/editUser/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}`
         axios({
             method: "post",
             data: encodeURIComponent(JSON.stringify(e.formData)),
@@ -135,9 +149,9 @@ const Users = (props, context) => {
     const generateGroupContorls = (_id, _rowIdx, row) => {
         const customElement = document.createElement('div')
         ReactDOM.render(<div className='add-edit-users-form group-controls'>
-            <button className='btn-success btn_save_form' onClick={() => removeGroup(row)}>Remove</button>
-            <button className='btn-success btn_save_form' onClick={() => setBasicGroup(row)}>Basic Group</button>
-            <button className='btn-success btn_save_form cancel-btn' onClick={() => Swal.close()}>Cancel</button>
+            <button className='btn-success btn_save_form' onClick={() => removeGroup(row)}>{context.intl.formatMessage({ id: 'perun.admin_console.remove', defaultMessage: 'perun.admin_console.remove' })}</button>
+            <button className='btn-success btn_save_form' onClick={() => setBasicGroup(row)}>{context.intl.formatMessage({ id: 'perun.admin_console.basic_group', defaultMessage: 'perun.admin_console.basic_group' })}</button>
+            <button className='cancel-btn' onClick={() => Swal.close()}>{context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</button>
         </div>, customElement)
         return customElement
     }
