@@ -2,12 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from '../../elements'
+import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const GeoLayerTypes = (props, context) => {
-  const initialState = { tableName: 'GEO_LAYER_TYPE', loading: false, gridId: undefined, show: false, objectId: 0 }
+  const initialState = { tableName: 'GEO_LAYER_TYPE', loading: false, gridId: 'GEO_LAYER_TYPE_GRID', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, loading, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
@@ -50,7 +50,7 @@ const GeoLayerTypes = (props, context) => {
     const isEmpty = Object.values(formData).every(v => v === null || v === undefined)
     if (!formData || isEmpty) {
       const label = context.intl.formatMessage({ id: 'perun.admin_console.input_data_error', defaultMessage: 'perun.admin_console.input_data_error' })
-      alertUser(true, 'info', label, '', onConfirm)
+      alertUserV2({ type: 'info', title: label, showConfirm: true, onConfirm })
     } else {
       const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`
       axios({
@@ -61,19 +61,16 @@ const GeoLayerTypes = (props, context) => {
       }).then((res) => {
         if (res.data) {
           const resType = res.data?.type?.toLowerCase() || 'info'
-          const title = res.data?.title || ''
-          const msg = res.data?.message || ''
-          alertUser(true, resType, title, msg, onConfirm)
+          alertUserResponse({ type: resType, response: res, onConfirm })
           if (resType === 'success') {
             GridManager.reloadGridData(gridId)
+            ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
             setState({ show: false })
           }
         }
       }).catch(err => {
         console.error(err)
-        const title = err.response?.data?.title || err
-        const msg = err.response?.data?.message || ''
-        alertUser(true, 'error', title, msg, onConfirm)
+        alertUserResponse({ response: err.response, onConfirm })
       })
     }
   }
@@ -98,6 +95,7 @@ const GeoLayerTypes = (props, context) => {
 
   const deleteFunc = (_id, _action, _session, formData) => {
     const { svSession } = props
+    const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { deleteExecuted: false })
     const url = `${window.server}/ReactElements/deleteObject/${svSession}`
     axios({
       method: 'post',
@@ -105,24 +103,18 @@ const GeoLayerTypes = (props, context) => {
       url: url,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data.type === 'SUCCESS') {
-        alertUser(true, 'success', res.data.title, res.data.message)
-        setState({ show: false })
-        ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-          deleteExecuted: false,
-        })
-        ComponentManager.setStateForComponent(gridId, null, {
-          rowClicked: undefined,
-        })
-        GridManager.reloadGridData(gridId)
+      if (res.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          GridManager.reloadGridData(gridId)
+          ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
+          setState({ show: false })
+        }
       }
     }).catch(err => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg, () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-        deleteExecuted: false,
-      }))
+      alertUserResponse({ response: err.response, onConfirm })
     })
   }
 
