@@ -45,7 +45,8 @@ export const alertUserResponse = (params) => {
   const message = response?.message || response?.data?.message || ''
   Swal.fire({
     icon: alertType,
-    title, text: message,
+    title,
+    text: message,
     allowOutsideClick: false,
     heightAuto: false,
     confirmButtonColor: '#7cd1f9'
