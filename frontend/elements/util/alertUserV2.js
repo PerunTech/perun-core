@@ -15,7 +15,7 @@ export const alertUserV2 = (params) => {
     allowOutsideClick: allowOutsideClick || false,
     allowEscapeKey: allowEscapeKey || true,
     html,
-    showConfirmButton: Boolean(showConfirm),
+    showConfirmButton: showConfirm ?? true,
     confirmButtonText: confirmButtonText || 'OK',
     confirmButtonColor: confirmButtonColor || '#7cd1f9',
     showCancelButton: showCancel,
