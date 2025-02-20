@@ -171,12 +171,12 @@ async function loadLocaleData(locale) {
   }
 }
 
-/* call function on perun-core initialization f.r */
+/* call function on perun-core initialization */
 persistBundleReducers(whitelistRoot)
 
 changeLanguageAndLocale(defaultLocale?.replace('_', '-'), defaultLocale)
 
-/* exportable function to add persist reducers from bundle f.r */
+/* exportable function to add persist reducers from bundle */
 export function persistBundleReducers(listOfBundleReducers) {
   let res = whitelist.filter(item => listOfBundleReducers.includes(item));
   if (res.length > 0) {

@@ -8,7 +8,7 @@ function passwordStrengthTest(string) {
   } else return null
 }
 
-/* form validator send: data and type of form, return error message f.r */
+/* form validator send: data and type of form, return error message */
 function validateInput(data, type) {
   const errors = {}
   switch (type) {

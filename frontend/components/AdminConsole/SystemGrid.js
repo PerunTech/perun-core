@@ -47,7 +47,7 @@ export default class SystemGrid extends React.Component {
   }
 
   rowClicked = (stateVal, rowIdx, row) => {
-    // /* global variable with data from clicked row f.r */
+    // /* global variable with data from clicked row */
     rowData = row
   }
 

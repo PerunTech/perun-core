@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import ReactTooltip from 'react-tooltip'
 
-/* custom form for handling errors f.r */
+/* custom form for handling errors */
 
 const InputElement = ({
   id,
@@ -25,8 +25,8 @@ const InputElement = ({
   // add context for label connection with redux store
 }, context) => {
   /* replace placeholder text with error message
-    change class for input field f.r.p.mkd*
-  */
+   * change class for input field*
+   */
   dataTip = ''
   if (error !== undefined) {
     // placeholder = error;
