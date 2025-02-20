@@ -10,7 +10,7 @@ const UsersAddGroup = (props, context) => {
 
     useEffect(() => {
         return () => {
-            ComponentManager.cleanComponentReducerState('USERS_ADD_GROUP_GRID');
+            ComponentManager.cleanComponentReducerState('USER_ADD_GROUP_GRID');
         }
     }, [])
 

@@ -154,7 +154,9 @@ export function activateLink(restUrl, method, formData) {
 }
 
 export function logoutUser(restUrl) {
+
   return function (dispatch) {
+    dispatch({ type: 'RESET_USER_DATA' })
     dispatch({ type: a.logoutUserPending, payload: undefined })
     // make the call
     axios.get(restUrl).then((response) => {
