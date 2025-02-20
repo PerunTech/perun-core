@@ -133,7 +133,7 @@ const MyProfile = (props, context) => {
                 saveExecuted: false,
             });
         }).catch(err => {
-            alertUserResponse({ response: err, alertType: 'error' })
+            alertUserResponse({ response: err, type: 'error' })
             ComponentManager.setStateForComponent('MY_PROFILE_FORM', null, {
                 saveExecuted: false,
             });

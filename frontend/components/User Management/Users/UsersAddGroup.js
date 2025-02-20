@@ -21,7 +21,7 @@ const UsersAddGroup = (props, context) => {
             alertUserResponse({ response: res })
             props.setAddGroupFlag(false)
         }).catch(err => {
-            alertUserResponse({ response: err, alertType: 'error' })
+            alertUserResponse({ response: err, type: 'error' })
         })
 
     }

@@ -66,7 +66,7 @@ const Groups = (props, context) => {
             });
             setShow(falsegridId)
         }).catch(err => {
-            alertUserResponse({ 'response': err, alertType: 'error' })
+            alertUserResponse({ 'response': err, type: 'error' })
         })
     }
     return (

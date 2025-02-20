@@ -109,7 +109,7 @@ const PasswordForm = (props) => {
             let url = window.server + `/WsAdminConsole/changePassword/${props.svSession}`;
             axios.post(url, data, { headers: { "Content-Type": "application/x-www-form-urlencoded" } })
                 .then(res => alertUserResponse({ response: res }))
-                .catch(err => alertUserResponse({ response: err, alertType: 'error' }));
+                .catch(err => alertUserResponse({ response: err, type: 'error' }));
         }
     };
 

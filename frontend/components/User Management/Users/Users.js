@@ -101,7 +101,7 @@ const Users = (props, context) => {
                 saveExecuted: false,
             });
         }).catch(err => {
-            alertUserResponse({ response: err, alertType: 'error' })
+            alertUserResponse({ response: err, type: 'error' })
         })
     }
     const handleSave = (e, gridId) => {
@@ -118,7 +118,7 @@ const Users = (props, context) => {
                 saveExecuted: false,
             });
         }).catch(err => {
-            alertUserResponse({ response: err, alertType: 'error' })
+            alertUserResponse({ response: err, type: 'error' })
             refreshGrid()
             ComponentManager.setStateForComponent(gridId, null, {
                 saveExecuted: false,
@@ -143,7 +143,7 @@ const Users = (props, context) => {
             axios.get(url).then(res => {
                 alertUserResponse({ response: res })
                 refreshGrid()
-            }).catch(err => alertUserResponse({ response: err, alertType: 'error' }));
+            }).catch(err => alertUserResponse({ response: err, type: 'error' }));
         }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
     }
     const generateGroupContorls = (_id, _rowIdx, row) => {
@@ -160,14 +160,14 @@ const Users = (props, context) => {
         axios.get(url).then(res => {
             alertUserResponse({ response: res })
             GridManager.reloadGridData('USER_GROUP_GRID')
-        }).catch(err => alertUserResponse({ response: err, alertType: 'error' }));
+        }).catch(err => alertUserResponse({ response: err, type: 'error' }));
     }
     const removeGroup = (gridRow) => {
         const url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/${gridRow['SVAROG_USER_GROUPS.OBJECT_ID']}/remove`
         axios.get(url).then(res => {
             alertUserResponse({ response: res })
             GridManager.reloadGridData('USER_GROUP_GRID')
-        }).catch(err => alertUserResponse({ response: err, alertType: 'error' }));
+        }).catch(err => alertUserResponse({ response: err, type: 'error' }));
     }
     return (
         <>
