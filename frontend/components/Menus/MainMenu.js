@@ -3,14 +3,12 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
 import createHashHistory from 'history/createHashHistory'
-import { store, logoutUser } from '../../model';
-import { alertUser } from '../../elements'
+import { store, logoutUser, isValidObject } from '../../model';
+import { alertUserResponse } from '../../elements'
 import { svConfig } from '../../config';
-import { iconManager } from '../../assets/svg/svgHolder'
 import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
-import { isValidObject } from '../../model'
 import PerunNavbar from '../PerunNavbar'
 // main menu top- tells the Main app parent which function needs to be dispatched
 // or which grid should be shown in the main content
@@ -99,11 +97,8 @@ class MainMenu extends React.Component {
         store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: userData })
       }
     }).catch(err => {
-      const title = err.response?.data?.title || this.context.intl.formatMessage({
-        id: 'perun.something_went_wrong', defaultMessage: 'perun.something_went_wrong'
-      })
-      const message = err.response?.data?.message || err
-      alertUser(true, 'error', title, message)
+      console.log(err)
+      alertUserResponse({ response: err.response })
     })
   }
 
@@ -124,9 +119,7 @@ class MainMenu extends React.Component {
             }
           }).catch(err => {
             console.error(err)
-            const title = err.response?.data?.title || err
-            const msg = err.response?.data?.message || ''
-            alertUser(true, 'error', title, msg)
+            alertUserResponse({ response: err.response })
           })
         }
       }

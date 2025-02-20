@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { Loading } from '../ComponentsIndex';
 import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
-import { alertUser } from '../../elements';
+import { alertUserResponse } from '../../elements';
 import { svConfig } from '../../config';
 
 let arrayOfBundles
@@ -75,9 +75,7 @@ class ModuleMenu extends React.Component {
       }
     }).catch((err) => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: err.response })
     })
   }
 
@@ -211,7 +209,7 @@ class ModuleMenu extends React.Component {
       this.goDirectToFrMapRoute(window.core.memorizeFrMapRoute)
     }
 
-    // check for direct access flag and re-route f.r
+    // check for direct access flag and re-route
     if (plugin.cardDirectAccess) {
       this.goDirectToRoute(plugin);
     } else {
@@ -246,7 +244,7 @@ class ModuleMenu extends React.Component {
   }
 
   /* function that provides re-routing to requested module
-   * provided to exclude main card menu  f.r
+   * provided to exclude main card menu
    * 
    * @param {*} plugin - The plugin to be re-routed to.
    * 

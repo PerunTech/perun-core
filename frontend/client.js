@@ -36,7 +36,7 @@ export {
   axios, Loading, createHashHistory, md5
 };
 
-import { Button, DependencyDropdown, Dropdown, InputElement, alertUser } from './elements'
+import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
@@ -73,21 +73,19 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
-    const title = error.response?.data?.title || error
-    const msg = error.response?.data?.message || ''
     if (error.response.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'info', 'The server responsed with a status code 302 Found')
+          alertUserV2({ type: 'info', title: 'The server responsed with a status code 302 Found' })
           break;
         case 401:
           createHashHistory().push('/home/login')
-          alertUser(true, 'error', title, msg);
+          alertUserResponse({ response: error.response })
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 502:
         case 503:
-          alertUser(true, 'info', 'The server is temporarily down for maintenance', 'Please try again soon')
+          alertUserV2({ type: 'info', title: 'The server is temporarily down for maintenance', message: 'Please try again soon' })
           break;
         default:
           return Promise.reject(error);
