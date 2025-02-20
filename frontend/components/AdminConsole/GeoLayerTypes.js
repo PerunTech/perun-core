@@ -50,7 +50,7 @@ const GeoLayerTypes = (props, context) => {
     const isEmpty = Object.values(formData).every(v => v === null || v === undefined)
     if (!formData || isEmpty) {
       const label = context.intl.formatMessage({ id: 'perun.admin_console.input_data_error', defaultMessage: 'perun.admin_console.input_data_error' })
-      alertUserV2({ type: 'info', title: label, showConfirm: true, onConfirm })
+      alertUserV2({ type: 'info', title: label, onConfirm })
     } else {
       const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`
       axios({

@@ -43,7 +43,13 @@ export const alertUserResponse = (params) => {
   const alertType = type || response?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || ''
   const title = response?.title || response?.data?.title || response
   const message = response?.message || response?.data?.message || ''
-  Swal.fire({ icon: alertType, title, text: message, allowOutsideClick: false, heightAuto: false }).then(value => {
+  Swal.fire({
+    icon: alertType,
+    title, text: message,
+    allowOutsideClick: false,
+    heightAuto: false,
+    confirmButtonColor: '#7cd1f9'
+  }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
     }
