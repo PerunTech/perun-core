@@ -132,6 +132,7 @@ const NotificationsComponent = (props, context) => {
       title,
       confirmButtonText: yesLabel,
       onConfirm: deleteNotification,
+      confirmButtonColor: '#8d230f',
       showCancel: true,
       cancelButtonText: noLabel
     })
