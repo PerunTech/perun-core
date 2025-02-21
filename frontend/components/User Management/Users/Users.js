@@ -240,7 +240,8 @@ const Users = (props, context) => {
                                     customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
                                     onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
                                         html: generateGroupContorls(_id, _rowIdx, row),
-                                        allowOutsideClick: true
+                                        allowOutsideClick: true,
+                                        showConfirm: false,
                                     })}
                                 />}
                                 {active === 'PRIVILEGES' && <ExportableGrid
