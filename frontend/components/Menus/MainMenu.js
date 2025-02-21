@@ -25,7 +25,6 @@ class MainMenu extends React.Component {
       activeLanguage: ''
     }
     this.hashHistory = createHashHistory()
-    this.unmountRegister = this.unmountRegister.bind(this)
     this.getCurrentUser = this.getCurrentUser.bind(this)
   }
 
@@ -135,13 +134,6 @@ class MainMenu extends React.Component {
       store.dispatch(logoutUser(restUrl))
       this.hashHistory.push('/')
     }
-
-  }
-
-  unmountRegister() {
-    document.getElementById('identificationScreen').innerText = this.context.intl.formatMessage({
-      id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
-    });
   }
 
   getLocale = () => {

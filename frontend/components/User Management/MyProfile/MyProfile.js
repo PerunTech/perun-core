@@ -13,9 +13,10 @@ const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [img, setImg] = useState(undefined);
     useEffect(() => {
-        document.getElementById('identificationScreen').innerText = context.intl.formatMessage({
-            id: 'perun.my_profile', defaultMessage: 'perun.my_profile'
-        });
+        const idScreen = document.getElementById('identificationScreen')
+        if (idScreen) {
+            idScreen.innerText = context.intl.formatMessage({ id: 'perun.my_profile', defaultMessage: 'perun.my_profile' });
+        }
         if (props.userInfo.avatar) {
             downloadFile(props.userInfo.avatar, props.svSession, setImg)
         }
