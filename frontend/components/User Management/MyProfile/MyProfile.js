@@ -205,7 +205,7 @@ const MyProfile = (props, context) => {
                     id="MY_PROFILE_FORM"
                     method={`/ReactElements/getTableJSONSchema/${props.svSession}/SVAROG_USERS`}
                     uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/SVAROG_USERS`}
-                    tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId}/SVAROG_USERS`}
+                    tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId || 0}/SVAROG_USERS`}
                     addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"
