@@ -24,7 +24,8 @@ export const alertUserV2 = (params) => {
     showDenyButton: showDeny,
     denyButtonText,
     denyButtonColor,
-    heightAuto: false
+    heightAuto: false,
+    reverseButtons: true
   }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
