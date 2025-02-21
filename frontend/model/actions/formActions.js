@@ -24,7 +24,7 @@ export function getFormData(id, reduxKey, formName, uiSchema, formTableData, ses
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || formName)
     axios.get(restUrl).then((response) => {
       let data
-      if (isValidObject(response.data, 1)) {
+      if (isValidObject(response?.data, 1)) {
         if (isValidObject(response.data.data, 1)) {
           data = response.data.data
         } else {
@@ -67,7 +67,7 @@ function getUiSchema(id, reduxKey, uiSchema, session, params) {
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || uiSchema)
     axios.get(restUrl).then((response) => {
       let data
-      if (isValidObject(response.data)) {
+      if (isValidObject(response?.data)) {
         if (isValidObject(response.data.data)) {
           data = response.data.data
         } else {
@@ -112,7 +112,7 @@ function getDataTableForm(id, reduxKey, formTableData, session, params) {
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || formTableData)
     axios.get(restUrl).then((response) => {
       let data
-      if (isValidObject(response.data)) {
+      if (isValidObject(response?.data)) {
         if (isValidObject(response.data.data)) {
           data = response.data.data
         } else {
