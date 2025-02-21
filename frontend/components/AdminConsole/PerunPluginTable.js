@@ -4,11 +4,13 @@ import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } fro
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 const { useState, useEffect } = React;
-import { alertUser, ReactBootstrap } from "../../elements";
+import { alertUserResponse, ReactBootstrap } from "../../elements";
 import ConfigMenuWrapper from './ConfigMenuWrapper';
 const { Modal } = ReactBootstrap;
+
 const tableName = "SVAROG_PERUN_PLUGIN";
-let gridId = `${tableName}_GRID`;
+const gridId = `${tableName}_GRID`;
+
 const PerunPluginTable = (props, context) => {
     const [show, setShow] = useState(false);
     const [objectId, setObjectId] = useState(undefined)
@@ -18,8 +20,6 @@ const PerunPluginTable = (props, context) => {
             ComponentManager.cleanComponentReducerState(gridId);
         }
     }, []);
-    //handle infinite loading
-
     //edit on row click
     const handleRowClick = (_id, _rowIdx, row) => {
         setObjectId(row[`${'SVAROG_PERUN_PLUGIN'}.OBJECT_ID`] || 0)
@@ -28,8 +28,7 @@ const PerunPluginTable = (props, context) => {
     //togglemodal
     const generatePluginTable = () => {
         const { svSession } = props;
-        gridId = `${tableName}_GRID`;
-        let grid = (
+        return (
             <ExportableGrid
                 gridType={"READ_URL"}
                 key={gridId}
@@ -49,91 +48,76 @@ const PerunPluginTable = (props, context) => {
                 editContextFunc={handleRowClick}
             />
         );
-        return grid
     };
     //create record
     const saveRecord = (e) => {
         const { svSession } = props;
-        let url =
-            window.server +
-            `/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`;
+        const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { saveExecuted: false })
+        const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`
         axios({
             method: "post",
             data: encodeURIComponent(JSON.stringify(e.formData)),
             url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        })
-            .then((res) => {
-                if (res.data) {
-                    const resType = res.data.type.toLowerCase()
-                    const title = res.data.title || ''
-                    const msg = res.data.message || ''
-                    alertUser(true, resType, title, msg)
-                    GridManager.reloadGridData(gridId);
+        }).then((res) => {
+            if (res.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ type: resType, response: res, onConfirm })
+                if (resType === 'success') {
+                    GridManager.reloadGridData(gridId)
+                    ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
                     setShow(false);
                 }
-            })
-            .catch(err => {
-                console.error(err)
-                const title = err.response?.data?.title || err
-                const msg = err.response?.data?.message || ''
-                alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-                    saveExecuted: false,
-                }));
-
-            });
+            }
+        }).catch(err => {
+            console.error(err)
+            alertUserResponse({ response: err.response, onConfirm })
+        });
     };
     //create record form
     const generatePluginForm = (objectId) => {
         const { svSession } = props;
-        return <GenericForm
-            params={"READ_URL"}
-            key={`${tableName}_FORM`}
-            id={`${tableName}_FORM`}
-            method={`/ReactElements/getTableJSONSchema/${svSession}/${tableName}`}
-            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
-            tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/${tableName}`}
-            addSaveFunction={(e) => saveRecord(e)}
-            hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
-            addDeleteFunction={deleteFunc}
-            className={'admin-settings-forms'}
-            inputWrapper={ConfigMenuWrapper}
-        />
+        return (
+            <GenericForm
+                params={"READ_URL"}
+                key={`${tableName}_FORM`}
+                id={`${tableName}_FORM`}
+                method={`/ReactElements/getTableJSONSchema/${svSession}/${tableName}`}
+                uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
+                tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/${tableName}`}
+                addSaveFunction={(e) => saveRecord(e)}
+                hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
+                addDeleteFunction={deleteFunc}
+                className={'admin-settings-forms'}
+                inputWrapper={ConfigMenuWrapper}
+            />
+        )
     };
 
     const deleteFunc = (_id, _action, _session, formData) => {
         const { svSession } = props;
-        let url = window.server + `/ReactElements/deleteObject/${svSession}`;
+        const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { deleteExecuted: false })
+        const url = `${window.server}/ReactElements/deleteObject/${svSession}`
         axios({
             method: "post",
             data: encodeURIComponent(formData[4]["PARAM_VALUE"]),
             url: url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        })
-            .then((res) => {
-                if (res.data.type === "SUCCESS") {
-                    alertUser(true, "success", res.data.title, res.data.message);
+        }).then((res) => {
+            if (res.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ type: resType, response: res, onConfirm })
+                if (resType === 'success') {
+                    GridManager.reloadGridData(gridId)
+                    ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
                     setShow(false);
-                    ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-                        saveExecuted: false,
-                    });
-                    ComponentManager.setStateForComponent(gridId, null, {
-                        rowClicked: undefined,
-                    });
-                    GridManager.reloadGridData(gridId);
                 }
-            })
-            .catch(err => {
-                console.error(err)
-                const title = err.response?.data?.title || err
-                const msg = err.response?.data?.message || ''
-                alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-                    saveExecuted: false,
-                }));
-
-            });
+            }
+        }).catch(err => {
+            console.error(err)
+            alertUserResponse({ response: err.response, onConfirm })
+        });
     };
-
 
     return (
         <>
@@ -143,15 +127,17 @@ const PerunPluginTable = (props, context) => {
                 </div>
                 {generatePluginTable()}
             </div>
-            {show && <Modal className='admin-console-unit-modal' show={show} onHide={() => setShow(false)}>
-                <Modal.Header className='admin-console-unit-modal-header' closeButton>
-                    <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className='admin-console-unit-modal-body'>
-                    {generatePluginForm(objectId)}
-                </Modal.Body>
-                <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-            </Modal>}
+            {show && (
+                <Modal className='admin-console-unit-modal' show={show} onHide={() => setShow(false)}>
+                    <Modal.Header className='admin-console-unit-modal-header' closeButton>
+                        <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className='admin-console-unit-modal-body'>
+                        {generatePluginForm(objectId)}
+                    </Modal.Body>
+                    <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
+                </Modal>
+            )}
         </>
     );
 };
@@ -163,4 +149,5 @@ const mapStateToProps = (state) => ({
 PerunPluginTable.contextTypes = {
     intl: PropTypes.object.isRequired
 }
+
 export default connect(mapStateToProps)(PerunPluginTable);

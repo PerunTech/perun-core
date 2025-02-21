@@ -1,5 +1,5 @@
 import React from 'react';
-import { ReactBootstrap, alertUser, ComponentManager, GridManager } from '../../elements';
+import { ReactBootstrap, alertUserV2, alertUserResponse, ComponentManager, GridManager } from '../../elements';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import JsonView from 'react-json-view';
@@ -56,43 +56,31 @@ const ConfigMenuWrapper = (props, context) => {
     }
 
     const addSaveFunction = () => {
-        const { svSession } = props;
-        const { formid } = props
-        const formData = ComponentManager.getStateForComponent(
-            formid,
-            "formTableData"
-        );
-        let url =
-            window.server +
-            `/ReactElements/createTableRecordFormData/${svSession}/SVAROG_PERUN_PLUGIN/0`;
+        const { svSession, formid } = props;
+        const formData = ComponentManager.getStateForComponent(formid, "formTableData");
+        const onConfirm = () => ComponentManager.setStateForComponent(formid, null, { saveExecuted: false })
+        const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_PERUN_PLUGIN/0`
         axios({
             method: "post",
             data: encodeURIComponent(JSON.stringify(formData)),
             url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        })
-            .then((res) => {
+        }).then((res) => {
+            if (res.data) {
                 if (res.data) {
-                    const resType = res.data.type.toLowerCase()
-                    const title = res.data.title || ''
-                    const msg = res.data.message || ''
-                    alertUser(true, resType, title, msg, () => {
-                        ComponentManager.setStateForComponent(`SVAROG_PERUN_PLUGIN_FORM`, null, {
-                            saveExecuted: false,
-                        });
-                        GridManager.reloadGridData('SVAROG_PERUN_PLUGIN_GRID');
-                    })
+                    const resType = res.data?.type?.toLowerCase() || 'info'
+                    alertUserResponse({ type: resType, response: res, onConfirm })
+                    if (resType === 'success') {
+                        GridManager.reloadGridData('SVAROG_PERUN_PLUGIN_GRID')
+                        ComponentManager.setStateForComponent('SVAROG_PERUN_PLUGIN_GRID', null, { rowClicked: undefined })
+                        setShow(false);
+                    }
                 }
-            })
-            .catch(err => {
-                console.error(err)
-                const title = err.response?.data?.title || err
-                const msg = err.response?.data?.message || ''
-                alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`SVAROG_PERUN_PLUGIN_FORM`, null, {
-                    saveExecuted: false,
-                }));
-
-            });
+            }
+        }).catch(err => {
+            console.error(err)
+            alertUserResponse({ response: err.response, onConfirm })
+        });
     };
 
     const openJsonEditor = () => {
@@ -114,14 +102,16 @@ const ConfigMenuWrapper = (props, context) => {
 
     const changeJson = (editedJson) => {
         const { formid } = props
-        const formData = ComponentManager.getStateForComponent(
-            formid,
-            "formTableData"
-        );
-        alertUser(true, "info", "perun.admin_console.change_json", "", () => {
+        const formData = ComponentManager.getStateForComponent(formid, "formTableData");
+        const onConfirm = () => {
             formData['MENU_CONF'] = JSON.stringify(editedJson)
             ComponentManager.setStateForComponent(formid, "formTableData", formData);
             props.formInstance.setState({ formTableData: formData });
+        }
+        alertUserV2({
+            type: 'info',
+            title: context.intl.formatMessage({ id: 'perun.admin_console.change_json', defaultMessage: 'perun.admin_console.change_json' }),
+            onConfirm
         })
     }
 
