@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
 import { ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
@@ -64,7 +64,7 @@ const Groups = (props, context) => {
             ComponentManager.setStateForComponent(gridId, null, {
                 saveExecuted: false,
             });
-            setShow(falsegridId)
+            setShow(false)
         }).catch(err => {
             alertUserResponse({ 'response': err, type: 'error' })
         })

@@ -6,7 +6,7 @@ import { alertUserResponse, ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
 
-const UsersAddGroup = (props, context) => {
+const UsersAddGroup = (props) => {
 
     useEffect(() => {
         return () => {
