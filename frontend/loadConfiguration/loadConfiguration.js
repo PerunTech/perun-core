@@ -2,7 +2,7 @@ import axios from 'axios'
 import { store, addConfiguration } from '../model'
 import * as config from '../config/config'
 import constants from './constants.json'
-import { alertUser } from '../elements'
+import { alertUserResponse } from '../elements'
 /**
  * Get configuration dispatch function- gets the requested configuration from the DB.
  * After the request has been fulfilled a reducing function writes the configuration in the global application state.
@@ -28,13 +28,10 @@ export function loadConfiguration(componentName, configPath) {
     verbPath = verbPath.replace(`%${constants.session}`, session)
   }
   const restUrl = config.svConfig.restSvcBaseUrl + verbPath
-  axios.get(restUrl)
-    .then((response) => {
-      store.dispatch(addConfiguration(response.data, componentName))
-    }).catch(err => {
-      console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg);
-    });
+  axios.get(restUrl).then((response) => {
+    store.dispatch(addConfiguration(response.data, componentName))
+  }).catch(err => {
+    console.error(err)
+    alertUserResponse({ response: err.response?.data })
+  });
 }

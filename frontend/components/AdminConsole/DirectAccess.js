@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
 import Select from 'react-select'
-import { alertUser } from '../../elements'
+import { alertUserV2, alertUserResponse } from '../../elements'
 import Loading from '../Loading/Loading'
 
 class DirectAccess extends React.Component {
@@ -45,9 +45,8 @@ class DirectAccess extends React.Component {
       this.setState({ loading: false })
     }).catch((error) => {
       this.setState({ loading: false })
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      console.error(error)
+      alertUserResponse({ response: error.response?.data })
     })
   }
 
@@ -67,9 +66,8 @@ class DirectAccess extends React.Component {
       this.setState({ loading: false })
     }).catch((error) => {
       this.setState({ loading: false })
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      console.error(error)
+      alertUserResponse({ response: error.response?.data })
     })
   }
 
@@ -97,17 +95,26 @@ class DirectAccess extends React.Component {
 
   callOnSave = () => {
     const directAccessChangeLabel = this.context.intl.formatMessage({ id: 'perun.admin_console.direct_access_change', defaultMessage: 'perun.admin_console.direct_access_change' })
+    const missingParamsLabel = this.context.intl.formatMessage({ id: 'perun.missingParams', defaultMessage: 'perun.missingParams' })
+    const enterValuesLabel = this.context.intl.formatMessage({ id: 'perun.please_enter_values', defaultMessage: 'perun.please_enter_values' })
     const yesLabel = this.context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' })
     const noLabel = this.context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' })
+    const alertParams = {
+      type: 'info',
+      title: directAccessChangeLabel,
+      confirmButtonText: yesLabel,
+      onConfirm: this.onSave,
+      showCancel: true,
+      cancelButtonText: noLabel
+    }
     const { multiValue, contextName, showGroup, showModule } = this.state
     if ((contextName && multiValue.length > 0) && (showModule && showGroup)) {
-      alertUser(true, 'info', directAccessChangeLabel, '', () => this.onSave(), null, true, yesLabel, noLabel)
+      alertUserV2(alertParams)
     } else if (contextName && (showModule && showGroup === false)) {
-      alertUser(true, 'info', directAccessChangeLabel, '', () => this.onSave(), null, true, yesLabel, noLabel)
+      alertUserV2(alertParams)
     } else {
-      alertUser(true, 'info', this.context.intl.formatMessage({ id: 'perun.missingParams', defaultMessage: 'perun.missingParams' }), this.context.intl.formatMessage({ id: 'perun.please_enter_values', defaultMessage: 'perun.please_enter_values' }))
+      alertUserV2({ type: 'info', title: missingParamsLabel, message: enterValuesLabel })
     }
-
   }
 
   onSave = () => {
@@ -122,19 +129,15 @@ class DirectAccess extends React.Component {
       url: restUrl,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then(res => {
-      if (res.data) {
-        const resType = res.data.type
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
+      if (res?.data) {
+        alertUserResponse({ response: res.data })
         this.setState({ typeAccess: '', multiValue: '', contextName: '', showGroup: '', showModule: '' }, () => {
           this.getAllGroups()
         })
       }
     }).catch(error => {
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      console.error(error)
+      alertUserResponse({ response: error.response?.data })
     })
   }
 

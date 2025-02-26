@@ -1,145 +1,35 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import axios from 'axios'
 import { connect } from 'react-redux'
 import Form from '@rjsf/core'
-import { ComponentManager, ExportableGrid, Modal, PropTypes } from '../../client'
-import { alertUser, GridManager } from '../../elements'
+import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
+import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
-import validator from '@rjsf/validator-ajv8';
-/* name of the table, if needed change only here */
-const tableName = 'SVAROG_NOTIFICATION'
-class NotificationsComponent extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      showGrid: null,
-      setModal: null,
-      selectedRow: undefined,
+import validator from '@rjsf/validator-ajv8'
+const { useReducer, useEffect } = React
+const { Modal } = ReactBootstrap
+
+const NotificationsComponent = (props, context) => {
+  const initialState = {
+    tableName: 'SVAROG_NOTIFICATION', loading: false, gridId: 'SVAROG_NOTIFICATION_GRID', show: false,
+    objectId: 0, selectedRow: undefined, formData: undefined
+  }
+  const reducer = (currState, update) => ({ ...currState, ...update })
+  const [{ tableName, loading, gridId, show, objectId, selectedRow, formData }, setState] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    return () => {
+      ComponentManager.cleanComponentReducerState(gridId)
     }
+  }, [gridId])
+
+  const onHide = () => {
+    setState({ show: false, objectId: 0, selectedRow: undefined, formData: undefined })
   }
 
-  componentDidMount() {
-    this.showInitGrid()
-  }
-
-  componentWillUnmount() {
-    ComponentManager.cleanComponentReducerState(tableName + '_GRID')
-  }
-
-  /* initial notifications grid */
-  showInitGrid = () => {
-    let grid = <ExportableGrid
-      gridType={'READ_URL'}
-      key={tableName + '_GRID'}
-      id={tableName + '_GRID'}
-      configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getTableData/%session/' + tableName + '/0'}
-      onRowClickFunct={this.onRowClickFn}
-      customButton={() => this.generateForm()}
-      customButtonLabel={this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
-      toggleCustomButton={true}
-      heightRatio={0.75}
-      refreshData={true}
-    />
-    ComponentManager.setStateForComponent(tableName + '_GRID', null, {
-      onRowClickFunct: this.onRowClickFn,
-      customButton: () => this.generateForm()
-    })
-    this.setState({ showGrid: grid })
-  }
-
-  reloadGrid = (gridId) => {
-    GridManager.reloadGridData(gridId)
-    ComponentManager.setStateForComponent(gridId, 'rowClicked', undefined)
-  }
-
-  onSubmit = (e, url) => {
-    const formData = flattenObject(e.formData)
-    const data = encodeURIComponent(JSON.stringify(formData))
-    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    axios(reqConfig).then((res) => {
-      if (res.data) {
-        const resType = res.data.type
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
-        if (resType?.toLowerCase() === 'success') {
-          this.closeModal()
-          this.reloadGrid(`${tableName}_GRID`)
-        }
-      }
-    }).catch((error) => {
-      console.log(error)
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
-    })
-  }
-
-  onDelete = () => {
-    alertUser(true, 'warning', this.context.intl.formatMessage({ id: 'perun.admin_console.delete_notification', defaultMessage: 'perun.admin_console.delete_notification' }), '',
-      () => this.deleteAxiosPost(), () => { }, true, this.context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), this.context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
-  }
-
-  generateForm = (formData) => {
-    const { schema, uiSchema } = getNotificationsFormSchema(this.context)
-    const data = formData || {}
-    const modalTitle = formData ? this.context.intl.formatMessage({ id: 'perun.admin_console.change_delete', defaultMessage: 'perun.admin_console.change_delete' }) : this.context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })
-    const wsPath = `/ReactElements/createTableRecordFormData/${this.props.svSession}/${tableName}/0`
-    const url = `${window.server}${wsPath}`
-    const onSubmit = (e) => this.onSubmit(e, url)
-
-    const form = <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
-      <></>
-      <div id='buttonHolder'>
-        <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
-          <button type='submit' id='save_form_btn' className='btn-success btn_save_form'>
-            {this.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}
-          </button>
-        </div>
-        {formData && <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={this.onDelete}>
-          {this.context.intl.formatMessage({ id: 'perun.generalLabel.delete', defaultMessage: 'perun.generalLabel.delete' })}
-        </button>}
-      </div>
-    </Form>
-
-    const modal = <Modal key={'NotificationEditForm_Modal'} modalTitle={modalTitle} closeModal={this.closeModal} modalContent={form} />
-    this.setState({ setModal: modal })
-  }
-
-  /* simple axios post delete method */
-  deleteAxiosPost = () => {
-    const { selectedRow } = this.state
-    const url = window.server + '/ReactElements/deleteObject/' + this.props.svSession
-    const data = encodeURIComponent(JSON.stringify(selectedRow))
-    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    axios(reqConfig).then((res) => {
-      if (res.data) {
-        const resType = res.data.type
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType?.toLowerCase() || 'info', title, msg)
-        if (resType?.toLowerCase() === 'success') {
-          this.closeModal()
-          this.reloadGrid(`${tableName}_GRID`)
-        }
-      }
-    }).catch((error) => {
-      console.error(error)
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
-    })
-  }
-
-  /* hide modal */
-  closeModal = () => {
-    this.setState({ setModal: false, selectedRow: undefined })
-  }
-
-  /* on rowClick callback from grid, sets objId */
-  onRowClickFn = (_id, _idx, row) => {
+  const handleRowClick = (_id, _rowIdx, row) => {
     const formData = {}
     // Remove the tableName (SVAROG_NOTIFICATIONS) part from the selected row object keys
     for (const key in row) {
@@ -155,23 +45,149 @@ class NotificationsComponent extends React.Component {
       section_one: { TYPE: formData.TYPE || '', TITLE: formData.TITLE || '' },
       section_two: { MESSAGE: formData.MESSAGE || '' }
     }
-    this.generateForm(finalFormData)
-    this.setState({ selectedRow: formData })
+    setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, selectedRow: formData, formData: finalFormData, show: true })
   }
 
-  render() {
-    const { showGrid, setModal } = this.state
+  const generateNotificationsGrid = () => {
+    const { svSession } = props
     return (
-      <React.Fragment>
-        <div className='admin-console-grid-container'>
-          <div className='admin-console-component-header'>
-            <p>{this.context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}</p>
-          </div>
-          {showGrid}</div>
-        {setModal}
-      </React.Fragment>
+      <ExportableGrid
+        gridType='READ_URL'
+        key={gridId}
+        id={gridId}
+        configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
+        dataTableName={`/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
+        onRowClickFunct={handleRowClick}
+        refreshData={true}
+        toggleCustomButton={true}
+        customButton={() => {
+          setState({ show: true, objectId: 0, selectedRow: undefined, formData: undefined })
+        }}
+        customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+        heightRatio={0.75}
+        editContextFunc={handleRowClick}
+      />
     )
   }
+
+  const reloadGrid = () => {
+    GridManager.reloadGridData(gridId)
+    ComponentManager.setStateForComponent(gridId, 'rowClicked', undefined)
+  }
+
+  const saveNotification = (e, url) => {
+    setState({ loading: true })
+    const formData = flattenObject(e.formData)
+    const data = encodeURIComponent(JSON.stringify(formData))
+    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    axios(reqConfig).then((res) => {
+      setState({ loading: false })
+
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res })
+        if (resType === 'success') {
+          onHide()
+          reloadGrid()
+        }
+      }
+    }).catch((err) => {
+      console.log(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err.response })
+    })
+  }
+
+  const deleteNotification = () => {
+    setState({ loading: true })
+    const wsPath = `/ReactElements/deleteObject/${props.svSession}`
+    const url = `${window.server}${wsPath}`
+    const data = encodeURIComponent(JSON.stringify(selectedRow))
+    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    axios(reqConfig).then((res) => {
+      setState({ loading: false })
+
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res })
+        if (resType === 'success') {
+          onHide()
+          reloadGrid()
+        }
+      }
+    }).catch(err => {
+      console.log(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err.response })
+    })
+  }
+
+  const onDelete = () => {
+    const title = context.intl.formatMessage({ id: 'perun.admin_console.delete_notification', defaultMessage: 'perun.admin_console.delete_notification' })
+    const yesLabel = context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' })
+    const noLabel = context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' })
+
+    alertUserV2({
+      type: 'warning',
+      title,
+      confirmButtonText: yesLabel,
+      onConfirm: deleteNotification,
+      confirmButtonColor: '#8d230f',
+      showCancel: true,
+      cancelButtonText: noLabel
+    })
+  }
+
+  const generateNotificationForm = () => {
+    const { schema, uiSchema } = getNotificationsFormSchema(context)
+    const data = formData || {}
+    const wsPath = `/ReactElements/createTableRecordFormData/${props.svSession}/${tableName}/0`
+    const url = `${window.server}${wsPath}`
+    const onSubmit = (e) => saveNotification(e, url)
+
+    return (
+      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
+        <></>
+        <div id='buttonHolder'>
+          <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
+            <button type='submit' id='save_form_btn' className='btn-success btn_save_form'>
+              {context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}
+            </button>
+          </div>
+          {formData && (
+            <button type='button' id='delete_form_btn' className='btn-danger btn_delete_form' onClick={onDelete}>
+              {context.intl.formatMessage({ id: 'perun.generalLabel.delete', defaultMessage: 'perun.generalLabel.delete' })}
+            </button>
+          )}
+        </div>
+      </Form>
+    )
+  }
+
+  return (
+    <>
+      {loading && <Loading />}
+      <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}</p>
+        </div>
+        {generateNotificationsGrid()}
+      </div>
+      {show && (
+        <Modal className='admin-console-unit-modal' show={show} onHide={() => onHide()}>
+          <Modal.Header className='admin-console-unit-modal-header' closeButton>
+            <Modal.Title>
+              {context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className='admin-console-unit-modal-body'>
+            {generateNotificationForm(objectId)}
+          </Modal.Body>
+          <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
+        </Modal>
+      )}
+    </>
+  )
 }
 
 NotificationsComponent.contextTypes = {

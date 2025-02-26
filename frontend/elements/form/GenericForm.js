@@ -7,7 +7,7 @@ import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
 import { labelBasePath } from '../../config/config';
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
-import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser } from '..';
+import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser, alertUserV2, alertUserResponse } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
@@ -416,21 +416,15 @@ class GenericForm extends React.Component {
     }
 
     if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
-      const title = nextProps.formData?.response?.data?.title || nextProps.formData?.response?.data || ''
-      const msg = nextProps.formData?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.formData?.response?.data })
     }
 
     if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
-      const title = nextProps.uischema?.response?.data?.title || nextProps.uischema?.response?.data || ''
-      const msg = nextProps.uischema?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.uischema?.response?.data })
     }
 
     if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
-      const title = nextProps.formTableData?.response?.data?.title || nextProps.formTableData?.response?.data || ''
-      const msg = nextProps.formTableData?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.formTableData?.response?.data })
     }
 
     if (this.props.uischema !== nextProps.uischema) {
@@ -513,36 +507,24 @@ class GenericForm extends React.Component {
     }
   }
 
-  /*
-    The following three functions delete the currently selected record
-    (prompt, cancel, confirm)
-    KNI 23.06.2017
-  */
-
   initiateDeleteAction() {
     if (this.state.params !== 'READ_URL') {
       this.prepDropLinkParams()
     }
-    this.setState({
-      alert: alertUser(
-        true,
-        'warning',
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_title`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_title` }),
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_message`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_message` }),
-        () => {
-          this.setState(
-            { deleteExecuted: true },
-            this.deleteObjectOrDropLink()
-          )
-        },
-        () => this.basicAlertClose(),
-        true,
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` }),
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.cancel`, defaultMessage: `${labelBasePath}.main.forms.cancel` }),
-        true,
-        '#8d230f',
-        true
-      )
+
+    const title = this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_title`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_title` })
+    const message = this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_message`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_message` })
+    const confirm = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })
+    const cancel = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.cancel`, defaultMessage: `${labelBasePath}.main.forms.cancel` })
+    alertUserV2({
+      type: 'warning',
+      title,
+      message,
+      confirmButtonText: confirm,
+      confirmButtonColor: '#8d230f',
+      onConfirm: () => this.setState({ deleteExecuted: true }, this.deleteObjectOrDropLink()),
+      showCancel: true,
+      cancelButtonText: cancel
     })
   }
 

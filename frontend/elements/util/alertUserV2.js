@@ -15,7 +15,7 @@ export const alertUserV2 = (params) => {
     allowOutsideClick: allowOutsideClick || false,
     allowEscapeKey: allowEscapeKey || true,
     html,
-    showConfirmButton: Boolean(showConfirm),
+    showConfirmButton: showConfirm ?? true,
     confirmButtonText: confirmButtonText || 'OK',
     confirmButtonColor: confirmButtonColor || '#7cd1f9',
     showCancelButton: showCancel,
@@ -24,7 +24,8 @@ export const alertUserV2 = (params) => {
     showDenyButton: showDeny,
     denyButtonText,
     denyButtonColor,
-    heightAuto: false
+    heightAuto: false,
+    reverseButtons: true
   }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
@@ -43,7 +44,14 @@ export const alertUserResponse = (params) => {
   const alertType = type || response?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || ''
   const title = response?.title || response?.data?.title || response
   const message = response?.message || response?.data?.message || ''
-  Swal.fire({ icon: alertType, title, text: message, allowOutsideClick: false, heightAuto: false }).then(value => {
+  Swal.fire({
+    icon: alertType,
+    title,
+    text: message,
+    allowOutsideClick: false,
+    heightAuto: false,
+    confirmButtonColor: '#7cd1f9'
+  }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
     }

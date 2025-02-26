@@ -6,7 +6,7 @@ import { Data, Editors, Formatters, Filters, Menu } from 'react-data-grid-addons
 
 import { labelBasePath, translateComponents } from '../../config/config';
 import { store, getGridConfig, getGridData, rowClicked, resetGridEditResponseState } from '../../model';
-import { WrapItUp, ComponentManager, alertUser } from '..';
+import { WrapItUp, ComponentManager, alertUser, alertUserResponse } from '..';
 import { Loading } from '../../components/ComponentsIndex';
 
 import CustomGridToolbar from './CustomGridToolbar';
@@ -338,18 +338,14 @@ class GenericGrid extends React.Component {
 
     if (this.props.gridConfigLoaded !== nextProps.gridConfigLoaded || this.props.gridConfig !== nextProps.gridConfig) {
       if (nextProps.gridConfigLoaded === false && nextProps.gridConfig.constructor !== Array) {
-        const title = nextProps.gridConfig?.response?.data?.title || nextProps.gridConfig?.response?.data || ''
-        const msg = nextProps.gridConfig?.response?.data?.message || ''
-        alertUser(true, 'error', title, msg)
+        alertUserResponse({ response: nextProps.gridConfig?.response?.data })
         this.setState({ hideLoader: true })
       }
     }
 
     if (this.props.gridDataLoaded !== nextProps.gridDataLoaded || this.props.gridData !== nextProps.gridData) {
       if (nextProps.gridDataLoaded === false && nextProps.gridData.constructor !== Array) {
-        const title = nextProps.gridData?.response?.data?.title || nextProps.gridData?.response?.data || ''
-        const msg = nextProps.gridData?.response?.data?.message || ''
-        alertUser(true, 'error', title, msg)
+        alertUserResponse({ response: nextProps.gridData?.response?.data })
         this.setState({ hideLoader: true })
       }
     }

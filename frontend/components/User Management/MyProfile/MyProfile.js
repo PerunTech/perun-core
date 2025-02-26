@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { GenericForm, axios, createHashHistory, ComponentManager } from '../../../client';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { downloadFile } from '../../../functions/utils';
-import { alertUser, alertUserResponse } from '../../../elements';
+import { alertUserV2, alertUserResponse } from '../../../elements';
 import ReactDOM from 'react-dom';
 import { store } from '../../../model';
 import PasswordForm from './PasswordForm';
@@ -13,28 +13,64 @@ const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [img, setImg] = useState(undefined);
     useEffect(() => {
-        document.getElementById('identificationScreen').innerText = context.intl.formatMessage({
-            id: 'perun.my_profile', defaultMessage: 'perun.my_profile'
-        });
+        const idScreen = document.getElementById('identificationScreen')
+        if (idScreen) {
+            idScreen.innerText = context.intl.formatMessage({ id: 'perun.my_profile', defaultMessage: 'perun.my_profile' });
+        }
         if (props.userInfo.avatar) {
             downloadFile(props.userInfo.avatar, props.svSession, setImg)
         }
     }, []);
 
+    const uploadFile = (file) => {
+        const data = new FormData();
+        data.append('file', file);
+        axios({
+            method: 'post',
+            data: data,
+            url: `${window.server}/ReactElements/uploadAvatar/sid/${props.svSession}`,
+        }).then(res => {
+            if (res.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ type: resType, response: res })
+                if (resType === 'success') {
+                    let tempUserInfo = props.userInfo
+                    tempUserInfo.avatar.objectId = res.data.data.objectId
+                    store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: tempUserInfo })
+                    downloadFile(tempUserInfo.avatar, props.svSession, setImg)
+                }
+            }
+        }).catch(err => {
+            console.error(err);
+            alertUserResponse({ response: err.response?.data })
+        });
+    }
+
     const previewAndUpload = (file) => {
         const fileReader = new FileReader()
         fileReader.onloadend = () => {
             const customElement = document.createElement('div')
-            ReactDOM.render(<div className='my-profile-preview-img'>
-                <img src={fileReader.result} />
-            </div>, customElement)
-            alertUser(true, '', '', '', () => { uploadFile(file) }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement)
+            ReactDOM.render((
+                <div className='my-profile-preview-img'>
+                    <img src={fileReader.result} />
+                </div>
+            ), customElement)
+            const confirmLabel = context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' })
+            const cancelLabel = context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })
+            const alertParams = {
+                confirmButtonText: confirmLabel,
+                onConfirm: () => uploadFile(file),
+                showCancel: true,
+                cancelButtonText: cancelLabel,
+                html: customElement
+            }
+            alertUserV2(alertParams)
         }
         fileReader.readAsDataURL(file)
     }
 
     const handlePhotoSelection = (e) => {
-        const largerThan15MbLabel = context.intl.formatMessage({ id: 'perun.my_profile.file_too_large', defaultMessage: 'perun.my_profile.file_too_large' });
+        const fileTooLargeLabel = context.intl.formatMessage({ id: 'perun.my_profile.file_too_large', defaultMessage: 'perun.my_profile.file_too_large' });
         const notAPhotoLabel = context.intl.formatMessage({ id: 'perun.my_profile.not_a_photo', defaultMessage: 'perun.my_profile.not_a_photo' });
         const photoHeadersArr = ['89504e47', '47494638', 'ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8']
         e.preventDefault()
@@ -55,69 +91,67 @@ const MyProfile = (props, context) => {
                         previewAndUpload(file)
                         header = ''
                     } else {
-                        alertUser(true, 'info', notAPhotoLabel)
+                        alertUserV2({ type: 'info', title: notAPhotoLabel })
                     }
                 }
                 fileReader.readAsArrayBuffer(file)
-
             } else {
-                alertUser(true, 'info', largerThan15MbLabel)
+                alertUserV2({ type: 'info', title: fileTooLargeLabel })
             }
         })
     }
 
     const deleteDownload = (e) => {
-        alertUser(true, 'warning', context.intl.formatMessage({ id: 'perun.my_profile.remove_current_avatar', defaultMessage: 'perun.my_profile.remove_current_avatar' }), '', () => {
+        const titleLabel = context.intl.formatMessage({ id: 'perun.my_profile.remove_current_avatar', defaultMessage: 'perun.my_profile.remove_current_avatar' })
+        const confirmLabel = context.intl.formatMessage({ id: 'perun.my_profile.confirm', defaultMessage: 'perun.my_profile.confirm' })
+        const cancelLabel = context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })
+        const onConfirm = () => {
             e.preventDefault()
-            let deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
-            let url = window.server + `/ReactElements/deleteObject/${props.svSession}`
+            const deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
+            const url = window.server + `/ReactElements/deleteObject/${props.svSession}`
             axios({
                 method: "post",
                 data: deleteObj,
                 url: url,
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            })
-                .then((res) => {
-                    alertUser(true, res.data.type.toLowerCase(), res.data.title, res.data.message)
-                    if (res.data.type === 'SUCCESS') {
+            }).then((res) => {
+                if (res.data) {
+                    const resType = res.data?.type?.toLowerCase() || 'info'
+                    alertUserResponse({ type: resType, response: res })
+                    if (resType === 'success') {
                         setImg(undefined)
                         let tempUserInfo = props.userInfo
                         tempUserInfo.avatar.objectId = undefined
                         store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: tempUserInfo })
                     }
-                }).catch(err => {
-                    console.error(err)
-                    const title = err.response?.data?.title || err
-                    const msg = err.response?.data?.message || ''
-                    alertUser(true, "error", title, msg);
-                });
-        }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.confirm', defaultMessage: 'perun.my_profile.confirm' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false)
-    }
-
-    const uploadFile = (file) => {
-        const data = new FormData();
-        data.append('file', file);
-        axios({
-            method: 'post',
-            data: data,
-            url: `${window.server}/ReactElements/uploadAvatar/sid/${props.svSession}`,
-        })
-            .then(res => {
-                let tempUserInfo = props.userInfo
-                tempUserInfo.avatar.objectId = res.data.data.objectId
-                store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: tempUserInfo })
-                downloadFile(tempUserInfo.avatar, props.svSession, setImg)
-                alertUser(true, res.data.type.toLowerCase(), res.data.title, res.data.message)
-            })
-            .catch(err => {
-                console.error('Upload error:', err);
+                }
+            }).catch(err => {
+                console.error(err)
+                alertUserResponse({ response: err.response?.data })
             });
+        }
+        const alertParams = {
+            type: 'warning',
+            title: titleLabel,
+            confirmButtonText: confirmLabel,
+            confirmButtonColor: '#8d230f',
+            onConfirm,
+            showCancel: true,
+            cancelButtonText: cancelLabel
+        }
+        alertUserV2(alertParams)
     }
 
     const changePassword = () => {
         const customElement = document.createElement('div')
-        ReactDOM.render(<PasswordForm userInfo={props.userInfo} svSession={props.svSession} context={context} />, customElement)
-        alertUser(true, '', '', '', () => { }, () => { }, true, context.intl.formatMessage({ id: 'perun.my_profile.set_new_avatar', defaultMessage: 'perun.my_profile.set_new_avatar' }), context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' }), false, '', false, customElement, true)
+        ReactDOM.render((
+            <PasswordForm userInfo={props.userInfo} svSession={props.svSession} context={context} />
+        ), customElement)
+        const alertParams = {
+            showConfirm: false,
+            html: customElement
+        }
+        alertUserV2(alertParams)
     }
 
     const handleEditProfile = (e) => {
@@ -171,7 +205,7 @@ const MyProfile = (props, context) => {
                     id="MY_PROFILE_FORM"
                     method={`/ReactElements/getTableJSONSchema/${props.svSession}/SVAROG_USERS`}
                     uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/SVAROG_USERS`}
-                    tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId}/SVAROG_USERS`}
+                    tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId || 0}/SVAROG_USERS`}
                     addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"

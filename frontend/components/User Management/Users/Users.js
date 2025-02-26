@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUser, alertUserV2, ReactBootstrap } from '../../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
+import { alertUserV2, ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
 import ReactDOM from 'react-dom'
@@ -136,15 +136,27 @@ const Users = (props, context) => {
         const initialStatus = row['SVAROG_USERS.STATUS']
         const objectId = row['SVAROG_USERS.OBJECT_ID']
         const status = initialStatus === "VALID" ? 'INVALID' : 'VALID'
-        let label = context.intl.formatMessage({ id: `perun.admin_console.user_change_status_${status.toLocaleLowerCase()}`, defaultMessage: `perun.admin_console.user_change_status_${status.toLocaleLowerCase()}` })
-        let question = `${context.intl.formatMessage({ id: 'perun.admin_console.user_change_status', defaultMessage: 'perun.admin_console.user_change_status' })}`
-        alertUser(true, 'info', question, label, () => {
+        const label = context.intl.formatMessage({ id: `perun.admin_console.user_change_status_${status.toLocaleLowerCase()}`, defaultMessage: `perun.admin_console.user_change_status_${status.toLocaleLowerCase()}` })
+        const question = context.intl.formatMessage({ id: 'perun.admin_console.user_change_status', defaultMessage: 'perun.admin_console.user_change_status' })
+        const yesLabel = context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' })
+        const noLabel = context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' })
+        const onConfirm = () => {
             const url = `${window.server}/WsAdminConsole/changeUserStatus/${props.svSession}/${objectId}/${status}`
             axios.get(url).then(res => {
                 alertUserResponse({ response: res })
                 refreshGrid()
             }).catch(err => alertUserResponse({ response: err, type: 'error' }));
-        }, () => { }, true, context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }), context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }))
+        }
+        const alertParams = {
+            type: 'info',
+            title: question,
+            message: label,
+            confirmButtonText: yesLabel,
+            onConfirm,
+            showCancel: true,
+            cancelButtonText: noLabel
+        }
+        alertUserV2(alertParams)
     }
     const generateGroupContorls = (_id, _rowIdx, row) => {
         const customElement = document.createElement('div')
@@ -228,7 +240,8 @@ const Users = (props, context) => {
                                     customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
                                     onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
                                         html: generateGroupContorls(_id, _rowIdx, row),
-                                        allowOutsideClick: true
+                                        allowOutsideClick: true,
+                                        showConfirm: false,
                                     })}
                                 />}
                                 {active === 'PRIVILEGES' && <ExportableGrid

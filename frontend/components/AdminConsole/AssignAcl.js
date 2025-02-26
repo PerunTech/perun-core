@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { alertUser, GridManager, ReactBootstrap } from '../../elements';
+import { alertUser, ReactBootstrap } from '../../elements';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 

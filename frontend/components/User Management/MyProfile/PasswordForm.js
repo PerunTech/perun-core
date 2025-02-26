@@ -3,7 +3,7 @@ import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { strcmp } from '../../../model/utils';
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 import md5 from 'md5';
 import { alertUserResponse } from '../../../elements';
 import axios from 'axios';
@@ -93,7 +93,7 @@ const PasswordForm = (props) => {
         }
 
         if (!props.isNewUser && !props.isEdit) {
-            swal.close();
+            Swal.close();
         }
         if (!props.isNewUser) {
 
@@ -129,7 +129,7 @@ const PasswordForm = (props) => {
             <div className='my-profile-alert-btns'>
                 <div className='cancel-btn' onClick={() => {
                     if (!props.isEdit) {
-                        swal.close()
+                        Swal.close()
                     } else {
                         props.setShow(false)
                     }

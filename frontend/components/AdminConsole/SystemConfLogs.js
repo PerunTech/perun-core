@@ -1,87 +1,84 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Modal } from '../../client'
+import { ComponentManager, ExportableGrid, GenericForm } from '../../client'
+import { ReactBootstrap } from '../../elements'
 import SystemConfLogsWrapper from './SystemConfLogsWrapper'
+const { useReducer, useEffect } = React
+const { Modal } = ReactBootstrap
 
-const tableName = 'SVAROG_CONFIG_LOG'
-class SystemConfLogs extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
+const SystemConfLogs = (props, context) => {
+  const initialState = { tableName: 'SVAROG_CONFIG_LOG', formTableName: 'SVAROG_NOTES', gridId: 'SVAROG_CONFIG_LOG_GRID', show: false, objectId: 0 }
+  const reducer = (currState, update) => ({ ...currState, ...update })
+  const [{ tableName, formTableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    return () => {
+      ComponentManager.cleanComponentReducerState(gridId)
     }
+  }, [gridId])
+
+  const handleRowClick = (_id, _rowIdx, row) => {
+    setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, show: true })
   }
 
-  componentDidMount() {
-    this.generateSystemLogsGrid()
-  }
-
-  componentWillUnmount() {
-    ComponentManager.cleanComponentReducerState(tableName)
-  }
-
-  generateSystemLogsGrid = () => {
-    let grid = <ExportableGrid
-      gridType={'READ_URL'}
-      key={tableName}
-      id={tableName}
-      configTableName={'/ReactElements/getTableFieldList/%session/' + tableName}
-      dataTableName={'/ReactElements/getFullTableData/%session/' + tableName + '/0/true'}
-      onRowClickFunct={this.onRowClick}
-      heightRatio={0.75}
-      refreshData={true}
-    />
-    this.setState({ grid: grid })
-    ComponentManager.setStateForComponent(tableName, null, {
-      onRowClickFunct: this.onRowClick,
-    })
-  }
-
-  onRowClick = (gridId, rowId, row) => {
-    const selectedObjId = row[`${tableName}.OBJECT_ID`]
-    this.showModal(selectedObjId)
-  }
-
-  showModal = (parentId) => {
-    let formName = 'SVAROG_NOTES'
-    let modalData = <GenericForm
-      params={'READ_URL'}
-      key={tableName + '_FORM'}
-      id={tableName + '_FORM'}
-      method={'/ReactElements/getTableJSONSchema/%session/' + formName}
-      uiSchemaConfigMethod={'/ReactElements/getTableUISchema/%session/' + formName}
-      tableFormDataMethod={'/ReactElements/getFormDataByParentId/%session/' + parentId + '/' + formName}
-      hideBtns='all'
-      className={'hide-all-form-legends'}
-      inputWrapper={SystemConfLogsWrapper}
-    />
-    let loginfo = <Modal customClassBtnModal='customClassBtnModal'
-      closeModal={this.closeModal}
-      closeAction={this.closeModal}
-      modalContent={modalData}
-      modalTitle={this.context.intl.formatMessage({ id: 'perun.system.logs.preview', defaultMessage: 'perun.system.logs.preview' })}
-      nameCloseBtn={this.context.intl.formatMessage({ id: 'perun.generalLabel.close', defaultMessage: 'perun.generalLabel.close' })}
-    />
-    this.setState({ showLogModal: loginfo })
-  }
-
-  closeModal = () => {
-    this.setState({ showLogModal: false })
-  }
-
-  render() {
-    const { grid, showLogModal } = this.state
+  const generateConfLogGrid = () => {
+    const { svSession } = props
     return (
-      <React.Fragment>
-        {showLogModal}
-        <div className='admin-console-grid-container'>
-          <div className='admin-console-component-header'>
-            <p>{this.context.intl.formatMessage({ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' })}</p>
-          </div>
-          {grid}</div>
-      </React.Fragment>
-    );
+      <ExportableGrid
+        gridType='READ_URL'
+        key={gridId}
+        id={gridId}
+        configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
+        dataTableName={`/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
+        onRowClickFunct={handleRowClick}
+        refreshData={true}
+        heightRatio={0.75}
+        editContextFunc={handleRowClick}
+      />
+    )
   }
+
+  const generateConfLogForm = (objectId) => {
+    const { svSession } = props
+    return (
+      <GenericForm
+        params={'READ_URL'}
+        key={`${formTableName}_FORM`}
+        id={`${formTableName}_FORM`}
+        method={`/ReactElements/getTableJSONSchema/${svSession}/${formTableName}`}
+        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${formTableName}`}
+        tableFormDataMethod={`/ReactElements/getFormDataByParentId/${svSession}/${objectId}/${formTableName}`}
+        hideBtns='all'
+        className={'admin-settings-forms'}
+        inputWrapper={SystemConfLogsWrapper}
+      />
+    )
+  }
+
+  return (
+    <>
+      <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' })}</p>
+        </div>
+        {generateConfLogGrid()}
+      </div>
+      {show && (
+        <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
+          <Modal.Header className='admin-console-unit-modal-header' closeButton>
+            <Modal.Title>
+              {context.intl.formatMessage({ id: 'perun.system.logs.preview', defaultMessage: 'perun.system.logs.preview' })}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className='admin-console-unit-modal-body'>
+            {generateConfLogForm(objectId)}
+          </Modal.Body>
+          <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
+        </Modal>
+      )}
+    </>
+  )
 }
 
 const mapStateToProps = state => ({

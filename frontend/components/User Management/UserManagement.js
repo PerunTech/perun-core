@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client';
-import { alertUser, ReactBootstrap } from '../../elements';
 import Users from './Users/Users';
 import Groups from './Groups/Groups';
 import Privileges from './Privileges/Privileges';
-const { Modal } = ReactBootstrap;
 
-const UserManagement = (props, context) => {
+const UserManagement = (_props, context) => {
     const [activeTab, setActiveTab] = useState('USERS');
 
     const setActiveFunc = (tab) => {

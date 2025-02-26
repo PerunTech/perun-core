@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
-import { store, loginUser, registerUser, recoverPassword,
-  changePassword, changeEmail, activateUser, activateLink } from '../../../model';
+import { store, loginUser, registerUser, recoverPassword, changePassword, changeEmail, activateUser, activateLink } from '../../../model';
 
-export default function LogonActions (targetComponent) {
+export default function LogonActions(targetComponent) {
   const mapDispatchToProps = () => ({
     loginUser: (restUrl, method, formData) =>
       store.dispatch(loginUser(restUrl, method, formData)),
@@ -23,8 +22,8 @@ export default function LogonActions (targetComponent) {
   const mapStateToProps = state => ({
     isBusy: state.security.isBusy,
     svSession: state.security.svSession,
-    svTitle: state.security.svTitle,
-    svMessage: state.security.svMessage,
+    title: state.security.title,
+    message: state.security.message,
     status: state.security.status
   })
 

@@ -14,8 +14,7 @@ import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
 import BusinessType from './BusinessType'
 
-
-const AdminConsole = (props, context) => {
+const AdminConsole = () => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
     const [json, setJson] = useState([])
     const setDynamicComponentFunction = (comp) => {
@@ -24,20 +23,13 @@ const AdminConsole = (props, context) => {
     useEffect(() => {
         getMenu()
     }, [])
-
     const getMenu = () => {
         const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
-
-        fetch(url)
-            .then(res => res.json())
-            .then(json => {
-                if (json?.length > 0) {
-                    setJson(json)
-                }
-
-
-            })
-            .catch(err => { throw err });
+        fetch(url).then(res => res.json()).then(json => {
+            if (json?.length > 0) {
+                setJson(json)
+            }
+        }).catch(err => { throw err });
     }
     return (
         <div className="admin-console-main-container">
@@ -50,12 +42,9 @@ const AdminConsole = (props, context) => {
                 {dynamicComponent === 'GeoLayerTypes' && <GeoLayerTypes />}
                 {dynamicComponent === 'SvarogSystemParams' && <SvarogSystemParams />}
                 {dynamicComponent === 'NotificationsComponent' && <NotificationsComponent />}
-                {dynamicComponent === 'CreateAclCodes' && <CreateAclCodes />}
                 {dynamicComponent === 'DirectAccess' && <DirectAccess />}
                 {dynamicComponent === 'SystemConfLogs' && <SystemConfLogs />}
                 {dynamicComponent === 'OrganizationalUnit' && <OrganizationalUnit />}
-                {dynamicComponent === 'LabelEditor' && <LabelEditor />}
-                {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
                 {dynamicComponent === 'PerunPluginTable' && <PerunPluginTable />}
                 {dynamicComponent === 'SvarogMenu' && <SvarogMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
