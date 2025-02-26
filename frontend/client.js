@@ -6,6 +6,7 @@ import { Provider, connect } from 'react-redux'; // these should be represented 
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
 import md5 from 'md5'
+import Swal from 'sweetalert2'
 /* assets */
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
@@ -33,7 +34,7 @@ import * as cookies from './functions/cookies'
 /* -------- */
 export {
   React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
-  axios, Loading, createHashHistory, md5
+  axios, Loading, createHashHistory, md5, Swal
 };
 
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
