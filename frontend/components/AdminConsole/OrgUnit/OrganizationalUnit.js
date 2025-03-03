@@ -1,205 +1,168 @@
-import React, { useState, useEffect } from "react";
-import { ComponentManager, ExportableGrid, GridManager, GenericForm, PropTypes } from "../../../client";
-import { connect } from "react-redux";
-import axios from "axios";
-import OrganizationalUnitModal from "./OrganizationalUnitModal";
-import { alertUser, ReactBootstrap } from "../../../elements";
-const { Modal } = ReactBootstrap;
-let gridId;
-let gridId2;
-let pastObjOU = "";
+import React, { useState } from 'react'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
+import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
+import OrgUserModal from './OrgUserModal'
+import OrgMunicModal from './OrgMunicModal'
+const { useEffect } = React
+const { Modal } = ReactBootstrap
 
 const OrganizationalUnit = (props, context) => {
-  const [grid, setGrid] = useState(undefined);
-  const [gridUser, setGridUser] = useState(undefined);
-  const [showUser, setShowUser] = useState(false);
-  const [currentObj, setObj] = useState("");
-  const [userForm, setShowUserForm] = useState(false);
-  const [rowUser, setRowUser] = useState("");
-  const [form, setForm] = useState(undefined);
-
+  const [show, setShow] = useState(false)
+  const [row, setRow] = useState(undefined)
+  const [active, setActive] = useState('EDIT')
+  const [addMunicFlag, setAddMunicFlag] = useState(false)
+  const [addUserFlag, setAddUserFlag] = useState(false)
   useEffect(() => {
-    generateOrgUnitGrid();
-
     return () => {
-      ComponentManager.cleanComponentReducerState(gridId);
-      ComponentManager.cleanComponentReducerState(gridId2);
-    };
-  }, []);
-
-  const generateOrgUnitGrid = () => {
-    const { svSession } = props;
-    gridId = "UNITS_GRID";
-    let grid = (
-      <ExportableGrid
-        gridType={"READ_URL"}
-        key={gridId}
-        id={gridId}
-        configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_ORG_UNITS`}
-        dataTableName={`/ReactElements/getTableData/${svSession}/SVAROG_ORG_UNITS/100`}
-        defaultHeight={false}
-        heightRatio={0.5}
-        refreshData={true}
-        onRowClickFunct={onRowClick}
-        minHeight={600}
-      />
-    );
-    setGrid(grid);
-  };
-
-  const generateUserGrid = (objectIdOU) => {
-    pastObjOU = objectIdOU;
-    GridManager.reloadGridData(`USER_UNIT_GRID_${objectIdOU}`);
-    const { svSession } = props;
-    gridId2 = `USER_UNIT_GRID_${objectIdOU}`;
-
-    let grid = (
-      <div style={{ width: "60%" }}>
-        <p className='admin-console-grid-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.choose_user', defaultMessage: 'perun.admin_console.choose_user' })}</p>
-        <ExportableGrid
-          gridType={"READ_URL"}
-          key={gridId2}
-          id={gridId2}
-          configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_USERS`}
-          dataTableName={`/WsAdminConsole/get/usersByOU/sid/${svSession}/objectIdOU/${objectIdOU}`}
-          defaultHeight={false}
-          heightRatio={0.5}
-          refreshData={true}
-          toggleCustomButton={true}
-          customButton={() => showUserModal()}
-          customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_user', defaultMessage: 'perun.admin_console.add_user' })}
-          onRowClickFunct={onUserRowClick}
-          minHeight={600}
-        />
-      </div>
-    );
-    setGridUser(grid);
-  };
-
-  const onRowClick = (_id, _rowIdx, row) => {
-    let objectIdOU = row["SVAROG_ORG_UNITS.OBJECT_ID"];
-    setObj(objectIdOU);
-    if (pastObjOU != objectIdOU) {
-      ComponentManager.cleanComponentReducerState(`USER_UNIT_GRID_${pastObjOU}`);
+      cleanUpGrids()
     }
-    setGridUser(undefined);
-    generateUserGrid(objectIdOU);
-  };
+  }, [])
+  const cleanUpGrids = () => {
+    ComponentManager.cleanComponentReducerState('SVAROG_ORG_GRID');
+    ComponentManager.cleanComponentReducerState('ORG_MUNIC_GRID');
+    ComponentManager.cleanComponentReducerState('ORG_USER_GRID');
+  }
+  const generateForm = (tableName, objectId) => {
 
-  const showUserModal = () => {
-    setShowUser(!showUser);
-  };
-
-  const closeUserModal = () => {
-    setShowUser(false);
-  };
-
-  const showUserForm = () => {
-    setShowUserForm(!userForm);
-  };
-
-  const onUserRowClick = (_id, _rowIdx, row) => {
-    showUserForm();
-    let objecidUser = row["SVAROG_USERS.OBJECT_ID"];
-    setRowUser(objecidUser);
-    generateForm(objecidUser);
-  };
-
-  const generateForm = (objecidUser) => {
-    const { svSession } = props;
-    let form = (
+    return (
       <GenericForm
-        params={"READ_URL"}
-        key={"general_condition"}
-        id={"general_condition"}
-        method={`/ReactElements/getTableJSONSchema/${svSession}/SVAROG_USERS`}
-        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/SVAROG_USERS`}
-        tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objecidUser}/SVAROG_USERS`}
-        hideBtns={"all"}
+        params="READ_URL"
+        key={`${tableName}_FORM`}
+        id={`${tableName}_FORM`}
+        method={`/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`}
+        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
+        tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
+        hideBtns="all"
+        className={'form-test add-edit-users-form'}
+        disabled={true}
       />
     );
-    return setForm(form);
   };
+  const handleRowClick = (_id, _rowIdx, row) => {
+    setShow(true)
+    setRow(row)
+    setActive('EDIT')
+    setHideControls(false)
+  }
+  const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
+  const removeUserFromOrgUnit = (currentRow) => {
 
-  const removeUserFromOrgUnit = () => {
-    const { svSession } = props;
-    let url = `${window.server}/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${currentObj}/objecidUser/${rowUser}`;
-    axios.get(url).then((res) => {
-      const resType = res.data.type?.toLowerCase() || 'info'
-      const title = res.data.title || ''
-      const msg = res.data.message || ''
-      alertUser(true, resType, title, msg)
-      if (resType === 'success') {
-        GridManager.reloadGridData(`USER_UNIT_GRID_${currentObj}`);
-        setShowUserForm(false)
-      }
-    }).catch((error) => {
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
-    });
+    alertUserV2({
+      type: 'warning',
+      title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_user', defaultMessage: 'perun.admin_console.unassign_user' })}`,
+      confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.assign', defaultMessage: 'perun.admin_console.assign' })}`,
+      confirmButtonColor: '#8d230f',
+      onConfirm: () => {
+        const { svSession } = props;
+        let url = `${window.server}/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}/objecidUser/${currentRow['SVAROG_USERS.OBJECT_ID']}`;
+        axios.get(url).then((res) => {
+          const resType = res.data.type?.toLowerCase() || 'info'
+          alertUserResponse({ response: res })
+          if (resType === 'success') {
+            GridManager.reloadGridData(`ORG_USER_GRID`);
+          }
+        }).catch((error) => {
+          alertUserResponse({ response: error })
+        });
+      },
+      showCancel: true,
+      cancelButtonText: `${context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}`
+    })
   };
 
   return (
-    <React.Fragment>
-      <div className='admin-console-org-unit'>
-        <div style={{ width: "100%" }}>
-          <p className='admin-console-unit-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.unit_legend', defaultMessage: 'perun.admin_console.unit_legend' })}</p>
+    <>
+      {/* INITIAL ORG UNIT CONTAINER */}
+      <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{
+            context.intl.formatMessage({ id: 'perun.admin_console.organizational_units', defaultMessage: 'perun.admin_console.organizational_units' })
+          }</p>
         </div>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "space-around",
-          }}
-        >
-          <div style={{ width: "35%" }}>
-            <p className='admin-console-grid-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_name', defaultMessage: 'perun.admin_console.svarog_unit_name' })}</p>
-            {grid}
-          </div>
-
-          {gridUser}
-        </div>
+        <ExportableGrid
+          gridType='READ_URL'
+          key={'SVAROG_ORG_GRID'}
+          id={'SVAROG_ORG_GRID'}
+          configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_ORG_UNITS`}
+          dataTableName={`/ReactElements/getTableData/${props.svSession}/SVAROG_ORG_UNITS/100`}
+          onRowClickFunct={handleRowClick}
+          refreshData={true}
+          toggleCustomButton={false}
+          customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+          heightRatio={0.75}
+        />
       </div>
-      <OrganizationalUnitModal
-        show={showUser}
-        showUserModal={showUserModal}
-        closeUserModal={closeUserModal}
-        objectIdOU={currentObj}
-      />
-      <Modal
-        className='admin-console-unit-modal'
-        show={userForm}
-        onHide={showUserForm}
-      >
-        <Modal.Header className='admin-console-unit-modal-header' closeButton>
-          <Modal.Title className='admin-console-unit-modal-body'>
-            {context.intl.formatMessage({ id: 'perun.admin_console.remove_user', defaultMessage: 'perun.admin_console.remove_user' })}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className='admin-console-unit-modal-body'>
-          {form}
-          <div className='admin-console-remove-user-con'>
-            <button
-              className='admin-console-remove-user-btn'
-              onClick={() => removeUserFromOrgUnit()}
-            >
-              {context.intl.formatMessage({ id: 'perun.admin_console.remove', defaultMessage: 'perun.admin_console.remove' })}
-            </button>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-      </Modal>
-    </React.Fragment>
-  );
-};
+      {/* MODAL AND CONTROLS */}
+      {show && (
+        <Modal className='admin-console-unit-modal' show={show} onHide={() => {
+          setShow(false), setActive('EDIT'), ComponentManager.cleanComponentReducerState('ORG_MUNIC_GRID'),
+            ComponentManager.cleanComponentReducerState('ORG_USER_GRID')
+        }}>
+          <Modal.Header className='admin-console-unit-modal-header' closeButton>
+          </Modal.Header>
+          <Modal.Body className='admin-console-unit-modal-body'>
+            <div className='user-mng-dashboard user-mng'>
+              {/* USER DASH CONTROLS */}
+              {<div className='user-dash-controls'>
+                <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT') }}>{context.intl.formatMessage({ id: 'perun.admin_console.edit_org', defaultMessage: 'perun.admin_console.edit_org' })}</div>
+                <div className={getTabClass('MUNIC')} onClick={() => { setActive('MUNIC') }}>{context.intl.formatMessage({ id: 'perun.admin_console.assign_munic', defaultMessage: 'perun.admin_console.assign_munic' })}</div>
+                <div className={getTabClass('USER')} onClick={() => { setActive('USER') }}>{context.intl.formatMessage({ id: 'perun.admin_console.assign_user', defaultMessage: 'perun.admin_console.assign_user' })}</div>
+              </div>}
+              {/* RENDER ACTIVE*/}
+              <div className='user-dash-content'>
+                {active === 'EDIT' && generateForm('SVAROG_ORG_UNITS', row['SVAROG_ORG_UNITS.OBJECT_ID'])}
+                {/* MUNICC */}
+                {active === 'MUNIC' && <ExportableGrid
+                  key={'ORG_MUNIC_GRID'}
+                  id={'ORG_MUNIC_GRID'}
+                  gridType={'READ_URL'}
+                  configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
+                  dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_ORG_UNITS.OBJECT_ID']}`}
+                  minHeight={500}
+                  refreshData={true}
+                  toggleCustomButton={true}
+                  customButton={() => {
+                    setAddMunicFlag(true)
+                  }}
+                  customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.assign', defaultMessage: 'perun.admin_console.assign' })}
+                  //  missing remove funcc
+                  onRowClickFunct={(_id, _rowIdx, row) => console.log(row)}
+                />}
+                {/* HANDLE OLD USER WAY */}
+                {active === 'USER' && <ExportableGrid
+                  key={'ORG_USER_GRID'}
+                  id={'ORG_USER_GRID'}
+                  gridType={'READ_URL'}
+                  configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USERS`}
+                  dataTableName={`/WsAdminConsole/get/usersByOU/sid/${props.svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}`}
+                  minHeight={500}
+                  refreshData={true}
+                  toggleCustomButton={true}
+                  customButton={() => {
+                    setAddUserFlag(true)
+                  }}
+                  customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.assign', defaultMessage: 'perun.admin_console.assign' })}
+                  //  missing remove funcc
+                  onRowClickFunct={(_id, _rowIdx, row) => removeUserFromOrgUnit(row)}
+                />}
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
+        </Modal>
+      )}
+      {addUserFlag && <OrgUserModal setAddUserFlag={setAddUserFlag} objectIdOU={row['SVAROG_ORG_UNITS.OBJECT_ID']} addUserFlag={addUserFlag} />}
+      {addMunicFlag && <OrgMunicModal setAddMunicFlag={setAddMunicFlag} objectIdOU={row['SVAROG_ORG_UNITS.OBJECT_ID']} addMunicFlag={addMunicFlag} />}
+    </>
+  )
 
+}
 const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
-});
-
+})
 OrganizationalUnit.contextTypes = {
   intl: PropTypes.object.isRequired
 }
-
-export default connect(mapStateToProps)(OrganizationalUnit);
+export default connect(mapStateToProps)(OrganizationalUnit)

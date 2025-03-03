@@ -7,7 +7,7 @@ import Loading from "../../Loading/Loading";
 import { ComponentManager, GenericGrid, PropTypes } from "../../../client";
 import { orgSearchSchema } from "../utils/orgSearchSchema";
 import { alertUser } from "../../../elements";
-let gridId = "USER_INTERN_GRID";
+let gridId = "USERS_CHOSE_ORG_GRID";
 
 const OrgSearch = (props, context) => {
   const [grid, setGrid] = useState(undefined);
@@ -60,7 +60,7 @@ const OrgSearch = (props, context) => {
     if (postData["username"]) {
       multipleFilterData.push({
         fieldName: "USER_NAME",
-        fieldValue: postData["username"],
+        fieldValue: postData["username"]?.toUpperCase(),
         dbOperand: "LIKE",
         nextLogicOperand: "AND",
       });
