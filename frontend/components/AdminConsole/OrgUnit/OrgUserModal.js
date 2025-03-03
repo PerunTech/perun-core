@@ -1,19 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { alertUser, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
-import { GridManager, PropTypes } from "../../../client";
+import { GridManager, PropTypes, ComponentManager } from "../../../client";
 import OrgSearch from "./OrgSearch";
 
-const OrganizationalUnitModal = (props, context) => {
+const OrgUserModal = (props, context) => {
   const handleRowClick = (_id, _rowIdx, row) => {
     alertUser(
       true,
       "info",
       context.intl.formatMessage({ id: 'perun.admin_console.add_user', defaultMessage: 'perun.admin_console.add_user' }),
       context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_add_user', defaultMessage: 'perun.admin_console.svarog_unit_add_user' }),
-      () => { saveApp(row), props.closeUserModal() },
+      () => { saveApp(row) },
       () => { },
       true,
       context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' }),
@@ -30,7 +30,8 @@ const OrganizationalUnitModal = (props, context) => {
       const msg = res.data.message || ''
       alertUser(true, resType, title, msg)
       if (resType === "success") {
-        GridManager.reloadGridData(`USER_UNIT_GRID_${props.objectIdOU}`)
+        props.setAddUserFlag(false)
+        GridManager.reloadGridData('ORG_USER_GRID')
       }
     }).catch((error) => {
       const title = error.response?.data?.title || error
@@ -42,8 +43,8 @@ const OrganizationalUnitModal = (props, context) => {
   return (
     <Modal
       className='admin-console-unit-modal'
-      show={props.show}
-      onHide={props.showUserModal}
+      show={props.addUserFlag}
+      onHide={() => props.setAddUserFlag(false)}
     >
       <Modal.Header className='admin-console-unit-modal-header' closeButton>
         <Modal.Title className='admin-console-unit-modal-body'>
@@ -62,8 +63,8 @@ const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
 });
 
-OrganizationalUnitModal.contextTypes = {
+OrgUserModal.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps)(OrganizationalUnitModal);
+export default connect(mapStateToProps)(OrgUserModal);

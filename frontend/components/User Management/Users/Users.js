@@ -208,17 +208,20 @@ const Users = (props, context) => {
                 </div>}
             </div>
             {show && (
-                <Modal className='admin-console-unit-modal' show={show} onHide={() => { setShow(false), setActive('EDIT') }}>
+                <Modal className='admin-console-unit-modal' show={show} onHide={() => {
+                    setShow(false), setActive('EDIT'), ComponentManager.cleanComponentReducerState('USER_GROUP_GRID'),
+                        ComponentManager.cleanComponentReducerState('USERS_ACL_GRID')
+                }}>
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>
                         <div className='user-mng-dashboard user-mng'>
                             {/* USER DASH CONTROLS */}
                             {!hideControls && <div className='user-dash-controls'>
-                                <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
+                                <div className={getTabClass('EDIT')} onClick={() => { setActive('EDIT') }}>{context.intl.formatMessage({ id: 'perun.user_mng.edit_user', defaultMessage: 'perun.user_mng.edit_user' })}</div>
                                 <div className={'user-control'} onClick={() => changeUserStatus()}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_status', defaultMessage: 'perun.user_mng.chg_status' })}</div>
-                                <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
-                                <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES'), cleanUpGrids() }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
+                                <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP') }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
+                                <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES') }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
                             </div>}
                             {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
