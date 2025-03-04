@@ -52,7 +52,7 @@ const OrganizationalUnit = (props, context) => {
     alertUserV2({
       type: 'warning',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_user', defaultMessage: 'perun.admin_console.unassign_user' })}`,
-      confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.assign', defaultMessage: 'perun.admin_console.assign' })}`,
+      confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign', defaultMessage: 'perun.admin_console.unassign' })}`,
       confirmButtonColor: '#8d230f',
       onConfirm: () => {
         const { svSession } = props;
