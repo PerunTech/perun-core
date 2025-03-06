@@ -44,7 +44,6 @@ const OrganizationalUnit = (props, context) => {
     setShow(true)
     setRow(row)
     setActive('EDIT')
-    setHideControls(false)
   }
   const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
   const removeUserFromOrgUnit = (currentRow) => {

@@ -6,7 +6,7 @@ import validator from '@rjsf/validator-ajv8';
 import Loading from "../../Loading/Loading";
 import { ComponentManager, GenericGrid, PropTypes } from "../../../client";
 import { orgSearchSchema } from "../utils/orgSearchSchema";
-import { alertUser } from "../../../elements";
+import { alertUserResponse } from "../../../elements";
 let gridId = "USERS_CHOSE_ORG_GRID";
 
 const OrgSearch = (props, context) => {
@@ -86,11 +86,9 @@ const OrgSearch = (props, context) => {
         );
         return setGrid(grid), setLoading(false)
       }
-    }).catch((error) => {
-      console.error(error);
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+    }).catch((err) => {
+      console.error(err)
+      alertUserResponse({ response: err.response?.data })
     });
   };
 
