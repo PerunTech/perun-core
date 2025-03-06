@@ -23,7 +23,7 @@ export function getFormData(id, reduxKey, formName, uiSchema, formTableData, ses
 
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || formName)
     axios.get(restUrl).then((response) => {
-      let data
+      let data = {}
       if (isValidObject(response?.data, 1)) {
         if (isValidObject(response.data.data, 1)) {
           data = response.data.data
