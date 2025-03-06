@@ -74,7 +74,7 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
-    if (error.response.status) {
+    if (error.response?.status) {
       switch (error.response.status) {
         case 302:
           alertUserV2({ type: 'info', title: 'The server responsed with a status code 302 Found' })
@@ -92,7 +92,7 @@ axios.interceptors.response.use(
           return Promise.reject(error);
       }
     } else {
-      let msg = error.message
+      const msg = error?.message || ''
       switch (true) {
         case msg.includes('401'):
           /* if the accesed route is fr map memorize it and write it in window core */
@@ -108,7 +108,6 @@ axios.interceptors.response.use(
         case msg.includes('500'):
           return Promise.reject(error);
         case msg.includes('502'):
-          console.log(msg)
           return Promise.reject(error);
         default:
           return Promise.reject(error);
