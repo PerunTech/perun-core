@@ -6,7 +6,7 @@ import { Data, Editors, Formatters, Filters, Menu } from 'react-data-grid-addons
 
 import { labelBasePath, translateComponents } from '../../config/config';
 import { store, getGridConfig, getGridData, rowClicked, resetGridEditResponseState } from '../../model';
-import { WrapItUp, ComponentManager, alertUser, alertUserResponse } from '..';
+import { WrapItUp, ComponentManager, alertUser, alertUserResponse, alertUserV2 } from '..';
 import { Loading } from '../../components/ComponentsIndex';
 
 import CustomGridToolbar from './CustomGridToolbar';
@@ -843,9 +843,8 @@ class GenericGrid extends React.Component {
       if (typeof this.state.refreshData === 'function') {
         this.state.refreshData()
       } else {
-        alertUser(true, 'info', this.context.intl.formatMessage(
-          { id: `${labelBasePath}.error.refresh_data`, defaultMessage: `${labelBasePath}.error.refresh_data` }
-        ))
+        const title = this.context.intl.formatMessage({ id: `${labelBasePath}.error.refresh_data`, defaultMessage: `${labelBasePath}.error.refresh_data` })
+        alertUserV2({ type: 'info', title })
       }
     }
   }

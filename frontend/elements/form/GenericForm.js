@@ -59,7 +59,6 @@ class GenericForm extends React.Component {
     this.onInputChange = this.onInputChange.bind(this)
     this.initiateDeleteAction = this.initiateDeleteAction.bind(this)
     this.alertCloseWithAddedFunc = this.alertCloseWithAddedFunc.bind(this)
-    this.basicAlertClose = this.basicAlertClose.bind(this)
     this.transformErrors = this.transformErrors.bind(this)
     this.errorListTemplate = this.errorListTemplate.bind(this)
     this.Widgets = {
@@ -249,12 +248,7 @@ class GenericForm extends React.Component {
     this.props.refFunction(this)
   }
 
-  basicAlertClose() {
-    this.setState({ alert: alertUser(false, 'info', ' ') })
-  }
-
   alertCloseWithAddedFunc() {
-    this.basicAlertClose()
     if (this.props.onAlertClose && this.props.onAlertClose instanceof Function) {
       this.setState({ saveExecuted: false, deleteExecuted: false })
       this.props.onAlertClose()
@@ -264,7 +258,6 @@ class GenericForm extends React.Component {
   }
 
   alertCloseWithoutFormClose = () => {
-    this.basicAlertClose()
     if (this.props.onAlertClose && this.props.onAlertClose instanceof Function) {
       this.setState({ saveExecuted: false, deleteExecuted: false })
     } else {
@@ -369,7 +362,7 @@ class GenericForm extends React.Component {
         this.setState({
           saveExecuted: false,
           alert: alertUser(true, 'error',
-            errorTitle, errorMsg, () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined)
+            errorTitle, errorMsg, () => { }, undefined, false, undefined, undefined, false, undefined)
         },
           () => { ComponentManager.setStateForComponent(this.state.id, 'saveFormError', undefined) }
         )
