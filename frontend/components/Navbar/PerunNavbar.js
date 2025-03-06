@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { iconManager } from '../assets/svg/svgHolder';
+import { iconManager } from '../../assets/svg/svgHolder';
 import { createHashHistory } from 'history';
-import { downloadFile } from '../functions/utils';
+import { downloadFile } from '../../functions/utils';
 const PerunNavbar = (props, context) => {
     const history = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
