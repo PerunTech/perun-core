@@ -5,10 +5,10 @@ import axiosRetry from 'axios-retry';
 import { store } from '.';
 import { svConfig } from '../config';
 
-axiosRetry(axios, {retries: 1})
+axiosRetry(axios, { retries: 1 })
 
 // this functions sets busy To False after request is done
-export function busyToFalse (reducer, verb) {
+export function busyToFalse(reducer, verb) {
   return {
     type: `${reducer}/${verb}_ACTION_IS_NOW_FALSE`,
     overrideStatus: true,
@@ -18,12 +18,12 @@ export function busyToFalse (reducer, verb) {
   }
 }
 
-export function dataToRedux (callback, reducer, reduxKey, verb, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17) {
+export function dataToRedux(callback, reducer, reduxKey, verb, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17) {
   const args = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17]
   store.dispatch(dataToReduxMain(callback, reducer, reduxKey, verb, ...args))
 }
 
-export function dataToReduxMain (callback, reducer, reduxKey, verb, ...args) {
+export function dataToReduxMain(callback, reducer, reduxKey, verb, ...args) {
   let verbPath = svConfig.triglavRestVerbs[verb]
   let request = null
   let isNotRestCall = null
@@ -45,27 +45,25 @@ export function dataToReduxMain (callback, reducer, reduxKey, verb, ...args) {
 
   // if verb valid get http data
   if (isNotRestCall === null) {
-    request = axios.get(restUrl, {timeout: 10000})
-      .then((response) => {
-        store.dispatch(busyToFalse(reducer, verb))
-        // check if callback is valid
-        if (callback instanceof Function && !(response.data instanceof Error)) {
-          // give callback response data from axios
-          callback(response.data)
-        }
-        return response.data
-      })
-      .catch((error) => {
-        store.dispatch(busyToFalse(reducer, verb))
-        console.log('Error', error.message)
-        // this is used to continue loading application
-        // on refresh
-        if (verb === 'MAIN_VALIDATE' && callback instanceof Function) {
-          callback(error)
-        }
+    request = axios.get(restUrl, { timeout: 10000 }).then((response) => {
+      store.dispatch(busyToFalse(reducer, verb))
+      // check if callback is valid
+      if (callback instanceof Function && !(response?.data instanceof Error)) {
+        // give callback response data from axios
+        callback(response?.data)
+      }
+      return response?.data
+    }).catch((error) => {
+      store.dispatch(busyToFalse(reducer, verb))
+      console.log('Error', error.message)
+      // this is used to continue loading application
+      // on refresh
+      if (verb === 'MAIN_VALIDATE' && callback instanceof Function) {
+        callback(error)
+      }
 
-        throw new Error(error)
-      })
+      throw new Error(error)
+    })
   }
 
   // if verb is not valid skip http and send data to redux directly
