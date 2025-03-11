@@ -48,23 +48,25 @@ const OrgUserModal = (props, context) => {
     });
   };
 
-  return (<>
-    {loading && <Loading />}
-    <Modal
-      className='admin-console-unit-modal'
-      show={props.addUserFlag}
-      onHide={() => props.setAddUserFlag(false)}
-    >
-      <Modal.Header className='admin-console-unit-modal-header' closeButton>
-        <Modal.Title className='admin-console-unit-modal-body'>
-          {context.intl.formatMessage({ id: 'perun.admin_console.choose_user', defaultMessage: 'perun.admin_console.choose_user' })}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className='admin-console-unit-modal-body'>
-        <OrgSearch handleRowClick={handleRowClick} />
-      </Modal.Body>
-      <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-    </Modal></>
+  return (
+    <>
+      {loading && <Loading />}
+      <Modal
+        className='admin-console-unit-modal'
+        show={props.addUserFlag}
+        onHide={() => props.setAddUserFlag(false)}
+      >
+        <Modal.Header className='admin-console-unit-modal-header' closeButton>
+          <Modal.Title className='admin-console-unit-modal-body'>
+            {context.intl.formatMessage({ id: 'perun.admin_console.choose_user', defaultMessage: 'perun.admin_console.choose_user' })}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className='admin-console-unit-modal-body'>
+          <OrgSearch handleRowClick={handleRowClick} />
+        </Modal.Body>
+        <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

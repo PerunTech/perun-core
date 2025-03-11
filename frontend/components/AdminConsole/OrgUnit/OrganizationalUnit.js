@@ -49,7 +49,6 @@ const OrganizationalUnit = (props, context) => {
   }
   const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
   const removeUserFromOrgUnit = (currentRow) => {
-
     alertUserV2({
       type: 'warning',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_user', defaultMessage: 'perun.admin_console.unassign_user' })}`,
@@ -60,15 +59,18 @@ const OrganizationalUnit = (props, context) => {
         const { svSession } = props;
         let url = `${window.server}/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}/objecidUser/${currentRow['SVAROG_USERS.OBJECT_ID']}`;
         axios.get(url).then((res) => {
-          const resType = res.data.type?.toLowerCase() || 'info'
-          alertUserResponse({ response: res })
-          if (resType === 'success') {
-            GridManager.reloadGridData(`ORG_USER_GRID`);
+          setLoading(false)
+          if (res?.data) {
+            const resType = res.data?.type?.toLowerCase() || 'info'
+            alertUserResponse({ response: res })
+            if (resType === 'success') {
+              GridManager.reloadGridData(`ORG_USER_GRID`);
+            }
           }
-          setLoading(false)
         }).catch((error) => {
-          alertUserResponse({ response: error })
+          console.error(error)
           setLoading(false)
+          alertUserResponse({ response: error })
         });
       },
       showCancel: true,
@@ -76,7 +78,6 @@ const OrganizationalUnit = (props, context) => {
     })
   };
   const removeMunicFromOrgUnit = (currentRow) => {
-
     alertUserV2({
       type: 'warning',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_munic', defaultMessage: 'perun.admin_console.unassign_munic' })}`,
@@ -92,15 +93,18 @@ const OrganizationalUnit = (props, context) => {
           data: {},
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then((res) => {
-          const resType = res.data.type?.toLowerCase() || 'info'
-          alertUserResponse({ response: res })
-          if (resType === 'success') {
-            GridManager.reloadGridData(`ORG_MUNIC_GRID`);
+          setLoading(false)
+          if (res?.data) {
+            const resType = res.data.type?.toLowerCase() || 'info'
+            alertUserResponse({ response: res })
+            if (resType === 'success') {
+              GridManager.reloadGridData(`ORG_MUNIC_GRID`);
+            }
           }
-          setLoading(false)
         }).catch((error) => {
-          alertUserResponse({ response: error })
+          console.error(error)
           setLoading(false)
+          alertUserResponse({ response: error })
         });
       },
       showCancel: true,

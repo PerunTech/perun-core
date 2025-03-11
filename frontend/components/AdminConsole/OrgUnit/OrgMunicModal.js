@@ -23,15 +23,16 @@ const OrgMunicModal = (props) => {
             data: {},
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then((res) => {
-            GridManager.reloadGridData('ORG_MUNIC_GRID')
-            alertUserResponse({ response: res })
-            props.setAddMunicFlag(false)
             setLoading(false)
+            if (res?.data) {
+                GridManager.reloadGridData('ORG_MUNIC_GRID')
+                alertUserResponse({ response: res })
+                props.setAddMunicFlag(false)
+            }
         }).catch(err => {
             alertUserResponse({ response: err, type: 'error' })
             setLoading(false)
         })
-
     }
 
     return (
