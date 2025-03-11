@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import axios from 'axios';
-import { alertUser } from './../../../../elements';
+import { alertUserResponse, alertUserV2 } from './../../../../elements';
 import getRegisterSsoForm from './RegisterSsoForm';
 
-const RegistrationSso = (props, context) => {
+const RegistrationSso = (_props, context) => {
     const [data, setData] = useState({})
     const [key, setKey] = useState('')
 
@@ -34,15 +34,18 @@ const RegistrationSso = (props, context) => {
             data,
             url,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        }).then((response) => {
-            if (response.data.type === 'SUCCESS') {
-                alertUser(true, 'success', context.intl.formatMessage({ id: 'perun.admin_console.success_label', defaultMessage: 'perun.admin_console.success_label' }));
+        }).then((res) => {
+            if (res.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                let title = ''
+                if (resType === 'success') {
+                    title = context.intl.formatMessage({ id: 'perun.admin_console.success_label', defaultMessage: 'perun.admin_console.success_label' })
+                }
+                alertUserV2({ type: resType, title })
             }
         }).catch(err => {
             console.error(err)
-            const title = err.response?.data?.title || err
-            const msg = err.response?.data?.message || ''
-            alertUser(true, 'error', title, msg);
+            alertUserResponse({ response: err.response })
         });
     }
 

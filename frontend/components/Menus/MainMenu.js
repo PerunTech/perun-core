@@ -9,7 +9,7 @@ import { svConfig } from '../../config';
 import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
-import PerunNavbar from '../PerunNavbar'
+import PerunNavbar from '../Navbar/PerunNavbar'
 // main menu top- tells the Main app parent which function needs to be dispatched
 // or which grid should be shown in the main content
 class MainMenu extends React.Component {

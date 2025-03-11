@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { iconManager } from '../assets/svg/svgHolder';
+import { iconManager } from '../../assets/svg/svgHolder';
 import { createHashHistory } from 'history';
-import { downloadFile } from '../functions/utils';
+import { downloadFile } from '../../functions/utils';
 const PerunNavbar = (props, context) => {
     const history = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
@@ -78,7 +78,7 @@ const PerunNavbar = (props, context) => {
             {/* burger menu */}
             {toggleBurger && <div ref={burgerRef} className='nav-burger-menu'>
                 {menuBurger.map(el => (
-                    !el['cardHidden'] && <div className='nav-burger-option' onClick={() => { history.push(`/main/${el.id}`), setToggleBurger(false) }}>
+                    !el['cardHidden'] && <div key={el.id} className='nav-burger-option' onClick={() => { history.push(`/main/${el.id}`), setToggleBurger(false) }}>
                         <div className='nav-burger-img'><img src={`${window.location.origin}${el.imgPath}`} /></div>
                         <p>{el.title}</p></div>
                 ))}

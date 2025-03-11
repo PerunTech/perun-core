@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import { alertUser, alertUserResponse, ReactBootstrap } from "../../../elements";
+import React from "react";
+import { connect } from "react-redux";
+import { alertUserResponse, alertUserV2, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
 import { GridManager, PropTypes } from "../../../client";
@@ -10,31 +12,39 @@ import { Loading } from '../../ComponentsIndex';
 const OrgUserModal = (props, context) => {
   const [loading, setLoading] = useState(false)
   const handleRowClick = (_id, _rowIdx, row) => {
-    alertUser(
-      true,
-      "info",
-      context.intl.formatMessage({ id: 'perun.admin_console.add_user', defaultMessage: 'perun.admin_console.add_user' }),
-      context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_add_user', defaultMessage: 'perun.admin_console.svarog_unit_add_user' }),
-      () => { saveApp(row) },
-      () => { },
-      true,
-      context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' }),
-      context.intl.formatMessage({ id: 'perun.admin_console.cancel', defaultMessage: 'perun.admin_console.cancel' })
-    );
+    const title = context.intl.formatMessage({ id: 'perun.admin_console.add_user', defaultMessage: 'perun.admin_console.add_user' })
+    const message = context.intl.formatMessage({ id: 'perun.admin_console.svarog_unit_add_user', defaultMessage: 'perun.admin_console.svarog_unit_add_user' })
+    const confirm = context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })
+    const cancel = context.intl.formatMessage({ id: 'perun.admin_console.cancel', defaultMessage: 'perun.admin_console.cancel' })
+    alertUserV2({
+      type: 'info',
+      title,
+      message,
+      confirmButtonText: confirm,
+      onConfirm: () => assignUser(row),
+      showCancel: true,
+      cancelButtonText: cancel
+    })
   };
 
-  const saveApp = (row) => {
+  const assignUser = (row) => {
     setLoading(true)
-    let objecidUser = row['SVAROG_USERS.OBJECT_ID']
-    let url = window.server + `/WsAdminConsole/get/assignUserToOU/sid/${props.svSession}/objectIdOU/${props.objectIdOU}/objecidUser/${objecidUser}`
+    const objecidUser = row['SVAROG_USERS.OBJECT_ID']
+    const url = window.server + `/WsAdminConsole/get/assignUserToOU/sid/${props.svSession}/objectIdOU/${props.objectIdOU}/objecidUser/${objecidUser}`
     axios.get(url).then((res) => {
-      alertUserResponse({ response: res })
       setLoading(false)
-      props.setAddUserFlag(false)
-      GridManager.reloadGridData('ORG_USER_GRID')
-    }).catch((error) => {
-      alertUserResponse({ response: error })
+      if (res?.data) {
+        const resType = res.data.type?.toLowerCase() || 'info'
+        alertUserResponse({ response: res.data })
+        if (resType === "success") {
+          props.setAddUserFlag(false)
+          GridManager.reloadGridData('ORG_USER_GRID')
+        }
+      }
+    }).catch((err) => {
+      console.error(err)
       setLoading(false)
+      alertUserResponse({ response: err.response?.data })
     });
   };
 

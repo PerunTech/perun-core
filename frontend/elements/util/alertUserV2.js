@@ -40,7 +40,7 @@ export const alertUserV2 = (params) => {
 }
 
 export const alertUserResponse = (params) => {
-  const { response, type, onConfirm } = params
+  const { response, type, onConfirm, confirmButtonColor } = params
   const alertType = type || response?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || ''
   const title = response?.title || response?.data?.title || response
   const message = response?.message || response?.data?.message || ''
@@ -50,7 +50,7 @@ export const alertUserResponse = (params) => {
     text: message,
     allowOutsideClick: false,
     heightAuto: false,
-    confirmButtonColor: '#7cd1f9'
+    confirmButtonColor: confirmButtonColor || '#7cd1f9'
   }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()

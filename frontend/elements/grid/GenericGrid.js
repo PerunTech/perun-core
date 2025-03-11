@@ -3,12 +3,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ReactDataGrid from 'react-data-grid';
 import { Data, Editors, Formatters, Filters, Menu } from 'react-data-grid-addons';
-
 import { labelBasePath, translateComponents } from '../../config/config';
 import { store, getGridConfig, getGridData, rowClicked, resetGridEditResponseState } from '../../model';
-import { WrapItUp, ComponentManager, alertUser, alertUserResponse } from '..';
+import { WrapItUp, ComponentManager, alertUser, alertUserResponse, alertUserV2 } from '..';
 import { Loading } from '../../components/ComponentsIndex';
-
 import CustomGridToolbar from './CustomGridToolbar';
 import ContextMenuPopup from './ContextMenuPopup';
 import { customRowRenderer } from './RowRenderer';
@@ -69,7 +67,6 @@ class GenericGrid extends React.Component {
             PARAM_NAME: 'session',
             PARAM_VALUE: this.props.svSession
           }
-
  * INTERNAL VARIABLES
  * @param {Boolean} gridConfigLoaded - Has the grid configuration been Loaded. Grid rendering directly depends on this variable.
  * @param {JSON} gridConfig - The grid configuration. Internal variable that keeps the whole grid configuration and uses it to render the grid. Loaded from webservice. See  configTableName.
@@ -78,9 +75,7 @@ class GenericGrid extends React.Component {
  * @param {Array} selectedIndexes - Internal variable that keeps the INDEXES of the selectedRows.
  * @param {Array} filters - Internal variable that keeps the filters applied on the rendered grid.
  * @param {JSON} rows - Internal variable that keeps the filters applied on the rendered grid. Is assigned from gridData
-
  * @param {string} rowKey - Internal variable to know which field represents the unique id for a row.
-
  * It is mandatory to set gui_metadata params to all fields intended to be sortable, in order to enable the functionality
  * Params used in gui_metadata are =>
  *        sortable=true/false,  - MANDATORY to enable sort for each field, provides a clickable header cell where each sortable field can be sorted by the user, via a toggle cycle of 'ASC/DESC/NONE'
@@ -89,7 +84,6 @@ class GenericGrid extends React.Component {
  * @param {string} sortColumn - Internal variable to set which field to sort, matches field by internal column name
  * @param {string} sortDirection - Internal variable to know direction of sorted column, used in conjuction with sortColumn
  * @param {boolean/function} refreshData - true/false default refresh btn top righ toolbar
-
  */
   constructor(props) {
     super(props)
@@ -102,8 +96,6 @@ class GenericGrid extends React.Component {
       onRowClickFunct: this.props.onRowClickFunct,
       onSelectChangeFunct: this.props.onSelectChangeFunct,
       handleRowUpdatedFunct: this.props.handleRowUpdatedFunct,
-      saveAllRecords: this.props.saveAllRecords,
-
       id: this.props.id,
       params: this.props.params,
       gridType: this.props.gridType,
@@ -128,9 +120,7 @@ class GenericGrid extends React.Component {
       requestPending: false,
       active: true,
       hideLoader: false,
-
       buttonsArray: this.props.buttonsArray,
-
       additionalButton: this.props.additionalButton,
       additionalButtonLabel: this.props.additionalButtonLabel,
       customButtonClassName: this.props.customButtonClassName,
@@ -152,16 +142,12 @@ class GenericGrid extends React.Component {
     this.generateFormatterFromConfig = this.generateFormatterFromConfig.bind(this)
     this.handleRowUpdated = this.handleRowUpdated.bind(this)
     this.onSelectedRowsChange = this.onSelectedRowsChange.bind(this)
-    this.jsonPrepareObjectForSvarog = this.jsonPrepareObjectForSvarog.bind(this)
     this.getGridConfig = this.getGridConfig.bind(this)
     this.getGridData = this.getGridData.bind(this)
     this.getValidFilterValues = this.getValidFilterValues.bind(this)
     this.addRow = this.addRow.bind(this)
     this.columnValueContainsSearchTerms = this.columnValueContainsSearchTerms.bind(this)
     this.filterValues = this.filterValues.bind(this)
-    this.saveAllRecords = this.saveAllRecords.bind(this)
-    this.mouseOn = this.mouseOn.bind(this)
-    this.mouseOff = this.mouseOff.bind(this)
     this.handleGridSort = this.handleGridSort.bind(this)
   }
   /**
@@ -614,39 +600,6 @@ class GenericGrid extends React.Component {
     }
   }
 
-  jsonPrepareObjectForSvarog(tmpObject, tableNameDot) {
-    let svarogString1 = '' // to package svarog data
-    let svarogString2 = '' // to package rest of the data
-    for (let key in tmpObject) {
-      if (key.includes(tableNameDot) === true) {
-        let value = tmpObject[key]
-        const tableNAme = key.substring(0, key.indexOf('.'))
-        key = key.replace(`${tableNAme}.`, '')
-        if (value === null || value === undefined) {
-          value = ''
-        }
-        if (key === 'PKID' || key === 'OBJECT_ID' || key === 'DT_INSERT' || key === 'DT_DELETE' || key === 'PARENT_ID' || key === 'OBJECT_TYPE' || key === 'STATUS' || key === 'USER_ID') {
-          // has to be lowecase but does not matter if its integer in string object
-          svarogString1 = `${svarogString1}"${key.toLowerCase()}"` + `:` + `"${value}"` + `,`
-        } else {
-          // if we have integer value dont put in ""
-          if (isNaN(value)) {
-            svarogString2 = `${svarogString2}{"${key.toUpperCase()}"` + `:` + `"${value}"},`
-          } else
-            if (value === '') {
-              svarogString2 = svarogString2 + '{"' + key.toUpperCase() + '"' + ':\"\"},' // eslint-disable-line
-            } else {
-              svarogString2 = `${svarogString2}{"${key.toUpperCase()}"` + `:${value}},`
-            }
-        }
-      }
-    }
-
-    svarogString2 = svarogString2.substring(0, svarogString2.length - 1) // remove the coma at the end
-    const returnstring = `${'{' + '"' + 'com.prtech.svarog_common.DbDataObject' + '"' + ':{'}${svarogString1}"` + `values` + `"` + `:[${svarogString2}]}}`
-    return returnstring
-  }
-
   getRows() {
     const filteredRows = Selectors.getRows(this.state)
     return filteredRows
@@ -685,55 +638,6 @@ class GenericGrid extends React.Component {
       this.state.handleRowUpdatedFunct(this, rows, commit.fromRow, commit.updated)
     } else {
       console.warn('No inline grid save function provided. No default function found.')
-    }
-  }
-
-  saveAllPrompt(c, rows) {
-    c.setState({
-      alert: alertUser(true,
-        'warning',
-        c.context.intl.formatMessage({ id: `${labelBasePath}.main.save_all_records_prompt_title`, defaultMessage: `${labelBasePath}.main.save_all_records_prompt_title` }),
-        c.context.intl.formatMessage({ id: `${labelBasePath}.main.save_all_records_prompt_message`, defaultMessage: `${labelBasePath}.main.save_all_records_prompt_message` }),
-        () => {
-          c.setState({ requestPending: true })
-          c.state.saveAllRecords(c, rows)
-        },
-        () => c.setState({ alert: alertUser(false, 'info', ' ') }),
-        true,
-        c.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.save_all`, defaultMessage: `${labelBasePath}.main.forms.save_all` }),
-        c.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.cancel`, defaultMessage: `${labelBasePath}.main.forms.cancel` }),
-        true,
-        '#78aa22',
-        true
-      )
-    })
-  }
-
-  saveAllRecords() {
-    if (this.state.saveAllRecords) {
-      let rows = []
-      const filteredRows = this.state.filteredRows
-      const filters = this.state.filters
-      if (Object.keys(filters).length > 0 && filters.constructor === Object) {
-        if (filteredRows && filteredRows.constructor === Array) {
-          if (filteredRows.length > 0) {
-            rows = filteredRows.slice()
-            this.saveAllPrompt(this, rows)
-          } else {
-            this.setState({
-              alert: alertUser(true,
-                'info',
-                this.context.intl.formatMessage({ id: `${labelBasePath}.main.invalid_filter`, defaultMessage: `${labelBasePath}.main.invalid_filter` }),
-                '',
-                () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined,
-                undefined, undefined, true
-              )
-            })
-          }
-        }
-      } else {
-        this.saveAllPrompt(this, rows)
-      }
     }
   }
 
@@ -816,24 +720,11 @@ class GenericGrid extends React.Component {
     this.setState({ sortColumn, sortDirection })
   }
 
-  // some vodoo black magic copied from functions already
-  // present in this component modified to work with customButton
   customButton = () => {
     const { customButton, toggleCustomButton } = this.state
-
     if (toggleCustomButton && customButton) {
       customButton()
     }
-
-
-  }
-
-  mouseOn() {
-    this.setState({ active: true })
-  }
-
-  mouseOff() {
-    this.setState({ active: false })
   }
 
   refreshData = () => {
@@ -843,9 +734,8 @@ class GenericGrid extends React.Component {
       if (typeof this.state.refreshData === 'function') {
         this.state.refreshData()
       } else {
-        alertUser(true, 'info', this.context.intl.formatMessage(
-          { id: `${labelBasePath}.error.refresh_data`, defaultMessage: `${labelBasePath}.error.refresh_data` }
-        ))
+        const title = this.context.intl.formatMessage({ id: `${labelBasePath}.error.refresh_data`, defaultMessage: `${labelBasePath}.error.refresh_data` })
+        alertUserV2({ type: 'info', title })
       }
     }
   }
@@ -935,11 +825,6 @@ class GenericGrid extends React.Component {
                     this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.search`, defaultMessage: `${labelBasePath}.main.grids.search` })
                   }
                 >
-                  {this.state.saveAllRecords && (
-                    <button id='saveAllRecords' className='btn' onClick={this.saveAllRecords}>
-                      {this.context.intl.formatMessage({ id: `${labelBasePath}.main.grids.apply_all`, defaultMessage: `${labelBasePath}.main.grids.apply_all` })}
-                    </button>
-                  )}
                   {this.state.refreshData && (
                     <div className='refresh-data-container'>
                       <span id='refreshData' className='refreshData' onClick={this.refreshData}>
