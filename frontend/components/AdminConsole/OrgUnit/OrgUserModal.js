@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
-import { alertUser, ReactBootstrap } from "../../../elements";
+import { alertUser, alertUserResponse, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
-import { GridManager, PropTypes, ComponentManager } from "../../../client";
+import { GridManager, PropTypes } from "../../../client";
 import OrgSearch from "./OrgSearch";
+import { Loading } from '../../ComponentsIndex';
 
 const OrgUserModal = (props, context) => {
+  const [loading, setLoading] = useState(false)
   const handleRowClick = (_id, _rowIdx, row) => {
     alertUser(
       true,
@@ -22,25 +24,22 @@ const OrgUserModal = (props, context) => {
   };
 
   const saveApp = (row) => {
+    setLoading(true)
     let objecidUser = row['SVAROG_USERS.OBJECT_ID']
     let url = window.server + `/WsAdminConsole/get/assignUserToOU/sid/${props.svSession}/objectIdOU/${props.objectIdOU}/objecidUser/${objecidUser}`
     axios.get(url).then((res) => {
-      const resType = res.data.type?.toLowerCase() || 'info'
-      const title = res.data.title || ''
-      const msg = res.data.message || ''
-      alertUser(true, resType, title, msg)
-      if (resType === "success") {
-        props.setAddUserFlag(false)
-        GridManager.reloadGridData('ORG_USER_GRID')
-      }
+      alertUserResponse({ response: res })
+      setLoading(false)
+      props.setAddUserFlag(false)
+      GridManager.reloadGridData('ORG_USER_GRID')
     }).catch((error) => {
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: error })
+      setLoading(false)
     });
   };
 
-  return (
+  return (<>
+    {loading && <Loading />}
     <Modal
       className='admin-console-unit-modal'
       show={props.addUserFlag}
@@ -55,7 +54,7 @@ const OrgUserModal = (props, context) => {
         <OrgSearch handleRowClick={handleRowClick} />
       </Modal.Body>
       <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-    </Modal>
+    </Modal></>
   );
 };
 
