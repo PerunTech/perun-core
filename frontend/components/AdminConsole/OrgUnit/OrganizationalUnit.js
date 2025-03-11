@@ -5,6 +5,7 @@ import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } fro
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
 import OrgUserModal from './OrgUserModal'
 import OrgMunicModal from './OrgMunicModal'
+import { Loading } from '../../ComponentsIndex'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -14,6 +15,7 @@ const OrganizationalUnit = (props, context) => {
   const [active, setActive] = useState('EDIT')
   const [addMunicFlag, setAddMunicFlag] = useState(false)
   const [addUserFlag, setAddUserFlag] = useState(false)
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     return () => {
       cleanUpGrids()
@@ -47,22 +49,61 @@ const OrganizationalUnit = (props, context) => {
   }
   const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
   const removeUserFromOrgUnit = (currentRow) => {
-
     alertUserV2({
       type: 'warning',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_user', defaultMessage: 'perun.admin_console.unassign_user' })}`,
       confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign', defaultMessage: 'perun.admin_console.unassign' })}`,
       confirmButtonColor: '#8d230f',
       onConfirm: () => {
+        setLoading(true)
         const { svSession } = props;
         let url = `${window.server}/WsAdminConsole/get/removeUserFromOU/sid/${svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}/objecidUser/${currentRow['SVAROG_USERS.OBJECT_ID']}`;
         axios.get(url).then((res) => {
-          const resType = res.data.type?.toLowerCase() || 'info'
-          alertUserResponse({ response: res })
-          if (resType === 'success') {
-            GridManager.reloadGridData(`ORG_USER_GRID`);
+          setLoading(false)
+          if (res?.data) {
+            const resType = res.data?.type?.toLowerCase() || 'info'
+            alertUserResponse({ response: res })
+            if (resType === 'success') {
+              GridManager.reloadGridData(`ORG_USER_GRID`);
+            }
           }
         }).catch((error) => {
+          console.error(error)
+          setLoading(false)
+          alertUserResponse({ response: error })
+        });
+      },
+      showCancel: true,
+      cancelButtonText: `${context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}`
+    })
+  };
+  const removeMunicFromOrgUnit = (currentRow) => {
+    alertUserV2({
+      type: 'warning',
+      title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_munic', defaultMessage: 'perun.admin_console.unassign_munic' })}`,
+      confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign', defaultMessage: 'perun.admin_console.unassign' })}`,
+      confirmButtonColor: '#8d230f',
+      onConfirm: () => {
+        setLoading(true)
+        const { svSession } = props;
+        let url = `${window.server}/WsAdminConsole/removeObjectFromOU/sid/${svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}/objectId/${currentRow['NUTS_TERRITORIES.OBJECT_ID']}/tableName/NUTS_TERRITORIES`;
+        axios({
+          method: "post",
+          url: url,
+          data: {},
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }).then((res) => {
+          setLoading(false)
+          if (res?.data) {
+            const resType = res.data.type?.toLowerCase() || 'info'
+            alertUserResponse({ response: res })
+            if (resType === 'success') {
+              GridManager.reloadGridData(`ORG_MUNIC_GRID`);
+            }
+          }
+        }).catch((error) => {
+          console.error(error)
+          setLoading(false)
           alertUserResponse({ response: error })
         });
       },
@@ -73,6 +114,7 @@ const OrganizationalUnit = (props, context) => {
 
   return (
     <>
+      {loading && <Loading />}
       {/* INITIAL ORG UNIT CONTAINER */}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
@@ -117,8 +159,8 @@ const OrganizationalUnit = (props, context) => {
                   key={'ORG_MUNIC_GRID'}
                   id={'ORG_MUNIC_GRID'}
                   gridType={'READ_URL'}
-                  configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
-                  dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_ORG_UNITS.OBJECT_ID']}`}
+                  configTableName={`/ReactElements/getTableFieldList/${props.svSession}/NUTS_TERRITORIES`}
+                  dataTableName={`/WsAdminConsole/get/objectsByOU/sid/${props.svSession}/objectIdOU/${row['SVAROG_ORG_UNITS.OBJECT_ID']}/tableName/NUTS_TERRITORIES`}
                   minHeight={500}
                   refreshData={true}
                   toggleCustomButton={true}
@@ -127,7 +169,7 @@ const OrganizationalUnit = (props, context) => {
                   }}
                   customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.assign', defaultMessage: 'perun.admin_console.assign' })}
                   //  missing remove funcc
-                  onRowClickFunct={(_id, _rowIdx, row) => console.log(row)}
+                  onRowClickFunct={(_id, _rowIdx, row) => removeMunicFromOrgUnit(row)}
                 />}
                 {/* HANDLE OLD USER WAY */}
                 {active === 'USER' && <ExportableGrid
