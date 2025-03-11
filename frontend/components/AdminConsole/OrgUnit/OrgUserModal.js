@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import React from "react";
 import { connect } from "react-redux";
 import { alertUserResponse, alertUserV2, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
