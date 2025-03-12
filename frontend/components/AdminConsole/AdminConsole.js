@@ -13,6 +13,7 @@ import GeoLayerTypes from './GeoLayerTypes'
 import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
 import BusinessType from './BusinessType'
+import CodeListEditor from './CodeListComp/CodeListEditor'
 
 const AdminConsole = () => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
@@ -48,6 +49,7 @@ const AdminConsole = () => {
                 {dynamicComponent === 'PerunPluginTable' && <PerunPluginTable />}
                 {dynamicComponent === 'SvarogMenu' && <SvarogMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
+                {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
             </div>
         </div>
     )
