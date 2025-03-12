@@ -3,7 +3,7 @@ import createHashHistory from 'history/createHashHistory'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import { alertUser } from '../../elements'
+import { alertUserResponse } from '../../elements'
 import Modal from '../Modal/Modal'
 import { iconManager } from '../../assets/svg/svgHolder'
 import { Link } from 'react-router-dom'
@@ -55,16 +55,10 @@ class UserGuide extends React.Component {
             }
           }
         }).catch((err) => {
-          if (err) {
-            if (err.data) {
-              if (err.data.type) {
-                alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
-              }
-            }
-          }
+          console.error(err)
+          alertUserResponse({ response: err.response?.data })
         })
       }
-
     }
   }
 
