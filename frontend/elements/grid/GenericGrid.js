@@ -354,18 +354,6 @@ class GenericGrid extends React.Component {
       }
     }
 
-    if (nextProps.saveAllResult && (nextProps.saveAllResult !== this.props.saveAllResult)) {
-      this.setState({ requestPending: false })
-      this.setState({
-        alert: alertUser(
-          true, 'info', nextProps.saveAllResult.title, nextProps.saveAllResult.message,
-          () => {
-            store.dispatch(resetGridEditResponseState(this.state.id))
-            this.setState({ alert: alertUser(false, 'info', ' ') }, () => this.onClearFilters())
-          }, undefined, false, undefined, undefined, false, undefined)
-      })
-    }
-
     // if (nextProps.gridConfig && nextProps.gridData) {
     //   const formattedData = this.formatDates(nextProps.gridConfig, nextProps.gridData)
     //   this.setState({ rows: formattedData })
