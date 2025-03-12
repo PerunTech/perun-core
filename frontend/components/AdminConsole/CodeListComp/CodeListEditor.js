@@ -30,8 +30,11 @@ const CodeListEditor = (props, context) => {
         ComponentManager.cleanComponentReducerState(prevId);
         const gridId = 'CODES_GRID_' + Math.floor(Math.random() * 999999).toString(36)
         prevId = gridId
-        if (!data) {
-            data = 0
+        let dataWs = `/ReactElements/getTableData/${svSession}/SVAROG_CODES/0`
+        let heightRatio = 0.75
+        if (data) {
+            dataWs = `/ReactElements/getObjectsByParentId/${svSession}/${data}/SVAROG_CODES/0`
+            heightRatio = 0.35
         }
         const grid = (
             <ExportableGrid
@@ -39,9 +42,9 @@ const CodeListEditor = (props, context) => {
                 key={gridId}
                 id={gridId}
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_CODES`}
-                dataTableName={`/ReactElements/getObjectsByParentId/${svSession}/${data}/SVAROG_CODES/10000`}
+                dataTableName={dataWs}
                 defaultHeight={false}
-                heightRatio={0.75}
+                heightRatio={heightRatio}
                 refreshData={true}
                 onRowClickFunct={handleRowClick}
                 toggleCustomButton={true}
@@ -198,19 +201,19 @@ const CodeListEditor = (props, context) => {
     return (
         <React.Fragment>
             {loading && <Loading />}
-            <div className='admin-console-code-list-div'>
-                <div className='admin-console-code-list-content-holder'>
-                    {prevO?.length > 1 && <legend className='admin-console-code-list-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.change_code_list', defaultMessage: 'perun.admin_console.change_code_list' })} {arrOP[arrOP?.length - 1]}</legend>}
-                    {prevO?.length > 1 && editChildForm}
-                    {innerGrid}
-                    {prevO?.length > 1 && (
-                        <button className='btn_save_form admin-console-code-list-back-btn' onClick={backButton}>
-                            {context.intl.formatMessage({ id: 'perun.admin_console.back_button', defaultMessage: 'perun.admin_console.back_button' })}
-                        </button>
-                    )}
-                </div>
+            <div className='admin-console-component-header'>
+                <p>{context.intl.formatMessage({ id: 'perun.admin_console.codelist_editor', defaultMessage: 'perun.admin_console.codelist_editor' })}</p>
             </div>
-
+            <div className='admin-console-code-list-content-holder'>
+                {prevO?.length > 1 && <legend className='admin-console-code-list-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.change_code_list', defaultMessage: 'perun.admin_console.change_code_list' })} {arrOP[arrOP?.length - 1]}</legend>}
+                {prevO?.length > 1 && editChildForm}
+                {innerGrid}
+                {prevO?.length > 1 && (
+                    <button className='btn_save_form admin-console-code-list-back-btn' onClick={backButton}>
+                        {context.intl.formatMessage({ id: 'perun.admin_console.back_button', defaultMessage: 'perun.admin_console.back_button' })}
+                    </button>
+                )}
+            </div>
             <Modal
                 className='admin-console-unit-modal'
                 show={show}
