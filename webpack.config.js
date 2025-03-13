@@ -65,6 +65,10 @@ module.exports = (mode) => {
                     test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
                     type: 'asset/resource',
                 },
+                {
+                    test: /\.m?js/,
+                    resolve: { fullySpecified: false }
+                },
             ]
         },
         resolve: {
