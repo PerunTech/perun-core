@@ -14,7 +14,7 @@ export function loginUser(restUrl, method, formData, customData) {
       axios({
         method: method,
         url: restUrl,
-        data: formData,
+        data: JSON.stringify(formData),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       }).then((response) => {
         if (svSessionRegxp(response.data.data.token)) {

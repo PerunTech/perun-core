@@ -55,7 +55,7 @@ const Groups = (props, context) => {
     const handleFormSave = (e, gridId) => {
         axios({
             method: 'post',
-            data: e.formData,
+            data: JSON.stringify(e.formData),
             url: `${window.server}/WsAdminConsole/saveUserGroup/${props.svSession}`,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }).then(res => {

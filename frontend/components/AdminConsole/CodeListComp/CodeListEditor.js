@@ -131,7 +131,7 @@ const CodeListEditor = (props, context) => {
         let restUrl = window.server + '/ReactElements/deleteObject/' + props.svSession + '/false/false'
         axios({
             method: 'post',
-            data: edit,
+            data: JSON.stringify(edit),
             url: restUrl,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }).then((res) => {
@@ -162,7 +162,7 @@ const CodeListEditor = (props, context) => {
 
         axios({
             method: "post",
-            data,
+            data: JSON.stringify(data),
             url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then((res) => {
