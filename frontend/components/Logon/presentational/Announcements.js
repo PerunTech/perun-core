@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Announcement from './Announcement'
-import ShowNotification from './ShowNotifications'
+import Notifications from './Notifications'
 
 const Announcements = (_props, context) => {
   return (
@@ -10,7 +10,7 @@ const Announcements = (_props, context) => {
         <h4 style={{ color: 'black', borderBottom: '3px solid #e8b763' }}>
           {context.intl.formatMessage({ id: 'perun.login.announcements', defaultMessage: 'perun.login.announcements' })}
         </h4>
-        <ShowNotification />
+        <Notifications />
       </div>
       <div className='container-right'>
         <h4 style={{ color: 'black', borderBottom: '3px solid #e8b763' }}>
