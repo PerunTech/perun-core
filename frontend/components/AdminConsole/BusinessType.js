@@ -79,7 +79,7 @@ const BusinessType = (props, context) => {
       url,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data) {
+      if (res?.data) {
         const resType = res.data?.type?.toLowerCase() || 'info'
         alertUserResponse({ type: resType, response: res, onConfirm })
         if (resType === 'success') {
@@ -121,7 +121,7 @@ const BusinessType = (props, context) => {
       url: url,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data) {
+      if (res?.data) {
         const resType = res.data?.type?.toLowerCase() || 'info'
         alertUserResponse({ type: resType, response: res, onConfirm })
         if (resType === 'success') {

@@ -138,7 +138,7 @@ export const downloadFile = (file, svSession, callback) => {
     axios
       .get(url, { responseType: 'blob' })
       .then(res => {
-        const blob = new Blob([res.data], { type: res.data.type });
+        const blob = new Blob([res?.data], { type: res?.data?.type });
         const objectUrl = URL.createObjectURL(blob);
         callback(objectUrl)
       })

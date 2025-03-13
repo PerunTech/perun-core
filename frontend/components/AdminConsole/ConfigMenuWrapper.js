@@ -66,15 +66,13 @@ const ConfigMenuWrapper = (props, context) => {
             url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then((res) => {
-            if (res.data) {
-                if (res.data) {
-                    const resType = res.data?.type?.toLowerCase() || 'info'
-                    alertUserResponse({ type: resType, response: res, onConfirm })
-                    if (resType === 'success') {
-                        GridManager.reloadGridData('SVAROG_PERUN_PLUGIN_GRID')
-                        ComponentManager.setStateForComponent('SVAROG_PERUN_PLUGIN_GRID', null, { rowClicked: undefined })
-                        setShow(false);
-                    }
+            if (res?.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ type: resType, response: res, onConfirm })
+                if (resType === 'success') {
+                    GridManager.reloadGridData('SVAROG_PERUN_PLUGIN_GRID')
+                    ComponentManager.setStateForComponent('SVAROG_PERUN_PLUGIN_GRID', null, { rowClicked: undefined })
+                    setShow(false);
                 }
             }
         }).catch(err => {

@@ -69,7 +69,7 @@ const OrgSearch = (props, context) => {
     data.append("basicData", JSON.stringify(basicData));
     const reqConfig = { method: "post", data, url, headers: { "Content-Type": "application/x-www-form-urlencoded" } };
     axios(reqConfig).then((res) => {
-      if (res.data !== "empty") {
+      if (res?.data !== "empty") {
         let grid = (
           <GenericGrid
             gridType={"SEARCH_GRID_DATA"}
