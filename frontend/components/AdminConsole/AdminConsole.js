@@ -15,7 +15,7 @@ import SvarogMenu from './SvarogMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
 
-const AdminConsole = () => {
+const AdminConsole = (_props, context) => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
     const [json, setJson] = useState([])
     const setDynamicComponentFunction = (comp) => {
@@ -23,7 +23,16 @@ const AdminConsole = () => {
     }
     useEffect(() => {
         getMenu()
+        transformIdScreen()
     }, [])
+    const transformIdScreen = () => {
+        const idScreen = document.getElementById('identificationScreen')
+        if (idScreen) {
+            idScreen.innerText = context.intl.formatMessage({
+                id: 'perun.plugin.system_settings', defaultMessage: 'perun.plugin.system_settings'
+            })
+        }
+    }
     const getMenu = () => {
         const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
         fetch(url).then(res => res.json()).then(json => {

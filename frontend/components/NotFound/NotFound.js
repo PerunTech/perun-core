@@ -1,10 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { iconManager } from '../../assets/svg/svgHolder'
 import createHashHistory from 'history/createHashHistory'
 
 const history = createHashHistory()
 const NotFound = (_props, context) => {
+  useEffect(() => {
+    transformIdScreen()
+  }, [])
+
+  const transformIdScreen = () => {
+    const idScreen = document.getElementById('identificationScreen')
+    if (idScreen) {
+      idScreen.innerText = context.intl.formatMessage({
+        id: 'perun.main.not_found_title', defaultMessage: 'perun.main.not_found_title'
+      })
+    }
+  }
+
   return (
     <div className='not-found-container'>
       <div className='not-found-content'>{iconManager.getIcon('notFound')}</div>
