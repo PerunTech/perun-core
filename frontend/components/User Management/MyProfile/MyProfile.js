@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { GenericForm, axios, createHashHistory, ComponentManager } from '../../../client';
+import { GenericForm, Loading, axios, createHashHistory, ComponentManager } from '../../../client';
 import { iconManager } from '../../../assets/svg/svgHolder';
 import { downloadFile } from '../../../functions/utils';
 import { alertUserV2, alertUserResponse } from '../../../elements';
@@ -11,6 +11,7 @@ import PasswordForm from './PasswordForm';
 
 const MyProfile = (props, context) => {
     const history = createHashHistory()
+    const [loading, setLoading] = useState(false);
     const [img, setImg] = useState(undefined);
     useEffect(() => {
         const idScreen = document.getElementById('identificationScreen')
@@ -23,6 +24,7 @@ const MyProfile = (props, context) => {
     }, []);
 
     const uploadFile = (file) => {
+        setLoading(true);
         const data = new FormData();
         data.append('file', file);
         axios({
@@ -30,7 +32,8 @@ const MyProfile = (props, context) => {
             data: data,
             url: `${window.server}/ReactElements/uploadAvatar/sid/${props.svSession}`,
         }).then(res => {
-            if (res.data) {
+            setLoading(false);
+            if (res?.data) {
                 const resType = res.data?.type?.toLowerCase() || 'info'
                 alertUserResponse({ type: resType, response: res })
                 if (resType === 'success') {
@@ -42,6 +45,7 @@ const MyProfile = (props, context) => {
             }
         }).catch(err => {
             console.error(err);
+            setLoading(false);
             alertUserResponse({ response: err.response?.data })
         });
     }
@@ -107,15 +111,17 @@ const MyProfile = (props, context) => {
         const cancelLabel = context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })
         const onConfirm = () => {
             e.preventDefault()
+            setLoading(true)
             const deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
             const url = window.server + `/ReactElements/deleteObject/${props.svSession}`
             axios({
                 method: "post",
-                data: deleteObj,
+                data: JSON.stringify(deleteObj),
                 url: url,
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
             }).then((res) => {
-                if (res.data) {
+                setLoading(false)
+                if (res?.data) {
                     const resType = res.data?.type?.toLowerCase() || 'info'
                     alertUserResponse({ type: resType, response: res })
                     if (resType === 'success') {
@@ -127,6 +133,7 @@ const MyProfile = (props, context) => {
                 }
             }).catch(err => {
                 console.error(err)
+                setLoading(false)
                 alertUserResponse({ response: err.response?.data })
             });
         }
@@ -175,6 +182,7 @@ const MyProfile = (props, context) => {
     };
     return (
         <div className="my-profile">
+            {loading && <Loading />}
             <div className="my-profile-form-container">
                 <div className="my-profile-icon-holder">
                     <div className="my-profile-avatar">
