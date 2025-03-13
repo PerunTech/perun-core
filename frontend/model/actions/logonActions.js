@@ -40,7 +40,7 @@ export function registerUser(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.registerFulfilled, payload: response.data })
@@ -60,7 +60,7 @@ export function recoverPassword(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.recoverPassFulfilled, payload: response.data })
@@ -80,7 +80,7 @@ export function changePassword(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.changePassFulfilled, payload: response.data })
@@ -100,7 +100,7 @@ export function changeEmail(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.changeEmailFulfilled, payload: response.data })
@@ -120,7 +120,7 @@ export function activateUser(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.activateUserFulfilled, payload: response.data })
@@ -140,7 +140,7 @@ export function activateLink(restUrl, method, formData) {
     axios({
       method: method,
       url: restUrl,
-      data: formData,
+      data: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then((response) => {
       dispatch({ type: a.activateUserFulfilled, payload: response.data })
