@@ -96,7 +96,7 @@ const Users = (props, context) => {
         }).then(res => {
             cleanUpGrids()
             setUsersData(undefined)
-            setUsersData(res.data)
+            setUsersData(res?.data)
             ComponentManager.setStateForComponent(gridId, null, {
                 saveExecuted: false,
             });
