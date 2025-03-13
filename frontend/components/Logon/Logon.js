@@ -8,7 +8,6 @@ import ChangePassword from './composite/ChangePassword'
 import ActivateUser from './composite/ActivateUser'
 import ActivationEmail from './presentational/ActivationEmail';
 import Announcements from './presentational/Announcements';
-import ReportApp from './presentational/ReportApp';
 import RegistrationSso from './presentational/RegisterSSo/RegistrationSso'
 
 const Logon = ({ match }) => {
@@ -56,11 +55,6 @@ const Logon = ({ match }) => {
     case 'ann': {
       return <Configurator key='Configurator' type='LOGIN'>
         <Announcements key='Announcement' />
-      </Configurator>
-    }
-    case 'reportapp': {
-      return <Configurator key='Configurator' type='LOGIN'>
-        <ReportApp key='reportApp' />
       </Configurator>
     }
     case 'register_sso': {
