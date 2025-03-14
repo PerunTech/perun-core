@@ -343,7 +343,9 @@ class DependentElements extends React.Component {
           if (form?.contains(el)) {
             const parentNode = el.parentNode;
             el.value = '';
-            this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            if (parentNode) {
+              this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            }
             this.clearFormData(this.findCoreType(el.id)[1], groupPath);
           }
         });
