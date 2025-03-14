@@ -3,7 +3,7 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { store } from '../../../model'
 import { svConfig } from '../../../config';
-import { Dropdown, ComponentManager } from '../..';
+import { Dropdown, ComponentManager, alertUserResponse } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject } from '../../../functions/utils';
 
@@ -239,6 +239,7 @@ class DependentElements extends React.Component {
           console.error(error);
           this.setState({ loading: false });
           reject(error);
+          alertUserResponse({ response: error.response?.data })
         });
       } else {
         resolve();
@@ -410,8 +411,9 @@ class DependentElements extends React.Component {
             this.generateDropdown(finalResponse, newElement, groupPath)
           }
         }).catch((error) => {
-          console.log(error)
+          console.error(error)
           this.setState({ loading: false })
+          alertUserResponse({ response: error.response?.data })
         })
       }
     }
