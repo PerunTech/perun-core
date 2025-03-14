@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
 import { alertUserV2, ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
@@ -12,6 +12,7 @@ import AddUserWrapper from './AddUserWrapper'
 import EditUserWrapper from './EditUserWrapper'
 import Swal from 'sweetalert2'
 const Users = (props, context) => {
+    const [loading, setLoading] = useState(false)
     const [show, setShow] = useState(false)
     const [row, setRow] = useState(undefined)
     const [active, setActive] = useState('EDIT')
@@ -87,6 +88,7 @@ const Users = (props, context) => {
     };
 
     const searchData = (e, gridId) => {
+        setLoading(true)
         const url = `${window.server}/WsAdminConsole/searchUsers/${props.svSession}`
         axios({
             method: "post",
@@ -94,6 +96,7 @@ const Users = (props, context) => {
             url: url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then(res => {
+            setLoading(false)
             cleanUpGrids()
             setUsersData(undefined)
             setUsersData(res?.data)
@@ -101,6 +104,8 @@ const Users = (props, context) => {
                 saveExecuted: false,
             });
         }).catch(err => {
+            console.error(err)
+            setLoading(false)
             alertUserResponse({ response: err, type: 'error' })
         })
     }
@@ -183,6 +188,7 @@ const Users = (props, context) => {
     }
     return (
         <>
+            {loading && <Loading />}
             <div className='user-mng-users'>
                 <div className='user-mng-search'>
                     {generateForm('SVAROG_USERS', 0, 'search', 'USERS_SEARCH_FORM')}
