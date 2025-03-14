@@ -93,7 +93,7 @@ class DependentElements extends React.Component {
     this.setState({ loading: true })
     axios.get(restUrl).then((response) => {
       this.setState({ loading: false })
-      if (response.data) {
+      if (response?.data) {
         this.generateInitialDropdown(response.data, elementId, selectedVal, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown)
       }
     }).catch((error) => {
@@ -227,7 +227,7 @@ class DependentElements extends React.Component {
         this.setState({ loading: true });
         axios.get(url).then((response) => {
           this.setState({ loading: false });
-          if (response.data) {
+          if (response?.data) {
             let finalResponse = response.data;
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data;
@@ -399,7 +399,7 @@ class DependentElements extends React.Component {
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
           this.setState({ loading: false })
-          if (response.data?.data) {
+          if (response?.data?.data) {
             if (getAdditionalData && additionalDataKey && response?.data?.data?.[additionalDataKey]) {
               store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data?.data?.[additionalDataKey] })
             }
