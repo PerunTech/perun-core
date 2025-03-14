@@ -38,7 +38,7 @@ const Users = (props, context) => {
         ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
         ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
     }
-    const generateForm = (tableName, objectId, formType, gridId) => {
+    const generateForm = (tableName, objectId, formType, formId) => {
         let inputWrapper = null;
         let classNames = '';
         let label = '';
@@ -71,12 +71,12 @@ const Users = (props, context) => {
         return (
             <GenericForm
                 params="READ_URL"
-                key={gridId}
-                id={gridId}
+                key={formId}
+                id={formId}
                 method={method}
                 uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
                 tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
-                addSaveFunction={(e) => saveFunction(e, gridId)}
+                addSaveFunction={(e) => saveFunction(e, formId)}
                 hideBtns="closeAndDelete"
                 className={classNames}
                 inputWrapper={inputWrapper}
@@ -87,7 +87,7 @@ const Users = (props, context) => {
         );
     };
 
-    const searchData = (e, gridId) => {
+    const searchData = (e, formId) => {
         setLoading(true)
         const url = `${window.server}/WsAdminConsole/searchUsers/${props.svSession}`
         axios({
@@ -100,7 +100,7 @@ const Users = (props, context) => {
             cleanUpGrids()
             setUsersData(undefined)
             setUsersData(res?.data)
-            ComponentManager.setStateForComponent(gridId, null, {
+            ComponentManager.setStateForComponent(formId, null, {
                 saveExecuted: false,
             });
         }).catch(err => {
@@ -109,7 +109,7 @@ const Users = (props, context) => {
             alertUserResponse({ response: err, type: 'error' })
         })
     }
-    const handleSave = (e, gridId) => {
+    const handleSave = (e, formId) => {
         let url = `${window.server}/WsAdminConsole/editUser/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}`
         axios({
             method: "post",
@@ -119,13 +119,13 @@ const Users = (props, context) => {
         }).then((res) => {
             alertUserResponse({ response: res })
             refreshGrid()
-            ComponentManager.setStateForComponent(gridId, null, {
+            ComponentManager.setStateForComponent(formId, null, {
                 saveExecuted: false,
             });
         }).catch(err => {
             alertUserResponse({ response: err, type: 'error' })
             refreshGrid()
-            ComponentManager.setStateForComponent(gridId, null, {
+            ComponentManager.setStateForComponent(formId, null, {
                 saveExecuted: false,
             });
         });
