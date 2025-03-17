@@ -15,7 +15,7 @@
     "prop-types": "^15.6.0",
     "query-string": "^6.12.1",
     "react": "^16.14.0",
-    "react-bootstrap": "^1.0.1",
+    "react-bootstrap": "^2.10.9",
     "react-data-grid": "^5.0.4",
     "react-data-grid-addons": "4.0.8",
     "react-dom": "^16.14.0",
