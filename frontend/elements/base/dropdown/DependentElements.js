@@ -239,7 +239,7 @@ class DependentElements extends React.Component {
           console.error(error);
           this.setState({ loading: false });
           reject(error);
-          alertUserResponse({ response: error.response?.data })
+          alertUserResponse({ response: error })
         });
       } else {
         resolve();
@@ -415,7 +415,7 @@ class DependentElements extends React.Component {
         }).catch((error) => {
           console.error(error)
           this.setState({ loading: false })
-          alertUserResponse({ response: error.response?.data })
+          alertUserResponse({ response: error })
         })
       }
     }
