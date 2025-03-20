@@ -81,7 +81,7 @@ const AssignAcl = (props, context) => {
     const params = { manage: actionType, aclCode: aclList, groupObjId: groupType };
 
     try {
-      const response = await axios.post(postUrl, params, {
+      const response = await axios.post(postUrl, JSON.stringify(params), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
