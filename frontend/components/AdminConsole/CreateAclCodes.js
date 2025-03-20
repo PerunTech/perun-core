@@ -51,7 +51,7 @@ const CreateAclCodes = ({ svSession }, context) => {
     const params = { aclCode, accessType };
 
     try {
-      const response = await axios.post(restUrl, params, {
+      const response = await axios.post(restUrl, JSON.stringify(params), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
