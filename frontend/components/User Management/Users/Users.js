@@ -99,7 +99,7 @@ const Users = (props, context) => {
             setLoading(false)
             cleanUpGrids()
             setUsersData(undefined)
-            setUsersData(res?.data)
+            setUsersData(res?.data || [])
             ComponentManager.setStateForComponent(formId, null, {
                 saveExecuted: false,
             });
