@@ -26,7 +26,7 @@ const AssignAcl = (props, context) => {
     const url = `${window.server}/WsAdminConsole/getAllGroups/${props.svSession}`;
     try {
       const response = await axios.get(url);
-      if (response.data?.data) {
+      if (response?.data?.data) {
         setAllGroups(response.data.data);
       }
     } catch (error) {
@@ -86,7 +86,7 @@ const AssignAcl = (props, context) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
-      if (response.data) {
+      if (response?.data) {
         const { type } = response.data;
         const resType = type?.toLowerCase() || 'info'
         alertUserResponse({ response: response.data });
