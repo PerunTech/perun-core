@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { alertUser, ReactBootstrap } from '../../elements';
+import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../elements';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 
@@ -31,9 +31,7 @@ const AssignAcl = (props, context) => {
       }
     } catch (error) {
       console.error(error);
-      if (error.response?.data?.type) {
-        alertUser(true, error.response.data.type.toLowerCase(), error.response.data.message);
-      }
+      alertUserResponse({ response: error })
     }
   };
 
@@ -73,7 +71,10 @@ const AssignAcl = (props, context) => {
     const { actionType, aclList, groupType } = formData;
 
     if (!actionType || !aclList || !groupType) {
-      alertUser(true, 'info', context.intl.formatMessage({ id: 'perun.admin_console.fill_inputs', defaultMessage: 'Please fill in all required fields' }));
+      alertUserV2({
+        type: 'info',
+        title: context.intl.formatMessage({ id: 'perun.admin_console.fill_inputs', defaultMessage: 'perun.admin_console.fill_inputs' })
+      })
       return;
     }
 
@@ -86,18 +87,17 @@ const AssignAcl = (props, context) => {
       });
 
       if (response.data) {
-        const { type, message } = response.data;
-        alertUser(true, type.toLowerCase(), message);
-        if (type === 'SUCCESS') {
+        const { type } = response.data;
+        const resType = type?.toLowerCase() || 'info'
+        alertUserResponse({ response: response.data });
+        if (resType === 'success') {
           setFormData({ actionType: '', aclList: '', groupType: '' });
           props.setAssignFlag(false)
         }
       }
     } catch (err) {
-      const errorData = err.response?.data;
-      if (errorData?.type && errorData?.message) {
-        alertUser(true, errorData.type.toLowerCase(), errorData.message);
-      }
+      console.error(err)
+      alertUserResponse({ response: err })
     }
   };
 

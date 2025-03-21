@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { alertUser, GridManager } from '../../elements';
+import { alertUserResponse, alertUserV2, GridManager } from '../../elements';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 
@@ -43,7 +43,10 @@ const CreateAclCodes = ({ svSession }, context) => {
     const { aclCode, accessType } = formData;
 
     if (!aclCode || !accessType) {
-      alertUser(true, 'info', context.intl.formatMessage({ id: 'perun.admin_console.fill_inputs', defaultMessage: 'perun.admin_console.fill_inputs' }));
+      alertUserV2({
+        type: 'info',
+        title: context.intl.formatMessage({ id: 'perun.admin_console.fill_inputs', defaultMessage: 'perun.admin_console.fill_inputs' })
+      })
       return;
     }
 
@@ -56,18 +59,17 @@ const CreateAclCodes = ({ svSession }, context) => {
       });
 
       if (response.data) {
-        const { type, message } = response.data;
-        if (type === 'SUCCESS') {
+        const { type } = response.data;
+        const resType = type?.toLowerCase() || 'info'
+        alertUserResponse({ response: response.data });
+        if (resType === 'success') {
           setFormData({ aclCode: '', accessType: '' });
           GridManager.reloadGridData('SVAROG_ACL');
         }
-        alertUser(true, type.toLowerCase(), message);
       }
     } catch (err) {
-      const errorData = err.response?.data;
-      if (errorData?.type && errorData?.message) {
-        alertUser(true, errorData.type.toLowerCase(), errorData.message);
-      }
+      console.error(err)
+      alertUserResponse({ response: err })
     }
   };
 
