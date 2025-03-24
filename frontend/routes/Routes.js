@@ -4,18 +4,18 @@ import createHashHistory from 'history/createHashHistory';
 import { Loading, Footer, HomeMenu } from 'components/ComponentsIndex';
 import { connect } from 'react-redux';
 
-class Routes extends React.Component {
-    render() {
-        return <ReactRouter history={createHashHistory({ basename: '/' })} >
+const Routes = (props) => {
+    return (
+        <ReactRouter history={createHashHistory({ basename: '/' })} >
             <Suspense fallback={<Loading />}>
-                {this.props.fetchingRoutes ? <Loading /> : (
+                {props.fetchingRoutes ? <Loading /> : (
                     <React.Fragment>
                         <HomeMenu />
                         <Switch>
                             <Redirect exact from='/' to='/home/login' /> {/* this can be moved to our Home route, on top. */}
                             {/* ------------------------------------------------------------------------------ */}
                             {/* Render all routes currently registered with our Router. */}
-                            {Object.values(this.props.routes).map(route => route)}
+                            {Object.values(props.routes).map(route => route)}
                             {/* ------------------------------------------------------------------------------ */}
                             <Redirect exact from='*' to='/404' />
                         </Switch>
@@ -24,10 +24,12 @@ class Routes extends React.Component {
                 )}
             </Suspense>
         </ReactRouter>
-    }
+    )
 }
 
-export default connect(state => ({
+const mapStateToProps = (state) => ({
     routes: state.routes,
     fetchingRoutes: state.routes.loading,
-}))(Routes);
+})
+
+export default connect(mapStateToProps)(Routes);
