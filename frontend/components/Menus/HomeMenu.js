@@ -135,8 +135,9 @@ const HomeMenu = (props, context) => {
 };
 
 HomeMenu.propTypes = {
-  svSession: PropTypes.object,
+  svSession: PropTypes.string,
 };
+
 HomeMenu.contextTypes = {
   intl: PropTypes.object.isRequired
 }
