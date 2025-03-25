@@ -135,7 +135,7 @@ window.core = { React, ReactDOM, Provider, connect, Link, router, pluginManager,
 /* ---- */
 /* Init */
 /* ---- */
-const app = document.getElementById('body');
+const app = document.getElementById('app');
 let persistConfig = {}
 let whitelist = []
 let indexReducer = 0
