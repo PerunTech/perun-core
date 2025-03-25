@@ -1,4 +1,5 @@
-import React from 'react'
+/* eslint-disable */
+import React, { useEffect, useReducer } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
@@ -6,51 +7,39 @@ import createHashHistory from 'history/createHashHistory'
 import { store, logoutUser, isValidObject } from '../../model';
 import { alertUserResponse } from '../../elements'
 import { svConfig } from '../../config';
-import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
 import PerunNavbar from '../Navbar/PerunNavbar'
-// main menu top- tells the Main app parent which function needs to be dispatched
-// or which grid should be shown in the main content
-class MainMenu extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      navbarImgJson: [],
-      languageOptions: [],
-      stateTooltip: this.props.stateTooltip,
-      isActive: false,
-      createdUrl: false,
-      currentUser: '',
-      activeLanguage: ''
-    }
-    this.hashHistory = createHashHistory()
-    this.getCurrentUser = this.getCurrentUser.bind(this)
-  }
 
-  componentDidMount() {
-    this.getNavbarImgJson()
-    this.getLanguageOptions()
-    this.getLocale()
-    this.getCurrentUser()
-  }
+const MainMenu = (props) => {
+  const hashHistory = createHashHistory()
+  const initialState = { navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '' }
+  const reducer = (currState, update) => ({ ...currState, ...update })
+  const [{ navbarImgJson, languageOptions, currentUser, activeLanguage }, setState] = useReducer(reducer, initialState)
 
-  getNavbarImgJson() {
+  useEffect(() => {
+    getNavbarImgJson()
+    getLanguageOptions()
+    getLocale()
+    getCurrentUser()
+  }, [])
+
+  const getNavbarImgJson = () => {
     const url = `${window.location.origin}${window.assets}/json/config/NavbarImg.json`
     fetch(url).then(res => res.json()).then(json => {
-      this.setState({ navbarImgJson: json })
+      setState({ navbarImgJson: json })
     }).catch(err => { throw err })
   }
 
-  getLanguageOptions() {
+  const getLanguageOptions = () => {
     const url = `${window.location.origin}${window.assets}/json/config/LanguageOptions.json`
     fetch(url).then(res => res.json()).then(json => {
-      this.setState({ languageOptions: json })
+      setState({ languageOptions: json })
     }).catch(err => { throw err })
   }
 
-  getCurrentUser() {
-    const verbPath = `SvSecurity/getPersonalUserInfo/${this.props.token}/user_info`
+  const getCurrentUser = () => {
+    const verbPath = `SvSecurity/getPersonalUserInfo/${props.token}/user_info`
     const url = `${window.server}/${verbPath}`
     axios.get(url).then(res => {
       if (res?.data && res?.data?.data) {
@@ -64,7 +53,7 @@ class MainMenu extends React.Component {
           values.forEach(value => {
             if (value.USER_NAME) {
               Object.assign(userData, { username: value.USER_NAME })
-              this.setState({ currentUser: value.USER_NAME })
+              setState({ currentUser: value.USER_NAME })
             }
           })
         }
@@ -101,14 +90,14 @@ class MainMenu extends React.Component {
     })
   }
 
-  onSamlLogout = () => {
+  const onSamlLogout = () => {
     axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
       if (res.data?.data) {
         const configuration = res.data.data
         if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
           const sloConfig = configuration.sso_config
           const sloFormKey = sloConfig.SLO_FORM_KEY
-          const sloFormValue = sloConfig.SLO_FORM_VALUE.replace('{session}', this.props.token);
+          const sloFormValue = sloConfig.SLO_FORM_VALUE.replace('{session}', props.token);
           const sloMethod = sloConfig.SLO_METHOD
           const sloUrl = sloConfig.SLO_URL
           axios.get(`${window.server}${sloFormValue}`).then(res => {
@@ -126,27 +115,27 @@ class MainMenu extends React.Component {
     })
   }
 
-  logout = () => {
-    if (this.props?.samlFlag) {
-      this.onSamlLogout()
+  const logout = () => {
+    if (props?.samlFlag) {
+      onSamlLogout()
     } else {
-      const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + this.props.token
+      const restUrl = svConfig.restSvcBaseUrl + svConfig.triglavRestVerbs.CORE_LOGOUT + props.token
       store.dispatch(logoutUser(restUrl))
-      this.hashHistory.push('/')
+      hashHistory.push('/')
     }
   }
 
-  getLocale = () => {
+  const getLocale = () => {
     const locale = cookies.getCookie('defaultLocale')
-    this.setState({ activeLanguage: locale })
+    setState({ activeLanguage: locale })
   }
 
-  changeLang = (locale, lang) => {
-    this.switchServerLanguage(lang, locale)
+  const changeLang = (locale, lang) => {
+    switchServerLanguage(lang, locale)
   }
 
-  switchServerLanguage = (lang, locale) => {
-    let url = window.server + `/SvSecurity/i18n/${lang}/perun/${this.props.token}`
+  const switchServerLanguage = (lang, locale) => {
+    let url = window.server + `/SvSecurity/i18n/${lang}/perun/${props.token}`
     axios.get(url).then(() => {
       if (locale) {
         changeLanguageAndLocale(locale, lang)
@@ -156,13 +145,11 @@ class MainMenu extends React.Component {
     })
   }
 
-  render() {
-    return (
-      <React.Fragment>
-        <PerunNavbar logout={this.logout} location={window.location} />
-      </React.Fragment>
-    )
-  }
+  return (
+    <React.Fragment>
+      <PerunNavbar logout={logout} location={window.location} />
+    </React.Fragment>
+  )
 }
 
 MainMenu.contextTypes = {
@@ -170,7 +157,6 @@ MainMenu.contextTypes = {
 }
 
 const mapStateToProps = state => ({
-  stateTooltip: state.stateTooltip.stateTooltip,
   token: state.security.svSession,
   samlFlag: state.security?.saml
 })
