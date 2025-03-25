@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 
 const generateHtmlOptions = (options) => {
   const htmlOptions = options.map((element) => (<option
@@ -57,7 +57,8 @@ export const Dropdown = ({
         </label>
       }
       <select
-        data-tip={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
+        data-tooltip-id={`${id}-tooltip`}
+        data-tooltip-content={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
         id={id}
         name={name}
         value={value}
@@ -82,7 +83,7 @@ export const Dropdown = ({
       >
         {htmlOptions}
       </select>
-      <ReactTooltip event='click focus' globalEventOff='keypress' offset={{ left: 45, top: 8 }} id={id + '_tooltip'} />
+      <Tooltip event='click focus' globalEventOff='keypress' id={`${id}-tooltip`} />
     </div>
   )
 }
