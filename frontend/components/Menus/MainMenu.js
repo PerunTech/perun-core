@@ -3,7 +3,7 @@ import React, { useEffect, useReducer } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import { store, logoutUser, isValidObject } from '../../model';
 import { alertUserResponse } from '../../elements'
 import { svConfig } from '../../config';

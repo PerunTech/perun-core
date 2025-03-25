@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import { alertUserResponse } from '../../../elements';
 import LogonActions from '../functional/LogonActions'
 import Loading from 'components/Loading/Loading'

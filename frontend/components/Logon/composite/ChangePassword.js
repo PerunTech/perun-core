@@ -6,7 +6,7 @@ import Loading from 'components/Loading/Loading'
 import { Link } from 'react-router-dom'
 import * as utils from '../utils'
 import * as config from 'config/config.js'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import { getCapsLockState } from '../../../functions/utils';
 
 class ChangePassword extends React.Component {

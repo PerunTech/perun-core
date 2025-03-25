@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { iconManager } from '../../assets/svg/svgHolder'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 
 const history = createHashHistory()
 const NotFound = (_props, context) => {

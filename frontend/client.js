@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
 import { generatePath } from 'react-router'
-import createHashHistory from 'history/createHashHistory';
+import { createHashHistory } from 'history';
 /* i18n */
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';

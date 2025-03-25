@@ -1,5 +1,5 @@
 import React from 'react'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import { connect } from 'react-redux'

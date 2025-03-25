@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Router as ReactRouter, Switch, Redirect } from 'react-router-dom';
-import createHashHistory from 'history/createHashHistory';
+import { createHashHistory } from 'history';
 import { Loading, Footer, HomeMenu } from 'components/ComponentsIndex';
 import { connect } from 'react-redux';
 
