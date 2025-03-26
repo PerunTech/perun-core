@@ -9,17 +9,16 @@ const SideMenu = (props, context) => {
         if (props.json && Array.isArray(props.json)) {
             return props.json.map(el => {
                 return (
-                    <>
-                        <div
-                            className={activeElement === el.component ? 'admin-console-side-item active' : 'admin-console-side-item'}
-                            onClick={() => (onButtonClick(el))}
-                        >
-                            {iconManager.getIcon(el.icon) && <span className={'sidemenu-dynamic-comp-icon-holder'}>{iconManager.getIcon(el.icon)}</span>}<p>{context.intl.formatMessage({
-                                id: `perun.admin_console.${el.id}`,
-                                defaultMessage: `perun.admin_console.${el.id}`
-                            })}</p>
-                        </div>
-                    </>
+                    <div
+                        key={el.id}
+                        className={activeElement === el.component ? 'admin-console-side-item active' : 'admin-console-side-item'}
+                        onClick={() => (onButtonClick(el))}
+                    >
+                        {iconManager.getIcon(el.icon) && <span className={'sidemenu-dynamic-comp-icon-holder'}>{iconManager.getIcon(el.icon)}</span>}<p>{context.intl.formatMessage({
+                            id: `perun.admin_console.${el.id}`,
+                            defaultMessage: `perun.admin_console.${el.id}`
+                        })}</p>
+                    </div>
                 );
 
             });
