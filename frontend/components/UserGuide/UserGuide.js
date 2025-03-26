@@ -49,9 +49,14 @@ class UserGuide extends React.Component {
       } else {
         url = window.server + '/PublicWs/getGuides/' + this.props.svSession + '/UserGuideJson'
         axios.get(url).then((response) => {
-          if (response.data) {
-            if (response.data.data) {
-              this.iterateDocs(response.data.data)
+          if (response?.data) {
+            const resType = response.data?.type?.toLowerCase() || 'info'
+            if (resType !== 'success') {
+              alertUserResponse({ response: response.data })
+            } else {
+              if (response.data?.data) {
+                iterateDocs(response.data.data)
+              }
             }
           }
         }).catch((err) => {
