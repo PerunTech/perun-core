@@ -191,11 +191,8 @@ class GenericGrid extends React.Component {
       case 'DropDownFormatter':
         if (editorOptions !== null && editorOptions !== undefined) {
           retval = <DropDownFormatter value='' options={editorOptions} />
-        } else {
-          console.log('FS bad config')
         }
         break
-
       default:
         retval = null
     }
@@ -272,11 +269,6 @@ class GenericGrid extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    // Refresh state if new labels are loaded
-    // if (nextProps.gridLang && (this.props.gridLang !== nextProps.gridLang)) {
-    //   this.forceUpdate()
-    // }
-
     for (const key in nextProps) {
       const value = nextProps[key]
       this.setState({ [key]: value })
@@ -353,11 +345,6 @@ class GenericGrid extends React.Component {
         this.updateRowsAfterSave(this, nextProps)
       }
     }
-
-    // if (nextProps.gridConfig && nextProps.gridData) {
-    //   const formattedData = this.formatDates(nextProps.gridConfig, nextProps.gridData)
-    //   this.setState({ rows: formattedData })
-    // }
   }
 
   updateRowsAfterSave(comp, nextProps) {
@@ -368,11 +355,9 @@ class GenericGrid extends React.Component {
     let filteredRows = comp.state.filteredRows
     if (filteredRows && filteredRows.constructor === Array) {
       if (filteredRows.length > 0) {
-        // ComponentManager.setStateForComponent(this.state.id, null, 'reloadGrid', true)
         this.getGridData()
       }
     } else {
-      // rows = comp.state.gridData.slice()
       rows[rowId] = savedObject
       this.setState({ gridData: rows })
     }
@@ -381,8 +366,6 @@ class GenericGrid extends React.Component {
   onSelectedRowsChange(rows) {
     if (this.state.onSelectChangeFunct !== null && this.state.onSelectChangeFunct !== undefined) {
       this.state.onSelectChangeFunct(rows, this.state.id)
-    } else {
-      console.log('running local change')
     }
   }
 
@@ -617,12 +600,6 @@ class GenericGrid extends React.Component {
     if (this.state.active && this.state.handleRowUpdatedFunct) {
       this.setState({ requestPending: true })
       let rows = Selectors.getRows(this.state)
-      /* const filteredRows = this.state.filteredRows
-      if (filteredRows && filteredRows.constructor === Array) {
-        if (filteredRows.length > 0) {
-          rows = filteredRows.slice()
-        }
-      } */
       this.state.handleRowUpdatedFunct(this, rows, commit.fromRow, commit.updated)
     } else {
       console.warn('No inline grid save function provided. No default function found.')
