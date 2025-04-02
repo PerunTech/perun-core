@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import { isHTML } from './utils'
 
 export const alertUserV2 = (params) => {
   const {
@@ -46,12 +47,18 @@ export const alertUserResponse = (params) => {
   if (!alertType && status > 200) {
     alertType = 'error'
   }
-  const title = response?.response?.data?.title || response?.data?.title || response?.title || response
-  const message = response?.response?.data?.message || response?.data?.message || response?.message || ''
+  let title = response?.response?.data?.title || response?.data?.title || response?.title || response
+  let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
+  const responseIsHtml = isHTML(response)
+  if (responseIsHtml) {
+    title = ''
+    message = ''
+  }
   Swal.fire({
     icon: alertType,
     title,
     text: message,
+    html: responseIsHtml && response,
     allowOutsideClick: false,
     heightAuto: false,
     confirmButtonColor: confirmButtonColor || '#7cd1f9'

@@ -1,8 +1,8 @@
-export function $ (x) {
+export function $(x) {
   return document.getElementById(x)
 }
 
-export function replaceConfigParamsWithFieldVals (string, session) {
+export function replaceConfigParamsWithFieldVals(string, session) {
   string = string.replace('{token}', session)
   const array = string.split('/')
   for (let i = 0; i < array.length; i++) {
@@ -17,7 +17,7 @@ export function replaceConfigParamsWithFieldVals (string, session) {
 
 /* Recursively find a key in the form data object which needs to be modified.
 the function converts the string into an array format - splitting by "," */
-export function convertStringToArrayInFormData (dataObject, property) {
+export function convertStringToArrayInFormData(dataObject, property) {
   let result = null
   for (const key in dataObject) {
     if (key === property) {
@@ -36,11 +36,11 @@ export function convertStringToArrayInFormData (dataObject, property) {
 
 /* Recursively check if there is a multiselection dropdown list enabled
 in the UI schema field, and return the field name, if any is found */
-export function findWidget (schemaObject, key, widget) {
+export function findWidget(schemaObject, key, widget) {
   let result = null
   for (const property in schemaObject) {
     if (schemaObject[property][key] &&
-    schemaObject[property][key] === widget) {
+      schemaObject[property][key] === widget) {
       return property
     }
     if (schemaObject[property] instanceof Object) {
@@ -54,7 +54,7 @@ export function findWidget (schemaObject, key, widget) {
 }
 
 /* Returns the section name of the nested field */
-export function findSectionName (schemaObject, field) {
+export function findSectionName(schemaObject, field) {
   let result = null
   for (const property in schemaObject) {
     if (schemaObject[property][field]) {
@@ -68,4 +68,13 @@ export function findSectionName (schemaObject, field) {
     }
   }
   return result
+}
+
+// Check if a given string is valid/pure HTML
+export const isHTML = (str) => {
+  const fragment = document.createRange().createContextualFragment(str)
+  // Remove all non text nodes from the fragment
+  fragment.querySelectorAll('*').forEach(el => el.parentNode.removeChild(el))
+  // If there is textContent, then the string is not pure HTML
+  return !(fragment.textContent || '').trim()
 }
