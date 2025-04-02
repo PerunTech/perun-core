@@ -55,7 +55,7 @@ class UserGuide extends React.Component {
               alertUserResponse({ response: response.data })
             } else {
               if (response.data?.data) {
-                iterateDocs(response.data.data)
+                this.iterateDocs(response.data.data)
               }
             }
           }
