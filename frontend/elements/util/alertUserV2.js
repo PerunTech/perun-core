@@ -42,6 +42,7 @@ export const alertUserV2 = (params) => {
 
 export const alertUserResponse = (params) => {
   const { response, type, onConfirm, confirmButtonColor } = params
+  const finalResponse = response?.response?.data || response?.data || response
   const status = response?.status || 500
   let alertType = type || response?.response?.data?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || response?.type?.toLowerCase() || ''
   if (!alertType && status > 200) {
@@ -49,7 +50,7 @@ export const alertUserResponse = (params) => {
   }
   let title = response?.response?.data?.title || response?.data?.title || response?.title || response
   let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
-  const responseIsHtml = isHTML(response)
+  const responseIsHtml = isHTML(finalResponse)
   if (responseIsHtml) {
     title = ''
     message = ''
@@ -58,7 +59,7 @@ export const alertUserResponse = (params) => {
     icon: alertType,
     title,
     text: message,
-    html: responseIsHtml && response,
+    html: responseIsHtml && finalResponse,
     allowOutsideClick: false,
     heightAuto: false,
     confirmButtonColor: confirmButtonColor || '#7cd1f9'
