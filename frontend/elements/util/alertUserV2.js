@@ -41,9 +41,13 @@ export const alertUserV2 = (params) => {
 
 export const alertUserResponse = (params) => {
   const { response, type, onConfirm, confirmButtonColor } = params
-  const alertType = type || response?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || ''
-  const title = response?.title || response?.data?.title || response
-  const message = response?.message || response?.data?.message || ''
+  const status = response?.status || 500
+  let alertType = type || response?.response?.data?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || response?.type?.toLowerCase() || ''
+  if (!alertType && status > 200) {
+    alertType = 'error'
+  }
+  const title = response?.response?.data?.title || response?.data?.title || response?.title || response
+  const message = response?.response?.data?.message || response?.data?.message || response?.message || ''
   Swal.fire({
     icon: alertType,
     title,
