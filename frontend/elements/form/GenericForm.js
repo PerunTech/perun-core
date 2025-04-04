@@ -7,7 +7,7 @@ import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
 import { labelBasePath } from '../../config/config';
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
-import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser, alertUserV2, alertUserResponse } from '..';
+import { WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUserV2, alertUserResponse } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
@@ -313,99 +313,13 @@ class GenericForm extends React.Component {
       const value = nextProps[key]
       this.setState({ [key]: value })
     }
+
     if (this.state.dataFormName !== nextProps.dataFormName || this.state.configFormName !== nextProps.configFormName ||
       this.state.params !== nextProps.params) {
       getFormData(
         nextProps.id, 'FORM', nextProps.method, nextProps.uiSchemaConfigMethod, nextProps.tableFormDataMethod,
         nextProps.session, nextProps.params
       )
-    }
-    if (this.state.saveExecuted === true) {
-      if (nextProps.saveFormResponse) {
-        let type
-        if (nextProps.saveFormType) {
-          type = nextProps.saveFormType.toLowerCase()
-        }
-        this.setState({
-          saveExecuted: false,
-          alert: alertUser(true, type || 'success',
-            nextProps.saveFormTitle || this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.data_save_success`, defaultMessage: `${labelBasePath}.main.forms.data_save_success` }),
-            nextProps.saveFormMessage || '', () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined)
-        },
-          () => {
-            getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod,
-              this.state.tableFormDataMethod, this.state.session, nextProps.params)
-            ComponentManager.setStateForComponent(this.state.id, null, {
-              saveFormResponse: undefined,
-              saveFormType: undefined,
-              saveFormTitle: undefined,
-              saveFormMessage: undefined
-            })
-          }
-        )
-      } else if (nextProps.saveFormError) {
-        let errorData
-        let errorMsg
-        let errorTitle
-        if (nextProps.saveFormError.title && nextProps.saveFormError.message) {
-          errorTitle = nextProps.saveFormError.title
-          errorMsg = nextProps.saveFormError.message
-        } else {
-          errorData = nextProps.saveFormError.response.data
-          errorTitle = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.data_save_error`, defaultMessage: `${labelBasePath}.main.forms.data_save_error` })
-          if (errorData.Error_Message !== undefined) {
-            errorMsg = this.context.intl.formatMessage({ id: errorData.Error_Message, defaultMessage: errorData.Error_Message })
-          } else {
-            errorMsg = 'Save Failed'
-          }
-        }
-        this.setState({
-          saveExecuted: false,
-          alert: alertUser(true, 'error',
-            errorTitle, errorMsg, () => { }, undefined, false, undefined, undefined, false, undefined)
-        },
-          () => { ComponentManager.setStateForComponent(this.state.id, 'saveFormError', undefined) }
-        )
-      }
-    }
-    if (this.state.deleteExecuted === true) {
-      if (nextProps.saveFormResponse) {
-        this.setState({
-          deleteExecuted: false,
-          alert: alertUser(true, 'success',
-            this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.record_deleted_success`, defaultMessage: `${labelBasePath}.main.forms.record_deleted_success` }),
-            '', () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined)
-        },
-          () => {
-            getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod,
-              this.state.tableFormDataMethod, this.state.session, nextProps.params)
-            ComponentManager.setStateForComponent(this.state.id, 'saveFormResponse', undefined)
-          }
-        )
-      } else if (nextProps.saveFormError) {
-        const errorData = nextProps.saveFormError.response.data
-        let errorMSG
-        if (errorData.Error_Message !== undefined) {
-          errorMSG = this.context.intl.formatMessage({ id: errorData.Error_Message, defaultMessage: errorData.Error_Message })
-        } else if (errorData.startsWith('ERROR')) {
-          let err = errorData.split(',')[1]
-          let newErrorMSG = err.split(':')[1]
-          errorMSG = this.context.intl.formatMessage({ id: newErrorMSG, defaultMessage: newErrorMSG })
-        } else {
-          errorMSG = 'Delete Failed'
-        }
-        this.setState(
-          {
-            deleteExecuted: false,
-            alert: alertUser(
-              true, 'error',
-              this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.record_deleted_error`, defaultMessage: `${labelBasePath}.main.forms.record_deleted_error` }),
-              errorMSG, () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined
-            )
-          },
-          () => { ComponentManager.setStateForComponent(this.state.id, 'saveFormError', undefined) }
-        )
-      }
     }
 
     if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
