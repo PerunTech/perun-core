@@ -323,15 +323,15 @@ class GenericForm extends React.Component {
     }
 
     if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
-      alertUserResponse({ response: nextProps.formData?.response?.data })
+      alertUserResponse({ response: nextProps.formData?.response })
     }
 
     if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
-      alertUserResponse({ response: nextProps.uischema?.response?.data })
+      alertUserResponse({ response: nextProps.uischema?.response })
     }
 
     if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
-      alertUserResponse({ response: nextProps.formTableData?.response?.data })
+      alertUserResponse({ response: nextProps.formTableData?.response })
     }
 
     if (this.props.uischema !== nextProps.uischema) {

@@ -316,14 +316,14 @@ class GenericGrid extends React.Component {
 
     if (this.props.gridConfigLoaded !== nextProps.gridConfigLoaded || this.props.gridConfig !== nextProps.gridConfig) {
       if (nextProps.gridConfigLoaded === false && nextProps.gridConfig.constructor !== Array) {
-        alertUserResponse({ response: nextProps.gridConfig?.response?.data })
+        alertUserResponse({ response: nextProps.gridConfig?.response })
         this.setState({ hideLoader: true })
       }
     }
 
     if (this.props.gridDataLoaded !== nextProps.gridDataLoaded || this.props.gridData !== nextProps.gridData) {
       if (nextProps.gridDataLoaded === false && nextProps.gridData.constructor !== Array) {
-        alertUserResponse({ response: nextProps.gridData?.response?.data })
+        alertUserResponse({ response: nextProps.gridData?.response })
         this.setState({ hideLoader: true })
       }
     }
