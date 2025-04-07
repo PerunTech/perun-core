@@ -69,12 +69,3 @@ export function findSectionName(schemaObject, field) {
   }
   return result
 }
-
-// Check if a given string is valid/pure HTML
-export const isHTML = (str) => {
-  const fragment = document.createRange().createContextualFragment(str)
-  // Remove all non text nodes from the fragment
-  fragment.querySelectorAll('*').forEach(el => el.parentNode.removeChild(el))
-  // If there is textContent, then the string is not pure HTML
-  return !(fragment.textContent || '').trim()
-}

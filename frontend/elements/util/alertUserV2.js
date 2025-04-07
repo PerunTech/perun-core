@@ -1,5 +1,4 @@
 import Swal from 'sweetalert2'
-import { isHTML } from './utils'
 
 export const alertUserV2 = (params) => {
   const {
@@ -43,6 +42,7 @@ export const alertUserV2 = (params) => {
 export const alertUserResponse = (params) => {
   const { response, type, onConfirm, confirmButtonColor } = params
   const finalResponse = response?.response?.data || response?.data || response
+  const responseContentType = response?.response?.headers?.['content-type'] || response?.headers?.['content-type'] || ''
   const status = response?.status || 500
   let alertType = type || response?.response?.data?.type?.toLowerCase() || response?.data?.type?.toLowerCase() || response?.type?.toLowerCase() || ''
   if (!alertType && status > 200) {
@@ -50,7 +50,7 @@ export const alertUserResponse = (params) => {
   }
   let title = response?.response?.data?.title || response?.data?.title || response?.title || response
   let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
-  const responseIsHtml = isHTML(finalResponse)
+  const responseIsHtml = responseContentType.includes('text/html')
   if (responseIsHtml) {
     title = ''
     message = ''
