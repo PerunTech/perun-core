@@ -31,14 +31,6 @@ export const Button = ({
         type={type}
         className={`btn ${className}`}
         onClick={onClick}
-        data-delay-hide='1000'
-        data-event='mouseover'
-        data-event-off='mouseout'
-        data-class='tooltips'
-        data-type='error'
-        data-place='right'
-        data-effect='solid'
-        data-for={id}
         disabled={disabled}
       >{label}
       </button>

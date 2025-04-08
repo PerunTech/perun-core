@@ -50,12 +50,12 @@ export const Dropdown = ({
   }
   return (
     <div className={classnames(`form-group custom-dropdown-container ${containerClassName}`, { 'has-error': error })} style={style} >
-      {
-        labelText && <label className='control-label' htmlFor={id}>
+      {labelText && (
+        <label className='control-label' htmlFor={id}>
           {labelText}
           {required && <span className='required'>*</span>}
         </label>
-      }
+      )}
       <select
         data-tooltip-id={`${id}-tooltip`}
         data-tooltip-content={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
@@ -69,14 +69,6 @@ export const Dropdown = ({
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onBlur={onBlur}
-        data-delay-hide='1000'
-        data-event='mouseover'
-        data-event-off='mouseout'
-        data-class='tooltips'
-        data-type='error'
-        data-place='right'
-        data-effect='solid'
-        data-for={id}
         disabled={disabled}
         required={required}
         maxLength={maxlength}
