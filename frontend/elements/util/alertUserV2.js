@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import { isJSON } from '../../functions/utils'
 
 export const alertUserV2 = (params) => {
   const {
@@ -50,7 +51,9 @@ export const alertUserResponse = (params) => {
   }
   let title = response?.response?.data?.title || response?.data?.title || response?.title || response
   let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
-  const responseIsHtml = responseContentType.includes('text/html')
+  // Check if the response Content-Type header includes text/html
+  // The additional check whether the response is JSON is needed since some services return JSON with the Content-Type set to text/html
+  const responseIsHtml = responseContentType.includes('text/html') && !isJSON(finalResponse)
   if (responseIsHtml) {
     title = ''
     message = ''
