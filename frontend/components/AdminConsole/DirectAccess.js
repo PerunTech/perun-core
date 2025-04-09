@@ -24,9 +24,10 @@ const DirectAccess = (props, context) => {
     const yesLabel = context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' })
     const noLabel = context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' })
     const alertParams = {
-      type: 'info',
+      type: 'question',
       title: directAccessChangeLabel,
       confirmButtonText: yesLabel,
+      confirmButtonColor: '#87adbd',
       onConfirm: onSave,
       showCancel: true,
       cancelButtonText: noLabel

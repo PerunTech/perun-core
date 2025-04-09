@@ -15,10 +15,11 @@ const OrgUserModal = (props, context) => {
     const confirm = context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })
     const cancel = context.intl.formatMessage({ id: 'perun.admin_console.cancel', defaultMessage: 'perun.admin_console.cancel' })
     alertUserV2({
-      type: 'info',
+      type: 'question',
       title,
       message,
       confirmButtonText: confirm,
+      confirmButtonColor: '#87adbd',
       onConfirm: () => assignUser(row),
       showCancel: true,
       cancelButtonText: cancel

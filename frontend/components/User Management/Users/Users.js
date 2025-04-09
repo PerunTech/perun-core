@@ -153,10 +153,11 @@ const Users = (props, context) => {
             }).catch(err => alertUserResponse({ response: err, type: 'error' }));
         }
         const alertParams = {
-            type: 'info',
+            type: 'question',
             title: question,
             message: label,
             confirmButtonText: yesLabel,
+            confirmButtonColor: '#87adbd',
             onConfirm,
             showCancel: true,
             cancelButtonText: noLabel

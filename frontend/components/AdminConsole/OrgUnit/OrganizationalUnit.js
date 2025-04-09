@@ -50,10 +50,10 @@ const OrganizationalUnit = (props, context) => {
   const getTabClass = (tab) => (tab === active ? 'user-control active' : 'user-control');
   const removeUserFromOrgUnit = (currentRow) => {
     alertUserV2({
-      type: 'warning',
+      type: 'question',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_user', defaultMessage: 'perun.admin_console.unassign_user' })}`,
       confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign', defaultMessage: 'perun.admin_console.unassign' })}`,
-      confirmButtonColor: '#8d230f',
+      confirmButtonColor: '#87adbd',
       onConfirm: () => {
         setLoading(true)
         const { svSession } = props;
@@ -79,10 +79,10 @@ const OrganizationalUnit = (props, context) => {
   };
   const removeMunicFromOrgUnit = (currentRow) => {
     alertUserV2({
-      type: 'warning',
+      type: 'question',
       title: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign_munic', defaultMessage: 'perun.admin_console.unassign_munic' })}`,
       confirmButtonText: `${context.intl.formatMessage({ id: 'perun.admin_console.unassign', defaultMessage: 'perun.admin_console.unassign' })}`,
-      confirmButtonColor: '#8d230f',
+      confirmButtonColor: '#87adbd',
       onConfirm: () => {
         setLoading(true)
         const { svSession } = props;
