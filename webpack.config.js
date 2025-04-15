@@ -1,10 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = (mode) => {
+module.exports = (env, params) => {
     return {
-        ...mode.NODE_ENV !== 'production' && { devtool: 'source-map' },
-        mode: mode.NODE_ENV,
+        ...env.SOURCE_MAP === 'true' && { devtool: 'source-map' },
+        mode: params.mode,
         entry: './frontend/client.js',
         output: {
             path: path.resolve('./www'),
