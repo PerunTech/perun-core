@@ -43,7 +43,7 @@ after_script:
     - rm -rf node_modules
     - npm install
     - rm -rf www/*.js
-    - npm run build-dev
+    - npm run build
     #- cd backend
     # - ls -al www/
     - pwd
