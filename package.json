@@ -70,7 +70,7 @@
   "scripts": {
     "build": "cross-env webpack --mode=production --env NODE_ENV=production SOURCE_MAP=false DEBUG=false --progress",
     "build-dev": "cross-env webpack --mode=production --env NODE_ENV=development SOURCE_MAP=true DEBUG=true --progress",
-    "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --hot --progress",
+    "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --env DEBUG=true --hot --progress",
     "test": "eslint --fix frontend/ || exit 0"
   },
   "author": "Perun Tech",
