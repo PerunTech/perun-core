@@ -27,7 +27,8 @@ module.exports = (env, params) => {
                 process: 'process/browser',
             }),
             new webpack.DefinePlugin({
-                'process.env.DEBUG': JSON.stringify(env.DEBUG)
+                'process.env.DEBUG': JSON.stringify(env.DEBUG),
+                'process.env.MODE': JSON.stringify(params.mode),
             })
         ],
         module: {

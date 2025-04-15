@@ -12,7 +12,7 @@ import createReducers from './createReducers';
 import { svConfig } from '../config';
 
 export function configureStore() {
-  const composeEnhancers = (process.env.NODE_ENV !== 'production' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
+  const composeEnhancers = (process.env.MODE !== 'production' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
   let middleware = null
   if (svConfig.isDebug) {
     middleware = applyMiddleware(magicAsyncMiddleware, promise, thunk, logger())
