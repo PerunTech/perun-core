@@ -17,7 +17,7 @@ const AddUserWrapper = (props, context) => {
         formData['PASSWORD_HASH'] = md5(data.userPassword).toUpperCase()
         formData['CONFIRM_PASSWORD_HASH'] = md5(data.confUserPassword).toUpperCase()
         const url = `${window.server}/WsAdminConsole/saveUser/${props.svSession}`
-        axios.post(url, JSON.stringify(formData), { headers: { "Content-Type": "application/x-www-form-urlencoded" } })
+        axios.post(url, encodeURIComponent(JSON.stringify(formData)), { headers: { "Content-Type": "application/x-www-form-urlencoded" } })
             .then(res => {
                 setLoading(false)
                 alertUserResponse({ response: res })

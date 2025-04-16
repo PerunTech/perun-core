@@ -92,7 +92,7 @@ const Users = (props, context) => {
         const url = `${window.server}/WsAdminConsole/searchUsers/${props.svSession}`
         axios({
             method: "post",
-            data: JSON.stringify(e.formData),
+            data: encodeURIComponent(JSON.stringify(e.formData)),
             url: url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then(res => {
