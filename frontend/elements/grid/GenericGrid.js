@@ -26,9 +26,6 @@ const { DropDownFormatter } = Formatters
 
 /**
  * Represents a instance of a grid. All data from this instance is published in a reducer identified by this instance's ID parameter.
- * @author KNI
- * @version 2.0
- * @class
  */
 class GenericGrid extends React.Component {
   /**
@@ -201,14 +198,10 @@ class GenericGrid extends React.Component {
   }
 
   /**
- * Convert dates from string into javascript short date format
- * @author KNI
- * @version 1.0
- * @function
- * PARAMETERS
- * @param {JSON} gridConfig - the grid configuration object
- * @param {JSON} gridData - grid data object
- */
+   * Convert dates from string into javascript short date format
+   * @param {JSON} gridConfig - the grid configuration object
+   * @param {JSON} gridData - grid data object
+   */
   formatDates(gridConfig, gridData) {
     for (let c = 0; c < gridConfig.length; c++) {
       if (gridConfig[c].datetype) {

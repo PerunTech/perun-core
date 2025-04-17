@@ -4,10 +4,8 @@ import { ReducerTemplater, ComponentManager } from '.';
 import { dataToRedux, publishState, store, injectAsyncReducer, removeAsyncReducer } from '../model';
 
 /**
- * A function that will wrap a react component and return a ComposedComponent. A reducer will be created for every component wrapped according to the either the props.id of the component itself or the parameter sent to this function
- * @author GPE
- * @version 0.9
- * @function
+ * A function that will wrap a react component and return a ComposedComponent.
+ * A reducer will be created for every component wrapped according to the either the props.id of the component itself or the parameter sent to this function
  */
 export function WrapItUp(ComposedComponent, typeOfComponent, id, isPersistent, storeKeys) {
   /**
