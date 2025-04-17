@@ -17,11 +17,11 @@ export function loginUser(restUrl, method, formData, customData) {
         data: JSON.stringify(formData),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       }).then((response) => {
-        if (svSessionRegxp(response.data.data.token)) {
+        if (svSessionRegxp(response?.data?.data?.token)) {
           dispatch({ type: a.loginFulfilled, payload: response.data })
           switchServerLanguage(cookies.getCookie('defaultLocale'), response.data.data.token)
         } else {
-          dispatch({ type: a.loginRejected, payload: response.data })
+          dispatch({ type: a.loginRejected, payload: response?.data })
         }
       }).catch((error) => {
         // error
