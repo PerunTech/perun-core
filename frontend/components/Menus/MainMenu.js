@@ -85,7 +85,7 @@ const MainMenu = (props) => {
         store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: userData })
       }
     }).catch(err => {
-      console.log(err)
+      console.error(err)
       alertUserResponse({ response: err.response })
     })
   }

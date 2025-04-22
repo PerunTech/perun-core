@@ -92,7 +92,7 @@ const NotificationsComponent = (props, context) => {
         }
       }
     }).catch((err) => {
-      console.log(err)
+      console.error(err)
       setState({ loading: false })
       alertUserResponse({ response: err.response })
     })
@@ -116,7 +116,7 @@ const NotificationsComponent = (props, context) => {
         }
       }
     }).catch(err => {
-      console.log(err)
+      console.error(err)
       setState({ loading: false })
       alertUserResponse({ response: err.response })
     })

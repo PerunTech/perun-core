@@ -97,7 +97,7 @@ class DependentElements extends React.Component {
         this.generateInitialDropdown(response.data, elementId, selectedVal, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown)
       }
     }).catch((error) => {
-      console.log(error)
+      console.error(error)
       this.setState({ loading: false })
     })
   }
