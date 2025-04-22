@@ -6,7 +6,8 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended"
     ],
     "settings": {
         "react": {
@@ -33,6 +34,7 @@
         "requireConfigFile": false
     },
     "plugins": [
+        "react",
         "react-hooks"
     ],
     "rules": {
