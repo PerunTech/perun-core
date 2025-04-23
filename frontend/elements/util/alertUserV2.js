@@ -32,7 +32,7 @@ export const alertUserV2 = (params) => {
     timerProgressBar: timerProgressBar ?? false,
     toast: toast ?? false,
     position: position || 'center',
-    target
+    target: target || 'body'
   }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
