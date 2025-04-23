@@ -6,15 +6,16 @@ export const alertUserV2 = (params) => {
     type, title, message, allowOutsideClick, allowEscapeKey, html,
     showConfirm, onConfirm, confirmButtonColor, confirmButtonText,
     showCancel, onCancel, cancelButtonColor, cancelButtonText,
-    showDeny, onDeny, denyButtonColor, denyButtonText
+    showDeny, onDeny, denyButtonColor, denyButtonText, reverseButtons,
+    timer, timerProgressBar, toast, position, target
   } = params
 
   Swal.fire({
     icon: type,
     title,
     text: message,
-    allowOutsideClick: allowOutsideClick || false,
-    allowEscapeKey: allowEscapeKey || true,
+    allowOutsideClick: allowOutsideClick ?? false,
+    allowEscapeKey: allowEscapeKey ?? true,
     html,
     showConfirmButton: showConfirm ?? true,
     confirmButtonText: confirmButtonText || 'OK',
@@ -26,7 +27,12 @@ export const alertUserV2 = (params) => {
     denyButtonText,
     denyButtonColor,
     heightAuto: false,
-    reverseButtons: true
+    reverseButtons: reverseButtons ?? true,
+    timer: timer ?? false,
+    timerProgressBar: timerProgressBar ?? false,
+    toast: toast ?? false,
+    position: position || 'center',
+    target
   }).then(value => {
     if (value.isConfirmed && onConfirm instanceof Function) {
       onConfirm()
