@@ -86,7 +86,7 @@ const MainMenu = (props) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response })
+      alertUserResponse({ response: err })
     })
   }
 
@@ -107,7 +107,7 @@ const MainMenu = (props) => {
             }
           }).catch(err => {
             console.error(err)
-            alertUserResponse({ response: err.response })
+            alertUserResponse({ response: err })
           })
         }
       }

@@ -77,7 +77,7 @@ const SvarogMenuWrapper = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response, onConfirm })
+      alertUserResponse({ response: err, onConfirm })
     });
   };
 

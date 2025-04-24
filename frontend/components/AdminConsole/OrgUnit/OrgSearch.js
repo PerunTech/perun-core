@@ -88,7 +88,7 @@ const OrgSearch = (props, context) => {
       }
     }).catch((err) => {
       console.error(err)
-      alertUserResponse({ response: err.response?.data })
+      alertUserResponse({ response: err })
     });
   };
 

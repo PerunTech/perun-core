@@ -34,7 +34,7 @@ const BusinessType = (props, context) => {
     }).catch(err => {
       setState({ loading: false })
       console.error(err)
-      alertUserResponse({ response: err.response })
+      alertUserResponse({ response: err })
     })
   }
 
@@ -89,7 +89,7 @@ const BusinessType = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response, onConfirm })
+      alertUserResponse({ response: err, onConfirm })
     })
   }
 
@@ -131,7 +131,7 @@ const BusinessType = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response, onConfirm })
+      alertUserResponse({ response: err, onConfirm })
     })
   }
 

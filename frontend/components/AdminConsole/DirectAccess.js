@@ -62,7 +62,7 @@ const DirectAccess = (props, context) => {
     }).catch(error => {
       console.error(error)
       setState({ loading: false })
-      alertUserResponse({ response: error.response?.data })
+      alertUserResponse({ response: error })
     })
   }
 
@@ -105,7 +105,7 @@ const DirectAccess = (props, context) => {
     }).catch((error) => {
       console.error(error)
       setState({ loading: false })
-      alertUserResponse({ response: error.response?.data })
+      alertUserResponse({ response: error })
     })
   }
 
@@ -120,7 +120,7 @@ const DirectAccess = (props, context) => {
     }).catch((error) => {
       console.error(error)
       setState({ loading: false })
-      alertUserResponse({ response: error.response?.data })
+      alertUserResponse({ response: error })
     })
   }
 

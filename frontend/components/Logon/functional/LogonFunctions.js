@@ -104,7 +104,7 @@ export default function LogonFunctions(TargetComponent, validationString, method
         }).catch(err => {
           console.error(err)
           this.setState({ loading: false })
-          alertUserResponse({ response: err.response })
+          alertUserResponse({ response: err })
         })
       }
     }

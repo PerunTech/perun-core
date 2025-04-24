@@ -45,7 +45,7 @@ const RegistrationSso = (_props, context) => {
             }
         }).catch(err => {
             console.error(err)
-            alertUserResponse({ response: err.response })
+            alertUserResponse({ response: err })
         });
     }
 

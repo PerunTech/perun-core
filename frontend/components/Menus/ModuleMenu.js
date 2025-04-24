@@ -75,7 +75,7 @@ class ModuleMenu extends React.Component {
       }
     }).catch((err) => {
       console.error(err)
-      alertUserResponse({ response: err.response })
+      alertUserResponse({ response: err })
     })
   }
 

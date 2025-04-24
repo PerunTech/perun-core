@@ -61,7 +61,7 @@ class UserGuide extends React.Component {
           }
         }).catch((err) => {
           console.error(err)
-          alertUserResponse({ response: err.response?.data })
+          alertUserResponse({ response: err })
         })
       }
     }

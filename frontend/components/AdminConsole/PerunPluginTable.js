@@ -71,7 +71,7 @@ const PerunPluginTable = (props, context) => {
             }
         }).catch(err => {
             console.error(err)
-            alertUserResponse({ response: err.response, onConfirm })
+            alertUserResponse({ response: err, onConfirm })
         });
     };
     //create record form
@@ -115,7 +115,7 @@ const PerunPluginTable = (props, context) => {
             }
         }).catch(err => {
             console.error(err)
-            alertUserResponse({ response: err.response, onConfirm })
+            alertUserResponse({ response: err, onConfirm })
         });
     };
 

@@ -69,7 +69,7 @@ const SvarogMenu = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response, onConfirm })
+      alertUserResponse({ response: err, onConfirm })
     });
   };
 
@@ -112,7 +112,7 @@ const SvarogMenu = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
-      alertUserResponse({ response: err.response, onConfirm })
+      alertUserResponse({ response: err, onConfirm })
     })
   }
 
