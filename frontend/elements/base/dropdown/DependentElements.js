@@ -438,21 +438,23 @@ class DependentElements extends React.Component {
       hidden: true
     }]
 
-    // Create dropdown options
-    for (let i = 0; i < dbDataArray.items.length; i++) {
-      let decodedValue = dbDataArray.items[i]['LBL_TRANSL']
-      let selected = false
-      if (selectedVal && selectedVal === dbDataArray.items[i]['CODE_VALUE']) {
-        selected = true
+    if (dbDataArray.items && Array.isArray(dbDataArray.items)) {
+      // Create dropdown options
+      for (let i = 0; i < dbDataArray.items.length; i++) {
+        let decodedValue = dbDataArray.items[i]['LBL_TRANSL']
+        let selected = false
+        if (selectedVal && selectedVal === dbDataArray.items[i]['CODE_VALUE']) {
+          selected = true
+        }
+        options.push({
+          id: dbDataArray.items[i]['object_id'],
+          key: dbDataArray.items[i]['object_id'],
+          name: dbDataArray.items[i]['CODE_VALUE'],
+          value: dbDataArray.items[i]['CODE_VALUE'],
+          text: decodedValue,
+          selected: selected
+        })
       }
-      options.push({
-        id: dbDataArray.items[i]['object_id'],
-        key: dbDataArray.items[i]['object_id'],
-        name: dbDataArray.items[i]['CODE_VALUE'],
-        value: dbDataArray.items[i]['CODE_VALUE'],
-        text: decodedValue,
-        selected: selected
-      })
     }
 
     // Generate the dropdown selector, labels and icons
