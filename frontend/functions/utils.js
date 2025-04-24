@@ -147,3 +147,22 @@ export const downloadFile = (file, svSession, callback) => {
       });
   }
 };
+
+/**
+ * Recursively searches an object for a value corresponding to a specified key.
+ *
+ * This function checks if the target key exists at the top level of the object.
+ * If not, it recursively checks all nested objects for the target key and returns the value if found.
+ * If the key is not found in any nested object, it returns `undefined`.
+ *
+ * @param {Object} obj - The object to search within. Can be a deeply nested object.
+ * @param {string} target - The key to search for in the object.
+ * @returns {any} The value associated with the target key, or `undefined` if the key is not found.
+**/
+export const getObjectValueByKey = (obj, target) =>
+  target in obj
+    ? obj[target]
+    : Object.values(obj).reduce((acc, val) => {
+      if (acc !== undefined) return acc;
+      if (typeof val === 'object') return getObjectValueByKey(val, target);
+    }, undefined);

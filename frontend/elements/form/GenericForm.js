@@ -11,7 +11,7 @@ import { WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUserV2,
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
-import { isValidObject } from '../../functions/utils';
+import { getObjectValueByKey, isValidObject } from '../../functions/utils';
 let fieldName
 let fieldValue
 
@@ -96,7 +96,8 @@ class GenericForm extends React.Component {
   }
 
   GPSCoordinate = props => {
-    const { value, readonly, disabled, autofocus, onBlur, onFocus, ...inputProps } = props;
+    const { formTableData } = this.props
+    const { value, name, readonly, disabled, autofocus, onBlur, onFocus, ...inputProps } = props;
     const defaultValue = `${'00'}°${'00'}'${'00'}''`
 
     const pad = string => {
@@ -142,13 +143,19 @@ class GenericForm extends React.Component {
       return props.onChange(format(e.target.value))
     }
 
+    let inputValue = value === undefined || value === null ? defaultValue : value
+    const formDataValue = getObjectValueByKey(formTableData, name)
+    if (formDataValue && !inputValue) {
+      inputValue = formDataValue
+    }
+
     return <input
       className='form-control'
       type='text'
       readOnly={readonly}
       disabled={disabled}
       autoFocus={autofocus}
-      value={value === undefined || value === null ? defaultValue : value}
+      value={inputValue}
       {...inputProps}
       onChange={_onChange}
       onBlur={onBlur && (event => onBlur(inputProps.id, event.target.value))}
