@@ -1,4 +1,4 @@
-export default function gridConfig (state = {
+export default function gridConfig(state = {
   gridHierarchy: []
   // other initial state...
 }, action) {
@@ -22,7 +22,7 @@ export default function gridConfig (state = {
         grid: action.payload
       }) // add a new object
 
-      return {...state, [action.group]: currGrids}
+      return { ...state, [action.group]: currGrids }
     }
     case 'REMOVEGRID': {
       // GPE:This should probably be changed in order to be REDUX compliant
@@ -40,12 +40,12 @@ export default function gridConfig (state = {
           }
         }
       }
-      return {...state, [action.group]: currGrids}
+      return { ...state, [action.group]: currGrids }
     }
 
     case 'CLEAN_GRIDS': {
       // GPE:This should probably be changed in order to be REDUX compliant
-      return {...state, [action.group]: undefined}
+      return { ...state, [action.group]: undefined }
     }
 
     case 'ADD_LAST_SELECTED_ITEM': {
@@ -82,7 +82,7 @@ export default function gridConfig (state = {
       })) {
         allGrids.push(lastSelectedItem)
       }
-      return {...state, gridHierarchy: allGrids}
+      return { ...state, gridHierarchy: allGrids }
     }
 
     case 'SWITCH_SELECTED_ITEM': {
@@ -98,15 +98,15 @@ export default function gridConfig (state = {
           }
         }
       }
-      return {...state, gridHierarchy: gridHierarchy}
+      return { ...state, gridHierarchy: gridHierarchy }
     }
 
     case 'CLEAN_ALL_SELECTED_ITEMS': {
-      return {...state, gridHierarchy: []}
+      return { ...state, gridHierarchy: [] }
     }
 
     case 'REPLACE_ALL_SELECTED_ITEMS': {
-      return {...state, gridHierarchy: action.payload}
+      return { ...state, gridHierarchy: action.payload }
     }
 
     default: {
@@ -115,8 +115,8 @@ export default function gridConfig (state = {
   }
 }
 
-function removeNumbersFromStringAndCutWhereFirstNumIsFound (string) {
-  var formattedString = string.split('_')
+function removeNumbersFromStringAndCutWhereFirstNumIsFound(string) {
+  let formattedString = string.split('_')
   if (formattedString.length > 1) {
     for (let j = 0; j < formattedString.length; j++) {
       if (!isNaN(parseFloat(formattedString[j + 1]))) {

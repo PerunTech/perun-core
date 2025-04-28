@@ -78,7 +78,7 @@ export function dataToReduxMain(callback, reducer, reduxKey, verb, ...args) {
   // main payload
   if (isFullState && reducer !== null) {
     const obj = {}
-    for (var key in request) {
+    for (const key in request) {
       if (key !== 'dispatch' && key !== 'authData' && key !== 'children') {
         const value = request[key]
         if (!(value instanceof React.Component) && !(typeof value === 'function')) { obj[key] = value }
