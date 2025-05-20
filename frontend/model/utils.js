@@ -122,30 +122,6 @@ export function cloneObject(obj) {
   return clonedObj;
 }
 
-export function isValidArray(array, minNumberOfElements) {
-  /** returns true if the variable passsed as the first parameter is an array and
-  there are at least X number of elements in the array, where X is the second function parameter
-  minNumberOfElements is an optional parameter if the function should check if the array
-  contains any number of elements */
-  if (minNumberOfElements) {
-    return (array && array.constructor === Array && array.length >= minNumberOfElements)
-  } else {
-    return (array && array.constructor === Array)
-  }
-}
-
-export function isValidObject(object, minNumberOfKeys) {
-  /** returns true if the variable passsed as the first parameter is an object and
-    there are at least X number of keys in the object, where X is the second function parameter
-    minNumberOfKeys is an optional parameter if the function should check if the object
-    contains any number of elements */
-  if (minNumberOfKeys) {
-    return (object && object.constructor === Object && Object.keys(object).length >= minNumberOfKeys)
-  } else {
-    return (object && object.constructor === Object)
-  }
-}
-
 /**
  * Check if two values are strings & have the same value (i.e. compare them)
  * 
@@ -163,22 +139,6 @@ export function strcmp(firstValue, secondValue) {
   } else {
     return false
   }
-}
-
-/**
- * Flattens a nested object
- * @param  {object} obj The object that needs to be flattened
- */
-export function flattenObject(obj) {
-  const flattened = {}
-  Object.keys(obj).forEach((key) => {
-    if (strcmp(typeof obj[key], 'object') && obj[key] !== null) {
-      Object.assign(flattened, flattenObject(obj[key]))
-    } else {
-      flattened[key] = obj[key]
-    }
-  })
-  return flattened
 }
 
 export function errTolastError(state, action) {

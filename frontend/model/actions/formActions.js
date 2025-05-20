@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { svConfig } from '../../config';
-import { store, cloneObject, isValidObject } from '..';
+import { store, cloneObject } from '..';
+import { isValidObject } from '../../functions/utils'
 
 export function getFormData(id, reduxKey, formName, uiSchema, formTableData, session, params) {
   let verbPath

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { svConfig } from '../../config';
-import { isValidObject, isValidArray } from '..';
+import { isValidObject, isValidArray } from '../../functions/utils';
 
 function getPath(gridid, url, session, params, gridType) {
   let axiosPath = ''

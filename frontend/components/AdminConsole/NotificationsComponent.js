@@ -6,7 +6,7 @@ import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
-import { flattenObject } from '../../model/utils'
+import { flattenObject } from '../../functions/utils'
 import validator from '@rjsf/validator-ajv8'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
