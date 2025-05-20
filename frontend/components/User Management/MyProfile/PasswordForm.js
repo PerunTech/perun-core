@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import { iconManager } from '../../../assets/svg/svgHolder';
-import { strcmp } from '../../../model/utils';
+import { strcmp } from '../../../functions/utils';
 import Swal from 'sweetalert2';
 import md5 from 'md5';
 import { alertUserResponse } from '../../../elements';
