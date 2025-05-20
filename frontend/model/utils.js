@@ -122,6 +122,65 @@ export function cloneObject(obj) {
   return clonedObj;
 }
 
+export function isValidArray(array, minNumberOfElements) {
+  /** returns true if the variable passsed as the first parameter is an array and
+  there are at least X number of elements in the array, where X is the second function parameter
+  minNumberOfElements is an optional parameter if the function should check if the array
+  contains any number of elements */
+  if (minNumberOfElements) {
+    return (array && array.constructor === Array && array.length >= minNumberOfElements)
+  } else {
+    return (array && array.constructor === Array)
+  }
+}
+
+export function isValidObject(object, minNumberOfKeys) {
+  /** returns true if the variable passsed as the first parameter is an object and
+    there are at least X number of keys in the object, where X is the second function parameter
+    minNumberOfKeys is an optional parameter if the function should check if the object
+    contains any number of elements */
+  if (minNumberOfKeys) {
+    return (object && object.constructor === Object && Object.keys(object).length >= minNumberOfKeys)
+  } else {
+    return (object && object.constructor === Object)
+  }
+}
+
+/**
+ * Check if two values are strings & have the same value (i.e. compare them)
+ * 
+ * The `localeCompare` method on the `String` interface returns `0` if the values are equal &
+ * a negative (`-1` for example) or a positive number (`1` for example) if the first value is shorter or longer than the second one, respectively
+ * 
+ * @param {any} firstValue The first value to be checked & compared
+ * @param {any} secondValue The second value to be checked & compared
+ */
+export function strcmp(firstValue, secondValue) {
+  // First, check if both of the values are strings
+  if ((typeof firstValue === 'string' && typeof secondValue === 'string') || (firstValue instanceof String && secondValue instanceof String)) {
+    // If both of the values are strings, compare them & return the result as a boolean value
+    return firstValue.localeCompare(secondValue, undefined, { sensitivity: 'base' }) === 0 ? true : false
+  } else {
+    return false
+  }
+}
+
+/**
+ * Flattens a nested object
+ * @param  {object} obj The object that needs to be flattened
+ */
+export function flattenObject(obj) {
+  const flattened = {}
+  Object.keys(obj).forEach((key) => {
+    if (strcmp(typeof obj[key], 'object') && obj[key] !== null) {
+      Object.assign(flattened, flattenObject(obj[key]))
+    } else {
+      flattened[key] = obj[key]
+    }
+  })
+  return flattened
+}
+
 export function errTolastError(state, action) {
   // replace action type name from / to _ so it can get the name of the global var
   const actionTypeName = action.type.replace('/', '_').split('_ERROR')[0]

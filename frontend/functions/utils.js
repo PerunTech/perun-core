@@ -1,5 +1,6 @@
 import { ComponentManager } from '../elements'
 import { store, updateSelectedRows, lastSelectedItem } from '../model'
+import { strcmp } from '../model/utils'
 import axios from 'axios'
 export const replaceParamsWithBoundPropVals = (string, props) => {
   let array = string.split('/')
@@ -15,41 +16,6 @@ export const replaceParamsWithBoundPropVals = (string, props) => {
   }
   string = array.join('/')
   return string
-}
-
-/**
- * Check if two values are strings & have the same value (i.e. compare them)
- * 
- * The `localeCompare` method on the `String` interface returns `0` if the values are equal &
- * a negative (`-1` for example) or a positive number (`1` for example) if the first value is shorter or longer than the second one, respectively
- * 
- * @param {any} firstValue The first value to be checked & compared
- * @param {any} secondValue The second value to be checked & compared
- */
-export function strcmp(firstValue, secondValue) {
-  // First, check if both of the values are strings
-  if ((typeof firstValue === 'string' && typeof secondValue === 'string') || (firstValue instanceof String && secondValue instanceof String)) {
-    // If both of the values are strings, compare them & return the result as a boolean value
-    return firstValue.localeCompare(secondValue, undefined, { sensitivity: 'base' }) === 0 ? true : false
-  } else {
-    return false
-  }
-}
-
-/**
- * Flattens a nested object
- * @param  {object} obj The object that needs to be flattened
- */
-export function flattenObject(obj) {
-  const flattened = {}
-  Object.keys(obj).forEach((key) => {
-    if (strcmp(typeof obj[key], 'object') && obj[key] !== null) {
-      Object.assign(flattened, flattenObject(obj[key]))
-    } else {
-      flattened[key] = obj[key]
-    }
-  })
-  return flattened
 }
 
 export function isJSON(value) {

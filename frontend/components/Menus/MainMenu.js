@@ -4,8 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import axios from 'axios'
 import { createHashHistory } from 'history'
-import { store, logoutUser } from '../../model';
-import { isValidObject } from '../../functions/utils'
+import { store, logoutUser, isValidObject } from '../../model';
 import { alertUserResponse } from '../../elements'
 import { svConfig } from '../../config';
 import * as cookies from '../../functions/cookies'

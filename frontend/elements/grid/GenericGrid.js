@@ -13,7 +13,8 @@ import { customRowRenderer } from './RowRenderer';
 import { customRowRendererSecondary } from './RowRendererSecondary';
 import { GridManager } from '..';
 import { iconManager } from '../../assets/svg/svgHolder'
-import { isValidArray, isValidObject, strcmp } from '../../functions/utils';
+import { isValidArray, isValidObject } from '../../functions/utils';
+import { strcmp } from '../../model/utils';
 
 const { ContextMenuTrigger } = Menu
 const { Selectors } = Data
