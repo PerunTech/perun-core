@@ -1,7 +1,6 @@
 export {
     svSessionRegxp, flattenJson, ConvertObjectKeysToUpperCase, replaceSpecialCharsInJson,
-    goBack, changeUndefinedObjectProperty, findObjInJSONbyKey, cloneObject, isValidArray,
-    isValidObject
+    goBack, changeUndefinedObjectProperty, findObjInJSONbyKey, cloneObject
 } from './utils';
 
 export { busyToFalse, dataToRedux, dataToReduxMain } from './dataToRedux';

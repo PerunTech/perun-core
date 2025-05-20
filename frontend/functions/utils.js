@@ -18,6 +18,22 @@ export const replaceParamsWithBoundPropVals = (string, props) => {
   return string
 }
 
+/**
+ * Flattens a nested object
+ * @param  {object} obj The object that needs to be flattened
+ */
+export function flattenObject(obj) {
+  const flattened = {}
+  Object.keys(obj).forEach((key) => {
+    if (strcmp(typeof obj[key], 'object') && obj[key] !== null) {
+      Object.assign(flattened, flattenObject(obj[key]))
+    } else {
+      flattened[key] = obj[key]
+    }
+  })
+  return flattened
+}
+
 export function isJSON(value) {
   value = !strcmp(typeof value, 'string') ? JSON.stringify(value) : value
   try {
