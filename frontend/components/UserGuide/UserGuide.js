@@ -187,7 +187,13 @@ class UserGuide extends React.Component {
   }
 
   isCloseUserGuide = () => {
-    this.props.history.go(-1)
+    const { history } = this.props
+    // If the history size is larger than 2, it means the user has already been navigating through the app
+    if (history.length > 2) {
+      history.goBack()
+    } else {
+      history.push('/main')
+    }
   }
 
   render() {
