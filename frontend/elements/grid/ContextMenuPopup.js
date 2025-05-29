@@ -35,8 +35,15 @@ function copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect) {
   saveCopiedValueToClipboard(cellValue)
 }
 
-function saveCopiedValueToClipboard(value) {
-  navigator.clipboard.writeText(value)
+function saveCopiedValueToClipboard(string) {
+  /* next, we have to create a hidden element and and set the string row as value
+  so we can save it to clipboard, because thats how javascript does it */
+  const el = document.createElement('textarea')
+  el.value = string
+  document.body.appendChild(el)
+  el.select()
+  document.execCommand('copy')
+  document.body.removeChild(el)
 }
 
 const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect, editContextFunc }, context) => {
