@@ -4,6 +4,7 @@ import { Menu } from 'react-data-grid-addons';
 import { prepJsonFromConf } from './ExportableGrid';
 import { store, rowClicked } from '../../model';
 import { labelBasePath } from '../../config';
+import { alertUserV2 } from '../util/alertUserV2';
 
 const { ContextMenu, MenuItem } = Menu
 
@@ -35,15 +36,8 @@ function copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect) {
   saveCopiedValueToClipboard(cellValue)
 }
 
-function saveCopiedValueToClipboard(string) {
-  /* next, we have to create a hidden element and and set the string row as value
-  so we can save it to clipboard, because thats how javascript does it */
-  const el = document.createElement('textarea')
-  el.value = string
-  document.body.appendChild(el)
-  el.select()
-  document.execCommand('copy')
-  document.body.removeChild(el)
+function saveCopiedValueToClipboard(value) {
+  navigator.clipboard.writeText(value)
 }
 
 const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect, editContextFunc }, context) => {
