@@ -23,6 +23,15 @@ const MyProfile = (props, context) => {
         }
     }, []);
 
+    const handleBack = () => {
+        // If the history size is larger than 2, it means the user has already been navigating through the app
+        if (history.length > 2) {
+            history.goBack()
+        } else {
+            history.push('/main')
+        }
+    }
+
     const uploadFile = (file) => {
         setLoading(true);
         const data = new FormData();
@@ -219,7 +228,12 @@ const MyProfile = (props, context) => {
                     className="hide-all-form-legends my-profile-form"
                     noValidate={true}
                 />
-                <div className='my-profile-back-btn' onClick={() => { history.goBack() }}><div className='my-profile-back-btn-icon'> <i className='fas fa-chevron-left' /></div><p>{context.intl.formatMessage({ id: 'perun.my_profile.back', defaultMessage: 'perun.my_profile.back' })}</p></div>
+                <div className='my-profile-back-btn' onClick={() => handleBack()}>
+                    <div className='my-profile-back-btn-icon'>
+                        <i className='fas fa-chevron-left' />
+                    </div>
+                    <p>{context.intl.formatMessage({ id: 'perun.my_profile.back', defaultMessage: 'perun.my_profile.back' })}</p>
+                </div>
             </div>
         </div>
     );
