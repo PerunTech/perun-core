@@ -4,7 +4,6 @@ import { Menu } from 'react-data-grid-addons';
 import { prepJsonFromConf } from './ExportableGrid';
 import { store, rowClicked } from '../../model';
 import { labelBasePath } from '../../config';
-import { alertUserV2 } from '../util/alertUserV2';
 
 const { ContextMenu, MenuItem } = Menu
 
