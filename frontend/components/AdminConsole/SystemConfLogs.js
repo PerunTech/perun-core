@@ -34,7 +34,6 @@ const SystemConfLogs = (props, context) => {
         onRowClickFunct={handleRowClick}
         refreshData={true}
         heightRatio={0.75}
-        editContextFunc={handleRowClick}
       />
     )
   }

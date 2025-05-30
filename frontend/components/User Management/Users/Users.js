@@ -211,6 +211,7 @@ const Users = (props, context) => {
                         }}
                         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
                         heightRatio={0.55}
+                        editContextFunc={handleRowClick}
                     />
                 </div>}
             </div>
