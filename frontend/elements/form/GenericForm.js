@@ -248,7 +248,6 @@ class GenericForm extends React.Component {
   /* get config data for forms. */
   componentDidMount() {
     getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod, this.state.tableFormDataMethod, this.state.session, this.props.params)
-    this.props.refFunction(this)
   }
 
   componentDidUpdate() {
