@@ -3,7 +3,7 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { store } from '../../../model'
 import { svConfig } from '../../../config';
-import { Dropdown, ComponentManager } from '../..';
+import { Dropdown, ComponentManager, alertUserResponse } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject } from '../../../functions/utils';
 
@@ -93,11 +93,11 @@ class DependentElements extends React.Component {
     this.setState({ loading: true })
     axios.get(restUrl).then((response) => {
       this.setState({ loading: false })
-      if (response.data) {
+      if (response?.data) {
         this.generateInitialDropdown(response.data, elementId, selectedVal, triggerAutoDependentDropdownOnChange, disableInitialDependentDropdown)
       }
     }).catch((error) => {
-      console.log(error)
+      console.error(error)
       this.setState({ loading: false })
     })
   }
@@ -227,7 +227,7 @@ class DependentElements extends React.Component {
         this.setState({ loading: true });
         axios.get(url).then((response) => {
           this.setState({ loading: false });
-          if (response.data) {
+          if (response?.data) {
             let finalResponse = response.data;
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data;
@@ -239,6 +239,7 @@ class DependentElements extends React.Component {
           console.error(error);
           this.setState({ loading: false });
           reject(error);
+          alertUserResponse({ response: error })
         });
       } else {
         resolve();
@@ -342,7 +343,9 @@ class DependentElements extends React.Component {
           if (form?.contains(el)) {
             const parentNode = el.parentNode;
             el.value = '';
-            this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            if (parentNode) {
+              this.removeElements(parentNode, ddls, index + 1 + i); // Adjusted the index for slice iteration
+            }
             this.clearFormData(this.findCoreType(el.id)[1], groupPath);
           }
         });
@@ -398,7 +401,7 @@ class DependentElements extends React.Component {
         const url = `${window.server}/${wsPath}`
         axios.get(url).then((response) => {
           this.setState({ loading: false })
-          if (response.data?.data) {
+          if (response?.data?.data) {
             if (getAdditionalData && additionalDataKey && response?.data?.data?.[additionalDataKey]) {
               store.dispatch({ type: 'ADDITIONAL_DEPENDENT_DROPDOWN_DATA', payload: response.data?.data?.[additionalDataKey] })
             }
@@ -410,8 +413,9 @@ class DependentElements extends React.Component {
             this.generateDropdown(finalResponse, newElement, groupPath)
           }
         }).catch((error) => {
-          console.log(error)
+          console.error(error)
           this.setState({ loading: false })
+          alertUserResponse({ response: error })
         })
       }
     }
@@ -434,21 +438,23 @@ class DependentElements extends React.Component {
       hidden: true
     }]
 
-    // Create dropdown options
-    for (let i = 0; i < dbDataArray.items.length; i++) {
-      let decodedValue = dbDataArray.items[i]['LBL_TRANSL']
-      let selected = false
-      if (selectedVal && selectedVal === dbDataArray.items[i]['CODE_VALUE']) {
-        selected = true
+    if (dbDataArray.items && Array.isArray(dbDataArray.items)) {
+      // Create dropdown options
+      for (let i = 0; i < dbDataArray.items.length; i++) {
+        let decodedValue = dbDataArray.items[i]['LBL_TRANSL']
+        let selected = false
+        if (selectedVal && selectedVal === dbDataArray.items[i]['CODE_VALUE']) {
+          selected = true
+        }
+        options.push({
+          id: dbDataArray.items[i]['object_id'],
+          key: dbDataArray.items[i]['object_id'],
+          name: dbDataArray.items[i]['CODE_VALUE'],
+          value: dbDataArray.items[i]['CODE_VALUE'],
+          text: decodedValue,
+          selected: selected
+        })
       }
-      options.push({
-        id: dbDataArray.items[i]['object_id'],
-        key: dbDataArray.items[i]['object_id'],
-        name: dbDataArray.items[i]['CODE_VALUE'],
-        value: dbDataArray.items[i]['CODE_VALUE'],
-        text: decodedValue,
-        selected: selected
-      })
     }
 
     // Generate the dropdown selector, labels and icons

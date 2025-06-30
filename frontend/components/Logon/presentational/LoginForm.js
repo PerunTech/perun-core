@@ -31,7 +31,9 @@ const LoginForm = (props, context) => {
   const getLoginLinks = () => {
     const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
     fetch(url).then(res => res.json()).then(json => {
-      setLoginLinks(json)
+      if (componentIsMounted.current) {
+        setLoginLinks(json)
+      }
     }).catch(err => { throw err });
   }
 

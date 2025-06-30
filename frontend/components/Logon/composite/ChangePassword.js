@@ -1,19 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { alertUser, InputElement } from '../../../elements';
+import { alertUserResponse, InputElement } from '../../../elements';
 import LogonActions from '../functional/LogonActions'
 import Loading from 'components/Loading/Loading'
 import { Link } from 'react-router-dom'
 import * as utils from '../utils'
 import * as config from 'config/config.js'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import { getCapsLockState } from '../../../functions/utils';
 
 class ChangePassword extends React.Component {
   static propTypes = {
     status: PropTypes.string,
-    svTitle: PropTypes.string,
-    svMessage: PropTypes.string,
+    title: PropTypes.string,
+    message: PropTypes.string,
     changePassword: PropTypes.func.isRequired,
     configuration: PropTypes.object
   }
@@ -36,21 +36,14 @@ class ChangePassword extends React.Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.status) {
-      let statusType = nextProps.status.toLowerCase()
+      let statusType = nextProps?.status?.toLowerCase() || 'info'
       if (statusType === 'exception') { statusType = 'error' }
-      this.setState({
-        alert: alertUser(true, statusType, nextProps.svTitle, nextProps.svMessage,
-          () => this.setState({ alert: alertUser(false, 'info', ' ') }, () => this.redirectOnSuccess(statusType)),
-          undefined, false, undefined, undefined, false, '#e0ab10', true)
-      })
+      alertUserResponse({ type: statusType, response: nextProps })
     }
     if (nextProps.configuration) {
-      let statusType = nextProps.configuration.type.toLowerCase()
+      const statusType = nextProps?.configuration?.type?.toLowerCase() || 'info'
       if (statusType !== 'success') {
-        this.setState({
-          alert: alertUser(true, statusType, nextProps.configuration.title, nextProps.configuration.message,
-            () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, '#e0ab10', true)
-        })
+        alertUserResponse({ type: statusType, response: nextProps.configuration })
       }
     }
   }

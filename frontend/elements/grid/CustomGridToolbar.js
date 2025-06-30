@@ -30,10 +30,7 @@ export default class CustomGridToolbar extends Toolbar {
             className={className}
             title={props.customButtonTitle}
           >
-            {this.context.intl.formatMessage({
-              id: props.customButtonLabel,
-              defaultMessage: props.customButtonLabel
-            })}
+            {props.customButtonLabel}
           </button>
         })
       } else {

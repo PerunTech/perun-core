@@ -29,7 +29,7 @@ class Modal extends React.Component {
     }
   }
 
-  /* check for submit action to generate secound button f.r, check for close action and generate cancel button AS :D */
+  /* check for submit action to generate secound button, check for close action and generate cancel button */
   componentDidMount = () => {
     if (this.props.submitAction) {
       this.setState({ submitAction: this.props.submitAction, showSubmitBtn: true })

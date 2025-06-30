@@ -7,7 +7,7 @@ import {
 } from "../../../client";
 import Form from '@rjsf/core';
 import { connect } from "react-redux";
-import { alertUser, ReactBootstrap } from "../../../elements";
+import { alertUserResponse, ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import axios from "axios";
 import LabelSearchSchema from "./LabelSearchSchema"
@@ -123,9 +123,10 @@ const LabelEditor = (props, context) => {
             `/ReactElements/getTableFormData/${props.svSession}/${objid}/SVAROG_LABELS`;
         axios.get(url).then((res) => {
             const { schema, uiSchema } = LabelFormSchema(context);
-            renderEditForm(schema, uiSchema, res.data)
+            renderEditForm(schema, uiSchema, res?.data)
         }).catch(err => {
-            alertUser(true, 'error', err.data.title, err.data.message)
+            console.error(err)
+            alertUserResponse({ response: err })
         })
     };
     const renderEditForm = (schema, uiSchema, formData) => {
@@ -164,21 +165,22 @@ const LabelEditor = (props, context) => {
             `/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`;
         axios({
             method: "post",
-            data,
+            data: JSON.stringify(data),
             url,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        })
-            .then(function (response) {
-                if (response.data.type === "SUCCESS") {
-                    alertUser(true, "success", context.intl.formatMessage({ id: 'perun.admin_console.success_label', defaultMessage: 'perun.admin_console.success_label' }), "", () => {
-                    });
+        }).then((res) => {
+            if (res?.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ response: res.data })
+                if (resType === 'success') {
                     GridManager.reloadGridData(prev);
                     setShow(false);
                 }
-            })
-            .catch(err => {
-                alertUser(true, 'error', err.data.title, err.data.message)
-            })
+            }
+        }).catch(err => {
+            console.error(err)
+            alertUserResponse({ response: err })
+        })
     };
     //delete label
     const deleteLabel = (formData) => {
@@ -186,15 +188,21 @@ const LabelEditor = (props, context) => {
         let url = window.server + '/ReactElements/deleteObject/' + svSession + '/false/false'
         axios({
             method: 'post',
-            data: formData,
+            data: encodeURIComponent(formData),
             url,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }).then(res => {
-            alertUser(true, res.data.type.toLowerCase(), res.data.message)
-            setShow(false)
-            GridManager.reloadGridData(prev)
+            if (res?.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info'
+                alertUserResponse({ response: res.data })
+                if (resType === 'success') {
+                    setShow(false)
+                    GridManager.reloadGridData(prev)
+                }
+            }
         }).catch(err => {
-            alertUser(true, 'error', err.data.title, err.data.message)
+            console.error(err)
+            alertUserResponse({ response: err })
         })
     }
 

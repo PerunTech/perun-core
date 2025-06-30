@@ -1,10 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = (mode) => {
+module.exports = (env, params) => {
     return {
-        ...mode.NODE_ENV !== 'production' && { devtool: 'source-map' },
-        mode: mode.NODE_ENV,
+        ...env.SOURCE_MAP === 'true' && { devtool: 'source-map' },
+        mode: params.mode,
         entry: './frontend/client.js',
         output: {
             path: path.resolve('./www'),
@@ -26,6 +26,10 @@ module.exports = (mode) => {
             new webpack.ProvidePlugin({
                 process: 'process/browser',
             }),
+            new webpack.DefinePlugin({
+                'process.env.DEBUG': JSON.stringify(env.DEBUG),
+                'process.env.MODE': JSON.stringify(params.mode),
+            })
         ],
         module: {
             rules: [
@@ -64,6 +68,10 @@ module.exports = (mode) => {
                 {
                     test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
                     type: 'asset/resource',
+                },
+                {
+                    test: /\.m?js/,
+                    resolve: { fullySpecified: false }
                 },
             ]
         },

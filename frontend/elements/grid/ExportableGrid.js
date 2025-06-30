@@ -9,9 +9,6 @@ import xlsx from 'xlsx';
 /* This extension component adds a downloadable filter option to the grid,
 with every result from the filter in the grid is displayed as a new row in the excel (csv) format.
 The header of the excel file represents the filter applied to the grid.
-Owner: Kni
-Creation date: 21.04.2017 */
-
 /* This function returns a JSON object from a filtered selection, where one object in the array
 represents one filtered row. Accepts 2 parameters: grid configuration and array of filtered rows.
 The table row names and table data are decoded, using the grid config formatter options functionality,

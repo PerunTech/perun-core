@@ -1,4 +1,4 @@
-/* reUsed and addapted component from internet f.r */
+/* reUsed and addapted component from internet */
 import React from 'react';
 import SchemaField from '@rjsf/core/lib/components/fields/SchemaField';
 

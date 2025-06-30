@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from '../../elements'
+import { alertUserResponse, ReactBootstrap } from '../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -34,10 +34,13 @@ const BusinessType = (props, context) => {
     }).catch(err => {
       setState({ loading: false })
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: err })
     })
+  }
+
+  const reloadGrid = () => {
+    GridManager.reloadGridData(gridId)
+    ComponentManager.setStateForComponent(gridId, 'rowClicked', undefined)
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
@@ -68,6 +71,7 @@ const BusinessType = (props, context) => {
 
   const saveRecord = (e) => {
     const { svSession } = props
+    const onConfirm = () => ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, { saveExecuted: false })
     const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${businessObjectTypeName}/0`
     axios({
       method: 'post',
@@ -75,21 +79,17 @@ const BusinessType = (props, context) => {
       url,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data) {
-        const resType = res.data.type.toLowerCase()
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType, title, msg)
-        GridManager.reloadGridData(gridId)
-        setState({ show: false })
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          reloadGrid()
+          setState({ show: false })
+        }
       }
     }).catch(err => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg, () => ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, {
-        saveExecuted: false,
-      }))
+      alertUserResponse({ response: err, onConfirm })
     })
   }
 
@@ -113,6 +113,7 @@ const BusinessType = (props, context) => {
 
   const deleteFunc = (_id, _action, _session, formData) => {
     const { svSession } = props
+    const onConfirm = () => ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, { deleteExecuted: false })
     const url = `${window.server}/ReactElements/deleteObject/${svSession}`
     axios({
       method: 'post',
@@ -120,24 +121,17 @@ const BusinessType = (props, context) => {
       url: url,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data.type === 'SUCCESS') {
-        alertUser(true, 'success', res.data.title, res.data.message)
-        setState({ show: false })
-        ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, {
-          deleteExecuted: false,
-        })
-        ComponentManager.setStateForComponent(gridId, null, {
-          rowClicked: undefined,
-        })
-        GridManager.reloadGridData(gridId)
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          reloadGrid()
+          setState({ show: false })
+        }
       }
     }).catch(err => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg, () => ComponentManager.setStateForComponent(`${businessObjectTypeName}_FORM`, null, {
-        deleteExecuted: false,
-      }))
+      alertUserResponse({ response: err, onConfirm })
     })
   }
 
@@ -146,6 +140,9 @@ const BusinessType = (props, context) => {
       {loading && <Loading />}
       {canRender && (
         <div className='admin-console-grid-container'>
+          <div className='admin-console-component-header'>
+            <p>{context.intl.formatMessage({ id: 'perun.admin_console.business_type', defaultMessage: 'perun.admin_console.business_type' })}</p>
+          </div>
           {generateBusinessTypeGrid()}
         </div>
       )}

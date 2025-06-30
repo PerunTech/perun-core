@@ -6,8 +6,8 @@ import validator from '@rjsf/validator-ajv8';
 import Loading from "../../Loading/Loading";
 import { ComponentManager, GenericGrid, PropTypes } from "../../../client";
 import { orgSearchSchema } from "../utils/orgSearchSchema";
-import { alertUser } from "../../../elements";
-let gridId = "USER_INTERN_GRID";
+import { alertUserResponse } from "../../../elements";
+let gridId = "USERS_CHOSE_ORG_GRID";
 
 const OrgSearch = (props, context) => {
   const [grid, setGrid] = useState(undefined);
@@ -60,7 +60,7 @@ const OrgSearch = (props, context) => {
     if (postData["username"]) {
       multipleFilterData.push({
         fieldName: "USER_NAME",
-        fieldValue: postData["username"],
+        fieldValue: postData["username"]?.toUpperCase(),
         dbOperand: "LIKE",
         nextLogicOperand: "AND",
       });
@@ -69,7 +69,7 @@ const OrgSearch = (props, context) => {
     data.append("basicData", JSON.stringify(basicData));
     const reqConfig = { method: "post", data, url, headers: { "Content-Type": "application/x-www-form-urlencoded" } };
     axios(reqConfig).then((res) => {
-      if (res.data !== "empty") {
+      if (res?.data !== "empty") {
         let grid = (
           <GenericGrid
             gridType={"SEARCH_GRID_DATA"}
@@ -86,11 +86,9 @@ const OrgSearch = (props, context) => {
         );
         return setGrid(grid), setLoading(false)
       }
-    }).catch((error) => {
-      console.error(error);
-      const title = error.response?.data?.title || error
-      const msg = error.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+    }).catch((err) => {
+      console.error(err)
+      alertUserResponse({ response: err })
     });
   };
 
@@ -118,7 +116,7 @@ const OrgSearch = (props, context) => {
     <React.Fragment>
       <div className='admin-console-show-user-container'>
         <div className='admin-console-show-user-customform'>
-          <legend className='admin-console-show-user-legend'>
+          <legend className='admin-console-show-user-legend admin-console-legend'>
             {context.intl.formatMessage({ id: 'perun.admin_console.search_user_legend', defaultMessage: 'perun.admin_console.search_user_legend' })}
           </legend>
           <div className='admin-console-show-user-inputholder'>{generateForm()}</div>

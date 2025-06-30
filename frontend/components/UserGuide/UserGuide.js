@@ -1,9 +1,9 @@
 import React from 'react'
-import createHashHistory from 'history/createHashHistory'
+import { createHashHistory } from 'history'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import { alertUser } from '../../elements'
+import { alertUserResponse } from '../../elements'
 import Modal from '../Modal/Modal'
 import { iconManager } from '../../assets/svg/svgHolder'
 import { Link } from 'react-router-dom'
@@ -49,22 +49,21 @@ class UserGuide extends React.Component {
       } else {
         url = window.server + '/PublicWs/getGuides/' + this.props.svSession + '/UserGuideJson'
         axios.get(url).then((response) => {
-          if (response.data) {
-            if (response.data.data) {
-              this.iterateDocs(response.data.data)
-            }
-          }
-        }).catch((err) => {
-          if (err) {
-            if (err.data) {
-              if (err.data.type) {
-                alertUser(true, err.response.data.type.toLowerCase(), err.response.data.message, null, this.closeAlert)
+          if (response?.data) {
+            const resType = response.data?.type?.toLowerCase() || 'info'
+            if (resType !== 'success') {
+              alertUserResponse({ response: response.data })
+            } else {
+              if (response.data?.data) {
+                this.iterateDocs(response.data.data)
               }
             }
           }
+        }).catch((err) => {
+          console.error(err)
+          alertUserResponse({ response: err })
         })
       }
-
     }
   }
 
@@ -188,7 +187,13 @@ class UserGuide extends React.Component {
   }
 
   isCloseUserGuide = () => {
-    this.props.history.go(-1)
+    const { history } = this.props
+    // If the history size is larger than 2, it means the user has already been navigating through the app
+    if (history.length > 2) {
+      history.goBack()
+    } else {
+      history.push('/main')
+    }
   }
 
   render() {

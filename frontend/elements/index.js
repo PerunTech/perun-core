@@ -3,6 +3,7 @@ import Form from '@rjsf/core';
 /* util */
 export { findWidget, findSectionName, replaceConfigParamsWithFieldVals, $ } from './util/utils';
 export { alertUser } from './util/alertUser';
+export { alertUserV2, alertUserResponse } from './util/alertUserV2';
 
 /* root */
 export { ComponentManager } from './ComponentManager.js';
@@ -24,7 +25,7 @@ export { default as ExportableGrid } from './grid/ExportableGrid';
 
 /* These should be moved to client.js */
 export { default as Draggable, DraggableCore } from 'react-draggable';
-// export { Select } from 'react-select';
+export { default as Select } from 'react-select';
 export { default as SchemaField } from '@rjsf/core/lib/components/fields/SchemaField'
 export * as createFilterOptions from "react-select-fast-filter-options";
 export { ReactBootstrap, Form }

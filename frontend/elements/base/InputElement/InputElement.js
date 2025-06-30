@@ -1,9 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
-import ReactTooltip from 'react-tooltip'
-
-/* custom form for handling errors f.r */
+import { Tooltip } from 'react-tooltip'
 
 const InputElement = ({
   id,
@@ -21,12 +19,7 @@ const InputElement = ({
   disabled,
   maxlength,
   style
-
-  // add context for label connection with redux store
 }, context) => {
-  /* replace placeholder text with error message
-    change class for input field f.r.p.mkd*
-  */
   dataTip = ''
   if (error !== undefined) {
     // placeholder = error;
@@ -35,11 +28,10 @@ const InputElement = ({
   }
 
   return (
-
     <div className={classnames('form-group ', { 'has-error': error })}>
-      {/* if no errors in dataTip return nothing, otherwise format labels from redux store */}
       <input
-        data-tip={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
+        data-tooltip-id={`${id}-tooltip`}
+        data-tooltip-content={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
         id={id}
         name={name}
         value={value}
@@ -50,19 +42,11 @@ const InputElement = ({
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onBlur={onBlur}
-        data-delay-hide='1000'
-        data-event='mouseover'
-        data-event-off='mouseout'
-        data-class='tooltips'
-        data-type='error'
-        data-place='right'
-        data-effect='solid'
-        data-for={id}
         disabled={disabled}
         maxLength={maxlength}
         style={style}
       />
-      <ReactTooltip event='click focus' globalEventOff='keypress' offset={{ left: 45, top: 8 }} id={id} />
+      <Tooltip event='click focus' globalEventOff='keypress' id={`${id}-tooltip`} />
     </div>)
 }
 

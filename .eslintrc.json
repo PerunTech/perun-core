@@ -6,7 +6,8 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended"
     ],
     "settings": {
         "react": {
@@ -33,12 +34,20 @@
         "requireConfigFile": false
     },
     "plugins": [
+        "react",
         "react-hooks"
     ],
     "rules": {
         "react/prop-types": 0,
         "react-hooks/rules-of-hooks": "warn",
         "react-hooks/exhaustive-deps": "warn",
-        "react/no-children-prop": 0
+        "react/no-children-prop": 0,
+        "no-unused-vars": [
+            "error",
+            {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }
+        ]
     }
 }

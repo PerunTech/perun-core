@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 
 export const Button = ({
   id,
@@ -23,25 +23,18 @@ export const Button = ({
   return (
     <div className={classnames('form-group ', { 'has-error': error })}>
       <button
-        data-tip={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
+        data-tooltip-id={`${id}-tooltip`}
+        data-tooltip-content={dataTip !== '' ? context.intl.formatMessage({ id: [dataTip], defaultMessage: [dataTip] }) : ''}
         id={id}
         key={id}
         name={name}
         type={type}
         className={`btn ${className}`}
         onClick={onClick}
-        data-delay-hide='1000'
-        data-event='mouseover'
-        data-event-off='mouseout'
-        data-class='tooltips'
-        data-type='error'
-        data-place='right'
-        data-effect='solid'
-        data-for={id}
         disabled={disabled}
       >{label}
       </button>
-      <ReactTooltip event='click focus' globalEventOff='keypress' offset={{ left: 45, top: 8 }} id={id} />
+      <Tooltip event='click focus' globalEventOff='keypress' id={`${id}-tooltip`} />
     </div>
   )
 }

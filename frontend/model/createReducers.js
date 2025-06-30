@@ -42,18 +42,6 @@ export default function createReducers(asyncReducers) {
 
   const rootReducer = (state, action) => {
     const newStoreState = state
-    // THE FOLLOWING BLOCK WILL TRY TO RESET THE REDUX STATE ON LOGOUT
-    // What a load of bollocks. igi 15042020
-    /*
-    if ((/LOGOUT_FULFILLED/g.test(action.type)) || (/^security\/MAIN_LOGOUT/g.test(action.type))) {
-      for (const reducer in state) {
-        if (reducer !== 'intl' || reducer !== 'routes') {
-          newStoreState[reducer] = undefined
-        }
-      }
-      localStorage.clear()
-    }
-    */
     return appReducer(newStoreState, action)
   }
   return rootReducer

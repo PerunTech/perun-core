@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Menu } from 'react-data-grid-addons';
 import { prepJsonFromConf } from './ExportableGrid';
+import { store, rowClicked } from '../../model';
 import { labelBasePath } from '../../config';
 
 const { ContextMenu, MenuItem } = Menu
@@ -46,17 +47,26 @@ function saveCopiedValueToClipboard(string) {
 }
 
 const ContextMenuPopup = ({ rows, gridConfig, idx, id, rowIdx, enableMultiSelect, editContextFunc }, context) => {
-  return <ContextMenu id={id}>
-    {editContextFunc && <MenuItem data={{ rowIdx, idx }} onClick={() => editContextFunc(id, rowIdx, rows[rowIdx])}>
-      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.edit_row`, defaultMessage: `${labelBasePath}.main.grids.edit_row` })}
-    </MenuItem>}
-    <MenuItem data={{ rowIdx, idx }} onClick={() => copyRow(rows, gridConfig, rowIdx, idx)}>
-      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_row`, defaultMessage: `${labelBasePath}.main.grids.copy_row` })}
-    </MenuItem>
-    <MenuItem data={{ rowIdx, idx }} onClick={() => copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect)}>
-      {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_cell`, defaultMessage: `${labelBasePath}.main.grids.copy_cell` })}
-    </MenuItem>
-  </ContextMenu>
+  const onEditContext = (id, rowIdx, row) => {
+    store.dispatch(rowClicked(id, row, rowIdx))
+    editContextFunc(id, rowIdx, row)
+  }
+
+  return (
+    <ContextMenu id={id}>
+      {editContextFunc && (
+        <MenuItem data={{ rowIdx, idx }} onClick={() => onEditContext(id, rowIdx, rows[rowIdx])}>
+          {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.edit_row`, defaultMessage: `${labelBasePath}.main.grids.edit_row` })}
+        </MenuItem>
+      )}
+      <MenuItem data={{ rowIdx, idx }} onClick={() => copyRow(rows, gridConfig, rowIdx, idx)}>
+        {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_row`, defaultMessage: `${labelBasePath}.main.grids.copy_row` })}
+      </MenuItem>
+      <MenuItem data={{ rowIdx, idx }} onClick={() => copyCell(rows, gridConfig, rowIdx, idx, enableMultiSelect)}>
+        {context.intl.formatMessage({ id: `${labelBasePath}.main.grids.copy_cell`, defaultMessage: `${labelBasePath}.main.grids.copy_cell` })}
+      </MenuItem>
+    </ContextMenu>
+  )
 }
 
 ContextMenuPopup.contextTypes = {

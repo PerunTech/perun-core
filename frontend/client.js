@@ -6,11 +6,12 @@ import { Provider, connect } from 'react-redux'; // these should be represented 
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
 import md5 from 'md5'
+import Swal from 'sweetalert2'
 /* assets */
 import * as assets from './assets/index'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
 import { generatePath } from 'react-router'
-import createHashHistory from 'history/createHashHistory';
+import { createHashHistory } from 'history';
 /* i18n */
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
@@ -33,10 +34,10 @@ import * as cookies from './functions/cookies'
 /* -------- */
 export {
   React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
-  axios, Loading, createHashHistory, md5
+  axios, Loading, createHashHistory, md5, Swal
 };
 
-import { Button, DependencyDropdown, Dropdown, InputElement, alertUser } from './elements'
+import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
@@ -73,27 +74,25 @@ axios.interceptors.response.use(
     return res;
   },
   (error) => {
-    const title = error.response?.data?.title || error
-    const msg = error.response?.data?.message || ''
-    if (error.response.status) {
+    if (error.response?.status) {
       switch (error.response.status) {
         case 302:
-          alertUser(true, 'info', 'The server responsed with a status code 302 Found')
+          alertUserV2({ type: 'info', title: 'The server responsed with a status code 302 Found' })
           break;
         case 401:
           createHashHistory().push('/home/login')
-          alertUser(true, 'error', title, msg);
+          alertUserResponse({ response: error.response })
           redux.store.dispatch({ type: 'LOGOUT_FULFILLED', payload: undefined })
           break;
         case 502:
         case 503:
-          alertUser(true, 'info', 'The server is temporarily down for maintenance', 'Please try again soon')
+          alertUserV2({ type: 'info', title: 'The server is temporarily down for maintenance', message: 'Please try again soon' })
           break;
         default:
           return Promise.reject(error);
       }
     } else {
-      let msg = error.message
+      const msg = error?.message || ''
       switch (true) {
         case msg.includes('401'):
           /* if the accesed route is fr map memorize it and write it in window core */
@@ -109,7 +108,6 @@ axios.interceptors.response.use(
         case msg.includes('500'):
           return Promise.reject(error);
         case msg.includes('502'):
-          console.log(msg)
           return Promise.reject(error);
         default:
           return Promise.reject(error);
@@ -137,7 +135,7 @@ window.core = { React, ReactDOM, Provider, connect, Link, router, pluginManager,
 /* ---- */
 /* Init */
 /* ---- */
-const app = document.getElementById('body');
+const app = document.getElementById('app');
 let persistConfig = {}
 let whitelist = []
 let indexReducer = 0
@@ -173,12 +171,12 @@ async function loadLocaleData(locale) {
   }
 }
 
-/* call function on perun-core initialization f.r */
+/* call function on perun-core initialization */
 persistBundleReducers(whitelistRoot)
 
 changeLanguageAndLocale(defaultLocale?.replace('_', '-'), defaultLocale)
 
-/* exportable function to add persist reducers from bundle f.r */
+/* exportable function to add persist reducers from bundle */
 export function persistBundleReducers(listOfBundleReducers) {
   let res = whitelist.filter(item => listOfBundleReducers.includes(item));
   if (res.length > 0) {

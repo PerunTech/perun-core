@@ -35,7 +35,7 @@ function replaceParams(path, gridid, session, params) {
   path = path.replace('%gridName', gridid)
   path = path.replace('%session', session)
   // replace custom params
-  for (var i = 0; i < params.length; i++) {
+  for (let i = 0; i < params.length; i++) {
     const obj = params[i]
     const paramName = obj['PARAM_NAME']
     const paramValue = obj['PARAM_VALUE']

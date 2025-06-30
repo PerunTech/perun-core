@@ -2,16 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../client'
-import { alertUser, ReactBootstrap } from "../../elements";
+import { alertUserResponse, ReactBootstrap } from '../../elements';
 import SvarogMenuWrapper from './SvarogMenuWrapper';
-const { useState, useEffect } = React;
+const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;
-const tableName = 'SVAROG_MENU';
-const gridId = `${tableName}_GRID`;
 
 const SvarogMenu = (props, context) => {
-  const [show, setShow] = useState(false);
-  const [objectId, setObjectId] = useState(undefined)
+  const initialState = { tableName: 'SVAROG_MENU', gridId: 'SVAROG_MENU_GRID', show: false, objectId: 0 }
+  const reducer = (currState, update) => ({ ...currState, ...update })
+  const [{ tableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     return () => {
@@ -19,9 +18,13 @@ const SvarogMenu = (props, context) => {
     }
   }, []);
 
+  const reloadGrid = () => {
+    GridManager.reloadGridData(gridId)
+    ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
+  }
+
   const handleRowClick = (_id, _rowIdx, row) => {
-    setObjectId(row['SVAROG_MENU.OBJECT_ID'] || 0)
-    setShow(true)
+    setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, show: true })
   };
 
   const generateSvarogMenuGrid = () => {
@@ -37,8 +40,7 @@ const SvarogMenu = (props, context) => {
         refreshData={true}
         toggleCustomButton={true}
         customButton={() => {
-          setShow(true)
-          setObjectId(0)
+          setState({ show: true, objectId: 0 })
         }}
         customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
         heightRatio={0.75}
@@ -49,30 +51,25 @@ const SvarogMenu = (props, context) => {
 
   const saveRecord = (e) => {
     const { svSession } = props;
-    let url =
-      window.server +
-      `/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`;
+    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`
+    const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { saveExecuted: false })
     axios({
       method: "post",
       data: encodeURIComponent(JSON.stringify(e.formData)),
       url,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     }).then((res) => {
-      if (res.data) {
-        const resType = res.data.type.toLowerCase()
-        const title = res.data.title || ''
-        const msg = res.data.message || ''
-        alertUser(true, resType, title, msg)
-        GridManager.reloadGridData(gridId);
-        setShow(false);
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          reloadGrid()
+          setState({ show: false })
+        }
       }
     }).catch(err => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-        saveExecuted: false,
-      }));
+      alertUserResponse({ response: err, onConfirm })
     });
   };
 
@@ -96,42 +93,39 @@ const SvarogMenu = (props, context) => {
   };
 
   const deleteFunc = (_id, _action, _session, formData) => {
-    const { svSession } = props;
-    let url = window.server + `/ReactElements/deleteObject/${svSession}`;
+    const { svSession } = props
+    const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { deleteExecuted: false })
+    const url = `${window.server}/ReactElements/deleteObject/${svSession}`
     axios({
-      method: "post",
-      data: encodeURIComponent(formData[4]["PARAM_VALUE"]),
+      method: 'post',
+      data: encodeURIComponent(formData[4]['PARAM_VALUE']),
       url: url,
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then((res) => {
-      if (res.data.type === "SUCCESS") {
-        alertUser(true, "success", res.data.title, res.data.message);
-        setShow(false);
-        ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-          saveExecuted: false,
-        });
-        ComponentManager.setStateForComponent(gridId, null, {
-          rowClicked: undefined,
-        });
-        GridManager.reloadGridData(gridId);
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          reloadGrid()
+          setState({ show: false })
+        }
       }
     }).catch(err => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, {
-        saveExecuted: false,
-      }));
-    });
-  };
+      alertUserResponse({ response: err, onConfirm })
+    })
+  }
 
   return (
     <>
       <div className='admin-console-grid-container'>
+        <div className='admin-console-component-header'>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_menus_editor', defaultMessage: 'perun.admin_console.svarog_menus_editor' })}</p>
+        </div>
         {generateSvarogMenuGrid()}
       </div>
       {show && (
-        <Modal className='admin-console-unit-modal' show={show} onHide={() => setShow(false)}>
+        <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
             <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
           </Modal.Header>

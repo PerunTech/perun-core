@@ -6,7 +6,7 @@ export const translateComponents = window.translateGridLabels?.toLowerCase() ===
 
 export const svConfig = {
   restSvcBaseUrl: window.server,
-  isDebug: process.env.NODE_ENV !== 'production',
+  isDebug: process.env.DEBUG === 'true',
   triglavRestVerbs: {
     MAIN_LABELS: '/SvSecurity/i18n/%s1/%s2',
     GET_COMPONENT_CONFIGURATION: '/SvSecurity/configuration/getConfiguration/%session/%componentName',

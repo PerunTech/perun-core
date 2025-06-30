@@ -16,6 +16,8 @@
  */
 export { Home } from './local/Home';
 export { Main } from './local/Main';
-export { AdminConsole } from './local/AdminConsole';
+export { AdminConsoleRoute } from './local/AdminConsole';
 export { UserGuideRoute } from './local/UserGuideRoute';
+export { MyProfileRoute } from './local/MyProfile';
+// KEEP ON THE BOTTOM
 export { NotFoundRoute } from './local/404'

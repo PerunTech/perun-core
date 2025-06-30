@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { Loading } from '../ComponentsIndex';
 import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
-import { alertUser } from '../../elements';
+import { alertUserResponse } from '../../elements';
 import { svConfig } from '../../config';
 
 let arrayOfBundles
@@ -23,8 +23,6 @@ class ModuleMenu extends React.Component {
     this.registry = pluginManager.getRegistry();
     // self id
     this.self = pkg.name;
-
-    this.showHambMenu = this.showHambMenu.bind(this)
     this.setLegacyNaits = this.setLegacyNaits.bind(this)
   }
 
@@ -36,7 +34,6 @@ class ModuleMenu extends React.Component {
   transformIdScreen = () => {
     const idScreen = document.getElementById('identificationScreen')
     if (idScreen) {
-      idScreen.className = 'identificationScreen'
       idScreen.innerText = this.context.intl.formatMessage({
         id: 'perun.main_menu', defaultMessage: 'perun.main_menu'
       })
@@ -78,9 +75,7 @@ class ModuleMenu extends React.Component {
       }
     }).catch((err) => {
       console.error(err)
-      const title = err.response?.data?.title || err
-      const msg = err.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: err })
     })
   }
 
@@ -214,7 +209,7 @@ class ModuleMenu extends React.Component {
       this.goDirectToFrMapRoute(window.core.memorizeFrMapRoute)
     }
 
-    // check for direct access flag and re-route f.r
+    // check for direct access flag and re-route
     if (plugin.cardDirectAccess) {
       this.goDirectToRoute(plugin);
     } else {
@@ -231,7 +226,7 @@ class ModuleMenu extends React.Component {
         id={plugin.id}
         className='card modWindow'
         key={plugin.id}
-        onClick={this.showHambMenu} >
+      >
         <div className='box'>
           <div className='card-img-top'>
             <img src={window.location.origin + plugin.imgPath} className='card-img-top' alt='...' />
@@ -244,12 +239,12 @@ class ModuleMenu extends React.Component {
 
       plugin.id === this.self
         ? render(plugin.id, accessCard)
-        : isRoutable(plugin.id) && render(plugin.id, accessCard);
+        : isRoutable(plugin.id) && !plugin.cardHidden && render(plugin.id, accessCard);
     }
   }
 
   /* function that provides re-routing to requested module
-   * provided to exclude main card menu  f.r
+   * provided to exclude main card menu
    * 
    * @param {*} plugin - The plugin to be re-routed to.
    * 
@@ -408,11 +403,6 @@ class ModuleMenu extends React.Component {
         })
     }
   }
-
-  showHambMenu() {
-    document.getElementById('hideHamb').className = 'showHambMenu';
-  }
-
   setLegacyNaits(plugin) {
     return plugin && this.setState({
       cards: {

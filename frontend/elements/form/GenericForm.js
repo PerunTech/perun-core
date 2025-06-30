@@ -7,11 +7,11 @@ import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
 import { labelBasePath } from '../../config/config';
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
-import { ComponentManager, WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUser } from '..';
+import { WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUserV2, alertUserResponse } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
-import { isValidObject } from '../../functions/utils';
+import { getObjectValueByKey, isValidObject } from '../../functions/utils';
 let fieldName
 let fieldValue
 
@@ -59,7 +59,6 @@ class GenericForm extends React.Component {
     this.onInputChange = this.onInputChange.bind(this)
     this.initiateDeleteAction = this.initiateDeleteAction.bind(this)
     this.alertCloseWithAddedFunc = this.alertCloseWithAddedFunc.bind(this)
-    this.basicAlertClose = this.basicAlertClose.bind(this)
     this.transformErrors = this.transformErrors.bind(this)
     this.errorListTemplate = this.errorListTemplate.bind(this)
     this.Widgets = {
@@ -97,7 +96,8 @@ class GenericForm extends React.Component {
   }
 
   GPSCoordinate = props => {
-    const { value, readonly, disabled, autofocus, onBlur, onFocus, ...inputProps } = props;
+    const { formTableData } = this.props
+    const { value, name, readonly, disabled, autofocus, onBlur, onFocus, ...inputProps } = props;
     const defaultValue = `${'00'}°${'00'}'${'00'}''`
 
     const pad = string => {
@@ -143,13 +143,19 @@ class GenericForm extends React.Component {
       return props.onChange(format(e.target.value))
     }
 
+    let inputValue = value === undefined || value === null ? defaultValue : value
+    const formDataValue = getObjectValueByKey(formTableData, name)
+    if (formDataValue && !inputValue) {
+      inputValue = formDataValue
+    }
+
     return <input
       className='form-control'
       type='text'
       readOnly={readonly}
       disabled={disabled}
       autoFocus={autofocus}
-      value={value === undefined || value === null ? defaultValue : value}
+      value={inputValue}
       {...inputProps}
       onChange={_onChange}
       onBlur={onBlur && (event => onBlur(inputProps.id, event.target.value))}
@@ -242,19 +248,13 @@ class GenericForm extends React.Component {
   /* get config data for forms. */
   componentDidMount() {
     getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod, this.state.tableFormDataMethod, this.state.session, this.props.params)
-    this.props.refFunction(this)
   }
 
   componentDidUpdate() {
     this.props.refFunction(this)
   }
 
-  basicAlertClose() {
-    this.setState({ alert: alertUser(false, 'info', ' ') })
-  }
-
   alertCloseWithAddedFunc() {
-    this.basicAlertClose()
     if (this.props.onAlertClose && this.props.onAlertClose instanceof Function) {
       this.setState({ saveExecuted: false, deleteExecuted: false })
       this.props.onAlertClose()
@@ -264,7 +264,6 @@ class GenericForm extends React.Component {
   }
 
   alertCloseWithoutFormClose = () => {
-    this.basicAlertClose()
     if (this.props.onAlertClose && this.props.onAlertClose instanceof Function) {
       this.setState({ saveExecuted: false, deleteExecuted: false })
     } else {
@@ -320,6 +319,7 @@ class GenericForm extends React.Component {
       const value = nextProps[key]
       this.setState({ [key]: value })
     }
+
     if (this.state.dataFormName !== nextProps.dataFormName || this.state.configFormName !== nextProps.configFormName ||
       this.state.params !== nextProps.params) {
       getFormData(
@@ -327,110 +327,17 @@ class GenericForm extends React.Component {
         nextProps.session, nextProps.params
       )
     }
-    if (this.state.saveExecuted === true) {
-      if (nextProps.saveFormResponse) {
-        let type
-        if (nextProps.saveFormType) {
-          type = nextProps.saveFormType.toLowerCase()
-        }
-        this.setState({
-          saveExecuted: false,
-          alert: alertUser(true, type || 'success',
-            nextProps.saveFormTitle || this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.data_save_success`, defaultMessage: `${labelBasePath}.main.forms.data_save_success` }),
-            nextProps.saveFormMessage || '', () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined)
-        },
-          () => {
-            getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod,
-              this.state.tableFormDataMethod, this.state.session, nextProps.params)
-            ComponentManager.setStateForComponent(this.state.id, null, {
-              saveFormResponse: undefined,
-              saveFormType: undefined,
-              saveFormTitle: undefined,
-              saveFormMessage: undefined
-            })
-          }
-        )
-      } else if (nextProps.saveFormError) {
-        let errorData
-        let errorMsg
-        let errorTitle
-        if (nextProps.saveFormError.title && nextProps.saveFormError.message) {
-          errorTitle = nextProps.saveFormError.title
-          errorMsg = nextProps.saveFormError.message
-        } else {
-          errorData = nextProps.saveFormError.response.data
-          errorTitle = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.data_save_error`, defaultMessage: `${labelBasePath}.main.forms.data_save_error` })
-          if (errorData.Error_Message !== undefined) {
-            errorMsg = this.context.intl.formatMessage({ id: errorData.Error_Message, defaultMessage: errorData.Error_Message })
-          } else {
-            errorMsg = 'Save Failed'
-          }
-        }
-        this.setState({
-          saveExecuted: false,
-          alert: alertUser(true, 'error',
-            errorTitle, errorMsg, () => this.basicAlertClose(), undefined, false, undefined, undefined, false, undefined)
-        },
-          () => { ComponentManager.setStateForComponent(this.state.id, 'saveFormError', undefined) }
-        )
-      }
-    }
-    if (this.state.deleteExecuted === true) {
-      if (nextProps.saveFormResponse) {
-        this.setState({
-          deleteExecuted: false,
-          alert: alertUser(true, 'success',
-            this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.record_deleted_success`, defaultMessage: `${labelBasePath}.main.forms.record_deleted_success` }),
-            '', () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined)
-        },
-          () => {
-            getFormData(this.state.id, 'FORM', this.state.method, this.state.uiSchemaConfigMethod,
-              this.state.tableFormDataMethod, this.state.session, nextProps.params)
-            ComponentManager.setStateForComponent(this.state.id, 'saveFormResponse', undefined)
-          }
-        )
-      } else if (nextProps.saveFormError) {
-        const errorData = nextProps.saveFormError.response.data
-        let errorMSG
-        if (errorData.Error_Message !== undefined) {
-          errorMSG = this.context.intl.formatMessage({ id: errorData.Error_Message, defaultMessage: errorData.Error_Message })
-        } else if (errorData.startsWith('ERROR')) {
-          let err = errorData.split(',')[1]
-          let newErrorMSG = err.split(':')[1]
-          errorMSG = this.context.intl.formatMessage({ id: newErrorMSG, defaultMessage: newErrorMSG })
-        } else {
-          errorMSG = 'Delete Failed'
-        }
-        this.setState(
-          {
-            deleteExecuted: false,
-            alert: alertUser(
-              true, 'error',
-              this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.record_deleted_error`, defaultMessage: `${labelBasePath}.main.forms.record_deleted_error` }),
-              errorMSG, () => this.alertCloseWithAddedFunc(), undefined, false, undefined, undefined, false, undefined
-            )
-          },
-          () => { ComponentManager.setStateForComponent(this.state.id, 'saveFormError', undefined) }
-        )
-      }
-    }
 
     if ((this.props.formConfigLoaded !== nextProps.formConfigLoaded || this.props.formData !== nextProps.formData) && nextProps.formConfigLoaded === false) {
-      const title = nextProps.formData?.response?.data?.title || nextProps.formData?.response?.data || ''
-      const msg = nextProps.formData?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.formData?.response })
     }
 
     if ((this.props.uischemaLoaded !== nextProps.uischemaLoaded || this.props.uischema !== nextProps.uischema) && nextProps.uischemaLoaded === false) {
-      const title = nextProps.uischema?.response?.data?.title || nextProps.uischema?.response?.data || ''
-      const msg = nextProps.uischema?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.uischema?.response })
     }
 
     if ((this.props.formDataLoaded !== nextProps.formDataLoaded || this.props.formTableData !== nextProps.formTableData) && nextProps.formDataLoaded === false) {
-      const title = nextProps.formTableData?.response?.data?.title || nextProps.formTableData?.response?.data || ''
-      const msg = nextProps.formTableData?.response?.data?.message || ''
-      alertUser(true, 'error', title, msg)
+      alertUserResponse({ response: nextProps.formTableData?.response })
     }
 
     if (this.props.uischema !== nextProps.uischema) {
@@ -513,36 +420,24 @@ class GenericForm extends React.Component {
     }
   }
 
-  /*
-    The following three functions delete the currently selected record
-    (prompt, cancel, confirm)
-    KNI 23.06.2017
-  */
-
   initiateDeleteAction() {
     if (this.state.params !== 'READ_URL') {
       this.prepDropLinkParams()
     }
-    this.setState({
-      alert: alertUser(
-        true,
-        'warning',
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_title`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_title` }),
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_message`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_message` }),
-        () => {
-          this.setState(
-            { deleteExecuted: true },
-            this.deleteObjectOrDropLink()
-          )
-        },
-        () => this.basicAlertClose(),
-        true,
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` }),
-        this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.cancel`, defaultMessage: `${labelBasePath}.main.forms.cancel` }),
-        true,
-        '#8d230f',
-        true
-      )
+
+    const title = this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_title`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_title` })
+    const message = this.context.intl.formatMessage({ id: `${labelBasePath}.main.delete_record_prompt_message`, defaultMessage: `${labelBasePath}.main.delete_record_prompt_message` })
+    const confirm = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.delete`, defaultMessage: `${labelBasePath}.main.forms.delete` })
+    const cancel = this.context.intl.formatMessage({ id: `${labelBasePath}.main.forms.cancel`, defaultMessage: `${labelBasePath}.main.forms.cancel` })
+    alertUserV2({
+      type: 'warning',
+      title,
+      message,
+      confirmButtonText: confirm,
+      confirmButtonColor: '#8d230f',
+      onConfirm: () => this.setState({ deleteExecuted: true }, this.deleteObjectOrDropLink()),
+      showCancel: true,
+      cancelButtonText: cancel
     })
   }
 

@@ -1,11 +1,9 @@
 import React from 'react';
 import createReducer from 'redux-updeep';
 import { prevReduxValueIfError, errTolastError } from '../model/utils.js';
+
 /**
  * A Class that contains functions that generate a new reducer from given templates
- * @author GPE
- * @version 0.9
- * @class
  */
 export class ReducerTemplater extends React.Component {
   /**
@@ -14,7 +12,7 @@ export class ReducerTemplater extends React.Component {
  * @param {string} templateName - The type of template that needs to be generated. Current options are : GenericGrid,genericComponent or GenericForm
  * @param {string} id - The id which will be assigned to the new template
  */
-  static generateReducerFromTemplate (templateName, id) {
+  static generateReducerFromTemplate(templateName, id) {
     let templateBody = ''
     let retvalFunc = ''
     if (templateName !== null) {
@@ -38,12 +36,12 @@ export class ReducerTemplater extends React.Component {
   }
   /* eslint-disable */
   // Disabling ESLINT because of Vlad reasons. VLAD KNOWS OF THIS !!!!
-   /**
- * Generate a new template for a genericComponent. Uses dataToRedux.
- * @function
- * @param {string} id - The id which will be assigned to the new template
- */
-  static genericComponentTemplate (id) {
+  /**
+* Generate a new template for a genericComponent. Uses dataToRedux.
+* @function
+* @param {string} id - The id which will be assigned to the new template
+*/
+  static genericComponentTemplate(id) {
     let getName = id + '/GET_DATA'
     let getNameError = id + '/GET_DATA_ERROR'
     let publishData = id + '/PUBLISH_DATA'
@@ -74,60 +72,60 @@ export class ReducerTemplater extends React.Component {
  * @function
  * @param {string} id - The id which will be assigned to the new template
  */
-  static gridTemplate (id) {
+  static gridTemplate(id) {
     const body =
-    `${'  \'use strict\'; ' +
-    ' if(state==null) state={}; ' +
-    'let propName = action.id;  ' +
-    '  ;' +
-'  if (propName == null || propName == undefined) { ' +
-'    propName = \'\' ;' +
-'  } ' +
-'  switch (action.type) {  ' +
-'    case  \''}${id}/PUBLISH_DATA': { ` +
-`        return Object.assign({}, state,action.payload)` +
-`    } ` +
-`    case  '${id}/FETCH_GRID_REJECTED': { ` +
-`        return Object.assign({}, state, {gridConfigLoaded: false, gridConfig: action.payload})` +
-`    } ` +
-`    case '${id}/FETCH_GRID_FULFILLED': { ` +
-`        return Object.assign({}, state, {gridConfigLoaded: true, gridConfig: action.payload})` +
-`    } ` +
-`    case '${id}/FETCH_GRID_DATA_FULFILLED': { ` +
-`        return Object.assign({}, state, {gridDataLoaded: true, gridData: action.payload, reloadGrid: false})` +
-`    } ` +
-`    case '${id}/FETCH_GRID_DATA_REJECTED': { ` +
-`        return Object.assign({}, state, {gridDataLoaded: false, gridData: action.payload})` +
-`    } ` +
-`    case '${id}/ROW_CLICKED': { ` +
-`        return Object.assign({}, state, {rowClicked: action.payload})` +
-`    } ` +
-`    case '${id}/INLINE_EDIT_FULFILLED':` +
-`    case '${id}/INLINE_EDIT_REJECTED': { ` +
-`        return Object.assign({}, state, {` +
-`        inlineSaveResult: action.payload,` +
-`        reloadGrid: true })` +
-`    } ` +
-`    case '${id}/INLINE_EDIT_RESET_STATE': { ` +
-`        return Object.assign({}, state, {` +
-`        inlineSaveResult: undefined })` +
-`    } ` +
-`    case '${id}/SAVE_ALL_RECORDS_FULFILLED':` +
-`    case '${id}/SAVE_ALL_RECORDS_REJECTED': { ` +
-`        return Object.assign({}, state, {` +
-`        saveAllResult: action.payload,` +
-`        reloadGrid: true })` +
-`    } ` +
-`    case '${id}/SAVE_ALL_RECORDS_RESET_STATE': { ` +
-`        return Object.assign({}, state, {` +
-`        saveAllResult: undefined })` +
-`    } ` +
-`     ` +
-` ` +
+      `${'  \'use strict\'; ' +
+      ' if(state==null) state={}; ' +
+      'let propName = action.id;  ' +
+      '  ;' +
+      '  if (propName == null || propName == undefined) { ' +
+      '    propName = \'\' ;' +
+      '  } ' +
+      '  switch (action.type) {  ' +
+      '    case  \''}${id}/PUBLISH_DATA': { ` +
+      `        return Object.assign({}, state,action.payload)` +
+      `    } ` +
+      `    case  '${id}/FETCH_GRID_REJECTED': { ` +
+      `        return Object.assign({}, state, {gridConfigLoaded: false, gridConfig: action.payload})` +
+      `    } ` +
+      `    case '${id}/FETCH_GRID_FULFILLED': { ` +
+      `        return Object.assign({}, state, {gridConfigLoaded: true, gridConfig: action.payload})` +
+      `    } ` +
+      `    case '${id}/FETCH_GRID_DATA_FULFILLED': { ` +
+      `        return Object.assign({}, state, {gridDataLoaded: true, gridData: action.payload, reloadGrid: false})` +
+      `    } ` +
+      `    case '${id}/FETCH_GRID_DATA_REJECTED': { ` +
+      `        return Object.assign({}, state, {gridDataLoaded: false, gridData: action.payload})` +
+      `    } ` +
+      `    case '${id}/ROW_CLICKED': { ` +
+      `        return Object.assign({}, state, {rowClicked: action.payload})` +
+      `    } ` +
+      `    case '${id}/INLINE_EDIT_FULFILLED':` +
+      `    case '${id}/INLINE_EDIT_REJECTED': { ` +
+      `        return Object.assign({}, state, {` +
+      `        inlineSaveResult: action.payload,` +
+      `        reloadGrid: true })` +
+      `    } ` +
+      `    case '${id}/INLINE_EDIT_RESET_STATE': { ` +
+      `        return Object.assign({}, state, {` +
+      `        inlineSaveResult: undefined })` +
+      `    } ` +
+      `    case '${id}/SAVE_ALL_RECORDS_FULFILLED':` +
+      `    case '${id}/SAVE_ALL_RECORDS_REJECTED': { ` +
+      `        return Object.assign({}, state, {` +
+      `        saveAllResult: action.payload,` +
+      `        reloadGrid: true })` +
+      `    } ` +
+      `    case '${id}/SAVE_ALL_RECORDS_RESET_STATE': { ` +
+      `        return Object.assign({}, state, {` +
+      `        saveAllResult: undefined })` +
+      `    } ` +
+      `     ` +
+      ` ` +
 
-`  } ` +
-` ` +
-`  return state`
+      `  } ` +
+      ` ` +
+      `  return state`
     return body
   }
 
@@ -136,39 +134,39 @@ export class ReducerTemplater extends React.Component {
  * @function
  * @param {string} id - The id which will be assigned to the new template
  */
-  static parameterTemplate (id) {
+  static parameterTemplate(id) {
     const body =
-        `${'  \'use strict\'; ' +
-        ' if(state==null) state={}; ' +
-        'let propName = action.id;  ' +
-        '  ;' +
-    '  if (propName == null || propName == undefined) { ' +
-    '    propName = \'\' ;' +
-    '  } ' +
-    '  switch (action.type) {  ' +
-    '    case  \''}${id}/PUBLISH_DATA': { ` +
-    `        return Object.assign({}, state,action.payload)` +
-    `    } ` +
-    `    case  '${id}/FETCH_PARAMS_REJECTED': { ` +
-    `      let isLoaded = 'paramConfigLoaded' ;` +
-    `      let loadedData =  'paramConfig' ;` +
-    `        return Object.assign({}, state, {[isLoaded]: false,[loadedData]: action.payload})` +
-    `    } ` +
-    `    case '${id}/FETCH_PARAMS_CONF_FULFILLED': { ` +
-    `      let isLoaded = 'paramConfigLoaded' ;` +
-    `      let loadedData =  'paramConfig' ;` +
-    `        return Object.assign({}, state, {[isLoaded]: true,[loadedData]: action.payload})` +
-    `    } ` +
-    `    case '${id}/FETCH_PARAMS_CONF_REJECTED': { ` +
-    `      let isLoaded = 'paramConfigLoaded' ;` +
-    `      let loadedData = 'paramConfig' ;` +
-    `        return Object.assign({}, state, {[isLoaded]: false,[loadedData]: action.payload})` +
-    `    } ` +
-    `     ` +
-    ` ` +
-    `  } ` +
-    ` ` +
-    `  return state`
+      `${'  \'use strict\'; ' +
+      ' if(state==null) state={}; ' +
+      'let propName = action.id;  ' +
+      '  ;' +
+      '  if (propName == null || propName == undefined) { ' +
+      '    propName = \'\' ;' +
+      '  } ' +
+      '  switch (action.type) {  ' +
+      '    case  \''}${id}/PUBLISH_DATA': { ` +
+      `        return Object.assign({}, state,action.payload)` +
+      `    } ` +
+      `    case  '${id}/FETCH_PARAMS_REJECTED': { ` +
+      `      let isLoaded = 'paramConfigLoaded' ;` +
+      `      let loadedData =  'paramConfig' ;` +
+      `        return Object.assign({}, state, {[isLoaded]: false,[loadedData]: action.payload})` +
+      `    } ` +
+      `    case '${id}/FETCH_PARAMS_CONF_FULFILLED': { ` +
+      `      let isLoaded = 'paramConfigLoaded' ;` +
+      `      let loadedData =  'paramConfig' ;` +
+      `        return Object.assign({}, state, {[isLoaded]: true,[loadedData]: action.payload})` +
+      `    } ` +
+      `    case '${id}/FETCH_PARAMS_CONF_REJECTED': { ` +
+      `      let isLoaded = 'paramConfigLoaded' ;` +
+      `      let loadedData = 'paramConfig' ;` +
+      `        return Object.assign({}, state, {[isLoaded]: false,[loadedData]: action.payload})` +
+      `    } ` +
+      `     ` +
+      ` ` +
+      `  } ` +
+      ` ` +
+      `  return state`
     return body
   }
 
@@ -177,56 +175,56 @@ export class ReducerTemplater extends React.Component {
  * @function
  * @param {string} id - The id which will be assigned to the new template
  */
-  static formTemplate (id) {
+  static formTemplate(id) {
     const body =
-    `${'  \'use strict\'; ' +
-    ' if(state==null) state={}; ' +
-    'let propName = action.id;  ' +
-    '  ;' +
-'  if (propName == null || propName == undefined) { ' +
-'    propName = \'\' ;' +
-'  } ' +
-'  switch (action.type) { ' +
-'    case  \''}${id}/PUBLISH_DATA': { ` +
-`        return Object.assign({}, state,action.payload)` +
-`    } ` +
-`    case  '${id}/FETCH_FORM_FULFILLED': { ` +
-`        return Object.assign({}, state,{formConfigLoaded: true, formWithExcluded: action.payloadExcludedFields, formData: action.payload})` +
-`    } ` +
-`    case  '${id}/FETCH_FORM_REJECTED': { ` +
-`        return Object.assign({}, state,{formConfigLoaded: false, formWithExcluded: action.payloadExcludedFields, formData: action.payload})` +
-`    } ` +
-`    case  '${id}_tabledata/FETCH_FORM_TABLE_DATA_FULFILLED': { ` +
-`        return Object.assign({}, state,{formDataLoaded: true, formTableData: action.payload})` +
-`    } ` +
-`    case  '${id}_tabledata/FETCH_FORM_TABLE_DATA_REJECTED': { ` +
-`        return Object.assign({}, state,{formDataLoaded: false, formTableData: action.payload})` +
-`    } ` +
-`    case  '${id}_uischema/FETCH_FORM_UISCHEMA_FULFILLED': { ` +
-`        return Object.assign({}, state,{uischemaLoaded: true, uischema: action.payload})` +
-`    } ` +
-`    case  '${id}_uischema/FETCH_FORM_UISCHEMA_REJECTED': { ` +
-`        return Object.assign({}, state,{uischemaLoaded: false, uischema: action.payload})` +
-`    } ` +
-`     ` +
-` ` +
-`  } ` +
-`  switch (action.type) {  ` +
-`    case  '${id}/SAVE_FORM_DATA': { ` +
-`        return Object.assign({}, state, { saveFormResponse: action.payload, saveFormError: undefined, saveFormType: action.resType, saveFormTitle: action.title, saveFormMessage: action.message })` +
-`    } ` +
-`     ` +
-` ` +
-`  } ` +
-`  switch (action.type) {  ` +
-`    case  '${id}/REJECTED_FORM_DATA': { ` +
-`        return Object.assign({}, state, { saveFormResponse: undefined, saveFormError: action.payload })` +
-`    } ` +
-`     ` +
-` ` +
-`  } ` +
-` ` +
-`  return state`
+      `${'  \'use strict\'; ' +
+      ' if(state==null) state={}; ' +
+      'let propName = action.id;  ' +
+      '  ;' +
+      '  if (propName == null || propName == undefined) { ' +
+      '    propName = \'\' ;' +
+      '  } ' +
+      '  switch (action.type) { ' +
+      '    case  \''}${id}/PUBLISH_DATA': { ` +
+      `        return Object.assign({}, state,action.payload)` +
+      `    } ` +
+      `    case  '${id}/FETCH_FORM_FULFILLED': { ` +
+      `        return Object.assign({}, state,{formConfigLoaded: true, formWithExcluded: action.payloadExcludedFields, formData: action.payload})` +
+      `    } ` +
+      `    case  '${id}/FETCH_FORM_REJECTED': { ` +
+      `        return Object.assign({}, state,{formConfigLoaded: false, formWithExcluded: action.payloadExcludedFields, formData: action.payload})` +
+      `    } ` +
+      `    case  '${id}_tabledata/FETCH_FORM_TABLE_DATA_FULFILLED': { ` +
+      `        return Object.assign({}, state,{formDataLoaded: true, formTableData: action.payload})` +
+      `    } ` +
+      `    case  '${id}_tabledata/FETCH_FORM_TABLE_DATA_REJECTED': { ` +
+      `        return Object.assign({}, state,{formDataLoaded: false, formTableData: action.payload})` +
+      `    } ` +
+      `    case  '${id}_uischema/FETCH_FORM_UISCHEMA_FULFILLED': { ` +
+      `        return Object.assign({}, state,{uischemaLoaded: true, uischema: action.payload})` +
+      `    } ` +
+      `    case  '${id}_uischema/FETCH_FORM_UISCHEMA_REJECTED': { ` +
+      `        return Object.assign({}, state,{uischemaLoaded: false, uischema: action.payload})` +
+      `    } ` +
+      `     ` +
+      ` ` +
+      `  } ` +
+      `  switch (action.type) {  ` +
+      `    case  '${id}/SAVE_FORM_DATA': { ` +
+      `        return Object.assign({}, state, { saveFormResponse: action.payload, saveFormError: undefined, saveFormType: action.resType, saveFormTitle: action.title, saveFormMessage: action.message })` +
+      `    } ` +
+      `     ` +
+      ` ` +
+      `  } ` +
+      `  switch (action.type) {  ` +
+      `    case  '${id}/REJECTED_FORM_DATA': { ` +
+      `        return Object.assign({}, state, { saveFormResponse: undefined, saveFormError: action.payload })` +
+      `    } ` +
+      `     ` +
+      ` ` +
+      `  } ` +
+      ` ` +
+      `  return state`
     return body
   }
 }

@@ -23,8 +23,8 @@ export function getFormData(id, reduxKey, formName, uiSchema, formTableData, ses
 
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || formName)
     axios.get(restUrl).then((response) => {
-      let data
-      if (isValidObject(response.data, 1)) {
+      let data = {}
+      if (isValidObject(response?.data, 1)) {
         if (isValidObject(response.data.data, 1)) {
           data = response.data.data
         } else {
@@ -67,7 +67,7 @@ function getUiSchema(id, reduxKey, uiSchema, session, params) {
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || uiSchema)
     axios.get(restUrl).then((response) => {
       let data
-      if (isValidObject(response.data)) {
+      if (isValidObject(response?.data)) {
         if (isValidObject(response.data.data)) {
           data = response.data.data
         } else {
@@ -112,7 +112,7 @@ function getDataTableForm(id, reduxKey, formTableData, session, params) {
     const restUrl = svConfig.restSvcBaseUrl + (verbPath || formTableData)
     axios.get(restUrl).then((response) => {
       let data
-      if (isValidObject(response.data)) {
+      if (isValidObject(response?.data)) {
         if (isValidObject(response.data.data)) {
           data = response.data.data
         } else {
@@ -220,7 +220,7 @@ function replaceParams(path, formName, session, params) {
   path = path.replace('%gridName', formName)
   path = path.replace('%session', session)
   // replace custom params
-  for (var i = 0; i < params.length; i++) {
+  for (let i = 0; i < params.length; i++) {
     const obj = params[i]
     const paramName = obj['PARAM_NAME']
     const paramValue = obj['PARAM_VALUE']

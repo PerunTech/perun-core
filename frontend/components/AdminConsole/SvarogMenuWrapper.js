@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
 import JsonView from 'react-json-view';
-import { ReactBootstrap, alertUser, ComponentManager, GridManager } from '../../elements';
+import { ReactBootstrap, alertUserV2, alertUserResponse, ComponentManager, GridManager } from '../../elements';
 import { isJSON } from '../../functions/utils';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
@@ -35,14 +35,8 @@ const SvarogMenuWrapper = (props, context) => {
     const { formid } = props
     ComponentManager.setStateForComponent(formid, "addSaveFunction", addSaveFunction);
     props.formInstance.setState({ addSaveFunction: addSaveFunction })
-    const jsonSchema = ComponentManager.getStateForComponent(
-      formid,
-      "formData"
-    );
-    const uiSchema = ComponentManager.getStateForComponent(
-      formid,
-      "uischema"
-    );
+    const jsonSchema = ComponentManager.getStateForComponent(formid, "formData");
+    const uiSchema = ComponentManager.getStateForComponent(formid, "uischema");
     if (jsonSchema) {
       if (uiSchema) {
         uiSchema['MENU_CONF'] = { "ui:readonly": true }
@@ -56,44 +50,35 @@ const SvarogMenuWrapper = (props, context) => {
     }
   }
 
+  const reloadGrid = () => {
+    GridManager.reloadGridData('SVAROG_MENU_GRID')
+    ComponentManager.setStateForComponent('SVAROG_MENU_GRID', null, { rowClicked: undefined })
+  }
+
   const addSaveFunction = () => {
     const { svSession } = props;
     const { formid } = props
-    const formData = ComponentManager.getStateForComponent(
-      formid,
-      "formTableData"
-    );
-    let url =
-      window.server +
-      `/ReactElements/createTableRecordFormData/${svSession}/SVAROG_MENU/0`;
+    const formData = ComponentManager.getStateForComponent(formid, "formTableData");
+    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_MENU/0`
+    const onConfirm = () => ComponentManager.setStateForComponent('SVAROG_MENU_FORM', null, { saveExecuted: false })
     axios({
       method: "post",
       data: encodeURIComponent(JSON.stringify(formData)),
       url,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    })
-      .then((res) => {
-        if (res.data) {
-          const resType = res.data.type.toLowerCase()
-          const title = res.data.title || ''
-          const msg = res.data.message || ''
-          alertUser(true, resType, title, msg, () => {
-            ComponentManager.setStateForComponent(`SVAROG_MENU_FORM`, null, {
-              saveExecuted: false,
-            });
-            GridManager.reloadGridData('SVAROG_MENU_GRID');
-          })
+    }).then((res) => {
+      if (res?.data) {
+        const resType = res.data?.type?.toLowerCase() || 'info'
+        alertUserResponse({ type: resType, response: res, onConfirm })
+        if (resType === 'success') {
+          reloadGrid()
+          setShow(false)
         }
-      })
-      .catch(err => {
-        console.error(err)
-        const title = err.response?.data?.title || err
-        const msg = err.response?.data?.message || ''
-        alertUser(true, "error", title, msg, () => ComponentManager.setStateForComponent(`SVAROG_MENU_FORM`, null, {
-          saveExecuted: false,
-        }));
-
-      });
+      }
+    }).catch(err => {
+      console.error(err)
+      alertUserResponse({ response: err, onConfirm })
+    });
   };
 
   const openJsonEditor = () => {
@@ -114,14 +99,16 @@ const SvarogMenuWrapper = (props, context) => {
 
   const changeJson = (editedJson) => {
     const { formid } = props
-    const formData = ComponentManager.getStateForComponent(
-      formid,
-      "formTableData"
-    );
-    alertUser(true, "info", "perun.admin_console.change_json", "", () => {
+    const formData = ComponentManager.getStateForComponent(formid, "formTableData");
+    const onConfirm = () => {
       formData['MENU_CONF'] = JSON.stringify(editedJson)
       ComponentManager.setStateForComponent(formid, "formTableData", formData);
       props.formInstance.setState({ formTableData: formData });
+    }
+    alertUserV2({
+      type: 'info',
+      title: context.intl.formatMessage({ id: 'perun.admin_console.change_json', defaultMessage: 'perun.admin_console.change_json' }),
+      onConfirm
     })
   }
 

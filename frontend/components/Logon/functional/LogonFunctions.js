@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import axios from 'axios';
 import * as utils from '../utils'
 import * as config from 'config/config.js'
-import { alertUser } from '../../../elements';
+import { alertUserResponse } from '../../../elements';
 import Loading from 'components/Loading/Loading'
 import { isValidObject } from '../../../functions/utils';
 
@@ -11,8 +11,8 @@ export default function LogonFunctions(TargetComponent, validationString, method
   class WrappedComponent extends React.Component {
     static propTypes = {
       status: PropTypes.string,
-      svTitle: PropTypes.string,
-      svMessage: PropTypes.string,
+      title: PropTypes.string,
+      message: PropTypes.string,
       configuration: PropTypes.object
     }
     constructor(props) {
@@ -40,25 +40,18 @@ export default function LogonFunctions(TargetComponent, validationString, method
           this.setState({ showSsoLoginBtn: true })
         }
       }
-
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
       if (nextProps.status) {
-        let statusType = nextProps.status.toLowerCase()
+        let statusType = nextProps?.status?.toLowerCase() || 'info'
         if (statusType === 'exception') { statusType = 'error' }
-        this.setState({
-          alert: alertUser(true, statusType, nextProps.svTitle, nextProps.svMessage,
-            () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, '#e0ab10', true)
-        })
+        alertUserResponse({ type: statusType, response: nextProps })
       }
       if (nextProps.configuration) {
-        let statusType = nextProps.configuration.type.toLowerCase()
+        const statusType = nextProps?.configuration?.type?.toLowerCase() || 'info'
         if (statusType !== 'success') {
-          this.setState({
-            alert: alertUser(true, statusType, nextProps.configuration.title, nextProps.configuration.message,
-              () => this.setState({ alert: alertUser(false, 'info', ' ') }), undefined, false, undefined, undefined, false, '#e0ab10', true)
-          })
+          alertUserResponse({ type: statusType, response: nextProps.configuration })
         }
       }
     }
@@ -111,9 +104,7 @@ export default function LogonFunctions(TargetComponent, validationString, method
         }).catch(err => {
           console.error(err)
           this.setState({ loading: false })
-          const title = err.response?.data?.title || err
-          const msg = err.response?.data?.message || ''
-          alertUser(true, 'error', title, msg)
+          alertUserResponse({ response: err })
         })
       }
     }

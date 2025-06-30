@@ -3,8 +3,8 @@ import a from '../actionNames.json'
 export default function security(state = {
   isBusy: false,
   svSession: undefined,
-  svTitle: undefined,
-  svMessage: undefined,
+  title: undefined,
+  message: undefined,
   status: undefined,
   saml: false,
   accessAdminConsole: false,
@@ -22,8 +22,8 @@ export default function security(state = {
         ...state,
         isBusy: true,
         svSession: undefined,
-        svTitle: undefined,
-        svMessage: undefined,
+        title: undefined,
+        message: undefined,
         status: undefined
       }
     }
@@ -43,8 +43,8 @@ export default function security(state = {
         ...state,
         isBusy: false,
         svSession: undefined,
-        svTitle: action.payload.title,
-        svMessage: action.payload.message,
+        title: action.payload.title,
+        message: action.payload.message,
         status: action.payload.type
       }
     }
@@ -55,8 +55,8 @@ export default function security(state = {
         svSession: action.payload.data.token,
         data: action.payload.data.farmer,
         config: action.payload.data.configuration,
-        svTitle: action.payload.title,
-        svMessage: action.payload.message,
+        title: action.payload.title,
+        message: action.payload.message,
         status: action.payload.type,
       }
     }
@@ -67,8 +67,8 @@ export default function security(state = {
         svSession: action.payload.data.token,
         data: action.payload.data.farmer,
         config: action.payload.data.configuration,
-        svTitle: action.payload.title,
-        svMessage: action.payload.message,
+        title: action.payload.title,
+        message: action.payload.message,
         status: action.payload.type,
         saml: action.payload.saml
       }
@@ -79,8 +79,8 @@ export default function security(state = {
         isBusy: false,
         svSession: action.payload.data.token,
         data: action.payload.data,
-        svTitle: action.payload.title,
-        svMessage: action.payload.message,
+        title: action.payload.title,
+        message: action.payload.message,
         status: action.payload.type
       }
     }
@@ -89,8 +89,8 @@ export default function security(state = {
         ...state,
         isBusy: false,
         svSession: undefined,
-        svTitle: undefined,
-        svMessage: undefined,
+        title: undefined,
+        message: undefined,
         status: undefined,
         saml: false,
         accessAdminConsole: false

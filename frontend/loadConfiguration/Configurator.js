@@ -11,11 +11,7 @@ import { loadConfiguration } from './loadConfiguration'
  * which gets the configuration type from the DB- defined by the 'type' prop.
  * After the configuration has been loaded, the reducing function writes it in the store 'configurator' object.
  * The said configuration can be accessed through the 'configuration prop in the wrapped component.'
- * @author KNI
- * @version 1.1
- * @class
  */
-
 class _Configurator extends React.Component {
   /**
    * Default constructor.

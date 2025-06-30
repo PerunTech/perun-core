@@ -13,7 +13,7 @@ export const svSessionRegxp = value => /^([a-zA-Z0-9_-]){36}$/.test(value);
 
 // flatten nested json for farmer data
 export function flattenJson(data) {
-  var result = {}
+  let result = {}
   function recurse(num, prop) {
     if (Object(num) !== num) {
       result[prop] = num
@@ -25,8 +25,8 @@ export function flattenJson(data) {
         result[prop] = []
       }
     } else {
-      var isEmpty = true
-      for (var p in num) {
+      let isEmpty = true
+      for (const p in num) {
         isEmpty = false
         recurse(num[p], prop ? prop + '.' + p : p)
       }
@@ -40,7 +40,7 @@ export function flattenJson(data) {
 }
 
 export function ConvertObjectKeysToUpperCase(obj) {
-  var output = {}
+  let output = {}
   for (const i in obj) {
     if (Object.prototype.toString.apply(obj[i]) === '[object Object]') {
       output[i.toUpperCase()] = ConvertObjectKeysToUpperCase(obj[i])
@@ -105,7 +105,7 @@ export function cloneObject(obj) {
 
   // handle Array
   if (Array.isArray(obj)) {
-    var clonedArr = [];
+    const clonedArr = [];
     obj.forEach((element) => {
       clonedArr.push(cloneObject(element))
     });
@@ -114,7 +114,7 @@ export function cloneObject(obj) {
 
   // lastly, handle objects
   let clonedObj = new obj.constructor();
-  for (var prop in obj) {
+  for (const prop in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, prop)) {
       clonedObj[prop] = cloneObject(obj[prop]);
     }
