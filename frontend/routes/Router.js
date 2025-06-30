@@ -48,7 +48,7 @@ function reInitPlugins(storageBundles) {
 
     // Create a list of promises for loading plugins
     const loadPromises = sortedBundles.map(bundle => {
-        if (bundle.id !== 'perun-core') {
+        if (bundle.id !== 'perun-core' && bundle.id !== 'naits') {
             return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
                 console.error(`Error loading plugin ${bundle.id}:`, error);
                 return null; // Continue with other plugins even if one fails
