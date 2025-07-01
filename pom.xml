@@ -173,8 +173,7 @@ Agreement
 						<Bundle-Name>Perun Core</Bundle-Name>
 						<Bundle-Vendor>Perun.Tech</Bundle-Vendor>
 						<Bundle-Description>
-							A bundle that provides basic perun core
-							services
+							A bundle that provides basic Perun Core services
 						</Bundle-Description>
 						<Bundle-Activator>
 							com.prtech.perun_core.Activator
