@@ -224,14 +224,14 @@ class ModuleMenu extends React.Component {
       // JSX template for our access cards.
       let accessCard = <Link to={'/main/' + plugin.id}
         id={plugin.id}
-        className='card modWindow'
+        className='moduleCard'
         key={plugin.id}
       >
         <div className='box'>
-          <div className='card-img-top'>
-            <img src={window.location.origin + plugin.imgPath} className='card-img-top' alt='...' />
+          <div className='cardImgTop'>
+            <img src={window.location.origin + plugin.imgPath} />
           </div>
-          <div title={plugin.text} className='card-body' >
+          <div title={plugin.text} className='cardBody' >
             <h5 className='card-title'>{plugin.title}</h5>
           </div>
         </div>
@@ -408,7 +408,7 @@ class ModuleMenu extends React.Component {
       cards: {
         ...this.state.cards, [plugin.id]: <a
           id={plugin.id}
-          className='card modWindow'
+          className='moduleCard'
           key={plugin.id}
           onClick={() => {
             let url = window.location.href
@@ -417,10 +417,10 @@ class ModuleMenu extends React.Component {
             location.replace(currentUrl + '/naits/index.html');
           }} >
           <div className='box'>
-            <div className='card-img-top'>
-              <img src={plugin.imgPath} className='card-img-top' alt='...' />
+            <div className='cardImgTop'>
+              <img src={plugin.imgPath} />
             </div>
-            <div title={plugin.text} className='card-body' >
+            <div title={plugin.text} className='cardBody' >
               <h5 className='card-title'>{plugin.title}</h5>
             </div>
           </div>
@@ -434,9 +434,7 @@ class ModuleMenu extends React.Component {
 
     return loading ? <Loading /> : (
       <div id='holderCards' className='holderCards'>
-        {!hasCardForDirectAccess ? Object.keys(cards).length < 5
-          ? <div id='modMainGridOneRow' className='modMainGridOneRow' >{Object.values(cards)}</div>
-          : <div id='modMainGrid' className={'modMainGrid'}>{Object.values(cards)}</div> : <></>}
+        {!hasCardForDirectAccess ? <div id='mainGrid' className={'mainGrid'}>{Object.values(cards)}</div> : <></>}
       </div>
     )
   }
