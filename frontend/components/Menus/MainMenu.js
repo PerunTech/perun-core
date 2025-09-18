@@ -10,7 +10,7 @@ import { svConfig } from '../../config';
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
 import PerunNavbar from '../Navbar/PerunNavbar'
-
+import { changeLanguageAndLocale } from '../../client'
 const MainMenu = (props) => {
   const hashHistory = createHashHistory()
   const initialState = { navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '' }
@@ -147,7 +147,7 @@ const MainMenu = (props) => {
 
   return (
     <React.Fragment>
-      <PerunNavbar logout={logout} location={window.location} />
+      <PerunNavbar logout={logout} activeLanguage={activeLanguage} languageOptions={languageOptions} location={window.location} changeLang={changeLang} />
     </React.Fragment>
   )
 }
