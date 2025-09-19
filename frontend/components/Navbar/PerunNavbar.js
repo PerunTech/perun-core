@@ -43,6 +43,7 @@ const PerunNavbar = (props, context) => {
         setMenuBurger(JSON.parse(localStorage.getItem('bundleStorage')))
         setToggleBurger(true)
     }
+
     return (
         <>
             <div className='perun-navbar'>
@@ -88,7 +89,7 @@ const PerunNavbar = (props, context) => {
                         </div>
                     </div>
                 )}
-            </div >
+            </div>
             {/* burger menu */}
             {toggleBurger && (
                 <div ref={burgerRef} className='nav-burger-menu'>
