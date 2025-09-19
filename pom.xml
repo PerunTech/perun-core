@@ -14,7 +14,7 @@ Agreement
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.peruntech</groupId>
 	<artifactId>perun-core</artifactId>
-	<version>4.5.1</version>
+	<version>4.5.2</version>
 	<packaging>bundle</packaging>
 	<name>Perun Core</name>
 	<url>https://github.com/PerunTech/perun-core</url>
@@ -173,8 +173,7 @@ Agreement
 						<Bundle-Name>Perun Core</Bundle-Name>
 						<Bundle-Vendor>Perun.Tech</Bundle-Vendor>
 						<Bundle-Description>
-							A bundle that provides basic perun core
-							services
+							A bundle that provides basic Perun Core services
 						</Bundle-Description>
 						<Bundle-Activator>
 							com.prtech.perun_core.Activator

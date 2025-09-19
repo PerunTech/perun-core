@@ -1,7 +1,9 @@
+import { useEffect, useRef } from 'react'
 import { ComponentManager } from '../elements'
 import { store, updateSelectedRows, lastSelectedItem } from '../model'
 import { strcmp } from '../model/utils'
 import axios from 'axios'
+
 export const replaceParamsWithBoundPropVals = (string, props) => {
   let array = string.split('/')
   for (let i = 0; i < array.length; i++) {
@@ -166,3 +168,175 @@ export const getObjectValueByKey = (obj, target) =>
       if (acc !== undefined) return acc;
       if (typeof val === 'object') return getObjectValueByKey(val, target);
     }, undefined);
+
+/**
+ * Retrieves a localized label using a label code, module name, and internationalization context.
+ *
+ * @param {string} labelCode - The key used to identify the label (e.g., `'submit'`, `'title'`).
+ * @param {{ intl: { formatMessage: function(Object): string } }} context - The internationalization context, typically from `react-intl`.
+ * @param {string} [moduleName='main'] - Optional module name for namespacing the label. Defaults to `'main'`.
+ */
+export const labelsManager = (labelCode, context, moduleName = 'main') => {
+  if (!labelCode || !context) return
+  return context.intl.formatMessage({
+    id: `perun.${moduleName}.${labelCode}`,
+    defaultMessage: `perun.${moduleName}.${labelCode}`,
+  })
+}
+
+/**
+ * Retrieves a localized plugin label using the provided label code and context.
+ * 
+ * @param {string} labelCode - The label code to be appended to the message ID.
+ * @param {{ intl: { formatMessage: function(Object): string } }} context - The internationalization context, typically provided by `react-intl`.
+ */
+export const getPluginLabel = (labelCode, context) => {
+  return context.intl.formatMessage({
+    id: `perun.plugin.${labelCode}`,
+    defaultMessage: `perun.plugin.${labelCode}`
+  })
+}
+
+/**
+ * Custom React hook that returns the previous value of a given input.
+ * 
+ * This hook uses `useRef` to persist the value across renders and `useEffect` to update the reference after each render.
+ * 
+ * @param {any} value - The current value to track.
+ */
+export const usePrevious = (value) => {
+  const ref = useRef()
+
+  useEffect(() => {
+    ref.current = JSON.parse(JSON.stringify(value))
+  }, [value])
+
+  return ref.current
+}
+
+/**
+ * Updates the text content of the DOM element with ID 'identificationScreen'.
+ *
+ * If the element exists, its `innerText` is set using a label fetched from `getPluginLabel`
+ * with the plugin name and the provided `context`.
+ *
+ * @param {any} context - Contextual data used to retrieve the appropriate label from `getPluginLabel`.
+ */
+export const updateIdScreen = (pluginLabel, context) => {
+  const idScreen = document.getElementById('identificationScreen')
+  if (idScreen) {
+    idScreen.innerText = getPluginLabel(pluginLabel, context)
+  }
+}
+
+/**
+ * Recursively flattens a nested object into a single-level object.
+ *
+ * This function merges nested properties into the top-level object.
+ * If a property is an object (and not `null`), its properties are 
+ * recursively added to the resulting object. Keys from nested objects 
+ * will overwrite keys at higher levels if they have the same name.
+ *
+ * @param {object} obj - The object to flatten.
+ */
+export const flattenObject = (obj) => {
+  const flattened = {}
+  Object.keys(obj).forEach((key) => {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      Object.assign(flattened, flattenObject(obj[key]))
+    } else {
+      flattened[key] = obj[key]
+    }
+  })
+  return flattened
+}
+
+/**
+ * Generates a pseudo-random alphanumeric key based on the current timestamp.
+ */
+export const getDynamicKey = () => {
+  return (+ new Date() + Math.floor(Math.random() * 999999)).toString(36)
+}
+
+/**
+ * Replaces a placeholder in a string path with a provided value.
+ *
+ * Searches the input string (`wsPath`) for a placeholder in the format `{<id>.OBJECT_ID}`.
+ * If found, replaces it with the provided `obj` value. If not found, returns the original string unchanged.
+ *
+ * @param {string} wsPath - The string path potentially containing the placeholder.
+ * @param {string} id - The identifier used to construct the placeholder (e.g., `user` creates `{user.OBJECT_ID}`).
+ * @param {string|number} obj - The value to replace the placeholder with.
+ */
+export const replaceFunc = (wsPath, id, obj) => {
+  if (wsPath.indexOf(`{${id}.OBJECT_ID}`) >= 0) {
+    wsPath = wsPath.replace(`{${id}.OBJECT_ID}`, obj)
+    return wsPath
+  } else {
+    return wsPath
+  }
+}
+
+/**
+ * Converts a number of bytes into a human-readable string with appropriate units.
+ *
+ * @param {number} bytes - The number of bytes to convert.
+ * @param {number} decimal - The number of decimal places to include in the result.
+ */
+export const convertBytes = (bytes, decimal) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimal)) + ' ' + sizes[i]
+}
+
+/**
+ * Converts a JSON object into a URL-encoded query string.
+ *
+ * @param {Object} json - The JSON object to convert.
+ * @param {boolean} shouldStringify - Whether to stringify object or array values.
+ */
+export const jsonToURI = (json, shouldStringify) => {
+  let arr = []
+  for (let property in json) {
+    if (Object.prototype.hasOwnProperty.call(json, property) && json[property] !== undefined) {
+      if (shouldStringify && typeof json[property] === 'object') {
+        if (Array.isArray(json[property])) {
+          arr.push(encodeURIComponent(property) + '=' + encodeURIComponent(json[property].toString()))
+        } else {
+          arr.push(encodeURIComponent(property) + '=' + encodeURIComponent(JSON.stringify(json[property])))
+        }
+      } else {
+        arr.push(encodeURIComponent(property) + '=' + encodeURIComponent(json[property]))
+      }
+    }
+  }
+  return arr.join('&')
+}
+
+/**
+ * A function used for restricting the type of value a user can enter in an
+ * input of type 'text' or textarea element (example: only a numeric value or a numeric value in
+ * a certain range)
+ * @param  {HTMLElement} element The input/textarea whose value we want to restrict
+ * @param  {RegExp} inputFilter The filter which will be applied to the input/textarea
+ * (the filter will be a regular expression)
+ */
+export function setInputFilter(element, inputFilter) {
+  const events = ['input', 'keydown', 'keyup', 'mousedown', 'mouseup', 'select', 'contextmenu', 'drop']
+  events.forEach(function (event) {
+    element.addEventListener(event, function () {
+      if (inputFilter(this.value)) {
+        this.oldValue = this.value
+        this.oldSelectionStart = this.selectionStart
+        this.oldSelectionEnd = this.selectionEnd
+      } else if (Object.prototype.hasOwnProperty.call(this, 'oldValue')) {
+        this.value = this.oldValue
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd)
+      } else {
+        this.value = ''
+      }
+    })
+  })
+}
