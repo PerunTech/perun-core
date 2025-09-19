@@ -43,6 +43,7 @@ const PerunNavbar = (props, context) => {
         setMenuBurger(JSON.parse(localStorage.getItem('bundleStorage')))
         setToggleBurger(true)
     }
+
     return (
         <>
             <div className='perun-navbar'>
@@ -74,7 +75,7 @@ const PerunNavbar = (props, context) => {
                             <p>{props.userInfo.defaultUserGroup.groupName}</p>
                         </div>
                         {props?.languageOptions && props?.languageOptions.map(lang => (
-                            < div className={`nav-option ${props?.activeLanguage == lang?.language && 'nav-active-lang'}`} onClick={() => { props.changeLang(lang.locale, lang.language), setToggleNavOpt(false) }}>
+                            <div className={`nav-option ${props?.activeLanguage == lang?.language && 'nav-active-lang'}`} onClick={() => { props.changeLang(lang.locale, lang.language), setToggleNavOpt(false) }}>
                                 <p>{lang.label}</p>
                             </div>
                         ))}
@@ -88,24 +89,22 @@ const PerunNavbar = (props, context) => {
                         </div>
                     </div>
                 )}
-            </div >
+            </div>
             {/* burger menu */}
-            {
-                toggleBurger && (
-                    <div ref={burgerRef} className='nav-burger-menu'>
-                        {menuBurger.map(el => (
-                            !el['cardHidden'] && (
-                                <Link key={el.id} className='nav-burger-option' to={`/main/${el.id}`} onClick={() => setToggleBurger(false)}>
-                                    <div className='nav-burger-img'>
-                                        <img src={`${window.location.origin}${el.imgPath}`} />
-                                    </div>
-                                    <p>{el.title}</p>
-                                </Link>
-                            )
-                        ))}
-                    </div>
-                )
-            }
+            {toggleBurger && (
+                <div ref={burgerRef} className='nav-burger-menu'>
+                    {menuBurger.map(el => (
+                        !el['cardHidden'] && (
+                            <Link key={el.id} className='nav-burger-option' to={`/main/${el.id}`} onClick={() => setToggleBurger(false)}>
+                                <div className='nav-burger-img'>
+                                    <img src={`${window.location.origin}${el.imgPath}`} />
+                                </div>
+                                <p>{el.title}</p>
+                            </Link>
+                        )
+                    ))}
+                </div>
+            )}
         </>
     );
 };
