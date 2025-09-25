@@ -56,6 +56,10 @@ export const alertUserResponse = (params) => {
     alertType = 'error'
   }
   let title = response?.response?.data?.title || response?.data?.title || response?.title || response
+  // Check if the title is JSON, for cases when the response doesn't contain the `title` key
+  if (isJSON(title)) {
+    title = ''
+  }
   let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
   // Check if the response Content-Type header includes text/html
   // The additional check whether the response is JSON is needed since some services return JSON with the Content-Type set to text/html
