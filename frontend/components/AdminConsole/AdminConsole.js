@@ -12,6 +12,7 @@ import SvarogSystemParams from './SvarogSystemParams'
 import GeoLayerTypes from './GeoLayerTypes'
 import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
+import PerunMenu from './PerunMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
 
@@ -57,6 +58,7 @@ const AdminConsole = (_props, context) => {
                 {dynamicComponent === 'OrganizationalUnit' && <OrganizationalUnit />}
                 {dynamicComponent === 'PerunPluginTable' && <PerunPluginTable />}
                 {dynamicComponent === 'SvarogMenu' && <SvarogMenu />}
+                {dynamicComponent === 'PerunMenu' && <PerunMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
                 {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
             </div>
