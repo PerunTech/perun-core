@@ -95,7 +95,6 @@ const MainMenu = (props) => {
   const onSamlLogout = () => {
     setState({ loading: true })
     axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
-      setState({ loading: false })
       if (res.data?.data) {
         const configuration = res.data.data
         if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
@@ -105,6 +104,7 @@ const MainMenu = (props) => {
           const sloMethod = sloConfig.SLO_METHOD
           const sloUrl = sloConfig.SLO_URL
           axios.get(`${window.server}${sloFormValue}`).then(res => {
+            setState({ loading: false })
             if (res.data) {
               const token = res.data
               submitForm(sloUrl, sloMethod, { [sloFormKey]: token })
@@ -116,6 +116,9 @@ const MainMenu = (props) => {
           })
         }
       }
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
     })
   }
 
