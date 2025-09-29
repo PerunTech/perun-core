@@ -10,12 +10,14 @@ import { svConfig } from '../../config';
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
 import PerunNavbar from '../Navbar/PerunNavbar'
+import Loading from 'components/Loading/Loading'
 import { changeLanguageAndLocale } from '../../client'
+
 const MainMenu = (props) => {
   const hashHistory = createHashHistory()
-  const initialState = { navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '' }
+  const initialState = { loading: false, navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '' }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ navbarImgJson, languageOptions, currentUser, activeLanguage }, setState] = useReducer(reducer, initialState)
+  const [{ loading, navbarImgJson, languageOptions, currentUser, activeLanguage }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     getNavbarImgJson()
@@ -91,7 +93,9 @@ const MainMenu = (props) => {
   }
 
   const onSamlLogout = () => {
+    setState({ loading: true })
     axios.get(`${window.server}/SvSecurity/configuration/getConfiguration/undefined/LOGIN`).then(res => {
+      setState({ loading: false })
       if (res.data?.data) {
         const configuration = res.data.data
         if (configuration.sso_config && isValidObject(configuration.sso_config, 1)) {
@@ -107,11 +111,11 @@ const MainMenu = (props) => {
             }
           }).catch(err => {
             console.error(err)
+            setState({ loading: false })
             alertUserResponse({ response: err })
           })
         }
       }
-
     })
   }
 
@@ -147,6 +151,7 @@ const MainMenu = (props) => {
 
   return (
     <React.Fragment>
+      {loading && <Loading />}
       <PerunNavbar logout={logout} activeLanguage={activeLanguage} languageOptions={languageOptions} location={window.location} changeLang={changeLang} />
     </React.Fragment>
   )
