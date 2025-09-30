@@ -2,8 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import JsonView from 'react-json-view';
-import { ReactBootstrap, alertUserV2, ComponentManager } from '../../elements';
-import { isJSON } from '../../functions/utils';
+import axios from 'axios';
+import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse } from '../../../elements';
+import { isJSON } from '../../../functions/utils';
+import SideMenu from './SideMenu';
+import { iconManager } from '../../../assets/svg/svgHolder';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
@@ -12,6 +15,8 @@ const PerunMenuWrapper = (props, context) => {
   const [shouldRender, setRender] = useState(false)
   const [fieldJson, setFieldJson] = useState({})
   const [editedJson, setJson] = useState(undefined)
+  const [configuration, setConfig] = useState(undefined)
+
   useEffect(() => {
     changeField()
   }, [])
@@ -75,10 +80,26 @@ const PerunMenuWrapper = (props, context) => {
     })
   }
 
+  const generateMenuPreview = () => {
+    const { formid } = props
+    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
+    const url = `${window.server}/Menu/generate/${props.svSession}/${formData['MENU_CODE']}`
+    axios.get(url).then(res => {
+      setConfig(res.data['buttonArray'])
+      setShow(true)
+    }).catch(err => {
+      console.error(err)
+      alertUserResponse({ response: err })
+    })
+  }
+
   return (
     <>
       {shouldRender &&
         <>
+          <button className='btn-success btn_save_form preview-btn' onClick={() => { generateMenuPreview() }}>{context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}
+            <span className='preview-span'>{iconManager.getIcon('eyeShow')}</span>
+          </button>
           {props.children}
         </>
       }
@@ -86,16 +107,18 @@ const PerunMenuWrapper = (props, context) => {
         <Modal
           className='admin-console-unit-modal menu-editor-modal'
           show={show}
-          onHide={() => { setShow(false) }}>
+          onHide={() => { setShow(false), setConfig(undefined) }}>
           <Modal.Header className='admin-console-unit-modal-header  menu-editor-header' closeButton>
+            <Modal.Title>{configuration && context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}</Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body  menu-editor-body'>
-            <div>
+            {!configuration && <div>
               <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} collapsed />
               <div>
                 <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson(editedJson) }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
               </div>
-            </div>
+            </div>}
+            {configuration && <SideMenu configuration={configuration} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer  menu-editor-footer'></Modal.Footer>
         </Modal>
