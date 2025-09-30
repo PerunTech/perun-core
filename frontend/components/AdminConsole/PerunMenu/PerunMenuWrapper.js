@@ -7,10 +7,12 @@ import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse } from
 import { isJSON } from '../../../functions/utils';
 import SideMenu from './SideMenu';
 import { iconManager } from '../../../assets/svg/svgHolder';
+import Swal from 'sweetalert2';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
 const PerunMenuWrapper = (props, context) => {
+  const [objectId, setObjectId] = useState(undefined)
   const [show, setShow] = useState(false);
   const [shouldRender, setRender] = useState(false)
   const [fieldJson, setFieldJson] = useState({})
@@ -37,6 +39,7 @@ const PerunMenuWrapper = (props, context) => {
 
   const changeField = () => {
     const { formid } = props
+    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const jsonSchema = ComponentManager.getStateForComponent(formid, 'formData');
     const uiSchema = ComponentManager.getStateForComponent(formid, 'uischema');
     if (jsonSchema) {
@@ -49,6 +52,10 @@ const PerunMenuWrapper = (props, context) => {
         props.formInstance.setState({ uischema: uiSchema });
         setRender(true)
       }
+    }
+
+    if (formData) {
+      setObjectId(formData.OBJECT_ID)
     }
   }
 
@@ -93,13 +100,46 @@ const PerunMenuWrapper = (props, context) => {
     })
   }
 
+  const downloadMenu = () => {
+    const { formid, svSession } = props
+    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
+    const menuCode = formData['MENU_CODE']
+    const download = (resolveImports) => {
+      const url = `${window.server}/Menu/download/${svSession}/${menuCode}/${resolveImports}`
+      window.open(url, '_blank')
+    }
+    alertUserV2({
+      type: 'info',
+      title: `${context.intl.formatMessage({ id: 'perun.admin_console.download_menu', defaultMessage: 'perun.admin_console.download_menu' })}: ${menuCode}`,
+      message: context.intl.formatMessage({ id: 'perun.admin_console.resolve_imports_prompt', defaultMessage: 'perun.admin_console.resolve_imports_prompt' }),
+      showCancel: true,
+      showDeny: true,
+      confirmButtonText: context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }),
+      cancelButtonText: context.intl.formatMessage({ id: 'perun.admin_console.cancel', defaultMessage: 'perun.admin_console.cancel' }),
+      denyButtonText: context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }),
+      denyButtonColor: '#7cd1f9',
+      onConfirm: () => download(true),
+      onCancel: () => Swal.close(),
+      onDeny: () => download(false),
+    })
+  }
+
   return (
     <>
       {shouldRender &&
         <>
-          <button className='btn-success btn_save_form preview-btn' onClick={() => { generateMenuPreview() }}>{context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}
-            <span className='preview-span'>{iconManager.getIcon('eyeShow')}</span>
-          </button>
+          {objectId && (
+            <div className='perun-menu-buttons-container'>
+              <button className='btn-success btn_save_form download-menu-btn' onClick={downloadMenu}>
+                {context.intl.formatMessage({ id: 'perun.admin_console.download_menu', defaultMessage: 'perun.admin_console.download_menu' })}
+                <span className='download-span'>{iconManager.getIcon('download')}</span>
+              </button>
+              <button className='btn-success btn_save_form preview-btn' onClick={() => { generateMenuPreview() }}>
+                {context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}
+                <span className='preview-span'>{iconManager.getIcon('eyeShow')}</span>
+              </button>
+            </div>
+          )}
           {props.children}
         </>
       }
