@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../client'
-import { alertUserResponse, ReactBootstrap } from '../../elements';
+import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../elements';
 import PerunMenuWrapper from './PerunMenuWrapper';
 const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;
@@ -11,6 +11,8 @@ const PerunMenu = (props, context) => {
   const initialState = { tableName: 'PERUN_MENU', gridId: 'PERUN_MENU_GRID', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
+
+  const uploadInputRef = useRef(null)
 
   useEffect(() => {
     return () => {
@@ -29,6 +31,19 @@ const PerunMenu = (props, context) => {
 
   const generatePerunMenuGrid = () => {
     const { svSession } = props;
+    const buttonsArray = [
+      {
+        id: 'import_perun_menu',
+        name: context.intl.formatMessage({ id: 'perun.admin_console.import_menu', defaultMessage: 'perun.admin_console.import_menu' }),
+        action: () => uploadInputRef?.current?.click()
+      },
+      {
+        id: 'add_perun_menu',
+        name: context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' }),
+        action: () => setState({ show: true, objectId: 0 })
+      },
+    ]
+
     return (
       <ExportableGrid
         gridType={'READ_URL'}
@@ -38,9 +53,7 @@ const PerunMenu = (props, context) => {
         dataTableName={`/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
         onRowClickFunct={handleRowClick}
         refreshData={true}
-        toggleCustomButton={true}
-        customButton={() => { setState({ show: true, objectId: 0 }) }}
-        customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+        buttonsArray={buttonsArray}
         heightRatio={0.75}
         editContextFunc={handleRowClick}
       />
@@ -113,8 +126,48 @@ const PerunMenu = (props, context) => {
     })
   }
 
+  const uploadFile = (file) => {
+    const { svSession } = props
+    const data = new FormData()
+    data.append('file', file)
+    const url = `${window.server}/Menu/upload/${svSession}`
+    const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'multipart/form-data' } }
+    axios(reqConfig).then(res => {
+      if (res?.data) {
+        alertUserResponse({ response: res })
+        if (res.data?.type?.toLowerCase() === 'success') {
+          reloadGrid()
+        }
+      }
+    }).catch(err => {
+      console.error(err)
+      alertUserResponse({ response: err })
+    })
+  }
+
+  const handleFileSelection = (e) => {
+    const notJSONLabel = context.intl.formatMessage({ id: 'perun.admin_console.file_is_not_json', defaultMessage: 'perun.admin_console.file_is_not_json' })
+    const file = e.target.files[0]
+    // Check if the selected file is valid JSON
+    const fileReader = new FileReader()
+    fileReader.onload = (e) => {
+      try {
+        JSON.parse(e.target.result)
+        uploadFile(file)
+      } catch (error) {
+        alertUserV2({ type: 'info', title: notJSONLabel })
+      }
+    }
+    fileReader.onerror = () => alertUserV2({ type: 'info', title: notJSONLabel })
+    fileReader.readAsText(file)
+    if (uploadInputRef?.current?.value) {
+      uploadInputRef.current.value = ''
+    }
+  }
+
   return (
     <>
+      <input type='file' id='upload-perun-menu-input' ref={uploadInputRef} onInput={handleFileSelection} style={{ display: 'none' }} />
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.perun_menu', defaultMessage: 'perun.admin_console.perun_menu' })}</p>
