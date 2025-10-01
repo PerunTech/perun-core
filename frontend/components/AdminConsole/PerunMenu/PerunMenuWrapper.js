@@ -42,6 +42,7 @@ const PerunMenuWrapper = (props, context) => {
     const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const jsonSchema = ComponentManager.getStateForComponent(formid, 'formData');
     const uiSchema = ComponentManager.getStateForComponent(formid, 'uischema');
+    const formDataLoaded = ComponentManager.getStateForComponent(formid, 'formDataLoaded');
     if (jsonSchema) {
       if (uiSchema) {
         uiSchema['MENU_CONF'] = { 'ui:readonly': true }
@@ -54,7 +55,7 @@ const PerunMenuWrapper = (props, context) => {
       }
     }
 
-    if (formData) {
+    if (formData && formDataLoaded) {
       setObjectId(formData.OBJECT_ID)
     }
   }
