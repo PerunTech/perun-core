@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../client'
-import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../elements';
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
+import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements';
 import PerunMenuWrapper from './PerunMenuWrapper';
 const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;

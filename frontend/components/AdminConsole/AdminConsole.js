@@ -12,7 +12,7 @@ import SvarogSystemParams from './SvarogSystemParams'
 import GeoLayerTypes from './GeoLayerTypes'
 import PerunPluginTable from './PerunPluginTable'
 import SvarogMenu from './SvarogMenu'
-import PerunMenu from './PerunMenu'
+import PerunMenu from './PerunMenu/PerunMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
 
