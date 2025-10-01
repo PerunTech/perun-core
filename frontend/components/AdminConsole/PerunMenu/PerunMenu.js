@@ -101,6 +101,7 @@ const PerunMenu = (props, context) => {
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
         inputWrapper={PerunMenuWrapper}
+        objectId={objectId}
       />
     )
   };

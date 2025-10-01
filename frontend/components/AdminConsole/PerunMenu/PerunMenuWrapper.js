@@ -32,10 +32,9 @@ const PerunMenuWrapper = (props, context) => {
 
   const getObjectId = () => {
     const { formid } = props
-    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
-    const formDataLoaded = ComponentManager.getStateForComponent(formid, 'formDataLoaded')
-    if (formData && formDataLoaded) {
-      setObjectId(formData.OBJECT_ID)
+    const objectId = ComponentManager.getStateForComponent(formid, 'objectId');
+    if (objectId) {
+      setObjectId(objectId)
     }
   }
 
