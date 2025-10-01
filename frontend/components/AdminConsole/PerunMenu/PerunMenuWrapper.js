@@ -26,8 +26,18 @@ const PerunMenuWrapper = (props, context) => {
   useEffect(() => {
     if (shouldRender) {
       handleInput()
+      getObjectId()
     }
   }, [shouldRender])
+
+  const getObjectId = () => {
+    const { formid } = props
+    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
+    const formDataLoaded = ComponentManager.getStateForComponent(formid, 'formDataLoaded')
+    if (formData && formDataLoaded) {
+      setObjectId(formData.OBJECT_ID)
+    }
+  }
 
   const handleInput = () => {
     const firstInput = document.getElementById('root_MENU_CONF');
@@ -39,10 +49,8 @@ const PerunMenuWrapper = (props, context) => {
 
   const changeField = () => {
     const { formid } = props
-    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const jsonSchema = ComponentManager.getStateForComponent(formid, 'formData');
     const uiSchema = ComponentManager.getStateForComponent(formid, 'uischema');
-    const formDataLoaded = ComponentManager.getStateForComponent(formid, 'formDataLoaded');
     if (jsonSchema) {
       if (uiSchema) {
         uiSchema['MENU_CONF'] = { 'ui:readonly': true }
@@ -53,10 +61,6 @@ const PerunMenuWrapper = (props, context) => {
         props.formInstance.setState({ uischema: uiSchema });
         setRender(true)
       }
-    }
-
-    if (formData && formDataLoaded) {
-      setObjectId(formData.OBJECT_ID)
     }
   }
 
