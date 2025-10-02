@@ -5,7 +5,7 @@ import { GenericGrid, ComponentManager } from '../../../client';
 import { iconManager } from '../../../assets/svg/svgHolder';
 const { useState, useEffect } = React;
 
-const SideMenu = (props, context) => {
+const SideMenu = (props) => {
     const [activeElement, setActiveElement] = useState('');
     const [activeChild, setActiveChild] = useState('');
     const [activeParent, setActiveParent] = useState('');
@@ -19,7 +19,7 @@ const SideMenu = (props, context) => {
     const generateSideMenuButtons = (configuration) => {
         if (configuration && Array.isArray(configuration)) {
             return configuration.map(el => {
-                let modifiedID = el.ID?.replace(/\d/g, '')?.replace(/_$/, '');
+                let _modifiedID = el.ID?.replace(/\d/g, '')?.replace(/_$/, '');
                 if (!el.ID?.toUpperCase()?.includes('SUMMARY')) {
                     return (
                         <>
@@ -31,7 +31,7 @@ const SideMenu = (props, context) => {
                             {el.data && (
                                 <div className={el.ID === activeParent ? 'sidemenu-sub-item-active' : 'sidemenu-sub-item-hidden'}>
                                     {el.data.map(sub => {
-                                        modifiedID = sub.ID?.replace(/\d/g, '')?.replace(/_$/, '');
+                                        _modifiedID = sub.ID?.replace(/\d/g, '')?.replace(/_$/, '');
                                         return (<button key={sub.ID} className={`sidemenu-btn_sub ${activeChild === sub.ID && 'sidemenu-active'}`}>
                                             <span className="sidemenu-btn-title"><p>{sub.label}</p>  </span> </button>);
                                     })}
