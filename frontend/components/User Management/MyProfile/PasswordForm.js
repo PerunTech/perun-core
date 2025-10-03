@@ -42,16 +42,17 @@ const PasswordForm = (props) => {
         title: `${props.isNewUser ? props.context.intl.formatMessage({ id: 'perun.my_profile.set_user_password', defaultMessage: 'perun.my_profile.set_user_password' }) : props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
         type: 'object',
         properties: {
-            userPassword: {
-                type: 'string',
-                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
-            },
+
             confUserPassword: {
                 type: 'string',
                 title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.confirm_password', defaultMessage: 'perun.my_profile.confirm_password' })}`
             },
+            userPassword: {
+                type: 'string',
+                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
+            },
         },
-        required: ['userPassword', 'confUserPassword']
+        required: ['confUserPassword', 'userPassword']
     };
 
     if (!props.isNewUser) {
@@ -63,12 +64,12 @@ const PasswordForm = (props) => {
     }
 
     const uiSchema = {
-        userPassword: {
-            'ui:widget': 'passwordWidget'
-        },
         confUserPassword: {
             'ui:widget': 'passwordWidget'
+        }, userPassword: {
+            'ui:widget': 'passwordWidget'
         },
+
     };
 
     if (!props.isNewUser) {
