@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import JsonView from 'react-json-view';
 import axios from 'axios';
 import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse } from '../../../elements';
+import { Loading } from '../../ComponentsIndex';
 import { isJSON } from '../../../functions/utils';
 import SideMenu from './SideMenu';
 import { iconManager } from '../../../assets/svg/svgHolder';
@@ -12,6 +13,7 @@ const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
 const PerunMenuWrapper = (props, context) => {
+  const [loading, setLoading] = useState(false)
   const [objectId, setObjectId] = useState(undefined)
   const [show, setShow] = useState(false);
   const [shouldRender, setRender] = useState(false)
@@ -95,11 +97,14 @@ const PerunMenuWrapper = (props, context) => {
     const { formid } = props
     const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const url = `${window.server}/Menu/generate/${props.svSession}/${formData['MENU_CODE']}`
+    setLoading(true)
     axios.get(url).then(res => {
+      setLoading(false)
       setConfig(res.data['buttonArray'])
       setShow(true)
     }).catch(err => {
       console.error(err)
+      setLoading(false)
       alertUserResponse({ response: err })
     })
   }
@@ -130,6 +135,7 @@ const PerunMenuWrapper = (props, context) => {
 
   return (
     <>
+      {loading && <Loading />}
       {shouldRender &&
         <>
           {objectId && (
