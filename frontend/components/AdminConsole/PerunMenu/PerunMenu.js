@@ -3,14 +3,15 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements';
+import { Loading } from '../../ComponentsIndex';
 import PerunMenuWrapper from './PerunMenuWrapper';
 const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
 const PerunMenu = (props, context) => {
-  const initialState = { tableName: 'PERUN_MENU', gridId: 'PERUN_MENU_GRID', show: false, objectId: 0 }
+  const initialState = { loading: false, tableName: 'PERUN_MENU', gridId: 'PERUN_MENU_GRID', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ tableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
+  const [{ loading, tableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
   const uploadInputRef = useRef(null)
 
@@ -128,12 +129,14 @@ const PerunMenu = (props, context) => {
   }
 
   const uploadFile = (file) => {
+    setState({ loading: true })
     const { svSession } = props
     const data = new FormData()
     data.append('file', file)
     const url = `${window.server}/Menu/upload/${svSession}`
     const reqConfig = { method: 'post', data, url, headers: { 'Content-Type': 'multipart/form-data' } }
     axios(reqConfig).then(res => {
+      setState({ loading: false })
       if (res?.data) {
         alertUserResponse({ response: res })
         if (res.data?.type?.toLowerCase() === 'success') {
@@ -142,6 +145,7 @@ const PerunMenu = (props, context) => {
       }
     }).catch(err => {
       console.error(err)
+      setState({ loading: false })
       alertUserResponse({ response: err })
     })
   }
@@ -168,6 +172,7 @@ const PerunMenu = (props, context) => {
 
   return (
     <>
+      {loading && <Loading />}
       <input type='file' id='upload-perun-menu-input' ref={uploadInputRef} onInput={handleFileSelection} style={{ display: 'none' }} />
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
