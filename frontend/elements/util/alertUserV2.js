@@ -7,7 +7,7 @@ export const alertUserV2 = (params) => {
     showConfirm, onConfirm, confirmButtonColor, confirmButtonText,
     showCancel, onCancel, cancelButtonColor, cancelButtonText,
     showDeny, onDeny, denyButtonColor, denyButtonText, reverseButtons,
-    timer, timerProgressBar, toast, position, target
+    timer, timerProgressBar, toast, backdrop, animation, theme, position, target
   } = params
 
   Swal.fire({
@@ -31,6 +31,9 @@ export const alertUserV2 = (params) => {
     timer: timer ?? false,
     timerProgressBar: timerProgressBar ?? false,
     toast: toast ?? false,
+    backdrop: backdrop ?? true,
+    animation: animation ?? true,
+    theme: theme || 'light',
     position: position || 'center',
     target: target || 'body'
   }).then(value => {
