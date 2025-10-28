@@ -117,8 +117,8 @@ after_script:
 1_bump_rc_version:
   stage: 4_bump_rc_version
   script:
-    - git config user.name "gitlab-ci"
-    - git config user.email "si@prtech.mk"
+    - git config user.name "${GITLAB_USER_EMAIL}"
+    - git config user.email "${GITLAB_USER_NAME}"
     - npm run version:rc
   only:
     - dev
