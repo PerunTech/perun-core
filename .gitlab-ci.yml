@@ -2,7 +2,8 @@ stages:
   - 1_linter
   - 2_build_and_install
   - 3_mvn_install
-  - 4_sonarqube
+  - 4_bump_rc_version
+  - 5_sonarqube
 
 before_script:
   - pwd
@@ -51,16 +52,6 @@ after_script:
     - dev
     - RND
     - dev_rnd
-
-1_bump_rc_version:
-  stage: 3_mvn_install
-  script:
-    - mvn clean deploy -DskipTests
-    - git config user.name "gitlab-ci"
-    - git config user.email "si@prtech.mk"
-    - npm run version:rc
-  only:
-    - dev
 
 1_perun-core-dev-generate-js:
   stage: 3_mvn_install
@@ -123,8 +114,18 @@ after_script:
     - main
     - staging
 
+1_bump_rc_version:
+  stage: 4_bump_rc_version
+  script:
+    - mvn clean deploy -DskipTests
+    - git config user.name "gitlab-ci"
+    - git config user.email "si@prtech.mk"
+    - npm run version:rc
+  only:
+    - dev
+
 1_perun-sonarqube_backend:
-  stage: 4_sonarqube
+  stage: 5_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
     #- cd backend
@@ -132,7 +133,7 @@ after_script:
   when: manual
 
 2_perun-sonarqube_backend_publish:
-  stage: 4_sonarqube
+  stage: 5_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
     #- cd backend
@@ -145,7 +146,7 @@ after_script:
   when: manual
 
 3_sonarqube_frontend:
-  stage: 4_sonarqube
+  stage: 5_sonarqube
   script:
     - sonar-scanner -Dsonar.sources=. -Dsonar.projectKey=$CI_PROJECT_NAME -Dsonar.analysis.mode=preview -Dsonar.login=a02003f1f8f90382d7570b57a85c00c38132f85f -Dsonar.branch=$CI_BUILD_REF_NAME -Dsonar.projectName=$CI_PROJECT_NAME -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID
     - sonar-scanner -Dsonar.sources=. -Dsonar.projectKey=$CI_PROJECT_NAME -Dsonar.analysis.mode=publish -Dsonar.login=a02003f1f8f90382d7570b57a85c00c38132f85f -Dsonar.branch=$CI_BUILD_REF_NAME -Dsonar.projectName=$CI_PROJECT_NAME
