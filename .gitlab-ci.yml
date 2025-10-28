@@ -48,6 +48,7 @@ after_script:
     # - ls -al www/
     - pwd
     - mvn clean deploy -DskipTests
+    - npm run version:rc
   only:
     - dev
     - RND

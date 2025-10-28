@@ -71,7 +71,8 @@
     "build": "cross-env webpack --mode=production --env SOURCE_MAP=false DEBUG=false --progress",
     "build-dev": "cross-env webpack --mode=production --env SOURCE_MAP=true DEBUG=true --progress",
     "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --env SOURCE_MAP=true DEBUG=true --hot --progress",
-    "test": "eslint --fix frontend/ || exit 0"
+    "test": "eslint --fix frontend/ || exit 0",
+    "version:rc": "npm version prerelease --preid=rc -m 'chore: bump to %s [skip ci]'"
   },
   "author": "Perun Tech",
   "license": "ISC"
