@@ -47,14 +47,22 @@ after_script:
     #- cd backend
     # - ls -al www/
     - pwd
+  only:
+    - dev
+    - RND
+    - dev_rnd
+
+1_bump_rc_version:
+  stage: 3_mvn_install
+  script:
     - mvn clean deploy -DskipTests
     - git config user.name "gitlab-ci"
     - git config user.email "si@prtech.mk"
     - npm run version:rc
   only:
     - dev
-    - RND
-    - dev_rnd
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
 1_perun-core-dev-generate-js:
   stage: 3_mvn_install
