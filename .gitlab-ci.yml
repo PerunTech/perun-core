@@ -2,7 +2,7 @@ stages:
   - 1_linter
   - 2_build_and_install
   - 3_mvn_install
-  - 4_bump_rc_version
+  # - 4_bump_rc_version
   - 5_sonarqube
 
 before_script:
@@ -114,14 +114,14 @@ after_script:
     - main
     - staging
 
-1_bump_rc_version:
-  stage: 4_bump_rc_version
-  script:
-    - git config user.name "${GITLAB_USER_EMAIL}"
-    - git config user.email "${GITLAB_USER_NAME}"
-    - npm run version:rc
-  only:
-    - dev
+# 1_bump_rc_version:
+#   stage: 4_bump_rc_version
+#   script:
+#     - git config user.name "${GITLAB_USER_EMAIL}"
+#     - git config user.email "${GITLAB_USER_NAME}"
+#     - npm run version:rc
+#   only:
+#     - dev
 
 1_perun-sonarqube_backend:
   stage: 5_sonarqube
