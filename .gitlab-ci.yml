@@ -48,6 +48,8 @@ after_script:
     # - ls -al www/
     - pwd
     - mvn clean deploy -DskipTests
+    - git config user.name "gitlab-ci"
+    - git config user.email "si@prtech.mk"
     - npm run version:rc
   only:
     - dev
