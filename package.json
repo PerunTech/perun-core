@@ -72,7 +72,7 @@
     "build-dev": "cross-env webpack --mode=production --env SOURCE_MAP=true DEBUG=true --progress",
     "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --env SOURCE_MAP=true DEBUG=true --hot --progress",
     "test": "eslint --fix frontend/ || exit 0",
-    "version:rc": "npm version prerelease --no-git-tag-version --preid=rc -m 'chore: bump to %s [skip ci]'"
+    "version:rc": "npm version prerelease --no-git-tag-version --preid=rc && git add package.json package-lock.json && git commit -m 'chore: bump to $(node -p \"require('./package.json').version\") [skip ci]'"
   },
   "author": "Perun Tech",
   "license": "ISC"
