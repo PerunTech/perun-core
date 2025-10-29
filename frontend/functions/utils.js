@@ -20,6 +20,10 @@ export const replaceParamsWithBoundPropVals = (string, props) => {
   return string
 }
 
+/**
+ * Checks if the given value is valid JSON (either a JSON string that can be parsed, or an already parsed JSON-compatible object).
+ * @param {*} value - The value to test. If a string, it will be parsed with `JSON.parse`.
+ */
 export function isJSON(value) {
   value = !strcmp(typeof value, 'string') ? JSON.stringify(value) : value
   try {
@@ -220,6 +224,7 @@ export const usePrevious = (value) => {
  * If the element exists, its `innerText` is set using a label fetched from `getPluginLabel`
  * with the plugin name and the provided `context`.
  *
+ * @param {string} pluginLabel - The plugin label
  * @param {any} context - Contextual data used to retrieve the appropriate label from `getPluginLabel`.
  */
 export const updateIdScreen = (pluginLabel, context) => {
@@ -325,8 +330,8 @@ export const jsonToURI = (json, shouldStringify) => {
  */
 export function setInputFilter(element, inputFilter) {
   const events = ['input', 'keydown', 'keyup', 'mousedown', 'mouseup', 'select', 'contextmenu', 'drop']
-  events.forEach(function (event) {
-    element.addEventListener(event, function () {
+  events.forEach(function(event) {
+    element.addEventListener(event, function() {
       if (inputFilter(this.value)) {
         this.oldValue = this.value
         this.oldSelectionStart = this.selectionStart
