@@ -38,11 +38,7 @@ const LoginForm = (props, context) => {
   }
 
   const getLogonImgJson = () => {
-    let url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
-    // If the assets context window variable exists (it can be something environment specific), use it as a part of the url
-    if (window.assetsContext) {
-      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/LogonImg.json`
-    }
+    const url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setLogonImgJson(json)

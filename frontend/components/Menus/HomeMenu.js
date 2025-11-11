@@ -23,12 +23,7 @@ const HomeMenu = (props, context) => {
   }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
-    let url = `${window.location.origin}${window.assets}/json/config/Header.json`;
-
-    if (window.assetsContext) {
-      url = `${window.location.origin}${window.assets}/json/config/${window.assetsContext}/Header.json`;
-    }
-
+    const url = `${window.location.origin}${window.assets}/json/config/Header.json`;
     try {
       const response = await fetch(url);
       const json = await response.json();
