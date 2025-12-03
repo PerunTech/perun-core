@@ -38,6 +38,7 @@ export {
 };
 
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
+import { Tooltip } from 'react-tooltip'
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
@@ -53,7 +54,7 @@ import MenuHolder from './components/MenuBuilder/MenuHolder'
 import ContextMenuHolder from './components/Menus/ContextMenu/ContextMenuHolder'
 
 export {
-  Form, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
+  Form, Tooltip, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
   ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, MenuHolder, ContextMenuHolder, validator
 };
 

@@ -219,6 +219,35 @@ export const usePrevious = (value) => {
 }
 
 /**
+ * React hook that triggers a callback when a click occurs outside the referenced element.
+ * 
+ * @param {Function} handler - Function to call when a user clicks or taps outside the element.
+ */
+export const useClickOutside = (handler) => {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const listener = (event) => {
+      const el = ref.current
+      if (!el || el.contains(event.target)) {
+        return
+      }
+      handler()
+    }
+
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [handler])
+
+  return ref
+}
+
+/**
  * Updates the text content of the DOM element with ID 'identificationScreen'.
  *
  * If the element exists, its `innerText` is set using a label fetched from `getPluginLabel`
