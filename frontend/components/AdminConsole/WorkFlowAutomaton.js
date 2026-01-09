@@ -3,10 +3,11 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
 import { alertUserResponse, ReactBootstrap } from '../../elements'
+import WorkFlow from './WorkFlow'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
-const WorkFlow = (props, context) => {
+const WorkFlowAutomaton = (props, context) => {
   const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_AUTOMATON', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, canRender, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
@@ -135,6 +136,7 @@ const WorkFlow = (props, context) => {
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateWorkFlowForm(objectId)}
+            {objectId > 0 && <WorkFlow autoId={objectId} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
         </Modal>
@@ -147,8 +149,8 @@ const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
 })
 
-WorkFlow.contextTypes = {
+WorkFlowAutomaton.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps)(WorkFlow)
+export default connect(mapStateToProps)(WorkFlowAutomaton)

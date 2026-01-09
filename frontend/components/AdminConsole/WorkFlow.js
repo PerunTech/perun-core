@@ -37,7 +37,7 @@ const WorkFlow = (props, context) => {
         key={gridId}
         id={gridId}
         configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_WORKFLOW_ITEM`}
-        dataTableName={`/ReactElements/getTableData/${svSession}/SVAROG_WORKFLOW_ITEM/0`}
+        dataTableName={`/ReactElements/getObjectsByParentId/${svSession}/${props.autoId}/SVAROG_WORKFLOW_ITEM/0`}
         onRowClickFunct={handleRowClick}
         refreshData={true}
         toggleCustomButton={true}
@@ -54,7 +54,7 @@ const WorkFlow = (props, context) => {
   const saveRecord = (e) => {
     const { svSession } = props
     const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_WORKFLOW_ITEM_FORM`, null, { saveExecuted: false })
-    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_WORKFLOW_ITEM/0`
+    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_WORKFLOW_ITEM/${props.autoId}`
     axios({
       method: 'post',
       data: encodeURIComponent(JSON.stringify(e.formData)),

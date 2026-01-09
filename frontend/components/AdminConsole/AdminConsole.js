@@ -37,7 +37,7 @@ const AdminConsole = (_props, context) => {
         }
     }
     const getMenu = () => {
-        const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
+        const url = `${window.json}/aims-assets/json/config/AppSettings.json`
         fetch(url).then(res => res.json()).then(json => {
             if (json?.length > 0) {
                 setJson(json)
@@ -63,7 +63,6 @@ const AdminConsole = (_props, context) => {
                 {dynamicComponent === 'PerunMenu' && <PerunMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
                 {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
-                {dynamicComponent === 'WorkFlow' && <WorkFlow />}
                 {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
             </div>
         </div>
