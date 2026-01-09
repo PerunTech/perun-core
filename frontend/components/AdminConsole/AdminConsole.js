@@ -15,9 +15,11 @@ import SvarogMenu from './SvarogMenu'
 import PerunMenu from './PerunMenu/PerunMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
+import WorkFlow from './WorkFlow'
+import WorkFlowAutomaton from './WorkFlowAutomaton'
 
 const AdminConsole = (_props, context) => {
-    const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
+    const [dynamicComponent, setDynamicComponent] = useState('WorkFlow')
     const [json, setJson] = useState([])
     const setDynamicComponentFunction = (comp) => {
         setDynamicComponent(comp)
@@ -61,6 +63,8 @@ const AdminConsole = (_props, context) => {
                 {dynamicComponent === 'PerunMenu' && <PerunMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
                 {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
+                {dynamicComponent === 'WorkFlow' && <WorkFlow />}
+                {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
             </div>
         </div>
     )
