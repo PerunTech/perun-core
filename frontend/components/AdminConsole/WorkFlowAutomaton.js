@@ -7,7 +7,7 @@ const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const WorkFlow = (props, context) => {
-  const initialState = { loading: false, canRender: true, businessObjectTypeName: undefined, gridId: undefined, show: false, objectId: 0 }
+  const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_AUTOMATON', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, canRender, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
@@ -123,7 +123,7 @@ const WorkFlow = (props, context) => {
       {canRender && (
         <div className='admin-console-grid-container'>
           <div className='admin-console-component-header'>
-            <p>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow', defaultMessage: 'perun.admin_console.work_flow' })}</p>
+            <p>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow_auto', defaultMessage: 'perun.admin_console.work_flow_auto' })}</p>
           </div>
           {generateWorkFlowGrid()}
         </div>

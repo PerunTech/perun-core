@@ -7,7 +7,7 @@ const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const WorkFlow = (props, context) => {
-  const initialState = { loading: false, canRender: true, businessObjectTypeName: undefined, gridId: undefined, show: false, objectId: 0 }
+  const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_ITEM', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, canRender, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 

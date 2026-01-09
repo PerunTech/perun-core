@@ -19,7 +19,7 @@ import WorkFlow from './WorkFlow'
 import WorkFlowAutomaton from './WorkFlowAutomaton'
 
 const AdminConsole = (_props, context) => {
-    const [dynamicComponent, setDynamicComponent] = useState('WorkFlow')
+    const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
     const [json, setJson] = useState([])
     const setDynamicComponentFunction = (comp) => {
         setDynamicComponent(comp)
