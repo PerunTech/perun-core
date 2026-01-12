@@ -137,8 +137,11 @@ export const svgIcons = {
   download: <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill='none'>
     <path d="M8 22.0002H16C18.8284 22.0002 20.2426 22.0002 21.1213 21.1215C22 20.2429 22 18.8286 22 16.0002V15.0002C22 12.1718 22 10.7576 21.1213 9.8789C20.3529 9.11051 19.175 9.01406 17 9.00195M7 9.00195C4.82497 9.01406 3.64706 9.11051 2.87868 9.87889C2 10.7576 2 12.1718 2 15.0002L2 16.0002C2 18.8286 2 20.2429 2.87868 21.1215C3.17848 21.4213 3.54062 21.6188 4 21.749" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
     <path d="M12 2L12 15M12 15L9 11.5M12 15L15 11.5" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+  </svg>,
+  workflowauto: <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'currentColor' }}><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5 4h1v1H5V4zm2 1h1V4H7v1zm15-3v8h-1V7H3v3h8v1H3v3h8v1H2V2h20zm-1 1H3v3h18V3zM5 8v1h1V8H5zm2 0v1h1V8H7zm-2 4v1h1v-1H5zm2 0v1h1v-1H7zm2-7h1V4H9v1zm0 3v1h1V8H9zm0 4v1h1v-1H9zm13 0h-4.086l.293-.293L17.5 11 16 12.5l1.5 1.5.707-.707-.293-.293H22v8h-1v1h1a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1zm-2.38 9.5l-2.12 2.12L15.88 22H14c-.55 0-1-.45-1-1v-2h-1v-3h1v-2.09c-.58-.21-1-.76-1-1.41 0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5c0 .65-.42 1.2-1 1.41V16h1v3h-1v2h1.88l1.62-1.62 2.12 2.12zM13 13h1v-1h-1v1zm1 5v-1h-1v1h1zm3.5 4.21l.71-.71-.71-.71-.71.71.71.71z"></path><path fill="none" d="M0 0h24v24H0z"></path></g></svg>,
+  workflowitem: <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'currentColor' }}><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M21 18v-4h-5.042L13 11.042V8.95a3.5 3.5 0 1 0-1 0v2.074L9.024 14H4v4H2v5h5v-5H5v-3h3.958l3.532 3.533L16.024 15H20v3h-2v5h5v-5zM6 22H3v-3h3zm4-16.5A2.5 2.5 0 1 1 12.5 8 2.5 2.5 0 0 1 10 5.5zm2.485 11.633l-2.6-2.6 2.5-2.5h.2l2.5 2.5zM22 22h-3v-3h3z"></path><path fill="none" d="M0 0h24v24H0z"></path></g></svg>,
 }
+
 
 export const iconManager = {
   getIcon(key) { return svgIcons[key] || svgIcons.default },
