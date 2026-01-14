@@ -71,11 +71,18 @@ export const alertUserResponse = (params) => {
     title = ''
     message = ''
   }
+  let renderMessageAsHtml = false
+  // Check if the message contains a new line character (\n)
+  if (message?.includes('\n')) {
+    // Render it as HTML if it does, by replacing the new line with a <br /> element
+    renderMessageAsHtml = true
+    message = message.replace(/\n/g, '<br>')
+  }
   Swal.fire({
     icon: alertType,
     title,
     text: message,
-    html: responseIsHtml && finalResponse,
+    html: renderMessageAsHtml ? message : responseIsHtml && finalResponse,
     allowOutsideClick: false,
     heightAuto: false,
     confirmButtonColor: confirmButtonColor || '#7cd1f9'
