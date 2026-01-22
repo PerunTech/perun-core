@@ -3,11 +3,10 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import JsonView from 'react-json-view';
 import axios from 'axios';
-import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse } from '../../../elements';
+import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse, Icon } from '../../../elements';
 import { Loading } from '../../ComponentsIndex';
 import { isJSON } from '../../../functions/utils';
 import SideMenu from './SideMenu';
-import { iconManager } from '../../../assets/svg/svgHolder';
 import Swal from 'sweetalert2';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
@@ -142,11 +141,11 @@ const PerunMenuWrapper = (props, context) => {
             <div className='perun-menu-buttons-container'>
               <button className='btn-success btn_save_form download-menu-btn' onClick={downloadMenu}>
                 {context.intl.formatMessage({ id: 'perun.admin_console.download_menu', defaultMessage: 'perun.admin_console.download_menu' })}
-                <span className='download-span'>{iconManager.getIcon('download')}</span>
+                <span className='download-span'>{<Icon name="IconDownload" />}</span>
               </button>
               <button className='btn-success btn_save_form preview-btn' onClick={() => { generateMenuPreview() }}>
                 {context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}
-                <span className='preview-span'>{iconManager.getIcon('eyeShow')}</span>
+                <span className='preview-span'>{<Icon name="IconEye" />}</span>
               </button>
             </div>
           )}

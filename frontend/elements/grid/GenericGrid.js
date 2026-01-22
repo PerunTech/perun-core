@@ -5,14 +5,13 @@ import ReactDataGrid from 'react-data-grid';
 import { Data, Editors, Formatters, Filters, Menu } from 'react-data-grid-addons';
 import { labelBasePath, translateComponents } from '../../config/config';
 import { store, getGridConfig, getGridData, rowClicked, resetGridEditResponseState } from '../../model';
-import { WrapItUp, ComponentManager, alertUser, alertUserResponse, alertUserV2 } from '..';
+import { WrapItUp, ComponentManager, alertUser, alertUserResponse, alertUserV2, Icon } from '..';
 import { Loading } from '../../components/ComponentsIndex';
 import CustomGridToolbar from './CustomGridToolbar';
 import ContextMenuPopup from './ContextMenuPopup';
 import { customRowRenderer } from './RowRenderer';
 import { customRowRendererSecondary } from './RowRendererSecondary';
 import { GridManager } from '..';
-import { iconManager } from '../../assets/svg/svgHolder'
 import { isValidArray, isValidObject } from '../../functions/utils';
 import { strcmp } from '../../model/utils';
 
@@ -736,7 +735,7 @@ class GenericGrid extends React.Component {
           defaultMessage: `${labelBasePath}.main.grids.no_data`
         })}
         <br />
-        {iconManager.getIcon('emptyBox')}
+        {<Icon name='IconBoxOff' />}
       </div>
     }
 
@@ -786,7 +785,7 @@ class GenericGrid extends React.Component {
                   {this.state.refreshData && (
                     <div className='refresh-data-container'>
                       <span id='refreshData' className='refreshData' onClick={this.refreshData}>
-                        {iconManager.getIcon('refreshGrid')}
+                        {<Icon name='IconRefresh' />}
                       </span>
                     </div>
                   )}
