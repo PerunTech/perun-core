@@ -64,7 +64,7 @@ const PerunNavbar = (props, context) => {
                 {/* navbar end */}
                 <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
                     <div className='nav-icon-with-title'>
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconLogout" />} <p>{props.userInfo.username}</p> </div>
+                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
                     <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
                 </div>
                 {/* navbar end toggle */}
