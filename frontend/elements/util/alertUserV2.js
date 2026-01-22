@@ -7,7 +7,7 @@ export const alertUserV2 = (params) => {
     showConfirm, onConfirm, confirmButtonColor, confirmButtonText,
     showCancel, onCancel, cancelButtonColor, cancelButtonText,
     showDeny, onDeny, denyButtonColor, denyButtonText, reverseButtons,
-    timer, timerProgressBar, toast, position, target
+    timer, timerProgressBar, toast, backdrop, animation, theme, position, target
   } = params
 
   Swal.fire({
@@ -31,6 +31,9 @@ export const alertUserV2 = (params) => {
     timer: timer ?? false,
     timerProgressBar: timerProgressBar ?? false,
     toast: toast ?? false,
+    backdrop: backdrop ?? true,
+    animation: animation ?? true,
+    theme: theme || 'light',
     position: position || 'center',
     target: target || 'body'
   }).then(value => {
@@ -56,6 +59,10 @@ export const alertUserResponse = (params) => {
     alertType = 'error'
   }
   let title = response?.response?.data?.title || response?.data?.title || response?.title || response
+  // Check if the title is JSON, for cases when the response doesn't contain the `title` key
+  if (isJSON(title)) {
+    title = ''
+  }
   let message = response?.response?.data?.message || response?.data?.message || response?.message || ''
   // Check if the response Content-Type header includes text/html
   // The additional check whether the response is JSON is needed since some services return JSON with the Content-Type set to text/html
@@ -64,11 +71,18 @@ export const alertUserResponse = (params) => {
     title = ''
     message = ''
   }
+  let renderMessageAsHtml = false
+  // Check if the message contains a new line character (\n)
+  if (message?.includes('\n')) {
+    // Render it as HTML if it does, by replacing the new line with a <br /> element
+    renderMessageAsHtml = true
+    message = message.replace(/\n/g, '<br>')
+  }
   Swal.fire({
     icon: alertType,
     title,
     text: message,
-    html: responseIsHtml && finalResponse,
+    html: renderMessageAsHtml ? message : responseIsHtml && finalResponse,
     allowOutsideClick: false,
     heightAuto: false,
     confirmButtonColor: confirmButtonColor || '#7cd1f9'

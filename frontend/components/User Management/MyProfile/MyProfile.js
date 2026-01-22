@@ -221,7 +221,7 @@ const MyProfile = (props, context) => {
                     key="MY_PROFILE_FORM"
                     id="MY_PROFILE_FORM"
                     method={`/ReactElements/getTableJSONSchema/${props.svSession}/SVAROG_USERS`}
-                    uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/SVAROG_USERS`}
+                    uiSchemaConfigMethod={`/WsAdminConsole/getUsersTableUISchema/${props.svSession}`}
                     tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${props.userInfo.userObjectId || 0}/SVAROG_USERS`}
                     addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"

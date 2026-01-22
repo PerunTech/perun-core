@@ -20,6 +20,10 @@ export const replaceParamsWithBoundPropVals = (string, props) => {
   return string
 }
 
+/**
+ * Checks if the given value is valid JSON (either a JSON string that can be parsed, or an already parsed JSON-compatible object).
+ * @param {*} value - The value to test. If a string, it will be parsed with `JSON.parse`.
+ */
 export function isJSON(value) {
   value = !strcmp(typeof value, 'string') ? JSON.stringify(value) : value
   try {
@@ -215,11 +219,41 @@ export const usePrevious = (value) => {
 }
 
 /**
+ * React hook that triggers a callback when a click occurs outside the referenced element.
+ * 
+ * @param {Function} handler - Function to call when a user clicks or taps outside the element.
+ */
+export const useClickOutside = (handler) => {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const listener = (event) => {
+      const el = ref.current
+      if (!el || el.contains(event.target)) {
+        return
+      }
+      handler()
+    }
+
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [handler])
+
+  return ref
+}
+
+/**
  * Updates the text content of the DOM element with ID 'identificationScreen'.
  *
  * If the element exists, its `innerText` is set using a label fetched from `getPluginLabel`
  * with the plugin name and the provided `context`.
  *
+ * @param {string} pluginLabel - The plugin label
  * @param {any} context - Contextual data used to retrieve the appropriate label from `getPluginLabel`.
  */
 export const updateIdScreen = (pluginLabel, context) => {
@@ -325,8 +359,8 @@ export const jsonToURI = (json, shouldStringify) => {
  */
 export function setInputFilter(element, inputFilter) {
   const events = ['input', 'keydown', 'keyup', 'mousedown', 'mouseup', 'select', 'contextmenu', 'drop']
-  events.forEach(function (event) {
-    element.addEventListener(event, function () {
+  events.forEach(function(event) {
+    element.addEventListener(event, function() {
       if (inputFilter(this.value)) {
         this.oldValue = this.value
         this.oldSelectionStart = this.selectionStart
@@ -339,4 +373,24 @@ export function setInputFilter(element, inputFilter) {
       }
     })
   })
+}
+
+/**
+ * Formats a timestamp into a human-readable date and time string.
+ * The output format is: `DD.MM.YYYY HH:mm:ss`
+ * @param {number|string|Date} timestamp - A value accepted by the JavaScript `Date` constructor
+ */
+export const formatDateAndTime = (timestamp) => {
+    const date = new Date(timestamp)
+    // Extract date components
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0') // Months are zero-based
+    const year = date.getFullYear()
+    // Extract time components
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+    // Construct the formatted date and time string
+    const formattedDateTime = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`
+    return formattedDateTime
 }

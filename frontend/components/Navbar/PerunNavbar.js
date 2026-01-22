@@ -72,10 +72,10 @@ const PerunNavbar = (props, context) => {
                     <div ref={navOptRef} className='nav-options'>
                         <div className='nav-option no-event'>
                             <p>{context.intl.formatMessage({ id: 'perun.navbar.usergr', defaultMessage: 'perun.navbar.usergr' })}</p>
-                            <p>{props.userInfo.defaultUserGroup.groupName}</p>
+                            <p>{props.userInfo?.defaultUserGroup?.groupName}</p>
                         </div>
                         {props?.languageOptions && props?.languageOptions.map(lang => (
-                            <div className={`nav-option ${props?.activeLanguage == lang?.language && 'nav-active-lang'}`} onClick={() => { props.changeLang(lang.locale, lang.language), setToggleNavOpt(false) }}>
+                            <div key={lang.locale} className={`nav-option ${props?.activeLanguage == lang?.language && 'nav-active-lang'}`} onClick={() => { props.changeLang(lang.locale, lang.language), setToggleNavOpt(false) }}>
                                 <p>{lang.label}</p>
                             </div>
                         ))}
