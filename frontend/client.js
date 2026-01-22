@@ -50,12 +50,10 @@ import GenericGrid from './elements/grid/GenericGrid'
 import GridManager from './elements/grid/GridManager'
 import { ComponentManager } from './elements/ComponentManager'
 import Modal from './components/Modal/Modal.js'
-import MenuHolder from './components/MenuBuilder/MenuHolder'
-import ContextMenuHolder from './components/Menus/ContextMenu/ContextMenuHolder'
 
 export {
   Form, Tooltip, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
-  ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, MenuHolder, ContextMenuHolder, validator
+  ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, validator
 };
 
 /* check for arraybuffer response types */
