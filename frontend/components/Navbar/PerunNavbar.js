@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { iconManager } from '../../assets/svg/svgHolder';
+import { Icon } from "../../elements"
 import { downloadFile } from '../../functions/utils';
 
 const PerunNavbar = (props, context) => {
@@ -50,10 +50,10 @@ const PerunNavbar = (props, context) => {
                 {/* navbar start */}
                 <div className='nav-title-start'>
                     <Link to='/main' className='nav-icon' title='Home'>
-                        {iconManager.getIcon('home')}
+                        {<Icon name="IconHomeFilled" />}
                     </Link>
                     <div className={`nav-icon-with-title ${toggleBurger && 'active'}`} title='menuBars' onClick={() => showBurgerMenu()}>
-                        {iconManager.getIcon('menuBars')}
+                        {<Icon name="IconCategoryFilled" />}
                         <p>{context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })}</p>
                     </div>
                 </div>
@@ -64,8 +64,8 @@ const PerunNavbar = (props, context) => {
                 {/* navbar end */}
                 <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
                     <div className='nav-icon-with-title'>
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : iconManager.getIcon('currentUserIcon')} <p>{props.userInfo.username}</p> </div>
-                    <div className='perun-navbar-arrow'>{iconManager.getIcon('arrowDown')}</div>
+                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
+                    <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
                 </div>
                 {/* navbar end toggle */}
                 {toggleNavOpt && (
@@ -80,11 +80,11 @@ const PerunNavbar = (props, context) => {
                             </div>
                         ))}
                         <Link className='nav-option' to='/main/my-profile' onClick={() => setToggleNavOpt(false)} title='edit-profile'>
-                            {iconManager.getIcon('edit')}
+                            {<Icon name='IconEdit' />}
                             <p>{context.intl.formatMessage({ id: 'perun.navbar.edit', defaultMessage: 'perun.navbar.edit' })}</p>
                         </Link>
                         <div className='nav-option' onClick={() => { props.logout(), setToggleNavOpt(false) }}>
-                            {iconManager.getIcon('logout')}
+                            {<Icon name="IconLogout" />}
                             <p>{context.intl.formatMessage({ id: 'perun.navbar.logout', defaultMessage: 'perun.navbar.logout' })}</p>
                         </div>
                     </div>
