@@ -15,8 +15,7 @@ import SvarogMenu from './SvarogMenu'
 import PerunMenu from './PerunMenu/PerunMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
-import WorkFlow from './WorkFlow'
-import WorkFlowAutomaton from './WorkFlowAutomaton'
+import WorkFlowAutomaton from './Workflow/WorkFlowAutomaton'
 
 const AdminConsole = (_props, context) => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
