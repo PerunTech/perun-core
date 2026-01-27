@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUserResponse, ReactBootstrap } from '../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { alertUserResponse, ReactBootstrap } from '../../../elements'
+import WorkFlowItemParams from './WorkFlowItemParams.'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
-const WorkFlow = (props, context) => {
+const WorkFlowItem = (props, context) => {
   const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_ITEM', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, canRender, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
@@ -131,10 +132,11 @@ const WorkFlow = (props, context) => {
       {show && (
         <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
-            <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
+            <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow', defaultMessage: 'perun.admin_console.work_flow' })}</Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateWorkFlowForm(objectId)}
+            {objectId > 0 && <WorkFlowItemParams autoId={objectId} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
         </Modal>
@@ -147,8 +149,8 @@ const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
 })
 
-WorkFlow.contextTypes = {
+WorkFlowItem.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps)(WorkFlow)
+export default connect(mapStateToProps)(WorkFlowItem)
