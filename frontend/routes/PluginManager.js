@@ -96,18 +96,14 @@ export const pluginManager = {
    * @returns Promise <any>; 
    */
   loadPlugin(name, url) {
-    if (_plugins[name]) {
-      return Promise.resolve({ id: name, value: _plugins[name] });
-    }
-
-    return new Promise((resolve, reject) => {
+    return !(_plugins[name]) && new Promise((resolve, reject) => {
       // Create a script element.
       const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
 
       script.onload = () => // revise compatibility(IE) and window[name] gimmick.
         resolve({ id: name, value: this.registerPlugin(name, (window[name][name] || window[name])) });
       script.onerror = () => // Do better messages.
-        reject({ id: name, value: new Error('Script failed to load for plugin ' + name) });
+        reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
 
       script.src = url; // images load on this line. Browser implementaion specific.
       document.body.appendChild(script); // JS scripts load on this line.

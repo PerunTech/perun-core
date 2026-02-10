@@ -2,7 +2,69 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { store } from '../model';
 import * as localRoutes from '.';
-import { pluginManager } from './PluginManager';
+
+let storageBundles = [];
+/**
+ * Loads a plugin by dynamically creating a script element.
+ * @param {string} name - The name of the plugin.
+ * @param {string} url - The URL to load the plugin from.
+ * @returns {Promise} - A promise that resolves when the script is successfully loaded.
+ */
+function loadPlugin(name, url) {
+    return new Promise((resolve, reject) => {
+        const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
+
+        script.onload = () => {
+            const plugin = window?.[name]?.[name] || window?.[name];
+            if (plugin) {
+                resolve({
+                    id: name,
+                    value: reRegisterRouter(name, plugin),
+                });
+            } else {
+                reject(new Error(`Plugin ${name} failed to register.`));
+            }
+        };
+
+        script.onerror = () => {
+            reject(new Error(`Script failed to load for plugin ${name}.`));
+        };
+
+        script.src = url
+        document.body.appendChild(script);
+    });
+}
+
+/**
+ * Initializes and loads plugins based on the provided storageBundles.
+ * Ensures plugins are loaded in the correct order according to their dependencies.
+ * @param {Array} storageBundles - The list of plugin bundles to load.
+ */
+function reInitPlugins(storageBundles) {
+    store.dispatch({ type: 'fetchingRoutes', payload: true });
+
+    // Sort plugins by their dependencies
+    const sortedBundles = sortBundlesByDependencies(storageBundles);
+
+    // Create a list of promises for loading plugins
+    const loadPromises = sortedBundles.map(bundle => {
+        if (bundle.id !== 'perun-core' && bundle.id !== 'naits') {
+            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
+                console.error(`Error loading plugin ${bundle.id}:`, error);
+                return null; // Continue with other plugins even if one fails
+            });
+        }
+        return Promise.resolve();
+    });
+
+    // Wait for all plugins to load
+    Promise.all(loadPromises).then(() => {
+        store.dispatch({ type: 'fetchingRoutes', payload: false });
+    }).catch((error) => {
+        console.error('Error loading plugins:', error);
+        store.dispatch({ type: 'fetchingRoutes', payload: false });
+    });
+}
 
 /**
  * Sorts bundles by their dependencies to ensure correct loading order.
@@ -43,35 +105,21 @@ function sortBundlesByDependencies(bundles) {
 }
 
 /**
- * Initializes and loads plugins based on the stored bundles in localStorage.
- * Ensures plugins are loaded in the correct order according to their dependencies.
- * Uses pluginManager.loadPlugin as the unified script loader.
- * @returns {Promise} - A promise that resolves when all plugins have been loaded.
+ * Registers routes for the given plugin and adds it to the storageBundles.
+ * @param {string} name - The name of the plugin.
+ * @param {Object} plugin - The plugin object.
+ * @returns {Object} - The registered plugin.
  */
-export function initializePlugins() {
-    const storageBundles = JSON.parse(localStorage.getItem('bundleStorage')) || [];
-    if (storageBundles.length === 0) return Promise.resolve();
-
-    store.dispatch({ type: 'fetchingRoutes', payload: true });
-
-    const sortedBundles = sortBundlesByDependencies(storageBundles);
-
-    const loadPromises = sortedBundles.map(bundle => {
-        if (bundle.id !== 'perun-core' && bundle.id !== 'naits') {
-            return pluginManager.loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
-                console.error(`Error loading plugin ${bundle.id}:`, error);
-                return null;
-            });
-        }
-        return Promise.resolve();
-    });
-
-    return Promise.allSettled(loadPromises).then(() => {
-        store.dispatch({ type: 'fetchingRoutes', payload: false });
-    }).catch((error) => {
-        console.error('Error loading plugins:', error);
-        store.dispatch({ type: 'fetchingRoutes', payload: false });
-    });
+function reRegisterRouter(name, plugin) {
+    if (plugin && plugin.routes) {
+        [...plugin.routes].forEach(route => router.registerRoute(route.name, route));
+    } else {
+        console.error(`Plugin ${name} has no routes or failed to load.`);
+        return null;
+    }
+    plugin.id = name;
+    storageBundles[name] = plugin;
+    return plugin;
 }
 
 /**
@@ -79,7 +127,11 @@ export function initializePlugins() {
  */
 const _registry = {};
 
-export const router = (function() {
+export const router = (function () {
+    storageBundles = JSON.parse(localStorage.getItem('bundleStorage')) || [];
+
+    reInitPlugins(storageBundles);
+
     /**
      * Creates a Route component based on the provided configuration.
      * @param {string} name - The name of the route.
