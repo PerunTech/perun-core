@@ -21,7 +21,7 @@ import ReactGA from 'react-ga';
 import * as redux from './model';
 import * as elements from './elements';
 import { Configurator } from './loadConfiguration';
-import { router, initializePlugins } from './routes/Router';
+import { router } from './routes/Router';
 import Routes from './routes/Routes';
 import { Loading } from 'components/ComponentsIndex';
 import { pluginManager } from './routes/PluginManager';
@@ -171,13 +171,9 @@ async function loadLocaleData(locale) {
 }
 
 /* call function on perun-core initialization */
-async function init() {
-  ReactDOM.render(<Loading />, app);
-  await initializePlugins();
-  persistBundleReducers(whitelistRoot);
-  changeLanguageAndLocale(defaultLocale?.replace('_', '-'), defaultLocale);
-}
-init();
+persistBundleReducers(whitelistRoot)
+
+changeLanguageAndLocale(defaultLocale?.replace('_', '-'), defaultLocale)
 
 /* exportable function to add persist reducers from bundle */
 export function persistBundleReducers(listOfBundleReducers) {
