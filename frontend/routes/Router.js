@@ -4,6 +4,22 @@ import { store } from '../model';
 import * as localRoutes from '.';
 
 let storageBundles = [];
+const loadingScripts = {};
+const getBundlesBaseUrl = () => {
+    const fromWindow = window.bundleServer || window.json || window.server || window.location.origin;
+    return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '');
+};
+
+const resolveScriptUrl = (url) => {
+    if (!url) {
+        return url;
+    }
+    if (/^https?:\/\//i.test(url)) {
+        return url;
+    }
+    const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+    return `${getBundlesBaseUrl()}${normalizedPath}`;
+};
 /**
  * Loads a plugin by dynamically creating a script element.
  * @param {string} name - The name of the plugin.
@@ -11,28 +27,54 @@ let storageBundles = [];
  * @returns {Promise} - A promise that resolves when the script is successfully loaded.
  */
 function loadPlugin(name, url) {
-    return new Promise((resolve, reject) => {
-        const script = Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
+    if (storageBundles[name]) {
+        return Promise.resolve({ id: name, value: storageBundles[name] });
+    }
+
+    if (loadingScripts[name]) {
+        return loadingScripts[name];
+    }
+
+    loadingScripts[name] = new Promise((resolve, reject) => {
+        const existingScript = document.getElementById(name);
+        const script = existingScript || Object.assign(document.createElement('script'), { id: name, type: 'text/javascript' });
+        const maybeResolveRegisteredPlugin = () => {
+            const plugin = window?.[name]?.[name] || window?.[name];
+            if (!plugin) {
+                return false;
+            }
+
+            delete loadingScripts[name];
+            resolve({
+                id: name,
+                value: reRegisterRouter(name, plugin),
+            });
+            return true;
+        };
 
         script.onload = () => {
-            const plugin = window?.[name]?.[name] || window?.[name];
-            if (plugin) {
-                resolve({
-                    id: name,
-                    value: reRegisterRouter(name, plugin),
-                });
-            } else {
+            if (!maybeResolveRegisteredPlugin()) {
+                delete loadingScripts[name];
                 reject(new Error(`Plugin ${name} failed to register.`));
             }
         };
 
         script.onerror = () => {
+            delete loadingScripts[name];
             reject(new Error(`Script failed to load for plugin ${name}.`));
         };
 
-        script.src = url
-        document.body.appendChild(script);
+        if (existingScript) {
+            if (maybeResolveRegisteredPlugin()) {
+                return;
+            }
+        } else {
+            script.src = resolveScriptUrl(url);
+            document.body.appendChild(script);
+        }
     });
+
+    return loadingScripts[name];
 }
 
 /**
@@ -46,24 +88,28 @@ function reInitPlugins(storageBundles) {
     // Sort plugins by their dependencies
     const sortedBundles = sortBundlesByDependencies(storageBundles);
 
-    // Create a list of promises for loading plugins
-    const loadPromises = sortedBundles.map(bundle => {
-        if (bundle.id !== 'perun-core' && bundle.id !== 'naits') {
-            return loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js).catch(error => {
-                console.error(`Error loading plugin ${bundle.id}:`, error);
-                return null; // Continue with other plugins even if one fails
-            });
-        }
-        return Promise.resolve();
-    });
+    // Load bundles in deterministic dependency order.
+    const loadInOrder = async () => {
+        for (const bundle of sortedBundles) {
+            if (bundle.id === 'perun-core' || bundle.id === 'naits') {
+                continue;
+            }
 
-    // Wait for all plugins to load
-    Promise.all(loadPromises).then(() => {
-        store.dispatch({ type: 'fetchingRoutes', payload: false });
-    }).catch((error) => {
-        console.error('Error loading plugins:', error);
-        store.dispatch({ type: 'fetchingRoutes', payload: false });
-    });
+            try {
+                await loadPlugin(bundle.id, '/' + bundle.id + '/' + bundle.js);
+            } catch (error) {
+                console.error(`Error loading plugin ${bundle.id}:`, error);
+            }
+        }
+    };
+
+    return loadInOrder()
+        .catch((error) => {
+            console.error('Error loading plugins:', error);
+        })
+        .finally(() => {
+            store.dispatch({ type: 'fetchingRoutes', payload: false });
+        });
 }
 
 /**
@@ -130,7 +176,7 @@ const _registry = {};
 export const router = (function () {
     storageBundles = JSON.parse(localStorage.getItem('bundleStorage')) || [];
 
-    reInitPlugins(storageBundles);
+    const pluginsReadyPromise = reInitPlugins(storageBundles);
 
     /**
      * Creates a Route component based on the provided configuration.
@@ -176,5 +222,6 @@ export const router = (function () {
     return {
         registerRoute,
         setRoute,
+        waitForPlugins: () => pluginsReadyPromise,
     };
 })();

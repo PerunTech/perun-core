@@ -41,8 +41,7 @@ class ModuleMenu extends React.Component {
   }
 
   getConfigCards = () => {
-    const url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`
-    axios.get(url).then(res => {
+    this.loadModuleCardsConfig().then(res => {
       if (res?.data?.data) {
         const data = res.data
         store.dispatch({ type: 'GET_MODULE_LINKS', payload: { data } })
@@ -77,6 +76,43 @@ class ModuleMenu extends React.Component {
       console.error(err)
       alertUserResponse({ response: err })
     })
+  }
+
+  /**
+   * Resolve plugin cards configuration source in this order:
+   * 1) localStorage payload override (`perun.pluginCardsPayload`)
+   * 2) local URL override (`window.localPluginCardsUrl` or `localStorage.perun.pluginCardsUrl`)
+   * 3) default backend endpoint
+   */
+  loadModuleCardsConfig = () => {
+    const localPayload = localStorage.getItem('perun.pluginCardsPayload');
+    if (localPayload) {
+      try {
+        const parsed = JSON.parse(localPayload);
+        const payloadData = Array.isArray(parsed) ? parsed : parsed?.data;
+        if (Array.isArray(payloadData)) {
+          return Promise.resolve({
+            data: {
+              type: 'SUCCESS',
+              title: 'Loaded plugins from localStorage',
+              message: 'Loaded plugins from localStorage',
+              label_code: null,
+              data: payloadData
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Invalid local plugin payload in localStorage key perun.pluginCardsPayload', e);
+      }
+    }
+
+    const localUrl = window.localPluginCardsUrl || localStorage.getItem('perun.pluginCardsUrl');
+    if (localUrl) {
+      return axios.get(localUrl);
+    }
+
+    const url = `http://192.168.100.162:8095/services/WsConf/getConfigModuleCardsEntry/6250a0ee-dcc8-4cc2-b05b-da6c36fab457`;
+    return axios.get(url);
   }
 
   /**

@@ -207,10 +207,22 @@ export function persistBundleReducers(listOfBundleReducers) {
 ReactGA.initialize('UA-138995187-1');
 ReactGA.pageview('/');
 
+let appBootstrapPromise
+function waitForAppBootstrap() {
+  if (!appBootstrapPromise) {
+    appBootstrapPromise = router.waitForPlugins().catch((error) => {
+      console.error('Plugin bootstrap failed:', error)
+    })
+  }
+  return appBootstrapPromise
+}
+
 function getAdditionalLabels(allLabels, locale, language, additionalLabels) {
   redux.dataToRedux((response) => {
     redux.store.dispatch(updateIntl({ locale: locale, messages: { ...allLabels, ...response } }));
-    app && ReactDOM.render(<App />, app);
+    waitForAppBootstrap().then(() => {
+      app && ReactDOM.render(<App />, app);
+    })
   },
     'security',
     'temp',
@@ -231,7 +243,9 @@ export function changeLanguageAndLocale(locale, language) {
       if (additionalLabels) {
         getAdditionalLabels(response, locale, language, additionalLabels)
       } else {
-        app && ReactDOM.render(<App />, app);
+        waitForAppBootstrap().then(() => {
+          app && ReactDOM.render(<App />, app);
+        })
       }
     },
       'security',
