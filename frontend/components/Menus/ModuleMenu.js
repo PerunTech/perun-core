@@ -111,7 +111,7 @@ class ModuleMenu extends React.Component {
       return axios.get(localUrl);
     }
 
-    const url = `http://192.168.100.162:8095/services/WsConf/getConfigModuleCardsEntry/6250a0ee-dcc8-4cc2-b05b-da6c36fab457`;
+    const url = `${svConfig.restSvcBaseUrl}${svConfig.triglavRestVerbs.GET_CONFIGURATION_MODULE_DB}${this.props.svSession}`;
     return axios.get(url);
   }
 
