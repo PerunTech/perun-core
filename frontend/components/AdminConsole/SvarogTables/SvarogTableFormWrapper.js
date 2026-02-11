@@ -10,10 +10,10 @@ const { Modal } = ReactBootstrap
 const SvarogTableFormWrapper = (props, context) => {
   const initialState = {
     loading: false, objectId: undefined, show: false, parentTableName: 'SVAROG_TABLES',
-    tableName: 'SVAROG_FIELDS', gridId: 'SVAROG_FIELDS_GRID', selectedFieldObjectId: undefined
+    tableName: 'SVAROG_FIELDS', gridId: 'SVAROG_FIELDS_GRID', selectedFieldObjectId: undefined, selectedTableName: ''
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ loading, objectId, show, parentTableName, tableName, gridId, selectedFieldObjectId }, setState] = useReducer(reducer, initialState)
+  const [{ loading, objectId, show, tableName, gridId, selectedFieldObjectId, selectedTableName }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     getObjectId()
@@ -33,17 +33,39 @@ const SvarogTableFormWrapper = (props, context) => {
   const getObjectId = () => {
     const { formid } = props
     const objectId = ComponentManager.getStateForComponent(formid, 'objectId');
+    const selectedTableName = ComponentManager.getStateForComponent(formid, 'selectedTableName');
     if (objectId) {
-      setState({ objectId })
+      setState({ objectId, selectedTableName: selectedTableName || '' })
     }
   }
 
   const exportJson = () => {
-    const { formid } = props
-    const table = ComponentManager.getStateForComponent(formid, 'formTableData')
-    console.log(table)
-    const fields = ComponentManager.getStateForComponent(gridId, 'gridData')
-    console.log(fields)
+    setState({ loading: true })
+    const { svSession } = props
+    const fieldsUrl = `${window.server}/WsCore/children/${svSession}/${objectId}/SVAROG_FIELDS`
+    const tableUrl = `${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`
+
+    Promise.all([
+      axios.get(fieldsUrl),
+      axios.get(tableUrl)
+    ]).then(([fieldsRes, tableRes]) => {
+      setState({ loading: false })
+      const fields = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
+      const table = Array.isArray(tableRes?.data) ? tableRes.data : tableRes?.data ? [tableRes.data] : []
+      const exportData = [...fields, ...table]
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${selectedTableName}.json`
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err })
+    })
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {

@@ -8,9 +8,9 @@ const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const SvarogTables = (props, context) => {
-  const initialState = { tableName: 'SVAROG_TABLES', loading: false, gridId: 'SVAROG_TABLES_GRID', show: false, objectId: 0 }
+  const initialState = { tableName: 'SVAROG_TABLES', loading: false, gridId: 'SVAROG_TABLES_GRID', show: false, objectId: 0, selectedTableName: '' }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ tableName, loading, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
+  const [{ tableName, loading, gridId, show, objectId, selectedTableName }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     return () => {
@@ -19,7 +19,7 @@ const SvarogTables = (props, context) => {
   }, [gridId])
 
   const handleRowClick = (_id, _rowIdx, row) => {
-    setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, show: true })
+    setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, selectedTableName: row[`${tableName}.TABLE_NAME`] || '', show: true })
   }
 
   const generateSvarogTablesGrid = () => {
@@ -92,6 +92,7 @@ const SvarogTables = (props, context) => {
         className={'admin-settings-forms'}
         inputWrapper={SvarogTableFormWrapper}
         objectId={objectId}
+        selectedTableName={selectedTableName}
       />
     )
   }
