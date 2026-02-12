@@ -87,7 +87,7 @@ const SvarogTables = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/${tableName}`}
         addSaveFunction={(e) => saveRecord(e)}
-        hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
+        hideBtns='closeAndDelete'
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
         inputWrapper={SvarogTableFormWrapper}
