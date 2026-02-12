@@ -50,9 +50,14 @@ const SvarogTableFormWrapper = (props, context) => {
       axios.get(tableUrl)
     ]).then(([fieldsRes, tableRes]) => {
       setState({ loading: false })
-      const fields = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
-      const table = Array.isArray(tableRes?.data) ? tableRes.data : tableRes?.data ? [tableRes.data] : []
-      const exportData = [...fields, ...table]
+      const fieldsData = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
+      const tableData = tableRes?.data
+      const dbDataArray = fieldsData[0]?.['com.prtech.svarog_common.DbDataArray']
+      if (dbDataArray && Array.isArray(dbDataArray.items) && tableData) {
+        const tableItem = Array.isArray(tableData) ? tableData : [tableData]
+        dbDataArray.items.push(...tableItem)
+      }
+      const exportData = fieldsData[0] || {}
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
