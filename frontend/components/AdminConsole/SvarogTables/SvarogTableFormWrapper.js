@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { Loading } from '../../ComponentsIndex'
-import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GenericForm, axios } from '../../../client'
 import { ReactBootstrap, Icon, alertUserResponse, alertUserV2 } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
@@ -24,11 +24,6 @@ const SvarogTableFormWrapper = (props, context) => {
       ComponentManager.cleanComponentReducerState(gridId)
     }
   }, [gridId])
-
-  const reloadGrid = () => {
-    GridManager.reloadGridData(gridId)
-    ComponentManager.setStateForComponent(gridId, 'rowClicked', undefined)
-  }
 
   const getObjectId = () => {
     const { formid } = props
@@ -92,7 +87,7 @@ const SvarogTableFormWrapper = (props, context) => {
         })
       } else {
         const tableFormData = props.admConsoleFormData.find(item => item.recordType === 'TABLE')
-        const fieldFormDataEntries = props.admConsoleFormData.filter(item => item.recordType === 'FIELD')
+        const fieldFormDataEntries = props.admConsoleFormData.filter(item => item.recordType === 'FIELD' && !item.deleted)
         const items = fieldFormDataEntries.map(fd => formDataToDbDataObject(fd))
         if (tableFormData) {
           items.push(formDataToDbDataObject(tableFormData))
@@ -122,6 +117,15 @@ const SvarogTableFormWrapper = (props, context) => {
         const tableData = tableRes?.data
         const dbDataArray = fieldsData[0]?.['com.prtech.svarog_common.DbDataArray']
         if (dbDataArray && Array.isArray(dbDataArray.items)) {
+          const deletedFieldIds = props.admConsoleFormData
+            .filter(item => item.recordType === 'FIELD' && item.deleted)
+            .map(item => item.OBJECT_ID)
+          if (deletedFieldIds.length > 0) {
+            dbDataArray.items = dbDataArray.items.filter(item => {
+              const dbObj = item['com.prtech.svarog_common.DbDataObject']
+              return !dbObj || !deletedFieldIds.includes(dbObj.object_id)
+            })
+          }
           applyFormDataOverrides(dbDataArray.items, 'FIELD')
           if (tableData) {
             const tableItem = Array.isArray(tableData) ? tableData : [tableData]
@@ -169,28 +173,15 @@ const SvarogTableFormWrapper = (props, context) => {
     )
   }
 
-  const deleteFunc = (_id, _action, _session, formData) => {
-    const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_FIELDS_FORM`, null, { deleteExecuted: false })
-    const url = `${window.server}/ReactElements/deleteObject/${svSession}`
-    axios({
-      method: 'post',
-      data: encodeURIComponent(formData[4]['PARAM_VALUE']),
-      url: url,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    }).then((res) => {
-      if (res?.data) {
-        const resType = res.data?.type?.toLowerCase() || 'info'
-        alertUserResponse({ type: resType, response: res, onConfirm })
-        if (resType === 'success') {
-          reloadGrid()
-          setState({ show: false })
-        }
-      }
-    }).catch(err => {
-      console.error(err)
-      alertUserResponse({ response: err, onConfirm })
+  const onDelete = () => {
+    const { dispatch } = props
+    const formData = ComponentManager.getStateForComponent(`${tableName}_FORM`, 'formTableData')
+    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, recordType: 'FIELD', deleted: true } })
+    alertUserV2({
+      type: 'info',
+      title: context.intl.formatMessage({ id: 'perun.admin_console.field_deleted', defaultMessage: 'perun.admin_console.field_deleted' }),
     })
+    setState({ show: false })
   }
 
   const onSubmit = () => {
@@ -206,6 +197,13 @@ const SvarogTableFormWrapper = (props, context) => {
 
   const generateFieldForm = () => {
     const { svSession } = props
+    const buttonsArray = [{
+      type: 'button',
+      id: 'delete_table_field',
+      className: 'btn-danger btn_delete_form delete-svarog-field-btn',
+      action: onDelete,
+      label: context.intl.formatMessage({ id: 'perun.admin_console.delete_field', defaultMessage: 'perun.admin_console.delete_field' }),
+    }]
     return (
       <GenericForm
         params={'READ_URL'}
@@ -217,8 +215,8 @@ const SvarogTableFormWrapper = (props, context) => {
         customSave
         customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm_changes', defaultMessage: 'perun.admin_console.confirm_changes' })}
         addSaveFunction={onSubmit}
-        hideBtns={selectedFieldObjectId === 0 ? 'closeAndDelete' : 'close'}
-        addDeleteFunction={deleteFunc}
+        hideBtns='closeAndDelete'
+        buttonsArray={buttonsArray}
         className={'admin-settings-forms'}
       />
     )
@@ -235,7 +233,7 @@ const SvarogTableFormWrapper = (props, context) => {
       </div>
       {props.children}
       {objectId && (
-        <div className='admin-console-grid-container'>
+        <div className='admin-console-grid-container svarog-fields-grid-container'>
           <div className='admin-console-component-header'>
             <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_fields', defaultMessage: 'perun.admin_console.svarog_fields' })}</p>
           </div>
