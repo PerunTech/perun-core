@@ -1,6 +1,9 @@
 export function admConsoleFormData (state = [], action) {
   switch (action.type) {
     case 'ADD_ADM_CONSOLE_FORM_DATA': {
+      if (!action.payload.OBJECT_ID) {
+        return [...state, action.payload]
+      }
       const exists = state.some(item => item.OBJECT_ID === action.payload.OBJECT_ID)
       if (exists) {
         return state.map(item =>

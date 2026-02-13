@@ -34,9 +34,7 @@ const SvarogTableFormWrapper = (props, context) => {
     const { formid } = props
     const objectId = ComponentManager.getStateForComponent(formid, 'objectId');
     const selectedTableName = ComponentManager.getStateForComponent(formid, 'selectedTableName');
-    if (objectId) {
-      setState({ objectId, selectedTableName: selectedTableName || '' })
-    }
+    setState({ objectId: objectId || ' ', selectedTableName: selectedTableName || '' })
   }
 
   const metaKeys = ['OBJECT_ID', 'OBJECT_TYPE', 'PKID', 'PARENT_ID', 'recordType']
@@ -46,6 +44,20 @@ const SvarogTableFormWrapper = (props, context) => {
       .filter(([key]) => !metaKeys.includes(key))
       .map(([key, value]) => ({ [key]: value }))
   }
+
+  const formDataToDbDataObject = (formData) => ({
+    'com.prtech.svarog_common.DbDataObject': {
+      pkid: formData.PKID || 0,
+      object_id: formData.OBJECT_ID || 0,
+      dt_insert: new Date().toISOString(),
+      dt_delete: '9999-12-31T02:00:00.000Z',
+      parent_id: formData.PARENT_ID || 0,
+      object_type: formData.OBJECT_TYPE || 0,
+      status: 'VALID',
+      user_id: props.userInfo.userId,
+      values: formDataToValues(formData)
+    }
+  })
 
   const applyFormDataOverrides = (items, recordType) => {
     const overrides = props.admConsoleFormData.filter(item => item.recordType === recordType)
@@ -60,42 +72,71 @@ const SvarogTableFormWrapper = (props, context) => {
     }
   }
 
-  const exportJson = () => {
-    setState({ loading: true })
-    const { svSession } = props
-    const fieldsUrl = `${window.server}/WsCore/children/${svSession}/${objectId}/SVAROG_FIELDS`
-    const tableUrl = `${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`
+  const downloadJson = (data, fileName) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${fileName}.json`
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
 
-    Promise.all([
-      axios.get(fieldsUrl),
-      axios.get(tableUrl)
-    ]).then(([fieldsRes, tableRes]) => {
-      setState({ loading: false })
-      const fieldsData = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
-      const tableData = tableRes?.data
-      const dbDataArray = fieldsData[0]?.['com.prtech.svarog_common.DbDataArray']
-      if (dbDataArray && Array.isArray(dbDataArray.items)) {
-        applyFormDataOverrides(dbDataArray.items, 'FIELD')
-        if (tableData) {
-          const tableItem = Array.isArray(tableData) ? tableData : [tableData]
-          applyFormDataOverrides(tableItem, 'TABLE')
-          dbDataArray.items.push(...tableItem)
+  const exportJson = () => {
+    if (!objectId || objectId === ' ') {
+      if (props.admConsoleFormData.length === 0) {
+        alertUserV2({
+          type: 'info',
+          title: context.intl.formatMessage({ id: 'perun.admin_console.nothing_to_export', defaultMessage: 'perun.admin_console.nothing_to_export' }),
+        })
+      } else {
+        const tableFormData = props.admConsoleFormData.find(item => item.recordType === 'TABLE')
+        const fieldFormDataEntries = props.admConsoleFormData.filter(item => item.recordType === 'FIELD')
+        const items = fieldFormDataEntries.map(fd => formDataToDbDataObject(fd))
+        if (tableFormData) {
+          items.push(formDataToDbDataObject(tableFormData))
         }
+        const exportData = {
+          'com.prtech.svarog_common.DbDataArray': {
+            indexField: null,
+            filter: null,
+            items,
+            idxItems: []
+          }
+        }
+        downloadJson(exportData, tableFormData?.TABLE_NAME || 'EXPORT_TABLE')
       }
-      const exportData = fieldsData[0] || {}
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${selectedTableName}.json`
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    }).catch(err => {
-      console.error(err)
-      setState({ loading: false })
-      alertUserResponse({ response: err })
-    })
+    } else {
+      setState({ loading: true })
+      const { svSession } = props
+      const fieldsUrl = `${window.server}/WsCore/children/${svSession}/${objectId}/SVAROG_FIELDS`
+      const tableUrl = `${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`
+
+      Promise.all([
+        axios.get(fieldsUrl),
+        axios.get(tableUrl)
+      ]).then(([fieldsRes, tableRes]) => {
+        setState({ loading: false })
+        const fieldsData = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
+        const tableData = tableRes?.data
+        const dbDataArray = fieldsData[0]?.['com.prtech.svarog_common.DbDataArray']
+        if (dbDataArray && Array.isArray(dbDataArray.items)) {
+          applyFormDataOverrides(dbDataArray.items, 'FIELD')
+          if (tableData) {
+            const tableItem = Array.isArray(tableData) ? tableData : [tableData]
+            applyFormDataOverrides(tableItem, 'TABLE')
+            dbDataArray.items.push(...tableItem)
+          }
+        }
+        const exportData = fieldsData[0] || {}
+        downloadJson(exportData, selectedTableName)
+      }).catch(err => {
+        console.error(err)
+        setState({ loading: false })
+        alertUserResponse({ response: err })
+      })
+    }
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
@@ -104,13 +145,17 @@ const SvarogTableFormWrapper = (props, context) => {
 
   const generateFieldsGrid = () => {
     const { svSession } = props
+    let gridData = []
+    if (objectId !== ' ') {
+      gridData = `/ReactElements/getObjectsByParentId/${svSession}/${objectId}/${tableName}/0`
+    }
     return (
       <ExportableGrid
-        gridType='READ_URL'
+        gridType='SEARCH_GRID_DATA'
         key={gridId}
         id={gridId}
         configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
-        dataTableName={`/ReactElements/getObjectsByParentId/${svSession}/${objectId}/${tableName}/0`}
+        dataTableName={gridData}
         onRowClickFunct={handleRowClick}
         refreshData={true}
         toggleCustomButton={true}
@@ -182,14 +227,12 @@ const SvarogTableFormWrapper = (props, context) => {
   return (
     <>
       {loading && <Loading />}
-      {objectId && (
-        <div className='perun-menu-buttons-container'>
-          <button className='btn-success btn_save_form svarog-table-export-btn' onClick={exportJson}>
-            {context.intl.formatMessage({ id: 'perun.admin_console.export_table_and_fields', defaultMessage: 'perun.admin_console.export_table_and_fields' })}
-            <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>
-          </button>
-        </div>
-      )}
+      <div className='perun-menu-buttons-container'>
+        <button className='btn-success btn_save_form svarog-table-export-btn' onClick={exportJson}>
+          {context.intl.formatMessage({ id: 'perun.admin_console.export_table_and_fields', defaultMessage: 'perun.admin_console.export_table_and_fields' })}
+          <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>
+        </button>
+      </div>
       {props.children}
       {objectId && (
         <div className='admin-console-grid-container'>
@@ -221,6 +264,7 @@ SvarogTableFormWrapper.contextTypes = {
 const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
   admConsoleFormData: state.admConsoleFormData,
+  userInfo: state.userInfo,
 })
 
 export default connect(mapStateToProps)(SvarogTableFormWrapper)
