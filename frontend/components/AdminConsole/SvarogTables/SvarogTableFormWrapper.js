@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { Loading } from '../../ComponentsIndex'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
-import { ReactBootstrap, Icon, alertUserResponse } from '../../../elements'
+import { ReactBootstrap, Icon, alertUserResponse, alertUserV2 } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -39,6 +39,27 @@ const SvarogTableFormWrapper = (props, context) => {
     }
   }
 
+  const metaKeys = ['OBJECT_ID', 'OBJECT_TYPE', 'PKID', 'PARENT_ID', 'recordType']
+
+  const formDataToValues = (formData) => {
+    return Object.entries(formData)
+      .filter(([key]) => !metaKeys.includes(key))
+      .map(([key, value]) => ({ [key]: value }))
+  }
+
+  const applyFormDataOverrides = (items, recordType) => {
+    const overrides = props.admConsoleFormData.filter(item => item.recordType === recordType)
+    if (overrides.length === 0) return
+    for (const item of items) {
+      const dbDataObject = item['com.prtech.svarog_common.DbDataObject']
+      if (!dbDataObject) continue
+      const override = overrides.find(o => o.OBJECT_ID === dbDataObject.object_id)
+      if (override) {
+        dbDataObject.values = formDataToValues(override)
+      }
+    }
+  }
+
   const exportJson = () => {
     setState({ loading: true })
     const { svSession } = props
@@ -53,9 +74,13 @@ const SvarogTableFormWrapper = (props, context) => {
       const fieldsData = Array.isArray(fieldsRes?.data) ? fieldsRes.data : fieldsRes?.data ? [fieldsRes.data] : []
       const tableData = tableRes?.data
       const dbDataArray = fieldsData[0]?.['com.prtech.svarog_common.DbDataArray']
-      if (dbDataArray && Array.isArray(dbDataArray.items) && tableData) {
-        const tableItem = Array.isArray(tableData) ? tableData : [tableData]
-        dbDataArray.items.push(...tableItem)
+      if (dbDataArray && Array.isArray(dbDataArray.items)) {
+        applyFormDataOverrides(dbDataArray.items, 'FIELD')
+        if (tableData) {
+          const tableItem = Array.isArray(tableData) ? tableData : [tableData]
+          applyFormDataOverrides(tableItem, 'TABLE')
+          dbDataArray.items.push(...tableItem)
+        }
       }
       const exportData = fieldsData[0] || {}
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -99,30 +124,6 @@ const SvarogTableFormWrapper = (props, context) => {
     )
   }
 
-  const saveRecord = (e) => {
-    const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_FIELDS_FORM`, null, { saveExecuted: false })
-    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_FIELDS/${objectId}`
-    axios({
-      method: 'post',
-      data: encodeURIComponent(JSON.stringify(e.formData)),
-      url,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    }).then((res) => {
-      if (res?.data) {
-        const resType = res.data?.type?.toLowerCase() || 'info'
-        alertUserResponse({ type: resType, response: res, onConfirm })
-        if (resType === 'success') {
-          reloadGrid()
-          setState({ show: false })
-        }
-      }
-    }).catch(err => {
-      console.error(err)
-      alertUserResponse({ response: err, onConfirm })
-    })
-  }
-
   const deleteFunc = (_id, _action, _session, formData) => {
     const { svSession } = props
     const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_FIELDS_FORM`, null, { deleteExecuted: false })
@@ -147,6 +148,17 @@ const SvarogTableFormWrapper = (props, context) => {
     })
   }
 
+  const onSubmit = () => {
+    const { dispatch } = props
+    const formData = ComponentManager.getStateForComponent(`${tableName}_FORM`, 'formTableData');
+    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, recordType: 'FIELD' } })
+    alertUserV2({
+      type: 'info',
+      title: context.intl.formatMessage({ id: 'perun.admin_console.field_change_confirmed', defaultMessage: 'perun.admin_console.field_change_confirmed' }),
+    })
+    setState({ show: false })
+  }
+
   const generateFieldForm = () => {
     const { svSession } = props
     return (
@@ -157,7 +169,9 @@ const SvarogTableFormWrapper = (props, context) => {
         method={`/ReactElements/getTableJSONSchema/${svSession}/${tableName}`}
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${selectedFieldObjectId}/${tableName}`}
-        addSaveFunction={(e) => saveRecord(e)}
+        customSave
+        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm', defaultMessage: 'perun.admin_console.confirm' })}
+        addSaveFunction={onSubmit}
         hideBtns={selectedFieldObjectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
@@ -206,6 +220,7 @@ SvarogTableFormWrapper.contextTypes = {
 
 const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
+  admConsoleFormData: state.admConsoleFormData,
 })
 
 export default connect(mapStateToProps)(SvarogTableFormWrapper)

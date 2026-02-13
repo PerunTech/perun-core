@@ -44,36 +44,14 @@ const SvarogTables = (props, context) => {
     )
   }
 
-  const saveRecord = (e) => {
-    const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { saveExecuted: false })
-    const formData = ComponentManager.getStateForComponent(`${tableName}_FORM`, 'formTableData')
-    const isEmpty = Object.values(formData).every(v => v === null || v === undefined)
-    if (!formData || isEmpty) {
-      const label = context.intl.formatMessage({ id: 'perun.admin_console.input_data_error', defaultMessage: 'perun.admin_console.input_data_error' })
-      alertUserV2({ type: 'info', title: label, onConfirm })
-    } else {
-      const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`
-      axios({
-        method: 'post',
-        data: encodeURIComponent(JSON.stringify(e.formData)),
-        url,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      }).then((res) => {
-        if (res?.data) {
-          const resType = res.data?.type?.toLowerCase() || 'info'
-          alertUserResponse({ type: resType, response: res, onConfirm })
-          if (resType === 'success') {
-            GridManager.reloadGridData(gridId)
-            ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
-            setState({ show: false })
-          }
-        }
-      }).catch(err => {
-        console.error(err)
-        alertUserResponse({ response: err, onConfirm })
-      })
-    }
+  const onSubmit = () => {
+    const { dispatch } = props
+    const formData = ComponentManager.getStateForComponent(`${tableName}_FORM`, 'formTableData');
+    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, recordType: 'TABLE' } })
+    alertUserV2({
+      type: 'info',
+      title: context.intl.formatMessage({ id: 'perun.admin_console.table_change_confirmed', defaultMessage: 'perun.admin_console.table_change_confirmed' }),
+    })
   }
 
   const generateSvarogTableForm = (objectId) => {
@@ -86,9 +64,10 @@ const SvarogTables = (props, context) => {
         method={`/ReactElements/getTableJSONSchema/${svSession}/${tableName}`}
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/${tableName}`}
-        addSaveFunction={(e) => saveRecord(e)}
+        customSave
+        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm', defaultMessage: 'perun.admin_console.confirm' })}
+        addSaveFunction={onSubmit}
         hideBtns='closeAndDelete'
-        addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
         inputWrapper={SvarogTableFormWrapper}
         objectId={objectId}
@@ -97,29 +76,9 @@ const SvarogTables = (props, context) => {
     )
   }
 
-  const deleteFunc = (_id, _action, _session, formData) => {
-    const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`${tableName}_FORM`, null, { deleteExecuted: false })
-    const url = `${window.server}/ReactElements/deleteObject/${svSession}`
-    axios({
-      method: 'post',
-      data: encodeURIComponent(formData[4]['PARAM_VALUE']),
-      url: url,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    }).then((res) => {
-      if (res?.data) {
-        const resType = res.data?.type?.toLowerCase() || 'info'
-        alertUserResponse({ type: resType, response: res, onConfirm })
-        if (resType === 'success') {
-          GridManager.reloadGridData(gridId)
-          ComponentManager.setStateForComponent(gridId, null, { rowClicked: undefined })
-          setState({ show: false })
-        }
-      }
-    }).catch(err => {
-      console.error(err)
-      alertUserResponse({ response: err, onConfirm })
-    })
+  const onHide = () => {
+    setState({ show: false })
+    props.dispatch({ type: 'CLEAN_ADM_CONSOLE_FORM_DATA' })
   }
 
   return (
@@ -132,7 +91,7 @@ const SvarogTables = (props, context) => {
         {generateSvarogTablesGrid()}
       </div>
       {show && (
-        <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
+        <Modal className='admin-console-unit-modal' show={show} onHide={onHide}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
             <Modal.Title>
               {context.intl.formatMessage({ id: 'perun.admin_console.svarog_table', defaultMessage: 'perun.admin_console.svarog_table' })}
