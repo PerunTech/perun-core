@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
-import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, Loading } from '../../../client'
+import { alertUserV2, ReactBootstrap } from '../../../elements'
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
@@ -65,7 +65,7 @@ const SvarogTables = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/${tableName}`}
         customSave
-        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm', defaultMessage: 'perun.admin_console.confirm' })}
+        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm_changes', defaultMessage: 'perun.admin_console.confirm_changes' })}
         addSaveFunction={onSubmit}
         hideBtns='closeAndDelete'
         className={'admin-settings-forms'}

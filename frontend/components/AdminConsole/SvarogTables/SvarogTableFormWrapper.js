@@ -170,7 +170,7 @@ const SvarogTableFormWrapper = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${selectedFieldObjectId}/${tableName}`}
         customSave
-        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm', defaultMessage: 'perun.admin_console.confirm' })}
+        customSaveButtonName={context.intl.formatMessage({ id: 'perun.admin_console.confirm_changes', defaultMessage: 'perun.admin_console.confirm_changes' })}
         addSaveFunction={onSubmit}
         hideBtns={selectedFieldObjectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
