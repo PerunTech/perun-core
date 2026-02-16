@@ -68,6 +68,14 @@ function validResponse(res) {
   }
 }
 
+axios.interceptors.request.use((config) => {
+  const svSession = redux.store?.getState()?.security?.svSession
+  if (svSession) {
+    config.headers['sessionId'] = svSession
+  }
+  return config
+})
+
 axios.interceptors.response.use(
   (res) => {
     return res;
