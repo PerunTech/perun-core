@@ -74,6 +74,9 @@
     "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --env SOURCE_MAP=true DEBUG=true --hot --progress",
     "test": "eslint --fix frontend/ || exit 0"
   },
+  "overrides": {
+    "serialize-javascript": "^7.0.3"
+  },
   "author": "Perun Tech",
   "license": "ISC"
 }
