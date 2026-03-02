@@ -1,3 +1,6 @@
+const crypto = require('crypto');
+if (!globalThis.crypto) globalThis.crypto = crypto;
+
 const path = require('path');
 const webpack = require('webpack');
 
