@@ -1,3 +1,4 @@
+// Polyfill globalThis.crypto for Node.js environments where it's not available (e.g. Node < 19)
 const crypto = require('crypto');
 if (!globalThis.crypto) globalThis.crypto = crypto.webcrypto;
 
