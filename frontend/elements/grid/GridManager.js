@@ -95,6 +95,15 @@ export default class GridManager extends React.Component {
     ComponentManager.setStateForComponent(gridId, 'reloadGrid', true)
   }
 
+  static reloadAllGrids() {
+    const components = store.getState().componentIndex
+    for (const componentId in components) {
+      if (components[componentId].type === 'GenericGrid') {
+        ComponentManager.setStateForComponent(componentId, 'reloadGrid', true)
+      }
+    }
+  }
+
   static addGridForRender(grid, groupId) {
     store.dispatch(addGrid(grid.key, grid, groupId))
   }
