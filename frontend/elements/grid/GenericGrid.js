@@ -339,6 +339,10 @@ class GenericGrid extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    ComponentManager.cleanComponentReducerState(this.props.id)
+  }
+
   updateRowsAfterSave(comp, nextProps) {
     const savedObject = nextProps.inlineSaveResult.data
     const rowId = savedObject.ROW_ID

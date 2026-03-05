@@ -100,6 +100,7 @@ export default class GridManager extends React.Component {
     for (const componentId in components) {
       if (components[componentId].type === 'GenericGrid') {
         ComponentManager.setStateForComponent(componentId, 'reloadGrid', true)
+        this.cleanSelectedIndexes(componentId)
       }
     }
   }
@@ -132,6 +133,15 @@ export default class GridManager extends React.Component {
   // static replaceState (grids, groupId) {
   //   store.dispatch(replaceGrids(grids, groupId))
   // }
+
+  static cleanSelectedIndexes(gridId) {
+    store.dispatch({ type: 'UPDATE_SELECTED_GRID_ROWS', payload: [[], gridId] })
+    ComponentManager.setStateForComponent(gridId, null, {
+      selectedIndexes: [],
+      selectedIndexesBeforeFilters: [],
+      selectedRowsBeforeFilters: []
+    })
+  }
 
   static removeGrid(gridId, groupId) {
     store.dispatch(removeGrid(gridId, groupId))
