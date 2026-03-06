@@ -67,7 +67,8 @@ class GenericGrid extends React.Component {
  * @param {JSON} gridConfig - The grid configuration. Internal variable that keeps the whole grid configuration and uses it to render the grid. Loaded from webservice. See  configTableName.
  * @param {Boolean} gridDataLoaded -  Has the grid data been Loaded. Grid rendering directly depends on this variable.
  * @param {JSON} gridData - The grid data. Internal variable that keeps the whole grid data and uses it to render the grid. Loaded from webservice. See  dataTableName.
- * @param {Array} selectedIndexes - Internal variable that keeps the INDEXES of the selectedRowData.
+ * @param {Array} selectedKeys - Internal variable that keeps the primary key values (PKID) of the selected rows. Used for key-based selection that persists across sorting and filtering.
+ * @param {Array} selectedRowData - Internal variable that keeps the full row data objects of the selected rows.
  * @param {Array} filters - Internal variable that keeps the filters applied on the rendered grid.
  * @param {JSON} rows - Internal variable that keeps the filters applied on the rendered grid. Is assigned from gridData
  * @param {string} rowKey - Internal variable to know which field represents the unique id for a row.
