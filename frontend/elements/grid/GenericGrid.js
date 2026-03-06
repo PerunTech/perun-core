@@ -12,8 +12,7 @@ import ContextMenuPopup from './ContextMenuPopup';
 import { customRowRenderer } from './RowRenderer';
 import { customRowRendererSecondary } from './RowRendererSecondary';
 import { GridManager } from '..';
-import { isValidArray, isValidObject } from '../../functions/utils';
-import { strcmp } from '../../model/utils';
+import { isValidArray } from '../../functions/utils';
 
 const { ContextMenuTrigger } = Menu
 const { Selectors } = Data
@@ -68,7 +67,7 @@ class GenericGrid extends React.Component {
  * @param {JSON} gridConfig - The grid configuration. Internal variable that keeps the whole grid configuration and uses it to render the grid. Loaded from webservice. See  configTableName.
  * @param {Boolean} gridDataLoaded -  Has the grid data been Loaded. Grid rendering directly depends on this variable.
  * @param {JSON} gridData - The grid data. Internal variable that keeps the whole grid data and uses it to render the grid. Loaded from webservice. See  dataTableName.
- * @param {Array} selectedIndexes - Internal variable that keeps the INDEXES of the selectedRows.
+ * @param {Array} selectedIndexes - Internal variable that keeps the INDEXES of the selectedRowData.
  * @param {Array} filters - Internal variable that keeps the filters applied on the rendered grid.
  * @param {JSON} rows - Internal variable that keeps the filters applied on the rendered grid. Is assigned from gridData
  * @param {string} rowKey - Internal variable to know which field represents the unique id for a row.
@@ -105,9 +104,8 @@ class GenericGrid extends React.Component {
       gridConfig: this.props.gridConfig,
       gridDataLoaded: this.props.gridDataLoaded,
       gridData: this.props.gridData,
-      selectedIndexes: [],
-      selectedIndexesBeforeFilters: [],
-      selectedRowsBeforeFilters: [],
+      selectedKeys: [],
+      selectedRowData: [],
       filters: [],
       rows: this.props.gridData,
       session: this.props.session,
@@ -295,7 +293,15 @@ class GenericGrid extends React.Component {
     if (nextProps.gridData && nextProps.gridConfig) {
       // this.setState({ rows: nextProps.gridData })
       const formattedData = this.formatDates(nextProps.gridConfig, nextProps.gridData)
-      this.setState({ rows: formattedData })
+      const stateUpdate = { rows: formattedData }
+      // Detect the actual PKID key from the row data (the prefix may differ from configTableName)
+      if (isValidArray(formattedData, 1)) {
+        const actualRowKey = Object.keys(formattedData[0]).find(k => k.endsWith('.PKID'))
+        if (actualRowKey) {
+          stateUpdate.rowKey = actualRowKey
+        }
+      }
+      this.setState(stateUpdate)
     }
 
     if (nextProps.reloadGrid !== null && nextProps.reloadGrid !== undefined) {
@@ -370,8 +376,8 @@ class GenericGrid extends React.Component {
     if (!this.state.gridDataLoaded) {
       this.getGridData(this.state.params)
     }
-    if (this.state.filters || this.state.filteredRows || this.state.selectedIndexes) {
-      ComponentManager.setStateForComponent(this.state.id, null, { filteredRows: undefined, filters: [], selectedIndexes: [] })
+    if (this.state.filters || this.state.filteredRows || this.state.selectedKeys) {
+      ComponentManager.setStateForComponent(this.state.id, null, { filteredRows: undefined, filters: [], selectedKeys: [], selectedRowData: [] })
     }
   }
 
@@ -427,144 +433,28 @@ class GenericGrid extends React.Component {
     }
 
     const filteredRows = Selectors.getRows({ filters: newFilters, rows: this.state.rows })
-    let selectedIndexes = []
-    // Check for cases when no filters have values
-    if (!isValidObject(newFilters, 1)) {
-      // Set the selected indexes to the persisted ones, if there are any
-      if (isValidArray(this.state.selectedIndexesBeforeFilters, 1)) {
-        selectedIndexes = this.state.selectedIndexesBeforeFilters
-      }
-    } else {
-      const { selectedRowsBeforeFilters } = this.state
-      const allFilteredRows = filteredRows
-      // Get the object IDs of the selected rows before the filters were applied
-      const selectedRowsObjIds = selectedRowsBeforeFilters.map(row => {
-        for (const [key, value] of Object.entries(row)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            return value
-          }
-        }
-      })
-      // Get the object IDs of the filtered out rows
-      const filteredRowsObjIds = allFilteredRows.map(row => {
-        for (const [key, value] of Object.entries(row)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            return value
-          }
-        }
-      })
-      // Check if the initially selected rows are contained in the filtered out rows and appropriately mark their indexes as selected
-      const filteredSelectedIndexes = selectedRowsObjIds.map(row => {
-        const index = filteredRowsObjIds.indexOf(row)
-        if (index > -1) {
-          return index
-        }
-      }).filter(item => item !== undefined)
-
-      selectedIndexes = filteredSelectedIndexes
-    }
-    this.setState({ filteredRows, filters: newFilters, selectedIndexes })
+    this.setState({ filteredRows, filters: newFilters })
   }
 
   onClearFilters() {
-    // all filters removed
-    let selectedIndexes = []
-    if (isValidArray(this.state.selectedIndexesBeforeFilters, 1)) {
-      selectedIndexes = this.state.selectedIndexesBeforeFilters
-    }
-    this.setState({ filteredRows: undefined, filters: [], selectedIndexes })
+    this.setState({ filteredRows: undefined, filters: [] })
   }
 
   onRowsSelected(rows) {
-    if (!isValidObject(this.state.filters, 1)) {
-      const LocalIndexes = this.state.selectedIndexes.concat(rows.map(r => r.rowIdx))
-      const allRows = Selectors.getRows(this.state)
-      const toSend = LocalIndexes.map(r => allRows[r])
-
-      this.setState({ selectedIndexes: LocalIndexes, selectedIndexesBeforeFilters: LocalIndexes, selectedRowsBeforeFilters: toSend })
-      this.onSelectedRowsChange(toSend, this.state.id)
-    } else {
-      const { selectedIndexesBeforeFilters, selectedRowsBeforeFilters } = this.state
-      const allRows = this.state.rows
-      let selectedIndexes = selectedIndexesBeforeFilters
-      // Get the object IDs of all the rows
-      const allRowsObjIds = allRows.map(row => {
-        for (const [key, value] of Object.entries(row)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            return value
-          }
-        }
-      })
-      // Get the currently selected row(s) & find its(their) object ID(s)
-      rows.forEach(r => {
-        const currentlySelectedRow = r.row
-        let currentlySelectedRowObjId = 0
-        for (const [key, value] of Object.entries(currentlySelectedRow)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            currentlySelectedRowObjId = value
-          }
-        }
-        // Find the initial position (before the filters were applied) of the currently selected row(s)
-        const initialIndexOfTheCurrentRow = allRowsObjIds.indexOf(currentlySelectedRowObjId)
-        // Add the current row index & the full row object to the appropriate arrays
-        selectedIndexes.push(initialIndexOfTheCurrentRow)
-        selectedRowsBeforeFilters.push(currentlySelectedRow)
-      })
-      const LocalIndexes = this.state.selectedIndexes.concat(rows.map(r => r.rowIdx))
-
-      this.setState({ selectedIndexes: LocalIndexes, selectedIndexesBeforeFilters: selectedIndexes, selectedRowsBeforeFilters })
-      this.onSelectedRowsChange(selectedRowsBeforeFilters, this.state.id)
-    }
+    const newKeys = rows.map(r => r.row[this.state.rowKey])
+    const newRows = rows.map(r => r.row)
+    const selectedKeys = [...this.state.selectedKeys, ...newKeys]
+    const selectedRowData = [...this.state.selectedRowData, ...newRows]
+    this.setState({ selectedKeys, selectedRowData })
+    this.onSelectedRowsChange(selectedRowData, this.state.id)
   }
 
   onRowsDeselected(rows) {
-    if (!isValidObject(this.state.filters, 1)) {
-      const rowIndexes = rows.map(r => r.rowIdx)
-      const LocalIndexes = this.state.selectedIndexes.filter(i => rowIndexes.indexOf(i) === -1)
-      const allRows = Selectors.getRows(this.state)
-      const toSend = LocalIndexes.map(r => allRows[r])
-
-      this.setState({ selectedIndexes: LocalIndexes, selectedIndexesBeforeFilters: LocalIndexes, selectedRowsBeforeFilters: toSend })
-      this.onSelectedRowsChange(toSend, this.state.id)
-    } else {
-      const { selectedIndexesBeforeFilters, selectedRowsBeforeFilters } = this.state
-      const rowIndexes = rows.map(r => r.rowIdx)
-      const allRows = this.state.rows
-      const selectedIndexes = selectedIndexesBeforeFilters
-      const selectedRows = selectedRowsBeforeFilters
-      // Get the object IDs of all the rows
-      const allRowsObjIds = allRows.map(row => {
-        for (const [key, value] of Object.entries(row)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            return value
-          }
-        }
-      })
-      // Get the currently selected row & find its object ID
-      const currentlySelectedRow = rows[0].row
-      let currentlySelectedRowObjId = 0
-      for (const [key, value] of Object.entries(currentlySelectedRow)) {
-        if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-          currentlySelectedRowObjId = value
-        }
-      }
-      // Find the initial position (before the filters were applied) of the currently selected row
-      const initialIndexOfTheCurrentRow = allRowsObjIds.indexOf(currentlySelectedRowObjId)
-      // Find the index that needs to be removed in the array of indexes & remove it
-      const indexToRemove = selectedIndexes.indexOf(initialIndexOfTheCurrentRow)
-      selectedIndexes.splice(indexToRemove, 1)
-      // Filter out the row whose object ID matches the one of the current row
-      const newSelectedRows = selectedRows.map(row => {
-        for (const [key, value] of Object.entries(row)) {
-          if (strcmp(key.split('.')[1], 'OBJECT_ID')) {
-            return value !== currentlySelectedRowObjId && row
-          }
-        }
-      }).filter(row => isValidObject(row, 1))
-      const LocalIndexes = this.state.selectedIndexes.filter(i => rowIndexes.indexOf(i) === -1)
-      this.setState({ selectedIndexes: LocalIndexes, selectedIndexesBeforeFilters: selectedIndexes, selectedRowsBeforeFilters: newSelectedRows })
-      this.onSelectedRowsChange(newSelectedRows, this.state.id)
-    }
+    const removedKeys = new Set(rows.map(r => r.row[this.state.rowKey]))
+    const selectedKeys = this.state.selectedKeys.filter(k => !removedKeys.has(k))
+    const selectedRowData = this.state.selectedRowData.filter(r => !removedKeys.has(r[this.state.rowKey]))
+    this.setState({ selectedKeys, selectedRowData })
+    this.onSelectedRowsChange(selectedRowData, this.state.id)
   }
 
   getRows() {
@@ -702,7 +592,7 @@ class GenericGrid extends React.Component {
   }
 
   render() {
-    const rowText = this.state.selectedIndexes.length === 1
+    const rowText = this.state.selectedKeys.length === 1
       ? this.context.intl.formatMessage(
         { id: `${labelBasePath}.row_selected`, defaultMessage: `${labelBasePath}.row_selected` }
       ) : this.context.intl.formatMessage(
@@ -803,7 +693,7 @@ class GenericGrid extends React.Component {
                   }
                   {this.state.enableMultiSelect === true && (
                     <div className='selected-rows-container'>
-                      <span id='reactGridspan3' style={{ paddingLeft: '10px' }}>{`${this.state.selectedIndexes.length} ${rowText}`}</span>
+                      <span id='reactGridspan3' style={{ paddingLeft: '10px' }}>{`${this.state.selectedKeys.length} ${rowText}`}</span>
                     </div>
                   )}
                   {this.props.customToolbarDescription && (
@@ -826,7 +716,10 @@ class GenericGrid extends React.Component {
                 onRowsSelected: this.onRowsSelected,
                 onRowsDeselected: this.onRowsDeselected,
                 selectBy: {
-                  indexes: this.state.selectedIndexes
+                  keys: {
+                    rowKey: this.state.rowKey,
+                    values: this.state.selectedKeys
+                  }
                 }
               } : null}
               onGridSort={this.handleGridSort}
