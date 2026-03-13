@@ -29,9 +29,11 @@ const Users = (props, context) => {
     const refreshGrid = () => {
         setUsersData(false)
         ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
+        setLoading(true)
         axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/0/PKID`).then(res => {
+            setLoading(false)
             setUsersData(res?.data)
-        }).catch(err => alertUserResponse({ response: err }));
+        }).catch(err => { alertUserResponse({ response: err }), setLoading(false) });
     }
     const cleanUpGrids = () => {
         ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
