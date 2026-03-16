@@ -92,7 +92,6 @@ const Users = (props, context) => {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then(res => {
             setLoading(false)
-            cleanUpGrids()
             setUsersData(undefined)
             setUsersData(res?.data || [])
             ComponentManager.setStateForComponent(formId, null, {
