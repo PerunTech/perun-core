@@ -129,11 +129,6 @@ export default class GridManager extends React.Component {
     store.dispatch(cleanGrids(groupId))
   }
 
-  /* does not exist */
-  // static replaceState (grids, groupId) {
-  //   store.dispatch(replaceGrids(grids, groupId))
-  // }
-
   static cleanSelection(gridId) {
     store.dispatch({ type: 'UPDATE_SELECTED_GRID_ROWS', payload: [[], gridId] })
     ComponentManager.setStateForComponent(gridId, null, {
