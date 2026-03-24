@@ -2,6 +2,11 @@
 
 The front-end module of the Svarog framework, containing the core functionalities such as login, admin console, plugin management and providing the React framework to other modules.
 
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [npm](https://www.npmjs.com/) (v8 or higher)
+
 ## Getting Started
 
 ### Installation
