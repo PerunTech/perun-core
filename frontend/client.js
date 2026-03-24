@@ -1,4 +1,4 @@
-/* Base libraries */
+// Base libraries
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
@@ -8,22 +8,22 @@ import axios from 'axios'
 import md5 from 'md5'
 import Swal from 'sweetalert2'
 
-/* Assets */
+// Assets
 import * as assets from './assets/index'; // eslint-disable-line
 
-/* Routing & history */
+// Routing & history
 import { Link } from 'react-router-dom';
 import { generatePath } from 'react-router'
 import { createHashHistory } from 'history';
 
-/* i18n */
+// i18n
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
 
-/* Google Analytics */
+// Google Analytics
 import ReactGA from 'react-ga';
 
-/* Local modules */
+// Local modules
 import * as redux from './model';
 import * as elements from './elements';
 import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
@@ -35,29 +35,27 @@ import { pluginManager } from './routes/PluginManager';
 import { ComponentManager } from './elements/ComponentManager'
 import Modal from './components/Modal/Modal.js'
 
-/* Forms */
+// Forms
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
 import GenericForm from './elements/form/GenericForm'
 
-/* Grid */
+// Grid
 import ContextMenuPopup from './elements/grid/ContextMenuPopup'
 import CustomGridToolbar from './elements/grid/CustomGridToolbar'
 import ExportableGrid from './elements/grid/ExportableGrid'
 import GenericGrid from './elements/grid/GenericGrid'
 import GridManager from './elements/grid/GridManager'
 
-/* UI */
+// UI
 import { Tooltip } from 'react-tooltip'
 
-/* Utility functions */
+// Utility functions
 import * as utils from './functions/utils'
 import * as cookies from './functions/cookies'
 
-/* -------- */
-/* Exports  */
-/* -------- */
+// Exports
 export {
   React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
   axios, Loading, createHashHistory, md5, Swal,
@@ -65,11 +63,9 @@ export {
   ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, validator
 };
 
-/* -------------------- */
-/* Axios interceptors   */
-/* -------------------- */
+// Axios interceptors
 
-/* check for arraybuffer response types */
+// Check for arraybuffer response types
 function validResponse(res) {
   return !!res && res.responseType !== 'arraybuffer'
 }
@@ -105,7 +101,7 @@ axios.interceptors.response.use(
     } else {
       const msg = error?.message || ''
       if (msg.includes('401')) {
-        /* if the accessed route is fr map memorize it and write it in window core */
+        // If the accessed route is FR map, memorize it and write it in window.core
         if (error.config.url.includes('/lpis/get/farmerAssets/undefined/')) {
           if (window.location.href.includes('farm-registry/map')) {
             window.core.memorizeFrMapRoute = window.location.href
@@ -119,9 +115,7 @@ axios.interceptors.response.use(
   }, { runWhen: validResponse }
 );
 
-/* -------------------- */
-/* Init & configuration */
-/* -------------------- */
+// Init & configuration
 const app = document.getElementById('app');
 let persistConfig = {}
 let whitelist = []
@@ -140,10 +134,8 @@ const whitelistRoot = [
   'businessLogicReducer'
 ]
 
-/* -------------------- */
-/* Use the default locale defined in the assets project */
-/* If the default locale doesn't exist, fallback to the english one */
-/* -------------------- */
+// Use the default locale defined in the assets project.
+// Falls back to English (en_US) if not set.
 const defaultLocale = cookies.getCookie('defaultLocale') || 'en_US'
 let localeData = ['en']
 if (utils.isJSON(cookies.getCookie('localeData'))) {
@@ -160,15 +152,13 @@ async function loadLocaleData(locale) {
   }
 }
 
-/* Google Analytics */
+// Google Analytics
 if (process.env.GA_TRACKING_ID) {
   ReactGA.initialize(process.env.GA_TRACKING_ID);
   ReactGA.pageview('/');
 }
 
-/* -------------------- */
-/* App component        */
-/* -------------------- */
+// App component
 const App = () => (
   <Provider store={redux.store}>
     <IntlProvider>
@@ -177,7 +167,7 @@ const App = () => (
   </Provider>
 )
 
-/* If user accesses fr route, memorize it */
+// If user accesses FR route, memorize it
 let memorizeFrMapRoute
 if (window.location.href.includes('farm-registry/map')) {
   memorizeFrMapRoute = window.location.href
@@ -186,9 +176,7 @@ if (window.location.href.includes('farm-registry/map')) {
 
 window.core = { React, ReactDOM, Provider, connect, Link, router, pluginManager, redux, elements, Configurator, memorizeFrMapRoute }
 
-/* -------------------- */
-/* Bootstrap & render   */
-/* -------------------- */
+// Bootstrap & render
 let appBootstrapPromise
 function waitForAppBootstrap() {
   if (!appBootstrapPromise) {
@@ -240,7 +228,7 @@ export function changeLanguageAndLocale(locale, language) {
   })
 }
 
-/* exportable function to add persist reducers from bundle */
+// Exportable function to add persist reducers from bundle
 export function persistBundleReducers(listOfBundleReducers) {
   let res = whitelist.filter(item => listOfBundleReducers.includes(item));
   if (res.length > 0) {
@@ -248,7 +236,7 @@ export function persistBundleReducers(listOfBundleReducers) {
   } else {
     whitelist.push(...listOfBundleReducers)
 
-    /* if reducers come from perun-core, skip the incrementation */
+    // If reducers come from perun-core, skip the incrementation
     if (!listOfBundleReducers.includes('intl')) {
       indexReducer++
     }
@@ -269,5 +257,5 @@ export function persistBundleReducers(listOfBundleReducers) {
   }
 }
 
-/* Initialize on perun-core load */
+// Initialize on perun-core load
 persistBundleReducers(whitelistRoot)
