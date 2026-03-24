@@ -2,8 +2,20 @@
 const crypto = require('crypto');
 if (!globalThis.crypto) globalThis.crypto = crypto.webcrypto;
 
+const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+
+/* Load .env file if it exists */
+const envFile = path.resolve(__dirname, '.env');
+if (fs.existsSync(envFile)) {
+    fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
+        const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+        if (match && !process.env[match[1]]) {
+            process.env[match[1]] = match[2] || '';
+        }
+    });
+}
 
 module.exports = (env, params) => {
     return {
@@ -33,6 +45,7 @@ module.exports = (env, params) => {
             new webpack.DefinePlugin({
                 'process.env.DEBUG': JSON.stringify(env.DEBUG),
                 'process.env.MODE': JSON.stringify(params.mode),
+                'process.env.GA_TRACKING_ID': JSON.stringify(process.env.GA_TRACKING_ID || ''),
             })
         ],
         module: {

@@ -24,6 +24,20 @@ npm install
 | `npm run dev` | Starts a development server with hot reloading, source maps, and debug enabled |
 | `npm run test` | Lints and auto-fixes the code using `eslint` |
 
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GA_TRACKING_ID` | Google Analytics tracking ID | No |
+
+For local development, create a `.env` file in the project root:
+
+```
+GA_TRACKING_ID=UA-XXXXXXXXX-X
+```
+
+For CI/CD, set the variable in your GitLab CI/CD settings under **Settings > CI/CD > Variables**.
+
 ## Local Development Guide
 
 When developing a project that uses `perun-core` as a dependency, follow these steps to use the latest local version.
