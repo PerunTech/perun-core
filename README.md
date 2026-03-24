@@ -40,9 +40,20 @@ For CI/CD, set the variable in your GitLab CI/CD settings under **Settings > CI/
 
 ## Local Development Guide
 
-When developing a project that uses `perun-core` as a dependency, follow these steps to use the latest local version.
+The following workflow applies both when developing `perun-core` itself and when developing a project that uses it as a dependency.
 
-### Setting Up the Backend
+### Updating Perun Core Locally
+
+1. Build perun-core:
+   ```bash
+   npm run build
+   ```
+   Or use `npm run build-dev` if you need source maps for debugging.
+2. Copy `perun-core/www/perun-core.js` into your project at `your-project/node_modules/perun-core/www/`.
+
+Since the built script is periodically committed to the repository, your project may already have a recent version of `perun-core.js` in `node_modules/perun-core/www/` after running `npm install`. This step is only necessary when you need changes that haven't been published yet.
+
+### Setting Up the Frontend Entry Point
 
 Create the following files in the `backend/www` directory of your project.
 
@@ -105,17 +116,6 @@ window.server = 'http://<host>:<port>/services'
 ```
 
 > **Note:** This is a simplified template. The full boilerplate is available at [`docs/index.html.template`](docs/index.html.template) — copy it into your project's `backend/www` directory and customize as needed.
-
-### Updating Perun Core Locally
-
-1. Build perun-core:
-   ```bash
-   npm run build
-   ```
-   Or use `npm run build-dev` if you need source maps for debugging.
-2. Copy `perun-core/www/perun-core.js` into your project at `your-project/node_modules/perun-core/www/`.
-
-It is recommended to repeat this step whenever there are new changes to perun-core, so that your project has access to the latest functionality.
 
 ### Spatial Support
 
