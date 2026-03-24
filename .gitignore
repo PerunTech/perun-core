@@ -1,4 +1,5 @@
 *.retry
+.env
 node_modules
 extracted-messages
 npm-debug.log*
