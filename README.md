@@ -55,7 +55,7 @@ Since the built script is periodically committed to the repository, your project
 
 ### Setting Up the Frontend Entry Point
 
-Create the following files in the `backend/www` directory of your project.
+Create the following files in the `www` directory when developing Perun Core, or `backend/www` when developing other projects.
 
 **`config.js`** - Configure the server URL for your environment:
 
