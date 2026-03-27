@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 
-/* Load .env file if it exists */
+// Load .env file if it exists
 const envFile = path.resolve(__dirname, '.env');
 if (fs.existsSync(envFile)) {
     fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
