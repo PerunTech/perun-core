@@ -47,8 +47,6 @@ after_script:
     - mvn clean deploy -DskipTests
   only:
     - dev
-    - RND
-    - dev_rnd
 
 1_perun-core-dev-generate-js:
   stage: 3_mvn_install
@@ -68,8 +66,6 @@ after_script:
     - git push origin HEAD:$CI_COMMIT_REF_NAME    
   only:
     - dev
-    - dev_rnd
-    - RND
   when: manual
 
 2_perun-core-stable-generate-js:
@@ -90,7 +86,6 @@ after_script:
     - git push origin HEAD:$CI_COMMIT_REF_NAME    
   only:
     - main
-    - staging
   when: manual
 
 2_perun-core-stable-install:
@@ -107,7 +102,6 @@ after_script:
     - mvn clean deploy -DskipTests
   only:
     - main
-    - staging
 
 1_perun-sonarqube_backend:
   stage: 4_sonarqube
@@ -124,7 +118,6 @@ after_script:
   environment:
     name: $CI_COMMIT_REF_NAME
   only:
-    - staging
     - dev  
   when: manual
 
@@ -134,4 +127,3 @@ after_script:
     - sonar-scanner -Dsonar.sources=. -Dsonar.projectKey=$CI_PROJECT_NAME -Dsonar.analysis.mode=preview -Dsonar.login=a02003f1f8f90382d7570b57a85c00c38132f85f -Dsonar.branch=$CI_BUILD_REF_NAME -Dsonar.projectName=$CI_PROJECT_NAME -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID
     - sonar-scanner -Dsonar.sources=. -Dsonar.projectKey=$CI_PROJECT_NAME -Dsonar.analysis.mode=publish -Dsonar.login=a02003f1f8f90382d7570b57a85c00c38132f85f -Dsonar.branch=$CI_BUILD_REF_NAME -Dsonar.projectName=$CI_PROJECT_NAME
   when: manual
-
