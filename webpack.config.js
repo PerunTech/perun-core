@@ -5,6 +5,7 @@ if (!globalThis.crypto) globalThis.crypto = crypto.webcrypto;
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 
 // Load .env file if it exists
 const envFile = path.resolve(__dirname, '.env');
@@ -22,6 +23,20 @@ module.exports = (env, params) => {
         ...env.SOURCE_MAP === 'true' && { devtool: 'source-map' },
         mode: params.mode,
         entry: './frontend/client.js',
+        cache: {
+            type: 'filesystem',
+        },
+        optimization: {
+            minimizer: [
+                new TerserPlugin({
+                    parallel: true,
+                    extractComments: false,
+                    terserOptions: {
+                        format: { comments: false },
+                    },
+                }),
+            ],
+        },
         output: {
             path: path.resolve('./www'),
             filename: 'perun-core.js',
