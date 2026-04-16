@@ -57,13 +57,19 @@ export default (env, params) => {
                 {
                     test: /\.(js|jsx)?$/,
                     exclude: /(node_modules)/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: ['@babel/preset-env', '@babel/preset-react'],
-                            cacheDirectory: true
-                        }
-                    }
+                    use: [
+                        'thread-loader',
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    ['@babel/preset-env', { targets: '> 0.5%, last 2 versions, not dead' }],
+                                    '@babel/preset-react',
+                                ],
+                                cacheDirectory: true,
+                            },
+                        },
+                    ]
                 },
                 {
                     // For pure CSS (without CSS modules)
