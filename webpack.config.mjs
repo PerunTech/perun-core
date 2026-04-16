@@ -1,26 +1,16 @@
-// Polyfill globalThis.crypto for Node.js environments where it's not available (e.g. Node < 19)
-const crypto = require('crypto');
-if (!globalThis.crypto) globalThis.crypto = crypto.webcrypto;
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
+import 'dotenv/config';
 
-const fs = require('fs');
-const path = require('path');
-const webpack = require('webpack');
-const TerserPlugin = require('terser-webpack-plugin');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
-// Load .env file if it exists
-const envFile = path.resolve(__dirname, '.env');
-if (fs.existsSync(envFile)) {
-    fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
-        const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-        if (match && !process.env[match[1]]) {
-            process.env[match[1]] = match[2] || '';
-        }
-    });
-}
-
-module.exports = (env, params) => {
+export default (env, params) => {
     return {
-        ...env.SOURCE_MAP === 'true' && { devtool: 'source-map' },
+        devtool: env.SOURCE_MAP === 'true' ? 'source-map' : false,
         mode: params.mode,
         entry: './frontend/client.js',
         cache: {
@@ -38,10 +28,9 @@ module.exports = (env, params) => {
             ],
         },
         output: {
-            path: path.resolve('./www'),
+            path: path.resolve(__dirname, 'www'),
             filename: 'perun-core.js',
-            library: 'perun-core',
-            libraryTarget: 'umd',
+            library: { name: 'perun-core', type: 'umd' },
             globalObject: 'this'
         },
         devServer: {
@@ -102,7 +91,7 @@ module.exports = (env, params) => {
                     type: 'asset/resource',
                 },
                 {
-                    test: /\.m?js/,
+                    test: /\.m?js$/,
                     resolve: { fullySpecified: false }
                 },
             ]
