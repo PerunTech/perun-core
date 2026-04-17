@@ -12,8 +12,14 @@
 <body id="body">
   <div id="app"></div>
   <script src="../services/WsConf/getServer"></script>
+  <script src="../perun-assets/js/sweetalert2.all.min.js"></script>
   <script>
-    //Save sso session if alt login is used 
+    // If the server is unavailable (e.g. 503), window.server won't be set — alert and stop execution
+    if (!window.server) {
+      Swal.fire({ icon: 'info', title: 'The server is temporarily down for maintenance', text: 'Please try again soon', confirmButtonColor: '#7cd1f9' });
+      throw new Error('Server unavailable');
+    }
+    //Save sso session if alt login is used
     const searchParams = new URLSearchParams(window.location.search);
     const session = searchParams.get('session');
     window.sessionToken = session;
