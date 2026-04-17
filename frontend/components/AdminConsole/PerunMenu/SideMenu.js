@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { iconManager } from '../../../assets/svg/svgHolder';
+import { Icon } from "../../../elements"
 const { useState } = React;
 
 const SideMenu = (props) => {
@@ -19,7 +19,7 @@ const SideMenu = (props) => {
                             <button id={el.ID} className={`sidemenu-btn_sub ${activeElement === el.ID && !el.data && 'sidemenu-active'}`}
                                 onClick={() => (el.data ? setActive(el) : onButtonClick(el))}>
                                 <span className='sidemenu-btn-title'><p>{el?.label || el?.LABEL}</p></span>
-                                {el.data && (<span className={`expand-arrow ${el.ID === activeParent && 'rotate-expand'}`}>{iconManager.getIcon('arrowDown')}</span>)}
+                                {el.data && (<span className={`expand-arrow ${el.ID === activeParent && 'rotate-expand'}`}>{<Icon name="IconChevronDown" />}</span>)}
                             </button>
                             {el.data && (
                                 <div className={el.ID === activeParent ? 'sidemenu-sub-item-active' : 'sidemenu-sub-item-hidden'}>

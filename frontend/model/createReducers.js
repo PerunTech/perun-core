@@ -16,6 +16,8 @@ import { modalReducer } from './reducers/modalReducer';
 import businessLogicReducer from './reducers/businessLogicReducer'
 import { userInfoReducer } from './reducers/userInfoReducer';
 import moduleLinksReducer from './reducers/moduleLinksReducer';
+import { admConsoleFormData } from './reducers/admConsoleFormData';
+import componentIndexReducer from './reducers/componentIndexReducer';
 
 export default function createReducers(asyncReducers) {
   const appReducer = combineReducers({
@@ -23,7 +25,7 @@ export default function createReducers(asyncReducers) {
     security: security,
     intl: intlReducer,
     stateTooltip: createReducer('stateTooltip', { stateTooltip: false }),
-    componentIndex: createReducer('componentIndex', {}),
+    componentIndex: componentIndexReducer,
     checkForInvalidSession: checkForInvalidSession,
     configurator: configuratorReducer,
     globalRequestProcessor: globalRequestProcessor,
@@ -37,6 +39,7 @@ export default function createReducers(asyncReducers) {
     userInfo: userInfoReducer,
     businessLogicReducer: businessLogicReducer,
     moduleLinks: moduleLinksReducer,
+    admConsoleFormData: admConsoleFormData,
     ...asyncReducers
   })
 

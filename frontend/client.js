@@ -1,82 +1,80 @@
-/* Base libraries */
+// Base libraries
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import { Provider, connect } from 'react-redux'; // these should be represented in /model and imported from there.
+import { Provider, connect } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import axios from 'axios'
 import md5 from 'md5'
-import Swal from 'sweetalert2'
-/* assets */
+// Assets
 import * as assets from './assets/index'; // eslint-disable-line
-import { Link } from 'react-router-dom'; // these should be represented in /routes and imported from there.
+// Routing & history
+import { Link } from 'react-router-dom';
 import { generatePath } from 'react-router'
 import { createHashHistory } from 'history';
-/* i18n */
+// i18n
 import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
-/* Google Analytics */
+// Google Analytics
 import ReactGA from 'react-ga';
-/* Local modules */
+// Local modules
 import * as redux from './model';
 import * as elements from './elements';
+import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
 import { Configurator } from './loadConfiguration';
 import { router } from './routes/Router';
 import Routes from './routes/Routes';
 import { Loading } from 'components/ComponentsIndex';
 import { pluginManager } from './routes/PluginManager';
-/* Utility functions */
-import * as utils from './functions/utils'
-import * as cookies from './functions/cookies'
-
-/* -------- */
-/* Assembly */
-/* -------- */
-export {
-  React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
-  axios, Loading, createHashHistory, md5, Swal
-};
-
-import { Button, DependencyDropdown, Dropdown, InputElement, alertUserV2, alertUserResponse } from './elements'
-import { Tooltip } from 'react-tooltip'
+import { ComponentManager } from './elements/ComponentManager'
+import Modal from './components/Modal/Modal.js'
+// Forms
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import FormManager from './elements/form/FormManager'
 import GenericForm from './elements/form/GenericForm'
+// Grids
 import ContextMenuPopup from './elements/grid/ContextMenuPopup'
 import CustomGridToolbar from './elements/grid/CustomGridToolbar'
 import ExportableGrid from './elements/grid/ExportableGrid'
 import GenericGrid from './elements/grid/GenericGrid'
 import GridManager from './elements/grid/GridManager'
-import { ComponentManager } from './elements/ComponentManager'
-import Modal from './components/Modal/Modal.js'
+// UI
+import { Tooltip } from 'react-tooltip'
+import Swal from 'sweetalert2'
+// Utility functions
+import * as utils from './functions/utils'
+import * as cookies from './functions/cookies'
 
+// Exports
 export {
+  React, ReactDOM, PropTypes, Provider, connect, Link, generatePath, router, pluginManager, redux, elements, utils, Configurator,
+  axios, Loading, createHashHistory, md5, Swal,
   Form, Tooltip, Button, DependencyDropdown, Dropdown, InputElement, FormManager, GenericForm, ContextMenuPopup, CustomGridToolbar,
   ExportableGrid, GenericGrid, GridManager, ComponentManager, Modal, validator
 };
 
-/* check for arraybuffer response types */
+// Check for arraybuffer response types
 function validResponse(res) {
-  if (!res) {
-    return false
-  }
-  if (res.responseType === 'arraybuffer') {
-    return false
-  } else {
-    return true
-  }
+  return !!res && res.responseType !== 'arraybuffer'
 }
 
+// Axios interceptors
+axios.interceptors.request.use((config) => {
+  const svSession = redux.store?.getState()?.security?.svSession
+  if (svSession) {
+    config.headers['sessionId'] = svSession
+  }
+  return config
+})
+
 axios.interceptors.response.use(
-  (res) => {
-    return res;
-  },
+  (res) => res,
   (error) => {
     if (error.response?.status) {
       switch (error.response.status) {
         case 302:
-          alertUserV2({ type: 'info', title: 'The server responsed with a status code 302 Found' })
+          alertUserV2({ type: 'info', title: 'The server responded with a status code 302 Found' })
           break;
         case 401:
           createHashHistory().push('/home/login')
@@ -90,55 +88,15 @@ axios.interceptors.response.use(
         default:
           return Promise.reject(error);
       }
-    } else {
-      const msg = error?.message || ''
-      switch (true) {
-        case msg.includes('401'):
-          /* if the accesed route is fr map memorize it and write it in window core */
-          if (error.config.url.includes('/lpis/get/farmerAssets/undefined/')) {
-            if (window.location.href.includes('farm-registry/map')) {
-              window.core.memorizeFrMapRoute = window.location.href
-            }
-          }
-
-          createHashHistory().push('/home/login')
-          // location.reload();
-          break;
-        case msg.includes('500'):
-          return Promise.reject(error);
-        case msg.includes('502'):
-          return Promise.reject(error);
-        default:
-          return Promise.reject(error);
-      }
     }
   }, { runWhen: validResponse }
 );
 
-const App = () => (
-  <Provider store={redux.store}>
-    <IntlProvider>
-      <Routes />
-    </IntlProvider>
-  </Provider>
-)
-/* if user acces fr route memorize it */
-let memorizeFrMapRoute
-if (window.location.href.includes('farm-registry/map')) {
-  memorizeFrMapRoute = window.location.href
-  createHashHistory().push('/home/login')
-}
-
-window.core = { React, ReactDOM, Provider, connect, Link, router, pluginManager, redux, elements, Configurator, memorizeFrMapRoute }
-
-/* ---- */
-/* Init */
-/* ---- */
+// Init & configuration
 const app = document.getElementById('app');
 let persistConfig = {}
 let whitelist = []
-let indexReducer = 0
-let whitelistRoot = [
+const whitelistRoot = [
   'checkForInvalidSession',
   'configurator',
   'globalRequestProcessor',
@@ -152,8 +110,8 @@ let whitelistRoot = [
   'businessLogicReducer'
 ]
 
-// Use the default locale defined in the assets project
-// If the default locale doesn't exist, fallback to the english one
+// Use the default locale defined in the assets project.
+// Falls back to English (en_US) if not set.
 const defaultLocale = cookies.getCookie('defaultLocale') || 'en_US'
 let localeData = ['en']
 if (utils.isJSON(cookies.getCookie('localeData'))) {
@@ -161,6 +119,7 @@ if (utils.isJSON(cookies.getCookie('localeData'))) {
 }
 localeData.forEach((locale) => loadLocaleData(locale))
 
+// Dynamically import and register locale data for react-intl
 async function loadLocaleData(locale) {
   try {
     const localeData = await import(`react-intl/locale-data/${locale}`);
@@ -170,47 +129,47 @@ async function loadLocaleData(locale) {
   }
 }
 
-/* call function on perun-core initialization */
-persistBundleReducers(whitelistRoot)
-
-changeLanguageAndLocale(defaultLocale?.replace('_', '-'), defaultLocale)
-
-/* exportable function to add persist reducers from bundle */
-export function persistBundleReducers(listOfBundleReducers) {
-  let res = whitelist.filter(item => listOfBundleReducers.includes(item));
-  if (res.length > 0) {
-    console.log('duplicate reducers')
-  } else {
-    whitelist.push(...listOfBundleReducers)
-
-    /* if reducers come from perun-core, skip the incrementation */
-    if (!listOfBundleReducers.includes('intl')) {
-      indexReducer++
-    }
-
-    persistConfig = {
-      whitelist: [...whitelist]
-    }
-  }
-
-  if (window.location.hostname === 'localhost') {
-    changeLanguageAndLocale(defaultLocale.replace('_', '-'), defaultLocale)
-  } else {
-    if (localStorage.getItem('indexReducers') === indexReducer.toString()) {
-      changeLanguageAndLocale(defaultLocale.replace('_', '-'), defaultLocale)
-    } else {
-      console.log(`Still waiting on all ${localStorage.getItem('indexReducers')} reducers...`)
-    }
-  }
+// Google Analytics
+if (process.env.GA_TRACKING_ID) {
+  ReactGA.initialize(process.env.GA_TRACKING_ID);
+  ReactGA.pageview('/');
 }
 
-ReactGA.initialize('UA-138995187-1');
-ReactGA.pageview('/');
+// App component
+const App = () => (
+  <Provider store={redux.store}>
+    <IntlProvider>
+      <Routes />
+    </IntlProvider>
+  </Provider>
+)
 
+window.core = { React, ReactDOM, Provider, connect, Link, router, pluginManager, redux, elements, Configurator }
+
+// Bootstrap & render
+let appBootstrapPromise
+// Wait for all plugins to load before rendering, caching the promise for repeated calls
+function waitForAppBootstrap() {
+  if (!appBootstrapPromise) {
+    appBootstrapPromise = router.waitForPlugins().catch((error) => {
+      console.error('Plugin bootstrap failed:', error)
+    })
+  }
+  return appBootstrapPromise
+}
+
+// Render the root App component once plugin bootstrap completes
+function renderApp() {
+  waitForAppBootstrap().then(() => {
+    app && ReactDOM.render(<App />, app);
+  })
+}
+
+// Fetch additional i18n labels from the server and merge them with existing labels
 function getAdditionalLabels(allLabels, locale, language, additionalLabels) {
   redux.dataToRedux((response) => {
     redux.store.dispatch(updateIntl({ locale: locale, messages: { ...allLabels, ...response } }));
-    app && ReactDOM.render(<App />, app);
+    renderApp()
   },
     'security',
     'temp',
@@ -220,18 +179,18 @@ function getAdditionalLabels(allLabels, locale, language, additionalLabels) {
   );
 }
 
+// Switch the app language by reloading labels from the server and re-rendering
 export function changeLanguageAndLocale(locale, language) {
   ReactDOM.render(<Loading />, app);
   persistStore(redux.store, persistConfig, () => {
     redux.dataToRedux((response) => {
       document.cookie = `defaultLocale=${language};max-age=${(365 * 24 * 60 * 60)}`
       redux.store.dispatch(updateIntl({ locale: locale, messages: response }));
-      // Check if any additional labels should be fetched
       const additionalLabels = cookies.getCookie('additionalLabels')
       if (additionalLabels) {
         getAdditionalLabels(response, locale, language, additionalLabels)
       } else {
-        app && ReactDOM.render(<App />, app);
+        renderApp()
       }
     },
       'security',
@@ -242,3 +201,15 @@ export function changeLanguageAndLocale(locale, language) {
     );
   })
 }
+
+// Allows dependent modules to register additional reducers for Redux persistence
+export function persistBundleReducers(listOfBundleReducers) {
+  whitelist.push(...listOfBundleReducers)
+  persistConfig = {
+    whitelist: [...whitelist]
+  }
+  changeLanguageAndLocale(defaultLocale.replace('_', '-'), defaultLocale)
+}
+
+// Persist perun-core's own reducers on initial load
+persistBundleReducers(whitelistRoot)

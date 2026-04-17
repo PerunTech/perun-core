@@ -62,7 +62,7 @@ const MainMenu = (props) => {
 
         // Get the individual system user values (ex. object ID, parent ID), since they're returned separately from the non-system values
         if (isValidObject(resData, 1)) {
-          Object.assign(userData, { userObjectId: resData?.object_id || 0 })
+          Object.assign(userData, { userObjectId: resData?.object_id || 0, userId: resData?.user_id || 0 })
         }
 
         // Get the individual values for the default user group

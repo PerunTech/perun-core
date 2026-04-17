@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
-import { iconManager } from '../../../assets/svg/svgHolder';
 import { strcmp } from '../../../model/utils';
 import Swal from 'sweetalert2';
 import md5 from 'md5';
-import { alertUserResponse } from '../../../elements';
+import { alertUserResponse, Icon } from '../../../elements';
 import axios from 'axios';
 
 const PasswordWidget = ({ value, onChange }) => {
@@ -24,7 +23,7 @@ const PasswordWidget = ({ value, onChange }) => {
                 className="my-profile-toggle-visibility"
                 onClick={() => setVisible(!visible)}
             >
-                {visible ? iconManager.getIcon('eyeHide') : iconManager.getIcon('eyeShow')}
+                {visible ? <Icon name='IconEyeOff' /> : <Icon name='IconEye' />}
             </button>
         </div>
     );

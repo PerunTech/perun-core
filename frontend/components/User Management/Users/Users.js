@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GenericGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
 import { alertUserV2, ReactBootstrap } from '../../../elements'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
@@ -21,23 +21,18 @@ const Users = (props, context) => {
     const [usersData, setUsersData] = useState(undefined)
     useEffect(() => {
         refreshGrid()
-        return () => {
-            cleanUpGrids()
-        }
     }, [])
 
     const refreshGrid = () => {
         setUsersData(false)
         ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
+        setLoading(true)
         axios.get(`${window.server}/ReactElements/getTableData/${props.svSession}/SVAROG_USERS/0/PKID`).then(res => {
+            setLoading(false)
             setUsersData(res?.data)
-        }).catch(err => alertUserResponse({ response: err }));
+        }).catch(err => { alertUserResponse({ response: err }), setLoading(false) });
     }
-    const cleanUpGrids = () => {
-        ComponentManager.cleanComponentReducerState('USERS_MAIN_GRID');
-        ComponentManager.cleanComponentReducerState('USER_GROUP_GRID');
-        ComponentManager.cleanComponentReducerState('USERS_ACL_GRID');
-    }
+
     const generateForm = (tableName, objectId, formType, formId) => {
         let inputWrapper = null;
         let classNames = '';
@@ -48,7 +43,7 @@ const Users = (props, context) => {
             case 'search':
                 classNames = 'admin-console-search-from hide-all-form-legends';
                 label = context.intl.formatMessage({ id: 'perun.generalLabel.search', defaultMessage: 'perun.generalLabel.search' });
-                method = `/ReactElements/getTableSearchJSONSchema/${props.svSession}/${tableName}`;
+                method = `/WsAdminConsole/getSvarogUsersSearchJSONSchema/${props.svSession}/${tableName}`;
                 break;
             case 'add':
                 inputWrapper = AddUserWrapper;
@@ -97,7 +92,6 @@ const Users = (props, context) => {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         }).then(res => {
             setLoading(false)
-            cleanUpGrids()
             setUsersData(undefined)
             setUsersData(res?.data || [])
             ComponentManager.setStateForComponent(formId, null, {
@@ -164,11 +158,11 @@ const Users = (props, context) => {
         }
         alertUserV2(alertParams)
     }
-    const generateGroupContorls = (_id, _rowIdx, row) => {
+    const generateGroupContorls = (_id, _rowIdx, row, default_g) => {
         const customElement = document.createElement('div')
         ReactDOM.render(<div className='add-edit-users-form group-controls'>
             <button className='btn-success btn_save_form' onClick={() => removeGroup(row)}>{context.intl.formatMessage({ id: 'perun.admin_console.remove', defaultMessage: 'perun.admin_console.remove' })}</button>
-            <button className='btn-success btn_save_form' onClick={() => setBasicGroup(row)}>{context.intl.formatMessage({ id: 'perun.admin_console.basic_group', defaultMessage: 'perun.admin_console.basic_group' })}</button>
+            {!default_g && <button className='btn-success btn_save_form' onClick={() => setBasicGroup(row)}>{context.intl.formatMessage({ id: 'perun.admin_console.basic_group', defaultMessage: 'perun.admin_console.basic_group' })}</button>}
             <button className='cancel-btn' onClick={() => Swal.close()}>{context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</button>
         </div>, customElement)
         return customElement
@@ -177,14 +171,14 @@ const Users = (props, context) => {
         const url = `${window.server}/WsAdminConsole/addDefaultUserGroup/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/${gridRow['SVAROG_USER_GROUPS.OBJECT_ID']}/true`
         axios.get(url).then(res => {
             alertUserResponse({ response: res })
-            GridManager.reloadGridData('USER_GROUP_GRID')
+            GridManager.reloadAllGrids()
         }).catch(err => alertUserResponse({ response: err, type: 'error' }));
     }
     const removeGroup = (gridRow) => {
         const url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/${gridRow['SVAROG_USER_GROUPS.OBJECT_ID']}/remove`
         axios.get(url).then(res => {
             alertUserResponse({ response: res })
-            GridManager.reloadGridData('USER_GROUP_GRID')
+            GridManager.reloadAllGrids()
         }).catch(err => alertUserResponse({ response: err, type: 'error' }));
     }
     return (
@@ -236,25 +230,47 @@ const Users = (props, context) => {
                                 {/* ADD USER */}
                                 {active === 'ADD' && generateForm('SVAROG_USERS', 0, 'add', 'USERS_ADD_FORM')}
                                 {active === 'EDIT' && generateForm('SVAROG_USERS', row['SVAROG_USERS.OBJECT_ID'], 'edit', 'USERS_EDIT_FORM')}
-                                {active === 'GROUP' && <ExportableGrid
-                                    key={'USER_GROUP_GRID'}
-                                    id={'USER_GROUP_GRID'}
-                                    gridType={'READ_URL'}
-                                    configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
-                                    dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}`}
-                                    minHeight={500}
-                                    refreshData={true}
-                                    toggleCustomButton={true}
-                                    customButton={() => {
-                                        setAddGroupFlag(true)
-                                    }}
-                                    customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
-                                    onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
-                                        html: generateGroupContorls(_id, _rowIdx, row),
-                                        allowOutsideClick: true,
-                                        showConfirm: false,
-                                    })}
-                                />}
+                                {active === 'GROUP' && <div className='admin-console-user-groups'>
+                                    <div className='user-mng-header'>
+                                        <p>{context.intl.formatMessage({ id: 'perun.admin_console.default_group', defaultMessage: 'perun.admin_console.default_group' })}</p>
+                                    </div>
+                                    <GenericGrid
+                                        key={'USER_GROUP_DEFAULT_GRID'}
+                                        id={'USER_GROUP_DEFAULT_GRID'}
+                                        gridType={'READ_URL'}
+                                        configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
+                                        dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/Y`}
+                                        minHeight={100}
+                                        refreshData={true}
+                                        onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
+                                            html: generateGroupContorls(_id, _rowIdx, row, true),
+                                            allowOutsideClick: true,
+                                            showConfirm: false,
+                                        })}
+                                    />
+                                    <div className='user-mng-header'>
+                                        <p>{context.intl.formatMessage({ id: 'perun.admin_console.all_groups', defaultMessage: 'perun.admin_console.all_groups' })}</p>
+                                    </div>
+                                    <ExportableGrid
+                                        key={'USER_GROUP_GRID'}
+                                        id={'USER_GROUP_GRID'}
+                                        gridType={'READ_URL'}
+                                        configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
+                                        dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/N`}
+                                        minHeight={350}
+                                        refreshData={true}
+                                        toggleCustomButton={true}
+                                        customButton={() => {
+                                            setAddGroupFlag(true)
+                                        }}
+                                        customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_group', defaultMessage: 'perun.admin_console.add_group' })}
+                                        onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
+                                            html: generateGroupContorls(_id, _rowIdx, row),
+                                            allowOutsideClick: true,
+                                            showConfirm: false,
+                                        })}
+                                    />
+                                </div>}
                                 {active === 'PRIVILEGES' && <ExportableGrid
                                     key={'USERS_ACL_GRID'}
                                     id={'USERS_ACL_GRID'}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { iconManager } from '../../assets/svg/svgHolder'
+import { Icon } from '../../elements'
 
 const SideMenu = (props, context) => {
     const [activeElement, setActiveElement] = useState('UserManagement');
@@ -14,7 +14,7 @@ const SideMenu = (props, context) => {
                         className={activeElement === el.component ? 'admin-console-side-item active' : 'admin-console-side-item'}
                         onClick={() => (onButtonClick(el))}
                     >
-                        {iconManager.getIcon(el.icon) && <span className={'sidemenu-dynamic-comp-icon-holder'}>{iconManager.getIcon(el.icon)}</span>}<p>{context.intl.formatMessage({
+                        {<span className={'sidemenu-dynamic-comp-icon-holder'}>{<Icon name={el.icon} />}</span>}<p>{context.intl.formatMessage({
                             id: `perun.admin_console.${el.id}`,
                             defaultMessage: `perun.admin_console.${el.id}`
                         })}</p>

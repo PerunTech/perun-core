@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { iconManager } from '../../assets/svg/svgHolder'
+import { Icon } from '../../elements';
 
 const NotFound = (_props, context) => {
   useEffect(() => {
@@ -19,7 +19,7 @@ const NotFound = (_props, context) => {
 
   return (
     <div className='not-found-container'>
-      <div className='not-found-content'>{iconManager.getIcon('notFound')}</div>
+      <div className='not-found-content'>{<Icon name="IconAlertTriangle" />}</div>
       <p className='not-found-title'>
         {context.intl.formatMessage({ id: 'perun.main.not_found_title', defaultMessage: 'perun.main.not_found_title' })}
       </p>

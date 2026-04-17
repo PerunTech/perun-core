@@ -7,6 +7,21 @@ import { router } from './Router';
  * @type {Object}
  */
 const _plugins = {};
+const getBundlesBaseUrl = () => {
+  const fromWindow = window.bundleServer || window.json || window.server || window.location.origin;
+  return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '');
+};
+
+const resolveScriptUrl = (url) => {
+  if (!url) {
+    return url;
+  }
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+  return `${getBundlesBaseUrl()}${normalizedPath}`;
+};
 
 /**
  * Remote script utilities.
@@ -105,7 +120,7 @@ export const pluginManager = {
       script.onerror = () => // Do better messages.
         reject({ id: name, value: Reflect.construct(Error, ['Script failed to load for plugin ' + name]) });
 
-      script.src = url; // images load on this line. Browser implementaion specific.
+      script.src = resolveScriptUrl(url); // images load on this line. Browser implementaion specific.
       document.body.appendChild(script); // JS scripts load on this line.
     });
   },

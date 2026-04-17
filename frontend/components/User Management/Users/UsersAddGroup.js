@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GridManager, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GridManager, Loading, axios } from '../../../client'
 import { alertUserResponse, ReactBootstrap } from '../../../elements'
-const { useEffect } = React
+const { useEffect, useState } = React
 const { Modal } = ReactBootstrap
 
 const UsersAddGroup = (props) => {
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         return () => {
@@ -16,11 +17,14 @@ const UsersAddGroup = (props) => {
 
     const handleRowClick = (_id, _rowIdx, row) => {
         let url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${props.userId}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/add`
+        setLoading(true)
         axios.get(url).then(res => {
             GridManager.reloadGridData('USER_GROUP_GRID')
             alertUserResponse({ response: res })
+            setLoading(false)
             props.setAddGroupFlag(false)
         }).catch(err => {
+            setLoading(false)
             alertUserResponse({ response: err, type: 'error' })
         })
 
@@ -33,6 +37,7 @@ const UsersAddGroup = (props) => {
                     <Modal.Header className='admin-console-unit-modal-header' closeButton>
                     </Modal.Header>
                     <Modal.Body className='admin-console-unit-modal-body'>
+                        {loading && <Loading />}
                         <div className='user-mng-dashboard user-mng'>
                             <div className='user-dash-content'>
                                 <ExportableGrid

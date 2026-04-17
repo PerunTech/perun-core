@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { GenericForm, Loading, axios, createHashHistory, ComponentManager } from '../../../client';
-import { iconManager } from '../../../assets/svg/svgHolder';
 import { downloadFile } from '../../../functions/utils';
-import { alertUserV2, alertUserResponse } from '../../../elements';
+import { alertUserV2, alertUserResponse, Icon } from '../../../elements';
 import ReactDOM from 'react-dom';
 import { store } from '../../../model';
 import PasswordForm from './PasswordForm';
@@ -199,7 +198,7 @@ const MyProfile = (props, context) => {
                         <p>{context.intl.formatMessage({ id: 'perun.my_profile.change_or_remove_avatar', defaultMessage: 'perun.my_profile.change_or_remove_avatar' })}</p>
                     </div>
                     <div className="my-profile-icon">
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt={context.intl.formatMessage({ id: 'perun.my_profile.user_avatar_alt', defaultMessage: 'perun.my_profile.user_avatar_alt' })} /> : iconManager.getIcon('currentUserIcon')}
+                        {img ? <img className="my-profile-icon-avatar" src={img} alt={context.intl.formatMessage({ id: 'perun.my_profile.user_avatar_alt', defaultMessage: 'perun.my_profile.user_avatar_alt' })} /> : <Icon name="IconUserFilled" />}
                     </div>
                     <div className="my-profile-upload">
                         <p className="my-profile-title-medium">{context.intl.formatMessage({ id: 'perun.my_profile.upload_new_avatar', defaultMessage: 'perun.my_profile.upload_new_avatar' })}</p>

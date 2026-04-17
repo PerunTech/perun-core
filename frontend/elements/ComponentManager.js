@@ -2,7 +2,7 @@ import React from 'react';
 import { dataToRedux, publishState, store, removeAsyncReducer } from '../model';
 
 export class ComponentManager extends React.Component {
-  static getStateForComponent (componentId, key) {
+  static getStateForComponent(componentId, key) {
     const currState = store.getState()
     let retval = null
     if (key !== null && key !== undefined) {
@@ -14,11 +14,12 @@ export class ComponentManager extends React.Component {
     }
     return retval
   }
-  static registerComponent (id, type, isPersistent, storeKeys) {
+
+  static registerComponent(id, type, isPersistent, storeKeys) {
     dataToRedux(null, 'componentIndex', id, { type, isPersistent, listener: storeKeys })
   }
 
-  static isComponentRegistered (id) {
+  static isComponentRegistered(id) {
     const currState = store.getState()
     const components = currState.componentIndex
     if (components[id] !== undefined) {
@@ -26,7 +27,7 @@ export class ComponentManager extends React.Component {
     } return false
   }
 
-  static setStateForComponent (componentId, key, state) {
+  static setStateForComponent(componentId, key, state) {
     const components = store.getState().componentIndex
     if (components[componentId]) {
       const componentData = components[componentId]
@@ -38,14 +39,16 @@ export class ComponentManager extends React.Component {
       }
     }
   }
-  static publishMeFull (finalId, props, typeOfComponent) {
+
+  static publishMeFull(finalId, props, typeOfComponent) {
     if (typeOfComponent === 'GenericGrid' || typeOfComponent === 'GenericForm') {
       store.dispatch(publishState(finalId, props))
     } else if (typeOfComponent === 'genericComponent') {
       dataToRedux(null, finalId, 'FULL_STATE', props)
     }
   }
-  static publishMeSingleValue (finalId, key, value, typeOfComponent) {
+
+  static publishMeSingleValue(finalId, key, value, typeOfComponent) {
     if (typeOfComponent === 'GenericGrid' || typeOfComponent === 'GenericForm') {
       store.dispatch(publishState(finalId, { [key]: value }))
     } else if (typeOfComponent === 'genericComponent') {
@@ -53,7 +56,8 @@ export class ComponentManager extends React.Component {
     }
   }
 
-  static cleanComponentReducerState (finalId) {
+  static cleanComponentReducerState(finalId) {
     removeAsyncReducer(store, finalId)
+    store.dispatch({ type: 'componentIndex/REMOVE_COMPONENT', componentId: finalId })
   }
 }

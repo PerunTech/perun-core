@@ -3,9 +3,8 @@ import { createHashHistory } from 'history'
 import PropTypes from 'prop-types'
 import axios from 'axios'
 import { connect } from 'react-redux'
-import { alertUserResponse } from '../../elements'
+import { alertUserResponse, Icon } from '../../elements'
 import Modal from '../Modal/Modal'
-import { iconManager } from '../../assets/svg/svgHolder'
 import { Link } from 'react-router-dom'
 
 class UserGuide extends React.Component {
@@ -145,19 +144,19 @@ class UserGuide extends React.Component {
             <div className='user-guide-title'>
               {el.exactLink &&
                 <a href={`${el.exactLink}`} target='_blank' rel='noopener noreferrer' title={el.exactLink} className='user-guide-link-title user-guide-flex-align-items user-guide-document'>
-                  <div className='user-guide-icon'>{iconManager.getIcon('fileLinkIcon')}</div>
+                  <div className='user-guide-icon'>{<Icon name='IconLinkPlus' />}</div>
                   {el.title}
                 </a>
               }
               {el.media &&
                 <div className='user-guide-flex-align-items user-guide-document' onClick={() => this.showOrHideVideoModal(el.title, el.media)}>
-                  <div className='user-guide-icon'>{iconManager.getIcon('videoIcon')}</div>
+                  <div className='user-guide-icon'>{<Icon name='IconVideo' />}</div>
                   {el.title}
                 </div>
               }
               {el.pdfTab &&
                 <div className='user-guide-flex-align-items user-guide-document' onClick={() => this.openGuide(el.pdfTab, el.title)}>
-                  <div className='user-guide-icon'>{iconManager.getIcon('filePdfIcon')}</div>
+                  <div className='user-guide-icon'>{<Icon name='IconFileTypePdf' />}</div>
                   {el.title}
                 </div>
               }
@@ -213,7 +212,7 @@ class UserGuide extends React.Component {
             <p style={{ margin: '1vh' }}>
               {this.context.intl.formatMessage({ id: 'perun.main.user_guide', defaultMessage: 'perun.main.user_guide' })}
             </p>
-            <Link onClick={() => this.isCloseUserGuide()} id='main-screen' className='user-guide-close-user-guide'>{iconManager.getIcon('close')}</Link>
+            <Link onClick={() => this.isCloseUserGuide()} id='main-screen' className='user-guide-close-user-guide'>{<Icon name='IconX' />}</Link>
           </div>
           <div className='user-guide-full-width-container'>
             {showVideoModal && mediaTitle && mediaPath &&

@@ -1,14 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUserResponse, ReactBootstrap } from '../../elements'
-import WorkFlow from './WorkFlow'
+import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { alertUserResponse, ReactBootstrap } from '../../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
-const WorkFlowAutomaton = (props, context) => {
-  const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_AUTOMATON', show: false, objectId: 0 }
+const WorkFlowItemParams = (props, context) => {
+  const initialState = { loading: false, canRender: true, gridId: 'SVAROG_WORKFLOW_PARAMS', show: false, objectId: 0 }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, canRender, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
 
@@ -27,7 +26,7 @@ const WorkFlowAutomaton = (props, context) => {
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
-    setState({ objectId: row[`SVAROG_WORKFLOW_AUTOMATON.OBJECT_ID`] || 0, show: true })
+    setState({ objectId: row[`SVAROG_WORKFLOW_PARAMS.OBJECT_ID`] || 0, show: true })
   }
 
   const generateWorkFlowGrid = () => {
@@ -37,8 +36,8 @@ const WorkFlowAutomaton = (props, context) => {
         gridType='READ_URL'
         key={gridId}
         id={gridId}
-        configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_WORKFLOW_AUTOMATON`}
-        dataTableName={`/ReactElements/getTableData/${svSession}/SVAROG_WORKFLOW_AUTOMATON/0`}
+        configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_WORKFLOW_PARAMS`}
+        dataTableName={`/ReactElements/getObjectsByParentId/${svSession}/${props.autoId}/SVAROG_WORKFLOW_PARAMS/0`}
         onRowClickFunct={handleRowClick}
         refreshData={true}
         toggleCustomButton={true}
@@ -54,8 +53,8 @@ const WorkFlowAutomaton = (props, context) => {
 
   const saveRecord = (e) => {
     const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_WORKFLOW_AUTOMATON_FORM`, null, { saveExecuted: false })
-    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_WORKFLOW_AUTOMATON/0`
+    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_WORKFLOW_PARAMS_FORM`, null, { saveExecuted: false })
+    const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/SVAROG_WORKFLOW_PARAMS/${props.autoId}`
     axios({
       method: 'post',
       data: encodeURIComponent(JSON.stringify(e.formData)),
@@ -81,11 +80,11 @@ const WorkFlowAutomaton = (props, context) => {
     return (
       <GenericForm
         params={'READ_URL'}
-        key={`SVAROG_WORKFLOW_AUTOMATON_FORM`}
-        id={`SVAROG_WORKFLOW_AUTOMATON_FORM`}
-        method={`/ReactElements/getTableJSONSchema/${svSession}/SVAROG_WORKFLOW_AUTOMATON`}
-        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/SVAROG_WORKFLOW_AUTOMATON`}
-        tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/SVAROG_WORKFLOW_AUTOMATON`}
+        key={`SVAROG_WORKFLOW_PARAMS_FORM`}
+        id={`SVAROG_WORKFLOW_PARAMS_FORM`}
+        method={`/ReactElements/getTableJSONSchema/${svSession}/SVAROG_WORKFLOW_PARAMS`}
+        uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/SVAROG_WORKFLOW_PARAMS`}
+        tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${objectId}/SVAROG_WORKFLOW_PARAMS`}
         addSaveFunction={(e) => saveRecord(e)}
         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
@@ -96,7 +95,7 @@ const WorkFlowAutomaton = (props, context) => {
 
   const deleteFunc = (_id, _action, _session, formData) => {
     const { svSession } = props
-    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_WORKFLOW_AUTOMATON_FORM`, null, { deleteExecuted: false })
+    const onConfirm = () => ComponentManager.setStateForComponent(`SVAROG_WORKFLOW_PARAMS_FORM`, null, { deleteExecuted: false })
     const url = `${window.server}/ReactElements/deleteObject/${svSession}`
     axios({
       method: 'post',
@@ -124,7 +123,7 @@ const WorkFlowAutomaton = (props, context) => {
       {canRender && (
         <div className='admin-console-grid-container'>
           <div className='admin-console-component-header'>
-            <p>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow_auto', defaultMessage: 'perun.admin_console.work_flow_auto' })}</p>
+            <p>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow_params', defaultMessage: 'perun.admin_console.work_flow_params' })}</p>
           </div>
           {generateWorkFlowGrid()}
         </div>
@@ -132,11 +131,10 @@ const WorkFlowAutomaton = (props, context) => {
       {show && (
         <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
-            <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}</Modal.Title>
+            <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow_params', defaultMessage: 'perun.admin_console.work_flow_params' })}</Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateWorkFlowForm(objectId)}
-            {objectId > 0 && <WorkFlow autoId={objectId} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
         </Modal>
@@ -149,8 +147,8 @@ const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
 })
 
-WorkFlowAutomaton.contextTypes = {
+WorkFlowItemParams.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps)(WorkFlowAutomaton)
+export default connect(mapStateToProps)(WorkFlowItemParams)
