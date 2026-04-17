@@ -117,6 +117,14 @@ window.server = 'http://<host>:<port>/services'
 
 > **Note:** This is a simplified template. The full boilerplate is available at [`docs/index.html.template`](docs/index.html.template) — copy it into your project's `backend/www` directory and customize as needed.
 
+### Server Unavailability Handling
+
+`index.html` loads `sweetalert2.all.min.js` from the assets server before the inline script runs. If the backend is temporarily unavailable (e.g. during a restart or deploy), the `getServer` script will fail to set `window.server`, and a SweetAlert2 dialog will be shown instead of a blank page.
+
+Make sure `sweetalert2.all.min.js` is present in your assets project at `perun-assets/js/`. The file can be obtained from the [SweetAlert2 releases page](https://github.com/sweetalert2/sweetalert2/releases).
+
+To simulate a server unavailability scenario locally, block the `getServer` request in your browser's DevTools under **Network > Block request URL**, then reload the page.
+
 ### Spatial Support
 
 If your project uses spatial features, you must manually add the following parameters to `index.html` (inside a `<script>` tag, before other scripts):

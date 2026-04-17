@@ -14,54 +14,56 @@
   <script src="../services/WsConf/getServer"></script>
   <script src="../perun-assets/js/sweetalert2.all.min.js"></script>
   <script>
-    // If the server is unavailable (e.g. 503), window.server won't be set — alert and stop execution
-    if (!window.server) {
-      Swal.fire({ icon: 'info', title: 'The server is temporarily down for maintenance', text: 'Please try again soon', confirmButtonColor: '#7cd1f9' });
-      throw new Error('Server unavailable');
-    }
-    //Save sso session if alt login is used
-    const searchParams = new URLSearchParams(window.location.search);
-    const session = searchParams.get('session');
-    window.sessionToken = session;
-    const encodedUserObject = searchParams.get('userObject');
-    if (encodedUserObject) {
-      // Decode the URL-encoded parameter
-      const decodedUserObject = decodeURIComponent(encodedUserObject);
-
-      // Parse the JSON string to an object
-      window.userObject = JSON.parse(decodedUserObject);
-    }
-
-    const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
-    fetch(assetsUrl).then(response => response.json()).then(res => {
-      if (res.VALUE) {
-        const assetsLocation = res.VALUE
-        // Assign the assets location to a window variable
-        window.assets = assetsLocation;
-        // Fetch the script for loading any additional scripts per project/environment
-        const additionalScriptsScript = Object.assign(document.createElement('script'), {
-          type: 'text/javascript', src: `${window.server.substring(0, window.server.lastIndexOf('/'))}${assetsLocation}/js/scripts.js`
-        });
-        document.body.appendChild(additionalScriptsScript);
+    (function() {
+      // If the server is unavailable (e.g. 503), window.server won't be set — alert and stop execution
+      if (!window.server) {
+        Swal.fire({ icon: 'info', title: 'The server is temporarily down for maintenance', text: 'Please try again soon', confirmButtonColor: '#7cd1f9' });
+        return;
       }
-    }).catch(err => {
-      console.log(err)
-    })
-    // Get the current server
-    const currentServer = window.server.substring(0, window.server.lastIndexOf('/'));
-    // Fetch the script for getting any geospatial data
-    const geospatialScript = Object.assign(document.createElement('script'), {
-      type: 'text/javascript', src: `${currentServer}/perun-assets/js/geospatial.js`
-    });
-    document.body.appendChild(geospatialScript);
-    const gridLabelsUrl = `${window.server}/WsConf/params/get/sys/TRANSLATE_GRID_LABELS`
-    fetch(gridLabelsUrl).then(response => response.json()).then(res => {
-      if (res.VALUE) {
-        window.translateGridLabels = res.VALUE
+      //Save sso session if alt login is used
+      const searchParams = new URLSearchParams(window.location.search);
+      const session = searchParams.get('session');
+      window.sessionToken = session;
+      const encodedUserObject = searchParams.get('userObject');
+      if (encodedUserObject) {
+        // Decode the URL-encoded parameter
+        const decodedUserObject = decodeURIComponent(encodedUserObject);
+
+        // Parse the JSON string to an object
+        window.userObject = JSON.parse(decodedUserObject);
       }
-    }).catch(err => {
-      console.log(err)
-    })
+
+      const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
+      fetch(assetsUrl).then(response => response.json()).then(res => {
+        if (res.VALUE) {
+          const assetsLocation = res.VALUE
+          // Assign the assets location to a window variable
+          window.assets = assetsLocation;
+          // Fetch the script for loading any additional scripts per project/environment
+          const additionalScriptsScript = Object.assign(document.createElement('script'), {
+            type: 'text/javascript', src: `${window.server.substring(0, window.server.lastIndexOf('/'))}${assetsLocation}/js/scripts.js`
+          });
+          document.body.appendChild(additionalScriptsScript);
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+      // Get the current server
+      const currentServer = window.server.substring(0, window.server.lastIndexOf('/'));
+      // Fetch the script for getting any geospatial data
+      const geospatialScript = Object.assign(document.createElement('script'), {
+        type: 'text/javascript', src: `${currentServer}/perun-assets/js/geospatial.js`
+      });
+      document.body.appendChild(geospatialScript);
+      const gridLabelsUrl = `${window.server}/WsConf/params/get/sys/TRANSLATE_GRID_LABELS`
+      fetch(gridLabelsUrl).then(response => response.json()).then(res => {
+        if (res.VALUE) {
+          window.translateGridLabels = res.VALUE
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    })()
   </script>
   <script src="perun-core.js"></script>
   <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer>
