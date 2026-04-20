@@ -10,6 +10,7 @@ const PerunNavbar = (props, context) => {
     const [menuBurger, setMenuBurger] = useState(undefined)
     const [toggleBurger, setToggleBurger] = useState(false)
     const [img, setImg] = useState(undefined);
+    const [tasksLength, setTasksLength] = useState(0)
     const navOptRef = useRef(null);
     const burgerRef = useRef(null);
 
@@ -61,11 +62,19 @@ const PerunNavbar = (props, context) => {
                 <div className='nav-title'>
                     <p id='identificationScreen'></p>
                 </div>
-                {/* navbar end */}
-                <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
-                    <div className='nav-icon-with-title'>
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
-                    <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
+                <div className='nav-task-user'>
+                    {props.renderTasks && (
+                        <div className='nav-title-tasks'>
+                            {<Icon name="IconCards" />}
+                            {tasksLength > 0 && <span className='nav-tasks-length'>{tasksLength}</span>}
+                        </div>
+                    )}
+                    {/* navbar end */}
+                    <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
+                        <div className='nav-icon-with-title'>
+                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
+                        <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
+                    </div>
                 </div>
                 {/* navbar end toggle */}
                 {toggleNavOpt && (
