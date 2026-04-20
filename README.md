@@ -1,19 +1,168 @@
 # Perun Core
 
-The front-end module of the Svarog framework, containing the core functionalities such as login, admin console, plugin management and provides the React framework to other modules.
+The front-end module of the Svarog framework, containing the core functionalities such as login, admin console, plugin management and providing the React framework to other modules.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18.12.0 or higher)
+- [npm](https://www.npmjs.com/) (v8 or higher)
+
+## Getting Started
 
 ### Installation
 
-  Run `npm install` to get the project's dependencies.
-
-  Run `npm run build` to produce minified version of your library.
-
-### Running a local development server
-
-Having all the dependencies installed run `npm run dev`. This command will generate an non-minified version of your library and will run a watcher so you get the compilation on file change.
+```bash
+npm install
+```
 
 ### Scripts
 
-- `npm run build` - Produces a production version of your library under the `/www` folder 
-- `npm run dev` - Produces a development version of your library and runs a watcher 
-- `npm run test` - Analyzes the code using `eslint` and the configuration defined in the `.eslintrc` file
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Production build under `/www` (minified, no source maps, no debug) |
+| `npm run build-dev` | Production build under `/www` with source maps and debug enabled |
+| `npm run dev` | Starts a development server with hot reloading, source maps, and debug enabled |
+| `npm run test` | Lints and auto-fixes the code using `eslint` |
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GA_TRACKING_ID` | Google Analytics tracking ID | No |
+
+For local development, create a `.env` file in the project root:
+
+```
+GA_TRACKING_ID=UA-XXXXXXXXX-X
+```
+
+For CI/CD, set the variable in your GitLab CI/CD settings under **Settings > CI/CD > Variables**.
+
+## Local Development Guide
+
+The following workflow applies both when developing `perun-core` itself and when developing a project that uses it as a dependency.
+
+### Updating Perun Core Locally
+
+1. Build perun-core:
+   ```bash
+   npm run build
+   ```
+   Or use `npm run build-dev` if you need source maps for debugging.
+2. Copy `perun-core/www/perun-core.js` into your project at `your-project/node_modules/perun-core/www/`.
+
+Since the built script is periodically committed to the repository, your project may already have a recent version of `perun-core.js` in `node_modules/perun-core/www/` after running `npm install`. This step is only necessary when you need changes that haven't been published yet.
+
+### Setting Up the Frontend Entry Point
+
+Create the following files in the `www` directory when developing Perun Core, or `backend/www` when developing other projects.
+
+**`config.js`** - Configure the server URL for your environment:
+
+```js
+window.server = 'http://<host>:<port>/services'
+```
+
+**`index.html`** - A minimal entry point that dynamically loads stylesheets and scripts:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id="app"></div>
+  <script src="config.js"></script>
+  <script>
+    // If your project uses spatial features, add these (see Spatial Support section):
+    // window.sysCrs = 'EPSG:3857'
+    // window.sysCenter = { lat: 41.294, lng: 74.597 }
+  </script>
+  <script>
+    const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
+    fetch(assetsUrl).then(response => response.json()).then(res => {
+      if (res.VALUE) {
+        const assetsLocation = res.VALUE
+        window.assets = assetsLocation;
+        const server = window.server.substring(0, window.server.lastIndexOf('/'));
+
+        // Load locale script
+        // ...
+
+        // Load custom stylesheets — list all available stylesheets for your environment
+        const stylesheets = [
+          'datagrid', 'forms', 'logon', 'homepage', 'style',
+          'footer', 'loading', 'topnavmenu', 'sidelistmenu',
+          'adminconsole', 'modal', 'userguide', 'not-found-page',
+          // ... add more as needed
+        ];
+        // Each entry loads: ${server}${assetsLocation}/styles/${name}.css
+
+        // Load Font Awesome stylesheets
+        // ...
+
+        // Load title script
+        // ...
+      }
+    }).catch(err => console.log(err))
+  </script>
+  <!-- Replace with your project's bundle filename -->
+  <script src="bundle-name.js"></script>
+</body>
+</html>
+```
+
+> **Note:** This is a simplified template. The full boilerplate is available at [`docs/index.html.template`](docs/index.html.template) — copy it into your project's `backend/www` directory and customize as needed.
+
+### Server Unavailability Handling
+
+`index.html` loads `sweetalert2.all.min.js` from the assets server before the inline script runs. If the backend is temporarily unavailable (e.g. during a restart or deploy), the `getServer` script will fail to set `window.server`, and a SweetAlert2 dialog will be shown instead of a blank page.
+
+Make sure `sweetalert2.all.min.js` is present in your assets project at `perun-assets/js/`. The file can be obtained from the [SweetAlert2 releases page](https://github.com/sweetalert2/sweetalert2/releases).
+
+To simulate a server unavailability scenario locally, block the `getServer` request in your browser's DevTools under **Network > Block request URL**, then reload the page.
+
+### Spatial Support
+
+If your project uses spatial features, you must manually add the following parameters to `index.html` (inside a `<script>` tag, before other scripts):
+
+```js
+window.sysCrs = 'EPSG:3857'
+window.sysCenter = { lat: 41.294, lng: 74.597 }
+```
+
+These values correspond to the following system parameters (`SVAROG_SYS_PARAMS`) at the environment level:
+
+| Window Variable | System Parameter |
+|-----------------|------------------|
+| `window.sysCrs` | `SYS_CRS` |
+| `window.sysCenter` | `SYS_CENTER` |
+
+### Icons
+
+Perun Core includes the [`@tabler/icons-react`](https://www.npmjs.com/package/@tabler/icons-react) icon library. Browse the available icons at https://tabler.io/icons.
+
+When developing a project, replace the `Icon` component at `frontend/elements/util/Icon.js` with the following static import version:
+
+```jsx
+import React from 'react'
+import * as TablerIcons from '@tabler/icons-react'
+
+const Icon = ({ name, ...props }) => {
+  const IconComponent = TablerIcons[name]
+  return IconComponent ? <IconComponent {...props} /> : null
+}
+
+export default Icon
+```
+
+After replacing the component, rebuild perun-core:
+
+```bash
+npm run build
+```
+
+> **Why?** The default `Icon` component uses dynamic imports for code-splitting. The static import version above bundles all icons upfront, which is simpler for local development of dependent projects.

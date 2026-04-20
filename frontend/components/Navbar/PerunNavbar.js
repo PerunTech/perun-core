@@ -53,7 +53,7 @@ const PerunNavbar = (props, context) => {
                     <Link to='/main' className='nav-icon' title='Home'>
                         {<Icon name="IconHomeFilled" />}
                     </Link>
-                    <div className={`nav-icon-with-title ${toggleBurger && 'active'}`} title='menuBars' onClick={() => showBurgerMenu()}>
+                    <div className={`nav-icon-with-title ${toggleBurger && 'active'}`} title={context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })} onClick={() => showBurgerMenu()}>
                         {<Icon name="IconCategoryFilled" />}
                         <p>{context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })}</p>
                     </div>
@@ -88,11 +88,11 @@ const PerunNavbar = (props, context) => {
                                 <p>{lang.label}</p>
                             </div>
                         ))}
-                        <Link className='nav-option' to='/main/my-profile' onClick={() => setToggleNavOpt(false)} title='edit-profile'>
+                        <Link className='nav-option' to='/main/my-profile' onClick={() => setToggleNavOpt(false)} title={context.intl.formatMessage({ id: 'perun.navbar.edit', defaultMessage: 'perun.navbar.edit' })}>
                             {<Icon name='IconEdit' />}
                             <p>{context.intl.formatMessage({ id: 'perun.navbar.edit', defaultMessage: 'perun.navbar.edit' })}</p>
                         </Link>
-                        <div className='nav-option' onClick={() => { props.logout(), setToggleNavOpt(false) }}>
+                        <div className='nav-option' onClick={() => { props.logout(), setToggleNavOpt(false) }} title={context.intl.formatMessage({ id: 'perun.navbar.logout', defaultMessage: 'perun.navbar.logout' })}>
                             {<Icon name="IconLogout" />}
                             <p>{context.intl.formatMessage({ id: 'perun.navbar.logout', defaultMessage: 'perun.navbar.logout' })}</p>
                         </div>

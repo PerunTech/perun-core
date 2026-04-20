@@ -1,20 +1,36 @@
-// Polyfill globalThis.crypto for Node.js environments where it's not available (e.g. Node < 19)
-const crypto = require('crypto');
-if (!globalThis.crypto) globalThis.crypto = crypto.webcrypto;
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
+import 'dotenv/config';
 
-const path = require('path');
-const webpack = require('webpack');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
-module.exports = (env, params) => {
+export default (env, params) => {
     return {
-        ...env.SOURCE_MAP === 'true' && { devtool: 'source-map' },
+        devtool: env.SOURCE_MAP === 'true' ? 'source-map' : false,
         mode: params.mode,
         entry: './frontend/client.js',
+        cache: {
+            type: 'filesystem',
+        },
+        optimization: {
+            minimizer: [
+                new TerserPlugin({
+                    parallel: true,
+                    extractComments: false,
+                    terserOptions: {
+                        format: { comments: false },
+                    },
+                }),
+            ],
+        },
         output: {
-            path: path.resolve('./www'),
+            path: path.resolve(__dirname, 'www'),
             filename: 'perun-core.js',
-            library: 'perun-core',
-            libraryTarget: 'umd',
+            library: { name: 'perun-core', type: 'umd' },
             globalObject: 'this'
         },
         devServer: {
@@ -33,6 +49,7 @@ module.exports = (env, params) => {
             new webpack.DefinePlugin({
                 'process.env.DEBUG': JSON.stringify(env.DEBUG),
                 'process.env.MODE': JSON.stringify(params.mode),
+                'process.env.GA_TRACKING_ID': JSON.stringify(process.env.GA_TRACKING_ID || ''),
             })
         ],
         module: {
@@ -40,13 +57,19 @@ module.exports = (env, params) => {
                 {
                     test: /\.(js|jsx)?$/,
                     exclude: /(node_modules)/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: ['@babel/preset-env', '@babel/preset-react'],
-                            cacheDirectory: true
-                        }
-                    }
+                    use: [
+                        'thread-loader',
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    ['@babel/preset-env', { targets: '> 0.5%, last 2 versions, not dead' }],
+                                    '@babel/preset-react',
+                                ],
+                                cacheDirectory: true,
+                            },
+                        },
+                    ]
                 },
                 {
                     // For pure CSS (without CSS modules)
@@ -74,7 +97,7 @@ module.exports = (env, params) => {
                     type: 'asset/resource',
                 },
                 {
-                    test: /\.m?js/,
+                    test: /\.m?js$/,
                     resolve: { fullySpecified: false }
                 },
             ]

@@ -4,7 +4,7 @@ import { labelBasePath } from '../../config';
 import { WrapItUp, ComponentManager } from '..';
 import GenericGrid from './GenericGrid';
 import { Parser } from '@json2csv/plainjs';
-import xlsx from 'xlsx';
+import xlsx from 'xlsx-js-style';
 
 /* This extension component adds a downloadable filter option to the grid,
 with every result from the filter in the grid is displayed as a new row in the excel (csv) format.

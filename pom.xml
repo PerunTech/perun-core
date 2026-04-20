@@ -14,7 +14,7 @@ Agreement
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.peruntech</groupId>
 	<artifactId>perun-core</artifactId>
-	<version>4.5.4-SNAPSHOT</version>
+	<version>4.5.5-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Perun Core</name>
 	<url>https://github.com/PerunTech/perun-core</url>
@@ -166,6 +166,7 @@ Agreement
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.9</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

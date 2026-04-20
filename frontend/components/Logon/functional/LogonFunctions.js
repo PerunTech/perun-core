@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import axios from 'axios';
 import * as utils from '../utils'
 import * as config from 'config/config.js'
-import { alertUserResponse } from '../../../elements';
+import { alertUserResponse, alertUserV2 } from '../../../elements';
 import Loading from 'components/Loading/Loading'
 import { isValidObject } from '../../../functions/utils';
 
@@ -106,6 +106,8 @@ export default function LogonFunctions(TargetComponent, validationString, method
           this.setState({ loading: false })
           alertUserResponse({ response: err })
         })
+      } else {
+        alertUserV2({ type: 'info', title: 'Missing SSO configuration', message: 'Please contact your IT administrator' })
       }
     }
 

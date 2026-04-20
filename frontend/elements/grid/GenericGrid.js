@@ -307,7 +307,7 @@ class GenericGrid extends React.Component {
 
     if (nextProps.reloadGrid !== null && nextProps.reloadGrid !== undefined) {
       if (nextProps.reloadGrid === true && this.state.gridDataLoaded === true && this.state.reloadGrid !== nextProps.reloadGrid) {
-        this.setState({ gridDataLoaded: false }, () => {
+        this.setState({ gridDataLoaded: false, filters: [], filteredRows: undefined }, () => {
           this.getGridData(nextProps.params, { configTableName: nextProps.configTableName, dataTableName: nextProps.dataTableName })
         })
       }

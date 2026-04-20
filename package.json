@@ -42,7 +42,7 @@
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.15.10",
     "validator": "^13.12.0",
-    "xlsx": "^0.17.3"
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -56,11 +56,14 @@
     "babel-loader": "^9.1.3",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",
-    "eslint": "^8.57.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.5.0",
     "process": "^0.11.10",
     "style-loader": "^4.0.0",
+    "thread-loader": "^4.0.4",
     "url": "^0.11.3",
     "util": "^0.12.5",
     "warning": "^4.0.3",
@@ -71,11 +74,11 @@
   "scripts": {
     "build": "cross-env webpack --mode=production --env SOURCE_MAP=false DEBUG=false --progress",
     "build-dev": "cross-env webpack --mode=production --env SOURCE_MAP=true DEBUG=true --progress",
-    "dev": "cp .pre-push-hook.tpl .git/hooks/pre-push && webpack-dev-server --mode=development --env SOURCE_MAP=true DEBUG=true --hot --progress",
+    "dev": "webpack-dev-server --mode=development --env SOURCE_MAP=true DEBUG=true --hot --progress",
     "test": "eslint --fix frontend/ || exit 0"
   },
-  "overrides": {
-    "serialize-javascript": "^7.0.3"
+  "engines": {
+    "node": ">=18.12.0"
   },
   "author": "Perun Tech",
   "license": "ISC"
