@@ -93,7 +93,7 @@ class ChangePassword extends React.Component {
       this.hashHistory.push('/home/login')
     } else if (isEverythingLoaded) {
       component = <div className='change-password-container'>
-        <form id='submit_form' className='form fadeIn customForm' onSubmit={this.onSubmit}>
+        <form id='submit_form' className='perun-core-form fadeIn customForm' onSubmit={this.onSubmit}>
           {alert}
           <h4 className='title-change-password'>
             {labels.formatMessage({
