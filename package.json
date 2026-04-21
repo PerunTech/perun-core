@@ -5,6 +5,7 @@
   "main": "www/perun-core.js",
   "dependencies": {
     "@json2csv/plainjs": "^7.0.5",
+    "@monaco-editor/react": "^4.7.0",
     "@rjsf/core": "^5.17.0",
     "@rjsf/utils": "^5.17.0",
     "@rjsf/validator-ajv8": "^5.17.0",
