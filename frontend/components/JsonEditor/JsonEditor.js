@@ -2,59 +2,24 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Editor, DiffEditor } from '@monaco-editor/react';
 import { Icon, alertUserV2 } from '../../elements';
-
-const THEMES = [
-  { value: 'vs', label: 'Light Theme' },
-  { value: 'vs-dark', label: 'Dark Theme' },
-  { value: 'hc-black', label: 'High Contrast Theme' },
-];
-const FALLBACK_LABELS = {
-  'perun.admin_console.config_menu_confirm': 'Apply Changes',
-  'perun.admin_console.json_invalid': 'Invalid JSON',
-  'perun.admin_console.show_diff': 'Show Diff',
-  'perun.admin_console.back_to_editor': 'Back to Editor',
-  'perun.admin_console.format': 'Format',
-  'perun.admin_console.copy': 'Copy',
-  'perun.admin_console.reset': 'Reset',
-};
-
-const BASE_OPTIONS = { minimap: { enabled: false }, scrollBeyondLastLine: false, formatOnPaste: true, fixedOverflowWidgets: true };
-const DIFF_OPTIONS = { ...BASE_OPTIONS, readOnly: true };
-const EDITOR_HEIGHT = '60vh';
-// Bootstrap modal fade animation duration
-const MODAL_ANIMATION_MS = 350;
-
-const getStats = (raw) => {
-  const lines = raw?.split('\n').length;
-  const bytes = new Blob([raw]).size;
-  const size = bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
-  return `${lines} lines · ${size}`;
-};
+import { THEMES, BASE_OPTIONS, DIFF_OPTIONS, EDITOR_HEIGHT, getStats } from './utils';
 
 const JsonEditor = ({ value, onSave }, context) => {
   const [showDiff, setShowDiff] = useState(false);
   const [themeIndex, setThemeIndex] = useState(0);
+  // Incrementing this key remounts the Editor, which is the only way to reset its value — Monaco has no reset API
   const [resetKey, setResetKey] = useState(0);
   const [stats, setStats] = useState(() => getStats(JSON.stringify(value, null, 2)));
 
   const originalRaw = useMemo(() => JSON.stringify(value, null, 2), [value]);
+  // Refs instead of state to avoid re-renders on every keystroke
   const currentRawRef = useRef(originalRaw);
   const isValidRef = useRef(true);
   const editorRef = useRef(null);
 
   const theme = THEMES[themeIndex].value;
   const themeLabel = THEMES[themeIndex].label;
-  const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: FALLBACK_LABELS[id] ?? id });
-
-  const handleMount = useCallback((editor) => {
-    editorRef.current = editor;
-    // Monaco appends context-view (position:absolute) to getContainerDomNode() and
-    // calculates top/left assuming it is the CSS containing block. Without
-    // position:relative the context-view falls through to .modal-content, shifting
-    // every tooltip by the offset between the two elements.
-    editor.getContainerDomNode().style.position = 'relative';
-    setTimeout(() => editor.layout(), MODAL_ANIMATION_MS);
-  }, []);
+  const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
 
   const handleChange = useCallback((raw) => {
     currentRawRef.current = raw ?? '';
@@ -120,6 +85,7 @@ const JsonEditor = ({ value, onSave }, context) => {
         </button>
         <span className='json-editor-stats'>{stats}</span>
       </div>
+      {/* Hidden instead of unmounted to preserve the editor's undo history when toggling diff view */}
       <div style={{ display: showDiff ? 'none' : 'block' }}>
         <Editor
           key={resetKey}
@@ -127,7 +93,6 @@ const JsonEditor = ({ value, onSave }, context) => {
           language='json'
           theme={theme}
           defaultValue={originalRaw}
-          onMount={handleMount}
           onChange={handleChange}
           onValidate={handleValidate}
           options={BASE_OPTIONS}
