@@ -56,7 +56,7 @@ const RegistrationSso = (_props, context) => {
             schema={schema}
             key={'SVAROG_USERS_SSO'}
             formData={formData}
-            className={`customForm form registration-form registration-form-sso`}
+            className={`customForm perun-core-form registration-form registration-form-sso`}
             validator={validator}
             onSubmit={submutSsoRegister}
         >

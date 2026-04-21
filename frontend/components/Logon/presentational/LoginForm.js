@@ -67,10 +67,10 @@ const LoginForm = (props, context) => {
   return (
     <div id='holder' className='holderLogon'>
       <div className='onlyLoginCustomHeight'>
-        <form id='submit_form' className='form fadeIn login-form' onSubmit={onSubmit}>
+        <form id='submit_form' className='perun-core-form fadeIn login-form' onSubmit={onSubmit}>
           {alert}
-          <div className='grid'>
-            <div className='left'>
+          <div className='login-main-container'>
+            <div className='login-container'>
               <div>
                 <div className='login-form-title'>
                   <h4>
@@ -148,7 +148,7 @@ const LoginForm = (props, context) => {
               )}
             </div>
             {loginLinks?.length > 0 && <div className='verticalLine' />}
-            <div className='right'>
+            <div className='alt-links-container'>
               <div className='linkStyle'>
                 {loginLinks.map((item, index) => {
                   return (
