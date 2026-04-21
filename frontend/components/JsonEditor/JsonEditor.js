@@ -35,7 +35,20 @@ const JsonEditor = ({ value, onSave }, context) => {
   }, []);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(currentRawRef.current);
+    const text = currentRawRef.current;
+    // clipboard API requires a secure context (HTTPS); fall back to execCommand for HTTP
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
   }, []);
 
   const handleReset = useCallback(() => {
