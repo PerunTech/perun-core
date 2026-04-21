@@ -11,8 +11,8 @@ const ChangeEmail = (props, context) => {
   const labels = context.intl
   return (
     <div className='linkFormHolder'>
-      <div className='parent'>
-        <form id='submit_form' className='form fadeIn customForm change-email-form' onSubmit={onSubmit}>
+      <div className='auth-form-parent'>
+        <form id='submit_form' className='perun-core-form fadeIn customForm change-email-form' onSubmit={onSubmit}>
           {alert}
           <h4>
             {labels.formatMessage({
