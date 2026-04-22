@@ -2,7 +2,7 @@ import React from 'react';
 import { ReactBootstrap, alertUserV2, alertUserResponse, ComponentManager, GridManager } from '../../elements';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import JsonEditor from '../JsonEditor/JsonEditor';
+import { JsonEditor } from '../JsonEditor';
 import { isJSON } from '../../functions/utils';
 import axios from 'axios';
 const { useState, useEffect } = React;

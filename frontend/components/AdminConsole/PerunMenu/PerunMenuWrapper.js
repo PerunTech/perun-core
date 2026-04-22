@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import JsonEditor from '../../JsonEditor/JsonEditor';
+import { JsonEditor } from '../JsonEditor';
 import axios from 'axios';
 import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse, Icon } from '../../../elements';
 import { Loading } from '../../ComponentsIndex';
