@@ -12,12 +12,21 @@
 <body>
   <div id="app"></div>
   <script src="config.js"></script>
+  <!-- SweetAlert2 must be loaded before the inline script so it's available if window.server is not set -->
+  <!-- Replace the host with your assets server URL -->
+  <script src="http://<host>:<port>/perun-assets/js/sweetalert2.all.min.js"></script>
   <script>
     // If your project uses spatial features, uncomment and configure these (see README > Spatial Support):
     // window.sysCrs = 'EPSG:3857'
     // window.sysCenter = { lat: 41.294, lng: 74.597 }
   </script>
   <script>
+    (function () {
+    // If the server is unavailable (e.g. 503), window.server won't be set — alert and stop execution
+    if (!window.server) {
+      Swal.fire({ icon: 'info', title: 'The server is temporarily down for maintenance', text: 'Please try again soon', confirmButtonColor: '#7cd1f9' });
+      return;
+    }
     const assetsUrl = `${window.server}/WsConf/params/get/sys/FRONTEND_ASSETS_LOCATION`
     fetch(assetsUrl).then(response => response.json()).then(res => {
       if (res.VALUE) {
@@ -102,6 +111,7 @@
     }).catch(err => {
       console.log(err)
     })
+    })()
   </script>
   <!-- Replace with your project's bundle filename -->
   <script src="bundle-name.js"></script>

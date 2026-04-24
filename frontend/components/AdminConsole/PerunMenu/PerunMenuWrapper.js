@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import JsonView from 'react-json-view';
+import { JsonEditor } from '../../JsonEditor';
 import axios from 'axios';
 import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse, Icon } from '../../../elements';
 import { Loading } from '../../ComponentsIndex';
@@ -17,7 +17,6 @@ const PerunMenuWrapper = (props, context) => {
   const [show, setShow] = useState(false);
   const [shouldRender, setRender] = useState(false)
   const [fieldJson, setFieldJson] = useState({})
-  const [editedJson, setJson] = useState(undefined)
   const [configuration, setConfig] = useState(undefined)
 
   useEffect(() => {
@@ -71,10 +70,6 @@ const PerunMenuWrapper = (props, context) => {
       setFieldJson(JSON.parse(formData['MENU_CONF']))
     }
     setShow(true)
-  }
-
-  const jsonManipulation = (obj) => {
-    setJson(obj['updated_src'])
   }
 
   const changeJson = (editedJson) => {
@@ -161,12 +156,7 @@ const PerunMenuWrapper = (props, context) => {
             <Modal.Title>{configuration && context.intl.formatMessage({ id: 'perun.admin_console.preview_title', defaultMessage: 'perun.admin_console.preview_title' })}</Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body  menu-editor-body'>
-            {!configuration && <div>
-              <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} collapsed />
-              <div>
-                <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson(editedJson) }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
-              </div>
-            </div>}
+            {!configuration && <JsonEditor value={fieldJson} onSave={changeJson} />}
             {configuration && <SideMenu configuration={configuration} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer  menu-editor-footer'></Modal.Footer>
