@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { GenericForm, Loading, axios, createHashHistory, ComponentManager } from '../../../client';
@@ -12,15 +12,21 @@ const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [loading, setLoading] = useState(false);
     const [img, setImg] = useState(undefined);
+    const avatarInputRef = useRef(null);
     useEffect(() => {
         const idScreen = document.getElementById('identificationScreen')
         if (idScreen) {
             idScreen.innerText = context.intl.formatMessage({ id: 'perun.my_profile', defaultMessage: 'perun.my_profile' });
         }
-        if (props.userInfo.avatar) {
-            downloadFile(props.userInfo.avatar, props.svSession, setImg)
-        }
     }, []);
+
+    useEffect(() => {
+        if (props?.userInfo?.avatar?.objectId && props?.userInfo?.avatar?.fileName) {
+            downloadFile(props.userInfo.avatar, props.svSession, setImg)
+        } else {
+            setImg(undefined)
+        }
+    }, [props.userInfo.avatar, props.svSession]);
 
     const handleBack = () => {
         // If the history size is larger than 2, it means the user has already been navigating through the app
@@ -45,10 +51,18 @@ const MyProfile = (props, context) => {
                 const resType = res.data?.type?.toLowerCase() || 'info'
                 alertUserResponse({ type: resType, response: res })
                 if (resType === 'success') {
-                    let tempUserInfo = props.userInfo
-                    tempUserInfo.avatar.objectId = res.data.data.objectId
-                    store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: tempUserInfo })
-                    downloadFile(tempUserInfo.avatar, props.svSession, setImg)
+                    const objectId = res?.data?.data?.objectId || res?.data?.objectId
+                    const fileName = res?.data?.data?.fileName || res?.data?.fileName || file?.name || ''
+                    const updatedUserInfo = {
+                        ...props.userInfo,
+                        avatar: {
+                            ...(props.userInfo.avatar || {}),
+                            objectId,
+                            fileName,
+                        },
+                    }
+                    store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: updatedUserInfo })
+                    downloadFile(updatedUserInfo.avatar, props.svSession, setImg)
                 }
             }
         }).catch(err => {
@@ -86,9 +100,10 @@ const MyProfile = (props, context) => {
         const notAPhotoLabel = context.intl.formatMessage({ id: 'perun.my_profile.not_a_photo', defaultMessage: 'perun.my_profile.not_a_photo' });
         const photoHeadersArr = ['89504e47', '47494638', 'ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8']
         e.preventDefault()
+        const fileInput = e.target
         const selectedFiles = []
 
-        Object.values(e.target.files).forEach(file => {
+        Object.values(fileInput.files).forEach(file => {
             if ((file.size / 1024).toFixed(2) < 200) {
                 selectedFiles.push(file)
                 let header = ''
@@ -111,6 +126,7 @@ const MyProfile = (props, context) => {
                 alertUserV2({ type: 'info', title: fileTooLargeLabel })
             }
         })
+        fileInput.value = ''
     }
 
     const deleteDownload = (e) => {
@@ -119,31 +135,41 @@ const MyProfile = (props, context) => {
         const cancelLabel = context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })
         const onConfirm = () => {
             e.preventDefault()
-            setLoading(true)
-            const deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
-            const url = window.server + `/ReactElements/deleteObject/${props.svSession}`
-            axios({
-                method: "post",
-                data: JSON.stringify(deleteObj),
-                url: url,
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            }).then((res) => {
-                setLoading(false)
-                if (res?.data) {
-                    const resType = res.data?.type?.toLowerCase() || 'info'
-                    alertUserResponse({ type: resType, response: res })
-                    if (resType === 'success') {
-                        setImg(undefined)
-                        let tempUserInfo = props.userInfo
-                        tempUserInfo.avatar.objectId = undefined
-                        store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: tempUserInfo })
+            if (props?.userInfo?.avatar?.objectId) {
+                setLoading(true)
+                const deleteObj = { 'OBJECT_ID': props.userInfo.avatar['objectId'], 'OBJECT_TYPE': 2 }
+                const url = window.server + `/ReactElements/deleteObject/${props.svSession}`
+                axios({
+                    method: "post",
+                    data: JSON.stringify(deleteObj),
+                    url: url,
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                }).then((res) => {
+                    setLoading(false)
+                    if (res?.data) {
+                        const resType = res.data?.type?.toLowerCase() || 'info'
+                        alertUserResponse({ type: resType, response: res })
+                        if (resType === 'success') {
+                            setImg(undefined)
+                            const updatedUserInfo = {
+                                ...props.userInfo,
+                                avatar: undefined,
+                            }
+                            store.dispatch({ type: 'GET_CURRENT_USER_DATA', payload: updatedUserInfo })
+                            if (avatarInputRef.current) {
+                                avatarInputRef.current.value = ''
+                            }
+                        }
                     }
-                }
-            }).catch(err => {
-                console.error(err)
-                setLoading(false)
-                alertUserResponse({ response: err })
-            });
+                }).catch(err => {
+                    console.error(err)
+                    setLoading(false)
+                    alertUserResponse({ response: err })
+                });
+            } else {
+                alertUserV2({ type: 'info', title: context.intl.formatMessage({ id: 'perun.my_profile.no_avatar_to_remove', defaultMessage: 'perun.my_profile.no_avatar_to_remove' }) })
+            }
+
         }
         const alertParams = {
             type: 'warning',
@@ -202,7 +228,7 @@ const MyProfile = (props, context) => {
                     </div>
                     <div className="my-profile-upload">
                         <p className="my-profile-title-medium">{context.intl.formatMessage({ id: 'perun.my_profile.upload_new_avatar', defaultMessage: 'perun.my_profile.upload_new_avatar' })}</p>
-                        <input type="file" onChange={handlePhotoSelection} />
+                        <input type="file" onChange={handlePhotoSelection} ref={avatarInputRef} />
                         <p className="my-profile-title-small">{context.intl.formatMessage({ id: 'perun.my_profile.max_file_size', defaultMessage: 'perun.my_profile.max_file_size' })}</p>
                         <div onClick={(e) => deleteDownload(e)} className="my-profile-remove">
                             <p>{context.intl.formatMessage({ id: 'perun.my_profile.remove_avatar', defaultMessage: 'perun.my_profile.remove_avatar' })}</p>
