@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Icon } from "../../elements"
 import { downloadFile } from '../../functions/utils';
-
+import { alertUserResponse } from '../../elements'
+import axios from 'axios';
+import { createHashHistory } from 'history';
 const PerunNavbar = (props, context) => {
+    let hashHistory = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
     const [menuBurger, setMenuBurger] = useState(undefined)
     const [toggleBurger, setToggleBurger] = useState(false)
@@ -45,6 +48,19 @@ const PerunNavbar = (props, context) => {
         setToggleBurger(true)
     }
 
+    useEffect(() => {
+        if (props.renderTasks) {
+            axios.get(window.server + `/taskManagement/getTaskCountByUser/${props.svSession}`).then(res => {
+                if (res?.data?.data?.count && res?.data?.data?.count > 0) {
+                    setTasksLength(res?.data?.data?.count)
+                }
+            }).catch(err => {
+                console.error(err)
+                alertUserResponse({ response: err, onConfirm })
+            })
+        }
+    }, [props.renderTasks]);
+
     return (
         <>
             <div className='perun-navbar'>
@@ -64,9 +80,11 @@ const PerunNavbar = (props, context) => {
                 </div>
                 <div className='nav-task-user'>
                     {props.renderTasks && (
-                        <div className='nav-title-tasks'>
+                        <div className='nav-title-tasks' onClick={() => {
+                            hashHistory.push('/main/task_management/user-tasks/')
+                        }}>
                             {<Icon name="IconCards" />}
-                            {tasksLength > 0 && <span className='nav-tasks-length'>{tasksLength}</span>}
+                            {tasksLength > 0 && <p className='nav-tasks-length'>{tasksLength}</p>}
                         </div>
                     )}
                     {/* navbar end */}
