@@ -18,15 +18,15 @@ export class ReducerTemplater extends React.Component {
     if (templateName !== null) {
       if (templateName === 'GenericGrid') {
         templateBody = this.gridTemplate(id)
-        retvalFunc = new Function('state', 'action', templateBody)  
+        retvalFunc = new Function('state', 'action', templateBody)
       } else if (templateName === 'genericComponent') {
         retvalFunc = this.genericComponentTemplate(id)
       } else if (templateName === 'GenericForm') {
         templateBody = this.formTemplate(id)
-        retvalFunc = new Function('state', 'action', templateBody)  
+        retvalFunc = new Function('state', 'action', templateBody)
       } else if (templateName === 'parameterComponent') {
         templateBody = this.parameterTemplate(id)
-        retvalFunc = new Function('state', 'action', templateBody)  
+        retvalFunc = new Function('state', 'action', templateBody)
       } else {
         return null
       }

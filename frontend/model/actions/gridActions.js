@@ -46,7 +46,7 @@ function replaceParams(path, gridid, session, params) {
 }
 
 export function getGridConfig(gridid, gridName, session, params, gridType) {
-  return function (dispatch) {
+  return function(dispatch) {
     // Check if the gridType is SEARCH_GRID_DATA and is not of type string
     if (gridType === 'SEARCH_GRID_DATA' && typeof gridName !== 'string') {
       dispatch({
@@ -88,7 +88,7 @@ export function getGridConfig(gridid, gridName, session, params, gridType) {
 }
 
 export function getGridData(gridid, gridNameOrData, session, params, gridType) {
-  return function (dispatch) {
+  return function(dispatch) {
     // Check if the gridType is SEARCH_GRID_DATA and is not of type string
     if (gridType === 'SEARCH_GRID_DATA' && typeof gridNameOrData !== 'string') {
       dispatch({
@@ -133,14 +133,14 @@ export function getGridData(gridid, gridNameOrData, session, params, gridType) {
 }
 
 export function rowClicked(gridid, row, rowIdx) {
-  return function (dispatch) {
+  return function(dispatch) {
     row['ROW_ID'] = rowIdx
     dispatch({ id: gridid, type: gridid + '/ROW_CLICKED', payload: row })
   }
 }
 
 export function lastSelectedItem(gridId, row, gridConfig) {
-  return function (dispatch) {
+  return function(dispatch) {
     if (gridId && row) {
       dispatch({ type: 'ADD_LAST_SELECTED_ITEM', payload: [gridId, row, gridConfig] })
     } else if (gridId && !row) {
@@ -154,7 +154,7 @@ export function lastSelectedItem(gridId, row, gridConfig) {
 }
 
 export function addGrid(gridid, grid, groupId) {
-  return function (dispatch) {
+  return function(dispatch) {
     if (groupId === null || groupId === undefined) {
       groupId = 'grids'
     }
@@ -163,7 +163,7 @@ export function addGrid(gridid, grid, groupId) {
 }
 
 export function removeGrid(gridid, groupId) {
-  return function (dispatch) {
+  return function(dispatch) {
     if (groupId == null) {
       groupId = 'grids'
     }
@@ -171,7 +171,7 @@ export function removeGrid(gridid, groupId) {
   }
 }
 export function cleanGrids(groupId) {
-  return function (dispatch) {
+  return function(dispatch) {
     if (groupId == null) {
       groupId = 'grids'
     }
@@ -180,7 +180,7 @@ export function cleanGrids(groupId) {
 }
 
 export function editRecordInline(session, onSaveMethodPath, jsonString, gridId) {
-  return function (dispatch) {
+  return function(dispatch) {
     const restUrl = svConfig.restSvcBaseUrl + onSaveMethodPath
     axios({
       method: 'post',
@@ -200,7 +200,7 @@ export function editRecordInline(session, onSaveMethodPath, jsonString, gridId) 
 }
 
 export function saveAllRecords(session, saveAll, rows, gridId) {
-  return function (dispatch) {
+  return function(dispatch) {
     const restUrl = svConfig.restSvcBaseUrl + saveAll
     axios({
       method: 'post',
@@ -216,20 +216,20 @@ export function saveAllRecords(session, saveAll, rows, gridId) {
 }
 
 export function resetGridEditResponseState(gridId) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch({ type: gridId + '/INLINE_EDIT_RESET_STATE', payload: undefined })
     dispatch({ type: gridId + '/SAVE_ALL_RECORDS_RESET_STATE', payload: undefined })
   }
 }
 
 export function publishState(gridid, state) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch({ type: gridid + '/PUBLISH_DATA', payload: state })
   }
 }
 
 export function updateSelectedRows(selectedRows, gridId) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch({ type: 'UPDATE_SELECTED_GRID_ROWS', payload: [selectedRows, gridId] })
   }
 }
