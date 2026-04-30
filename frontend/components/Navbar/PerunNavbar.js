@@ -56,7 +56,7 @@ const PerunNavbar = (props, context) => {
                 }
             }).catch(err => {
                 console.error(err)
-                alertUserResponse({ response: err, onConfirm })
+                alertUserResponse({ response: err })
             })
         }
     }, [props.renderTasks]);
