@@ -76,9 +76,27 @@ const SvarogTables = (props, context) => {
     )
   }
 
-  const onHide = () => {
+  const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
+
+  const doClose = () => {
     setState({ show: false })
     props.dispatch({ type: 'CLEAN_ADM_CONSOLE_FORM_DATA' })
+  }
+
+  const onHide = () => {
+    if (props.admConsoleFormData.length > 0) {
+      alertUserV2({
+        type: 'warning',
+        title: fmt('perun.admin_console.unsaved_changes_warning'),
+        showCancel: true,
+        cancelButtonText: fmt('perun.admin_console.cancel'),
+        confirmButtonText: fmt('perun.admin_console.discard_and_close'),
+        confirmButtonColor: '#dc2626',
+        onConfirm: doClose,
+      })
+      return
+    }
+    doClose()
   }
 
   return (
@@ -91,11 +109,8 @@ const SvarogTables = (props, context) => {
         {generateSvarogTablesGrid()}
       </div>
       {show && (
-        <Modal className='admin-console-unit-modal' show={show} onHide={onHide}>
+        <Modal className='admin-console-unit-modal sf-table-modal' show={show} onHide={onHide}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
-            <Modal.Title>
-              {context.intl.formatMessage({ id: 'perun.admin_console.svarog_table', defaultMessage: 'perun.admin_console.svarog_table' })}
-            </Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateSvarogTableForm(objectId)}
@@ -109,6 +124,7 @@ const SvarogTables = (props, context) => {
 
 const mapStateToProps = (state) => ({
   svSession: state.security.svSession,
+  admConsoleFormData: state.admConsoleFormData,
 })
 
 SvarogTables.contextTypes = {
