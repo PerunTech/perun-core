@@ -42,7 +42,15 @@ export const applyFormDataOverrides = (items, overrides) => {
     if (!dbDataObject) continue
     const override = overrides.find(o => o.OBJECT_ID === dbDataObject.object_id)
     if (override) {
-      dbDataObject.values = formDataToValues(override)
+      const overrideMap = Object.fromEntries(formDataToValues(override).map(e => Object.entries(e)[0]))
+      dbDataObject.values = dbDataObject.values.map(entry => {
+        const key = Object.keys(entry)[0]
+        return key in overrideMap ? { [key]: overrideMap[key] } : entry
+      })
+      const existingKeys = new Set(dbDataObject.values.map(e => Object.keys(e)[0]))
+      for (const [key, val] of Object.entries(overrideMap)) {
+        if (!existingKeys.has(key)) dbDataObject.values.push({ [key]: val })
+      }
     }
   }
 }

@@ -41,7 +41,7 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
       const isPending = !!field._pending
       const isNew = !!field._new
       const label = field.LABEL_CODE || ''
-      const _isI18nLabel = label.includes('.') && !label.includes(' ')
+      const isI18nLabel = label.includes('.') && !label.includes(' ')
 
       let cls = 'sf-field-row'
       if (isPk) cls += ' sf-field-row--pk'
@@ -61,8 +61,8 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
           </span>
           <span className='sf-field-info'>
             <span className='sf-field-name'>{field.FIELD_NAME || '(new field)'}</span>
-            {/* {!isI18nLabel && label && <span className='sf-field-label' title={label}>{label}</span>} */}
-            {hasCodeList && <span className='sf-codelist-tag'>{field.CODE_LIST_MNEMONIC}</span>}
+            {!isI18nLabel && label && <span className='sf-field-label' title={label}>{label}</span>}
+            {hasCodeList && <span className='sf-codelist-tag' title={field.CODE_LIST_MNEMONIC}>{field.CODE_LIST_MNEMONIC}</span>}
           </span>
           <span className='sf-type-cell'>
             <TypeBadge type={field.FIELD_TYPE || '—'} />
