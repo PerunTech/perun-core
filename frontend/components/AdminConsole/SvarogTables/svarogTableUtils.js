@@ -1,8 +1,34 @@
 export const META_KEYS = ['OBJECT_ID', 'OBJECT_TYPE', 'PKID', 'PARENT_ID', 'recordType']
 
+export const FLAG_META = [
+  { key: 'SYSTEM_TABLE', label: 'SYSTEM', color: '#7c3aed' },
+  { key: 'REPO_TABLE', label: 'REPO', color: '#0891b2' },
+  { key: 'IS_CONFIG_TABLE', label: 'CONFIG', color: '#d97706' },
+]
+
 export const FIELD_UISCHEMA_OVERRIDE = {
   'ui:order': ['FIELD_NAME', 'LABEL_CODE', 'FIELD_TYPE', 'FIELD_SIZE', 'SORT_ORDER', 'CODE_LIST_MNEMONIC', 'IS_NULL', 'IS_UNIQUE', 'IS_PRIMARY_KEY', 'INDEX_NAME', '*'],
   // IS_NULL: { 'ui:widget': 'InvertedMandatoryCheckbox' },
+}
+
+export const TABLE_UISCHEMA_OVERRIDE = {
+  'ui:order': ['TABLE_NAME', 'SCHEMA', 'REPO_NAME', 'LABEL_CODE', 'SYSTEM_TABLE', 'REPO_TABLE', 'IS_CONFIG_TABLE', 'USE_CACHE', 'CACHE_TYPE', 'CACHE_SIZE', 'CACHE_EXPIRY', '*'],
+  TABLE_NAME: { 'ui:classNames': 'stp-edit-field' },
+  SCHEMA: { 'ui:classNames': 'stp-edit-field' },
+  REPO_NAME: { 'ui:classNames': 'stp-edit-field' },
+  LABEL_CODE: { 'ui:classNames': 'stp-edit-field' },
+  SYSTEM_TABLE: { 'ui:classNames': 'stp-edit-toggle stp-section-start', 'ui:widget': 'CustomCheckboxWidget', 'ui:label': false, 'ui:options': { color: '#7c3aed' } },
+  REPO_TABLE: { 'ui:classNames': 'stp-edit-toggle', 'ui:widget': 'CustomCheckboxWidget', 'ui:label': false, 'ui:options': { color: '#0891b2' } },
+  IS_CONFIG_TABLE: { 'ui:classNames': 'stp-edit-toggle', 'ui:widget': 'CustomCheckboxWidget', 'ui:label': false, 'ui:options': { color: '#d97706' } },
+  USE_CACHE: { 'ui:classNames': 'stp-edit-toggle stp-section-start stp-use-cache-toggle', 'ui:widget': 'CustomCheckboxWidget', 'ui:label': false, 'ui:options': { color: '#059669' } },
+  CACHE_TYPE: { 'ui:classNames': 'stp-edit-field' },
+  CACHE_SIZE: { 'ui:classNames': 'stp-edit-field' },
+  CACHE_EXPIRY: { 'ui:classNames': 'stp-edit-field' },
+  CONFIG_UNQ_ID: { 'ui:classNames': 'stp-edit-field stp-section-start' },
+  CONFIG_TYPE_ID: { 'ui:classNames': 'stp-edit-field' },
+  CONFIG_RELATION_TYPE: { 'ui:classNames': 'stp-edit-field' },
+  CONFIG_RELATION_ID: { 'ui:classNames': 'stp-edit-field' },
+  EXTENDED_PARAMS: { 'ui:widget': 'hidden' }
 }
 
 export const isTrue = (v) => v === true || v === 'true' || v === 1

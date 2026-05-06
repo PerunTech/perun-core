@@ -4,10 +4,15 @@ import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading } from '../../../client'
 import { alertUserV2, ReactBootstrap } from '../../../elements'
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
+import { TABLE_UISCHEMA_OVERRIDE } from './svarogTableUtils'
+import CustomCheckboxWidget from './CustomCheckboxWidget'
+
+const TABLE_ADDITIONAL_WIDGETS = { CustomCheckboxWidget }
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const SvarogTables = (props, context) => {
+  const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
   const initialState = { tableName: 'SVAROG_TABLES', loading: false, gridId: 'SVAROG_TABLES_GRID', show: false, objectId: 0, selectedTableName: '' }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, loading, gridId, show, objectId, selectedTableName }, setState] = useReducer(reducer, initialState)
@@ -69,14 +74,14 @@ const SvarogTables = (props, context) => {
         addSaveFunction={onSubmit}
         hideBtns='closeAndDelete'
         className={'admin-settings-forms'}
+        uiSchemaOverride={TABLE_UISCHEMA_OVERRIDE}
+        additionalWidgets={TABLE_ADDITIONAL_WIDGETS}
         inputWrapper={SvarogTableFormWrapper}
         objectId={objectId}
         selectedTableName={selectedTableName}
       />
     )
   }
-
-  const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
 
   const doClose = () => {
     setState({ show: false })

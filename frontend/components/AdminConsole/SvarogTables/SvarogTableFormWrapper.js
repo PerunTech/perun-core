@@ -6,8 +6,7 @@ import { ComponentManager, GenericForm, axios } from '../../../client'
 import { ReactBootstrap, Icon, alertUserResponse, alertUserV2 } from '../../../elements'
 import { JsonEditor } from '../../JsonEditor'
 import SvarogFieldsPanel from './SvarogFieldsPanel'
-import SvarogTablePreview from './SvarogTablePreview'
-import { normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE } from './svarogTableUtils'
+import { normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE, isTrue, FLAG_META } from './svarogTableUtils'
 import InvertedMandatoryCheckbox from './InvertedMandatoryCheckbox'
 
 const FIELD_ADDITIONAL_WIDGETS = { InvertedMandatoryCheckbox }
@@ -20,11 +19,11 @@ const SvarogTableFormWrapper = (props, context) => {
     loading: false, objectId: undefined,
     tableName: 'SVAROG_FIELDS', selectedFieldObjectId: undefined, selectedTableName: '',
     exportPreview: null, exportServerJson: null, exportFileName: '',
-    serverFields: [], fieldsLoading: false,
+    serverFields: [], fieldsLoading: false, editingTable: false,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, objectId, tableName, selectedFieldObjectId, selectedTableName,
-    exportPreview, exportServerJson, exportFileName, serverFields, fieldsLoading }, setState] = useReducer(reducer, initialState)
+    exportPreview, exportServerJson, exportFileName, serverFields, fieldsLoading, editingTable }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     getObjectId()
@@ -63,22 +62,15 @@ const SvarogTableFormWrapper = (props, context) => {
       .sort((a, b) => (a.SORT_ORDER || 0) - (b.SORT_ORDER || 0))
   })()
 
+  const { userId } = props.userInfo
+
+  const isNew = objectId === ' '
+  const showEditForm = editingTable || isNew
+
   const tableData = ComponentManager.getStateForComponent(props.formid, 'formTableData')
   const tableOverride = props.admConsoleFormData.find(item => item.recordType === 'TABLE')
   const mergedTableData = tableOverride ? { ...(tableData || {}), ...tableOverride } : tableData
-
-  const { userId } = props.userInfo
-
-  const onSaveTable = (draftValues) => {
-    props.dispatch({
-      type: 'ADD_ADM_CONSOLE_FORM_DATA',
-      payload: { ...(tableData || {}), ...draftValues, recordType: 'TABLE' },
-    })
-    alertUserV2({
-      type: 'info',
-      title: fmt('perun.admin_console.table_change_confirmed'),
-    })
-  }
+  const qualifier = [mergedTableData?.SCHEMA, mergedTableData?.REPO_NAME].filter(Boolean).join(' / ')
 
   const exportJson = () => {
     if (!objectId || objectId === ' ') {
@@ -227,7 +219,47 @@ const SvarogTableFormWrapper = (props, context) => {
           <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>
         </button>
       </div>
-      <SvarogTablePreview data={mergedTableData} onSave={onSaveTable} />
+      {!editingTable && !isNew && mergedTableData?.TABLE_NAME && (
+        <div className='stp-card'>
+          <div className='stp-header'>
+            <span className='stp-table-name'>{mergedTableData.TABLE_NAME}</span>
+            {qualifier && <span className='stp-qualifier'>{qualifier}</span>}
+            <button className='stp-edit-btn' onClick={() => setState({ editingTable: true })} title='Edit table'>
+              <Icon name='IconPencil' size={18} />
+            </button>
+          </div>
+          <div className='stp-meta-row'>
+            {mergedTableData.LABEL_CODE && <span className='stp-label-code'>{mergedTableData.LABEL_CODE}</span>}
+            <div className='stp-badges'>
+              {FLAG_META.filter(f => isTrue(mergedTableData[f.key])).map(f => (
+                <span key={f.key} className='stp-badge' style={{ background: f.color }}>{f.label}</span>
+              ))}
+              {isTrue(mergedTableData.USE_CACHE) && (
+                <span className='stp-badge stp-badge--cache'>
+                  CACHE{mergedTableData.CACHE_TYPE ? `: ${mergedTableData.CACHE_TYPE}` : ''}
+                  {mergedTableData.CACHE_SIZE ? ` · ${mergedTableData.CACHE_SIZE}` : ''}
+                  {mergedTableData.CACHE_EXPIRY ? ` · ${mergedTableData.CACHE_EXPIRY}s` : ''}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      <div className={showEditForm ? 'stp-card stp-card--editing' : undefined} style={showEditForm ? undefined : { display: 'none' }}>
+        {props.children}
+        {showEditForm && (
+          <div className='stp-edit-actions'>
+            <button type='submit' form={props.formid} className='stp-btn stp-btn--save'>
+              <Icon name='IconCheck' size={14} />
+            </button>
+            {!isNew && (
+              <button type='button' className='stp-btn stp-btn--cancel' onClick={() => setState({ editingTable: false })}>
+                <Icon name='IconX' size={14} />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
       {objectId && (
         <div className='sf-split-panel'>
           <div className='sf-entity-box'>
