@@ -72,6 +72,16 @@ const SvarogTableFormWrapper = (props, context) => {
   const mergedTableData = tableOverride ? { ...(tableData || {}), ...tableOverride } : tableData
   const qualifier = [mergedTableData?.SCHEMA, mergedTableData?.REPO_NAME].filter(Boolean).join(' / ')
 
+  const cacheTypeLabel = (() => {
+    const cacheType = mergedTableData?.CACHE_TYPE
+    if (!cacheType) return null
+    const jsonSchema = ComponentManager.getStateForComponent(props.formid, 'formData')
+    const cacheTypeCodelist = jsonSchema?.properties?.CACHE_TYPE
+    const index = cacheTypeCodelist?.enum?.indexOf(cacheType)
+    const key = index >= 0 ? cacheTypeCodelist?.enumNames?.[index] : null
+    return key ? fmt(key) : cacheType
+  })()
+
   const exportJson = () => {
     if (!objectId || objectId === ' ') {
       if (props.admConsoleFormData.length === 0) {
@@ -236,7 +246,7 @@ const SvarogTableFormWrapper = (props, context) => {
               ))}
               {isTrue(mergedTableData.USE_CACHE) && (
                 <span className='stp-badge stp-badge--cache'>
-                  CACHE{mergedTableData.CACHE_TYPE ? `: ${mergedTableData.CACHE_TYPE}` : ''}
+                  CACHE{cacheTypeLabel ? `: ${cacheTypeLabel}` : ''}
                   {mergedTableData.CACHE_SIZE ? ` · ${mergedTableData.CACHE_SIZE}` : ''}
                   {mergedTableData.CACHE_EXPIRY ? ` · ${mergedTableData.CACHE_EXPIRY}s` : ''}
                 </span>
