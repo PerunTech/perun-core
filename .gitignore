@@ -1,6 +1,7 @@
 *.retry
 .env
 .npm
+.webpack_cache
 node_modules
 extracted-messages
 npm-debug.log*
