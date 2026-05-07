@@ -10,6 +10,7 @@ cache:
       - package-lock.json
   paths:
     - .webpack_cache/
+    - .npm/
 
 before_script:
   - pwd
@@ -29,8 +30,7 @@ after_script:
   script:
     - pwd
     - git reset --hard HEAD
-    - rm -rf node_modules
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - npm run test
     - npm run build
 
@@ -46,8 +46,7 @@ after_script:
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - rm -rf node_modules
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - rm -rf www/*.js
     - npm run build-dev
     - pwd
@@ -61,8 +60,7 @@ after_script:
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - rm -rf node_modules
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - rm -rf www/*.js
     - npm run build-dev
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -81,8 +79,7 @@ after_script:
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - rm -rf node_modules
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - rm -rf www/*.js
     - npm run build
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -101,8 +98,7 @@ after_script:
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - rm -rf node_modules
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - rm -rf www/*.js
     - npm run build
     - pwd
