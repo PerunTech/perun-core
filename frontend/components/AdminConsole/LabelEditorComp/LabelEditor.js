@@ -69,7 +69,7 @@ const LabelEditor = (props, context) => {
                 key={gridId}
                 id={gridId}
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_LABELS`}
-                dataTableName={`/ReactElements/getTableWithLike/${svSession}/${tablename}/${data['SEARCH_OPTION']}/${data['SEARCH_VALUES']}/1`}
+                dataTableName={`/ReactElements/getTableWithLike/${svSession}/${tablename}/${data['SEARCH_OPTION']}/${data['SEARCH_VALUES']}/0`}
                 defaultHeight={false}
                 heightRatio={0.5}
                 refreshData={true}
