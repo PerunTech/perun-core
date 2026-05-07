@@ -15,6 +15,7 @@ export default (env, params) => {
         entry: './frontend/client.js',
         cache: {
             type: 'filesystem',
+            cacheLocation: '.webpack_cache',
         },
         optimization: {
             minimizer: [
