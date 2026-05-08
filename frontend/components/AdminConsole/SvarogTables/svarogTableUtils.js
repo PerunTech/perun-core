@@ -43,6 +43,22 @@ export const normalizeRow = (prefix, row) => {
 
 export const normalizeField = (row) => normalizeRow('SVAROG_FIELDS.', row)
 
+export const parseDbDataArray = (response) => {
+  const items = response?.['com.prtech.svarog_common.DbDataArray']?.items
+  if (!Array.isArray(items)) return []
+  return items.map(item => {
+    const dbo = item['com.prtech.svarog_common.DbDataObject']
+    if (!dbo) return null
+    return {
+      OBJECT_ID: dbo.object_id,
+      PKID: dbo.pkid,
+      PARENT_ID: dbo.parent_id,
+      OBJECT_TYPE: dbo.object_type,
+      ...Object.assign({}, ...(dbo.values || [])),
+    }
+  }).filter(Boolean)
+}
+
 export const formDataToValues = (formData) =>
   Object.entries(formData)
     .filter(([key]) => !META_KEYS.includes(key))

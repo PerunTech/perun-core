@@ -6,7 +6,7 @@ import { ComponentManager, GenericForm, axios } from '../../../client'
 import { ReactBootstrap, Icon, alertUserResponse, alertUserV2 } from '../../../elements'
 import { JsonEditor } from '../../JsonEditor'
 import SvarogFieldsPanel from './SvarogFieldsPanel'
-import { normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE, isTrue, FLAG_META } from './svarogTableUtils'
+import { parseDbDataArray, normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE, isTrue, FLAG_META } from './svarogTableUtils'
 import InvertedMandatoryCheckbox from './InvertedMandatoryCheckbox'
 
 const FIELD_ADDITIONAL_WIDGETS = { InvertedMandatoryCheckbox }
@@ -32,13 +32,28 @@ const SvarogTableFormWrapper = (props, context) => {
   useEffect(() => {
     if (!objectId || objectId === ' ') return
     setState({ fieldsLoading: true })
-    axios.get(`${window.server}/ReactElements/getObjectsByParentId/${props.svSession}/${objectId}/${tableName}/0`)
-      .then(res => {
-        const raw = Array.isArray(res.data?.data) ? res.data.data
-          : Array.isArray(res.data) ? res.data : []
-        setState({ serverFields: raw.map(normalizeField), fieldsLoading: false })
-      })
-      .catch(() => setState({ fieldsLoading: false }))
+    const { svSession } = props
+    // WsCore/children returns the full DbDataObject structure needed for field metadata.
+    // getObjectsByParentId is kept alongside it because it translates LABEL_CODE server-side;
+    // WsCore/children returns the raw i18n key which is not in the client message bundle.
+    const childrenUrl = `${window.server}/WsCore/children/${svSession}/${objectId}/SVAROG_FIELDS`
+    const legacyUrl = `${window.server}/ReactElements/getObjectsByParentId/${svSession}/${objectId}/${tableName}/0`
+    Promise.all([axios.get(childrenUrl), axios.get(legacyUrl)]).then(([childrenRes, legacyRes]) => {
+      const fields = parseDbDataArray(childrenRes?.data)
+      const labelMap = {}
+      if (Array.isArray(legacyRes?.data)) {
+        for (const row of legacyRes.data) {
+          const n = normalizeField(row)
+          if (n.OBJECT_ID != null) labelMap[n.OBJECT_ID] = n.LABEL_CODE
+        }
+      }
+      // Patch translated labels onto the structured fields from the children endpoint
+      const merged = fields.map(f => labelMap[f.OBJECT_ID] != null ? { ...f, LABEL_CODE: labelMap[f.OBJECT_ID] } : f)
+      setState({ serverFields: merged, fieldsLoading: false })
+    }).catch((err) => {
+      setState({ fieldsLoading: false })
+      alertUserResponse({ response: err })
+    })
   }, [objectId])
 
   const getObjectId = () => {
@@ -223,7 +238,7 @@ const SvarogTableFormWrapper = (props, context) => {
   return (
     <>
       {loading && <Loading />}
-      <div className='perun-menu-buttons-container'>
+      <div className='svarog-table-buttons-container'>
         <button className='btn-success btn_save_form svarog-table-export-btn' onClick={exportJson}>
           {fmt('perun.admin_console.export_table_and_fields')}
           <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>

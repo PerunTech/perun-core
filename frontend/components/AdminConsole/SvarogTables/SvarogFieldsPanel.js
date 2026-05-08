@@ -37,6 +37,10 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
       const isUnique = field.IS_UNIQUE === 'yes' || field.IS_UNIQUE === true
       const hasIndex = !!field.INDEX_NAME
       const hasCodeList = !!field.CODE_LIST_MNEMONIC
+      const hasGuiMeta = !!field.GUI_METADATA
+      const guiMetaTooltip = hasGuiMeta
+        ? (typeof field.GUI_METADATA === 'string' ? field.GUI_METADATA : JSON.stringify(field.GUI_METADATA, null, 2))
+        : ''
       const isSelected = objectId != null && objectId === selectedObjectId
       const isPending = !!field._pending
       const isNew = !!field._new
@@ -73,6 +77,7 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
             {isNotNull && !isPk && <ConstraintBadge label='MANDATORY' color='#dc2626' />}
             {isUnique && <ConstraintBadge label='UNIQUE' color='#d97706' />}
             {hasIndex && <ConstraintBadge label='INDEX' color='#0891b2' />}
+            {hasGuiMeta && <span className='sf-constraint-badge sf-meta-badge' title={guiMetaTooltip}>{'{}'}</span>}
           </span>
         </div>
       )
