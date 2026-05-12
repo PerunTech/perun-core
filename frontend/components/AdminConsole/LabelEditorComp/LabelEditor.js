@@ -75,7 +75,7 @@ const LabelEditor = (props, context) => {
                 const resType = res.data?.type?.toLowerCase() || 'info';
                 alertUserResponse({ type: resType, response: res, onConfirm });
                 if (resType === 'success') {
-                    if (searchParams) GridManager.reloadGridData(GRID_ID);
+                    if (searchParams) GridManager.reloadAllGrids();
                     setShowForm(false);
                 }
             }
@@ -100,7 +100,7 @@ const LabelEditor = (props, context) => {
                 const resType = res.data?.type?.toLowerCase() || 'info';
                 alertUserResponse({ type: resType, response: res, onConfirm });
                 if (resType === 'success') {
-                    if (searchParams) GridManager.reloadGridData(GRID_ID);
+                    if (searchParams) GridManager.reloadAllGrids();
                     setShowForm(false);
                 }
             }
