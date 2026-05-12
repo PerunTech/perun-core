@@ -1,4 +1,4 @@
-export default function checkForInvalidSession (state = {
+export default function checkForInvalidSession(state = {
   exceptionTitle: undefined,
   exceptionMessage: undefined
 }, action) {
@@ -10,11 +10,12 @@ export default function checkForInvalidSession (state = {
         errTitle = action.payload.title
         errMsg = action.payload.message
       } catch (err) {
+        console.error(err)
         errTitle = undefined
         errMsg = undefined
       }
     }
-    return {...state, exceptionTitle: errTitle, exceptionMessage: errMsg}
+    return { ...state, exceptionTitle: errTitle, exceptionMessage: errMsg }
   }
   return state
 }

@@ -160,6 +160,7 @@ const PerunMenu = (props, context) => {
         JSON.parse(e.target.result)
         uploadFile(file)
       } catch (error) {
+        console.error(error)
         alertUserV2({ type: 'info', title: notJSONLabel })
       }
     }

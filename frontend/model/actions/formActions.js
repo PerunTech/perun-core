@@ -42,8 +42,8 @@ export function getFormData(id, reduxKey, formName, uiSchema, formTableData, ses
     })
   }
 
-  getUiSchema(id + '_uischema', reduxKey + '_uischema', uiSchema, session, params) // eslint-disable-line
-  getDataTableForm(id + '_tabledata', reduxKey + '_tabledata', formTableData, session, params) // eslint-disable-line
+  getUiSchema(id + '_uischema', reduxKey + '_uischema', uiSchema, session, params)
+  getDataTableForm(id + '_tabledata', reduxKey + '_tabledata', formTableData, session, params)
 }
 
 function getUiSchema(id, reduxKey, uiSchema, session, params) {
@@ -182,7 +182,7 @@ export function saveFormDataWithFile(id, formName, session, formData, fileToUplo
   let valueToSend = ''
   const restUrl = svConfig.restSvcBaseUrl + verbPath
   valueToSend = formData.formData
-  const data = new FormData() // eslint-disable-line
+  const data = new FormData()
   data.append('data', JSON.stringify(valueToSend))
   data.append('file', fileToUpload)
   // GPE 25.05.2017 Get the jsonString value from the formDat

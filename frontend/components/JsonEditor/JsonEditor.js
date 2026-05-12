@@ -4,7 +4,7 @@ import { Editor, DiffEditor } from '@monaco-editor/react';
 import { Icon, alertUserV2 } from '../../elements';
 import { THEMES, BASE_OPTIONS, DIFF_OPTIONS, EDITOR_HEIGHT, getStats } from './utils';
 
-const JsonEditor = ({ value, onSave }, context) => {
+const JsonEditor = ({ value, originalValue, onSave, onDownload }, context) => {
   const [showDiff, setShowDiff] = useState(false);
   const [themeIndex, setThemeIndex] = useState(0);
   // Incrementing this key remounts the Editor, which is the only way to reset its value — Monaco has no reset API
@@ -12,6 +12,10 @@ const JsonEditor = ({ value, onSave }, context) => {
   const [stats, setStats] = useState(() => getStats(JSON.stringify(value, null, 2)));
 
   const originalRaw = useMemo(() => JSON.stringify(value, null, 2), [value]);
+  const diffOriginalRaw = useMemo(
+    () => originalValue != null ? JSON.stringify(originalValue, null, 2) : originalRaw,
+    [originalValue, originalRaw]
+  );
   // Refs instead of state to avoid re-renders on every keystroke
   const currentRawRef = useRef(originalRaw);
   const isValidRef = useRef(true);
@@ -58,7 +62,7 @@ const JsonEditor = ({ value, onSave }, context) => {
     setResetKey(k => k + 1);
   }, [originalRaw]);
 
-  const handleSave = useCallback(() => {
+  const handleAction = useCallback((fn) => {
     if (!isValidRef.current) {
       alertUserV2({
         type: 'error',
@@ -66,8 +70,8 @@ const JsonEditor = ({ value, onSave }, context) => {
       });
       return;
     }
-    try { onSave(JSON.parse(currentRawRef.current)); } catch { }
-  }, [onSave]);
+    try { fn(JSON.parse(currentRawRef.current)); } catch (err) { console.error(err) }
+  }, []);
 
   return (
     <div className='json-editor-container'>
@@ -92,10 +96,18 @@ const JsonEditor = ({ value, onSave }, context) => {
           {fmt('perun.admin_console.reset')}
           <span className='json-editor-icon'><Icon name='IconRefresh' /></span>
         </button>
-        <button type='button' onClick={handleSave} className='json-editor-btn btn-success btn_save_form'>
-          {fmt('perun.admin_console.config_menu_confirm')}
-          <span className='json-editor-icon'><Icon name='IconCheck' /></span>
-        </button>
+        {onSave && (
+          <button type='button' onClick={() => handleAction(onSave)} className='json-editor-btn btn-success btn_save_form'>
+            {fmt('perun.admin_console.config_menu_confirm')}
+            <span className='json-editor-icon'><Icon name='IconCheck' /></span>
+          </button>
+        )}
+        {onDownload && (
+          <button type='button' onClick={() => handleAction(onDownload)} className='json-editor-btn btn-success btn_save_form'>
+            {fmt('perun.admin_console.export_table_and_fields')}
+            <span className='json-editor-icon'><Icon name='IconDatabaseExport' /></span>
+          </button>
+        )}
         <span className='json-editor-stats'>{stats}</span>
       </div>
       {/* Hidden instead of unmounted to preserve the editor's undo history when toggling diff view */}
@@ -116,7 +128,7 @@ const JsonEditor = ({ value, onSave }, context) => {
           height={EDITOR_HEIGHT}
           language='json'
           theme={theme}
-          original={originalRaw}
+          original={diffOriginalRaw}
           modified={currentRawRef.current}
           options={DIFF_OPTIONS}
         />
