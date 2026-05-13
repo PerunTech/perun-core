@@ -180,7 +180,8 @@ const SvarogTableFormWrapper = (props, context) => {
 
   const handleExportSave = (json) => {
     downloadJson(json, exportFileName)
-    setState({ exportPreview: null, exportServerJson: null, exportFileName: '' })
+    const onClose = ComponentManager.getStateForComponent(props.formid, 'onClose')
+    if (onClose) onClose()
   }
 
   const fieldFormId = `SVAROG_FIELDS_FORM_${selectedFieldObjectId}`
@@ -323,7 +324,10 @@ const SvarogTableFormWrapper = (props, context) => {
               )
               : (
                 <div className='sf-no-selection'>
-                  {fmt('perun.admin_console.select_field_to_edit')}
+                  {mergedFields.length === 0
+                    ? fmt('perun.admin_console.add_or_select_field_to_edit')
+                    : fmt('perun.admin_console.select_field_to_edit')
+                  }
                 </div>
               )
             }
