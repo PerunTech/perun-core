@@ -138,7 +138,7 @@ const LoginForm = (props, context) => {
                 ))}
               </div>
               {logonImgJson?.length > 0 && (
-                <div className='logonImg' onDoubleClick={function () { window.localStorage.clear(); }}>
+                <div className='logonImg' onDoubleClick={function() { window.localStorage.clear(); }}>
                   {logonImgJson.map(img => {
                     return (
                       <img key={img.id} id={img.id} src={img.src} className={img.className} />
@@ -147,25 +147,29 @@ const LoginForm = (props, context) => {
                 </div>
               )}
             </div>
-            {loginLinks?.length > 0 && <div className='verticalLine' />}
-            <div className='alt-links-container'>
-              <div className='linkStyle'>
-                {loginLinks.map((item, index) => {
-                  return (
-                    <div key={`${item.id}_${index}`}>
-                      {item?.href ? <Link to={item.href} key={item.id} className={item.className}>
-                        {labels.formatMessage({
-                          id: `perun.login.${item.id}`,
-                          defaultMessage: `perun.login.${item.id}`
-                        })}
-                      </Link> : <div id={item.id} key={item.id} className={item.className}>
-                        <img src={item.src} className={item.className + '-img'} />
-                      </div>}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            {loginLinks?.length > 0 && (
+              <React.Fragment>
+                <div className='verticalLine' />
+                <div className='alt-links-container'>
+                  <div className='linkStyle'>
+                    {loginLinks.map((item, index) => {
+                      return (
+                        <div key={`${item.id}_${index}`}>
+                          {item?.href ? <Link to={item.href} key={item.id} className={item.className}>
+                            {labels.formatMessage({
+                              id: `perun.login.${item.id}`,
+                              defaultMessage: `perun.login.${item.id}`
+                            })}
+                          </Link> : <div id={item.id} key={item.id} className={item.className}>
+                            <img src={item.src} className={item.className + '-img'} />
+                          </div>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
           </div>
         </form>
       </div>
