@@ -24,6 +24,7 @@ const LabelExportModal = ({
                                 className='label-export-locale-input'
                                 checked={selectedLocale === id}
                                 onChange={() => onSelectLocale(id)}
+                                disabled={exportLoading}
                             />
                             <label htmlFor={`locale-check-${id}`} className='label-export-locale-check'>
                                 <span>{label}</span>
@@ -34,6 +35,16 @@ const LabelExportModal = ({
                 <small className='text-muted'>
                     {fmt('perun.admin_console.export_locale_hint')}
                 </small>
+                {exportLoading && (
+                    <div className='label-export-loader'>
+                        <div className='label-export-spinner' />
+                        <p className='label-export-loader-title'>{fmt('perun.admin_console.export_loading_title')}</p>
+                        <p className='label-export-loader-hint'>
+                            {fmt('perun.admin_console.export_loading_hint_1')}<br />
+                            {fmt('perun.admin_console.export_loading_hint_2')}
+                        </p>
+                    </div>
+                )}
                 <div className='admin-console-label-search-btn-container'>
                     {!exportPreview && (
                         <button

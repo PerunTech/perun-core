@@ -122,7 +122,7 @@ const LabelEditor = (props, context) => {
         setExportLoading(true);
         try {
             const output = await generateExport(svSession, selectedLocale, controller.signal);
-            setExportPreview(output);
+            if (!controller.signal.aborted) setExportPreview(output);
         } catch (err) {
             if (err.code === 'ERR_CANCELED') return;
             console.error(err);
