@@ -110,18 +110,15 @@ const LabelEditor = (props, context) => {
         });
     };
 
-    const selectLocale = (localeId) => {
-        setExportPreview('');
-        setSelectedLocale(localeId);
-    };
-
-    const handleGenerateExport = async () => {
+    const handleGenerateExport = async (locale) => {
+        if (exportAbortRef.current) exportAbortRef.current.abort();
         const { svSession } = props;
         const controller = new AbortController();
         exportAbortRef.current = controller;
+        setExportPreview('');
         setExportLoading(true);
         try {
-            const output = await generateExport(svSession, selectedLocale, controller.signal);
+            const output = await generateExport(svSession, locale, controller.signal);
             if (!controller.signal.aborted) setExportPreview(output);
         } catch (err) {
             if (err.code === 'ERR_CANCELED') return;
@@ -131,6 +128,11 @@ const LabelEditor = (props, context) => {
             setExportLoading(false);
             exportAbortRef.current = null;
         }
+    };
+
+    const selectLocale = (localeId) => {
+        setSelectedLocale(localeId);
+        handleGenerateExport(localeId);
     };
 
     const handleCloseExport = () => {
@@ -176,7 +178,6 @@ const LabelEditor = (props, context) => {
                 fmt={fmt}
                 onHide={handleCloseExport}
                 onSelectLocale={selectLocale}
-                onGenerate={handleGenerateExport}
             />
         </React.Fragment>
     );
