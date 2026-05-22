@@ -2,6 +2,7 @@ import React from "react";
 import { ExportableGrid } from "../../../client";
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
+import Icon from '../../../elements/util/Icon';
 import { TABLE_NAME, GRID_ID } from './utils';
 
 const LabelSearchForm = ({
@@ -22,13 +23,13 @@ const LabelSearchForm = ({
             <></>
             <div className='admin-console-label-search-btn-container'>
                 <button className='btn-outline btn_save_form' type="button" onClick={onOpenAdd}>
-                    {fmt('perun.admin_console.create_label')}
+                    <Icon name='IconPlus' size={20} /> {fmt('perun.admin_console.create_label')}
                 </button>
                 <button className='btn-outline btn_save_form' type="button" onClick={onOpenExport}>
-                    {fmt('perun.admin_console.export')}
+                    <Icon name='IconFileExport' size={20} /> {fmt('perun.admin_console.export')}
                 </button>
                 <button className='btn-success btn_save_form' type="submit">
-                    {fmt('perun.admin_console.search_button')}
+                    <Icon name='IconSearch' size={20} /> {fmt('perun.admin_console.search_button')}
                 </button>
             </div>
         </Form>

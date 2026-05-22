@@ -2,6 +2,7 @@ import React from "react";
 import { ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import PropertiesPreview from './PropertiesPreview';
+import Icon from '../../../elements/util/Icon';
 import { downloadPropertiesFile } from './utils';
 
 const LabelExportModal = ({
@@ -46,16 +47,18 @@ const LabelExportModal = ({
                     </div>
                 )}
                 {exportPreview && (
-                    <div className='admin-console-label-search-btn-container'>
-                        <button
-                            className='btn-outline btn_save_form'
-                            onClick={() => downloadPropertiesFile(exportPreview, selectedLocale)}
-                        >
-                            {fmt('perun.admin_console.download')}
-                        </button>
+                    <div className='label-export-preview-container'>
+                        <div className='admin-console-label-search-btn-container'>
+                            <button
+                                className='btn-outline btn_save_form'
+                                onClick={() => downloadPropertiesFile(exportPreview, selectedLocale)}
+                            >
+                                <Icon name='IconDownload' size={20} /> {fmt('perun.admin_console.download')}
+                            </button>
+                        </div>
+                        <PropertiesPreview text={exportPreview} />
                     </div>
                 )}
-                {exportPreview && <PropertiesPreview text={exportPreview} />}
             </div>
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />
