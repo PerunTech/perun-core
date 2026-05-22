@@ -8,9 +8,10 @@ import { JsonEditor } from '../../JsonEditor'
 import SvarogFieldsPanel from './SvarogFieldsPanel'
 import { parseDbDataArray, normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE, isTrue, FLAG_META } from './svarogTableUtils'
 import InvertedMandatoryCheckbox from './InvertedMandatoryCheckbox'
+import GuiMetadataWidget from './GuiMetadataWidget'
 
 const FIELD_ADDITIONAL_WIDGETS = { InvertedMandatoryCheckbox }
-const { useReducer, useEffect } = React
+const { useReducer, useEffect, useRef } = React
 const { Modal } = ReactBootstrap
 
 const SvarogTableFormWrapper = (props, context) => {
@@ -19,11 +20,14 @@ const SvarogTableFormWrapper = (props, context) => {
     loading: false, objectId: undefined,
     tableName: 'SVAROG_FIELDS', selectedFieldObjectId: undefined, selectedTableName: '',
     exportPreview: null, exportServerJson: null, exportFileName: '',
-    serverFields: [], fieldsLoading: false, editingTable: false,
+    serverFields: [], fieldsLoading: false, editingTable: false, guiMetadata: undefined,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ loading, objectId, tableName, selectedFieldObjectId, selectedTableName,
-    exportPreview, exportServerJson, exportFileName, serverFields, fieldsLoading, editingTable }, setState] = useReducer(reducer, initialState)
+    exportPreview, exportServerJson, exportFileName, serverFields, fieldsLoading, editingTable, guiMetadata }, setState] = useReducer(reducer, initialState)
+
+  const guiMetadataRef = useRef(guiMetadata)
+  guiMetadataRef.current = guiMetadata
 
   useEffect(() => {
     getObjectId()
@@ -189,7 +193,7 @@ const SvarogTableFormWrapper = (props, context) => {
   const onDelete = () => {
     const { dispatch } = props
     const formData = ComponentManager.getStateForComponent(fieldFormId, 'formTableData')
-    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, recordType: 'FIELD', deleted: true } })
+    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, OBJECT_ID: selectedFieldObjectId, recordType: 'FIELD', deleted: true } })
     alertUserV2({
       type: 'info',
       title: fmt('perun.admin_console.field_deleted'),
@@ -200,7 +204,7 @@ const SvarogTableFormWrapper = (props, context) => {
   const onSubmit = () => {
     const { dispatch } = props
     const formData = ComponentManager.getStateForComponent(fieldFormId, 'formTableData')
-    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, recordType: 'FIELD' } })
+    dispatch({ type: 'ADD_ADM_CONSOLE_FORM_DATA', payload: { ...formData, OBJECT_ID: selectedFieldObjectId, GUI_METADATA: guiMetadataRef.current, recordType: 'FIELD' } })
     alertUserV2({
       type: 'info',
       title: fmt('perun.admin_console.field_change_confirmed'),
@@ -209,13 +213,6 @@ const SvarogTableFormWrapper = (props, context) => {
 
   const generateFieldForm = () => {
     const { svSession } = props
-    const buttonsArray = [{
-      type: 'button',
-      id: 'delete_table_field',
-      className: 'btn-danger btn_delete_form delete-svarog-field-btn',
-      action: onDelete,
-      label: fmt('perun.admin_console.delete_field'),
-    }]
     return (
       <GenericForm
         params={'READ_URL'}
@@ -225,10 +222,9 @@ const SvarogTableFormWrapper = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${selectedFieldObjectId}/${tableName}`}
         customSave
-        customSaveButtonName={fmt('perun.admin_console.confirm_changes')}
         addSaveFunction={onSubmit}
-        hideBtns='closeAndDelete'
-        buttonsArray={selectedFieldObjectId !== 0 ? buttonsArray : []}
+        hideBtns={true}
+        buttonsArray={[]}
         className={'admin-settings-forms'}
         additionalWidgets={FIELD_ADDITIONAL_WIDGETS}
         uiSchemaOverride={FIELD_UISCHEMA_OVERRIDE}
@@ -299,8 +295,11 @@ const SvarogTableFormWrapper = (props, context) => {
                 <SvarogFieldsPanel
                   fields={mergedFields}
                   selectedObjectId={selectedFieldObjectId}
-                  onSelect={(oid) => setState({ selectedFieldObjectId: oid })}
-                  onAdd={() => setState({ selectedFieldObjectId: 0 })}
+                  onSelect={(oid) => {
+                    const field = mergedFields.find(f => f.OBJECT_ID === oid)
+                    setState({ selectedFieldObjectId: oid, guiMetadata: field?.GUI_METADATA || undefined })
+                  }}
+                  onAdd={() => setState({ selectedFieldObjectId: 0, guiMetadata: undefined })}
                   addLabel={fmt('perun.admin_console.add')}
                 />
               )
@@ -311,15 +310,36 @@ const SvarogTableFormWrapper = (props, context) => {
               ? (
                 <>
                   <div className='sf-form-panel-toolbar'>
-                    <button
-                      className='sf-form-close-btn'
-                      title={fmt('perun.main.forms.close')}
-                      onClick={() => setState({ selectedFieldObjectId: undefined })}
-                    >
-                      <Icon name='IconX' size={16} />
-                    </button>
+                    {selectedFieldObjectId !== 0 && (
+                      <button type='button' className='btn-danger btn_delete_form' onClick={onDelete}>
+                        {fmt('perun.admin_console.delete_field')}
+                      </button>
+                    )}
+                    <div className='sf-form-panel-toolbar-right'>
+                      <button type='submit' form={fieldFormId} className='btn-success btn_save_form'>
+                        {fmt('perun.admin_console.confirm_changes')}
+                      </button>
+                      <button
+                        className='sf-form-close-btn'
+                        title={fmt('perun.main.forms.close')}
+                        onClick={() => setState({ selectedFieldObjectId: undefined })}
+                      >
+                        <Icon name='IconX' size={16} />
+                      </button>
+                    </div>
                   </div>
-                  {generateFieldForm()}
+                  <div className='sf-form-panel-fields'>
+                    {generateFieldForm()}
+                  </div>
+                  <div className='sf-gui-meta-section'>
+                    <span className='sf-gui-meta-label'>{fmt('perun.admin_console.gui_metadata')}</span>
+                    <GuiMetadataWidget
+                      key={selectedFieldObjectId}
+                      value={guiMetadata}
+                      onChange={(val) => setState({ guiMetadata: val })}
+                      fmt={fmt}
+                    />
+                  </div>
                 </>
               )
               : (
