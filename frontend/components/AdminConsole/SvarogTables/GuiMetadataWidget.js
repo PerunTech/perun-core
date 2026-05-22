@@ -12,7 +12,7 @@ const toEditorValue = (v) => {
   }
 }
 
-const GuiMetadataWidget = ({ value, onChange, disabled, readonly, fmt }) => {
+const GuiMetadataWidget = ({ value, onChange, disabled, readonly }) => {
   const [editorValue, setEditorValue] = useState(() => toEditorValue(value))
   const [isValid, setIsValid] = useState(true)
   const isValidRef = useRef(true)
