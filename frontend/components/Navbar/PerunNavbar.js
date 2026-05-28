@@ -50,7 +50,7 @@ const PerunNavbar = (props, context) => {
 
     useEffect(() => {
         if (props.renderTasks) {
-            axios.get(window.server + `/taskManagement/getTaskCountByUser/${props.svSession}`).then(res => {
+            axios.get(window.server + `/WsControlProgram/getTasksByResponsibleVet/${props.svSession}`).then(res => {
                 if (res?.data?.data?.count && res?.data?.data?.count > 0) {
                     setTasksLength(res?.data?.data?.count)
                 }
