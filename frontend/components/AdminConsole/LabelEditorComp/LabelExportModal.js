@@ -2,15 +2,16 @@ import React from "react";
 import { ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import PropertiesPreview from './PropertiesPreview';
+import Icon from '../../../elements/util/Icon';
 import { downloadPropertiesFile } from './utils';
 
 const LabelExportModal = ({
     show, locales, selectedLocale, exportPreview, exportLoading, fmt,
-    onHide, onSelectLocale, onGenerate,
+    onHide, onSelectLocale,
 }) => (
     <Modal className='admin-console-unit-modal' show={show} onHide={onHide}>
         <Modal.Header className='admin-console-unit-modal-header' closeButton>
-            <Modal.Title>{fmt('perun.admin_console.export_labels', 'perun.admin_console.export_labels')}</Modal.Title>
+            <Modal.Title>{fmt('perun.admin_console.export_labels')}</Modal.Title>
         </Modal.Header>
         <Modal.Body className='admin-console-unit-modal-body'>
             <div className='label-export-panel'>
@@ -24,6 +25,7 @@ const LabelExportModal = ({
                                 className='label-export-locale-input'
                                 checked={selectedLocale === id}
                                 onChange={() => onSelectLocale(id)}
+                                disabled={exportLoading}
                             />
                             <label htmlFor={`locale-check-${id}`} className='label-export-locale-check'>
                                 <span>{label}</span>
@@ -34,28 +36,29 @@ const LabelExportModal = ({
                 <small className='text-muted'>
                     {fmt('perun.admin_console.export_locale_hint')}
                 </small>
-                <div className='admin-console-label-search-btn-container'>
-                    {!exportPreview && (
-                        <button
-                            className='btn-success btn_save_form'
-                            onClick={onGenerate}
-                            disabled={exportLoading || !selectedLocale}
-                        >
-                            {exportLoading
-                                ? fmt('perun.main.loading')
-                                : fmt('perun.admin_console.generate')}
-                        </button>
-                    )}
-                    {exportPreview && (
-                        <button
-                            className='btn-outline btn_save_form'
-                            onClick={() => downloadPropertiesFile(exportPreview, selectedLocale)}
-                        >
-                            {fmt('perun.admin_console.download')}
-                        </button>
-                    )}
-                </div>
-                {exportPreview && <PropertiesPreview text={exportPreview} />}
+                {exportLoading && (
+                    <div className='label-export-loader'>
+                        <div className='label-export-spinner' />
+                        <p className='label-export-loader-title'>{fmt('perun.admin_console.export_loading_title')}</p>
+                        <p className='label-export-loader-hint'>
+                            {fmt('perun.admin_console.export_loading_hint_1')}<br />
+                            {fmt('perun.admin_console.export_loading_hint_2')}
+                        </p>
+                    </div>
+                )}
+                {exportPreview && (
+                    <div className='label-export-preview-container'>
+                        <div className='admin-console-label-search-btn-container'>
+                            <button
+                                className='btn-outline btn_save_form'
+                                onClick={() => downloadPropertiesFile(exportPreview, selectedLocale)}
+                            >
+                                <Icon name='IconDownload' size={20} /> {fmt('perun.admin_console.download')}
+                            </button>
+                        </div>
+                        <PropertiesPreview text={exportPreview} />
+                    </div>
+                )}
             </div>
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />

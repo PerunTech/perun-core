@@ -24,8 +24,8 @@ const TypeBadge = ({ type }) => (
   <span className='sf-type-badge' style={TYPE_STYLE[type] || DEFAULT_TYPE_STYLE}>{type}</span>
 )
 
-const ConstraintBadge = ({ label, color }) => (
-  <span className='sf-constraint-badge' style={{ background: color }}>{label}</span>
+const ConstraintBadge = ({ title, label, color }) => (
+  <span className='sf-constraint-badge' style={{ background: color }} title={title}>{label}</span>
 )
 
 const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel }) => (
@@ -45,7 +45,6 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
       const isPending = !!field._pending
       const isNew = !!field._new
       const label = field.LABEL_CODE || ''
-      const isI18nLabel = label.includes('.') && !label.includes(' ')
 
       let cls = 'sf-field-row'
       if (isPk) cls += ' sf-field-row--pk'
@@ -65,7 +64,7 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
           </span>
           <span className='sf-field-info'>
             <span className='sf-field-name'>{field.FIELD_NAME || '(new field)'}</span>
-            {!isI18nLabel && label && <span className='sf-field-label' title={label}>{label}</span>}
+            {label && <span className='sf-field-label' title={label}>{label}</span>}
             {hasCodeList && <span className='sf-codelist-tag' title={field.CODE_LIST_MNEMONIC}>{field.CODE_LIST_MNEMONIC}</span>}
           </span>
           <span className='sf-type-cell'>
@@ -76,7 +75,7 @@ const SvarogFieldsPanel = ({ fields, selectedObjectId, onSelect, onAdd, addLabel
             {isPk && <ConstraintBadge label='PK' color='#92400e' />}
             {isNotNull && !isPk && <ConstraintBadge label='MANDATORY' color='#dc2626' />}
             {isUnique && <ConstraintBadge label='UNIQUE' color='#d97706' />}
-            {hasIndex && <ConstraintBadge label='INDEX' color='#0891b2' />}
+            {hasIndex && <ConstraintBadge title={field.INDEX_NAME} label='INDEX' color='#0891b2' />}
             {hasGuiMeta && <span className='sf-constraint-badge sf-meta-badge' title={guiMetaTooltip}>{'{}'}</span>}
           </span>
         </div>

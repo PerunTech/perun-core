@@ -79,6 +79,7 @@ const SvarogTables = (props, context) => {
         inputWrapper={SvarogTableFormWrapper}
         objectId={objectId}
         selectedTableName={selectedTableName}
+        onClose={doClose}
       />
     )
   }
