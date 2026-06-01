@@ -81,7 +81,7 @@ const PerunNavbar = (props, context) => {
                 <div className='nav-task-user'>
                     {props.renderTasks && (
                         <div className='nav-title-tasks' onClick={() => {
-                            hashHistory.push('/main/task_management/user-tasks/')
+                            hashHistory.push('/main/control-programs/user-controls/')
                         }}>
                             {<Icon name="IconCards" />}
                             {tasksLength > 0 && <p className='nav-tasks-length'>{tasksLength}</p>}
