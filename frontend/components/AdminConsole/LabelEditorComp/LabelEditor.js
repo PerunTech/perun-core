@@ -36,6 +36,16 @@ const LabelEditor = (props, context) => {
         }
     }, [pendingSearch, searchParams]);
 
+    // Auto-select the only locale when the export modal is open and locales have loaded.
+    // Runs whenever showExport or locales change, covering the race where locales arrive
+    // after the modal is already open.
+    useEffect(() => {
+        if (showExport && locales.length === 1 && !selectedLocale) {
+            setSelectedLocale(locales[0].id);
+            handleGenerateExport(locales[0].id);
+        }
+    }, [showExport, locales]);
+
     const handleSearch = (e) => {
         const { LABEL_CODE, LABEL_TEXT } = e.formData;
         const SEARCH_OPTION = LABEL_CODE ? 'LABEL_CODE' : 'LABEL_TEXT';
@@ -157,10 +167,7 @@ const LabelEditor = (props, context) => {
                 onSearch={handleSearch}
                 onFormChange={(e) => setSearchFormData(e.formData)}
                 onOpenAdd={openAdd}
-                onOpenExport={() => {
-                    setShowExport(true);
-                    if (locales.length === 1) selectLocale(locales[0].id);
-                }}
+                onOpenExport={() => setShowExport(true)}
                 onRowClick={openEdit}
             />
             <LabelFormModal
