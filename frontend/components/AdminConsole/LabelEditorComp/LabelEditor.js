@@ -157,7 +157,10 @@ const LabelEditor = (props, context) => {
                 onSearch={handleSearch}
                 onFormChange={(e) => setSearchFormData(e.formData)}
                 onOpenAdd={openAdd}
-                onOpenExport={() => setShowExport(true)}
+                onOpenExport={() => {
+                    setShowExport(true);
+                    if (locales.length === 1) selectLocale(locales[0].id);
+                }}
                 onRowClick={openEdit}
             />
             <LabelFormModal

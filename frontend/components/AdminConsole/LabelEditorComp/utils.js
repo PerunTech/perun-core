@@ -25,7 +25,8 @@ export const fetchLocales = () =>
     axios.get(`${window.server}/WsConf/params/get/sys/ENV_LOCALES`)
         .then(res => {
             const parsed = JSON.parse(res?.data?.VALUE ?? '[]');
-            return Array.isArray(parsed) ? parsed.map(id => ({ id, label: getLocaleLabel(id) })) : [];
+            const ids = Array.isArray(parsed) && parsed.length > 0 ? parsed : ['en_US'];
+            return ids.map(id => ({ id, label: getLocaleLabel(id) }));
         });
 
 export const generateExport = async (svSession, locale, signal) => {

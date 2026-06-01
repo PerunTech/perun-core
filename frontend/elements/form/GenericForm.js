@@ -421,7 +421,7 @@ class GenericForm extends React.Component {
   }
 
   initiateDeleteAction() {
-    if (this.state.params !== 'READ_URL') {
+    if (this.state.params !== 'READ_URL' && this.state.params !== 'FORM_DATA') {
       this.prepDropLinkParams()
     }
 
