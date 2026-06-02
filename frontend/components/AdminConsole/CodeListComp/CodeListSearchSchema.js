@@ -1,26 +1,16 @@
-export default function getDDOptionsFormSchema(context) {
-    const labels = [
-        `${context.intl.formatMessage({ id: 'perun.admin_console.search_label_code', defaultMessage: 'perun.admin_console.search_label_code' })}`,
-        `${context.intl.formatMessage({ id: 'perun.admin_console.search_label_text', defaultMessage: 'perun.admin_console.search_label_text' })}`
-    ]
-    const values = ['LABEL_CODE', 'LABEL_TEXT']
+export default function getCodeListSearchSchema(context) {
+    const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
     return {
         schema: {
-            title: `${context.intl.formatMessage({ id: 'perun.admin_console.code_list_search', defaultMessage: 'perun.admin_console.code_list_search' })}`,
+            title: fmt('perun.admin_console.code_list_search'),
             type: 'object',
             properties: {
-                SEARCH_OPTION: {
+                CODE_VALUE: {
                     type: 'string',
-                    title: `${context.intl.formatMessage({ id: 'perun.admin_console.choose_search', defaultMessage: 'perun.admin_console.choose_search' })}`,
-                    enum: values,
-                    enumNames: labels
+                    title: fmt('perun.admin_console.svarog_code_value'),
                 },
-                SEARCH_VALUES: {
-                    type: 'string',
-                    title: `${context.intl.formatMessage({ id: 'perun.admin_console.search_bar_input', defaultMessage: 'perun.admin_console.search_bar_input' })}`,
-                    placeholder: `${context.intl.formatMessage({ id: 'perun.admin_console.search_value', defaultMessage: 'perun.admin_console.search_value' })}`,
-                }
-            }
+            },
         },
-    }
+        uiSchema: {},
+    };
 }
