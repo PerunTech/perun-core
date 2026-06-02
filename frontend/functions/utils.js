@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { ComponentManager } from '../elements'
 import { store, updateSelectedRows, lastSelectedItem } from '../model'
-import { strcmp } from '../model/utils'
 import axios from 'axios'
 
 export const replaceParamsWithBoundPropVals = (string, props) => {
@@ -25,19 +24,13 @@ export const replaceParamsWithBoundPropVals = (string, props) => {
  * @param {*} value - The value to test. If a string, it will be parsed with `JSON.parse`.
  */
 export function isJSON(value) {
-  value = !strcmp(typeof value, 'string') ? JSON.stringify(value) : value
+  if (typeof value === 'object') return value !== null
   try {
-    value = JSON.parse(value);
-  } catch (e) {
-    console.error(e)
+    const parsed = JSON.parse(value)
+    return typeof parsed === 'object' && parsed !== null
+  } catch {
     return false
   }
-
-  if (strcmp(typeof value, 'object') && value !== null) {
-    return true
-  }
-
-  return false
 }
 
 export function isValidArray(array, minNumberOfElements) {
