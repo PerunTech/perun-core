@@ -18,6 +18,7 @@ const CodeListEditor = (props, context) => {
     const [showForm, setShowForm] = useState(false);
     const [editObjectId, setEditObjectId] = useState(0);
     const [activeParentObjectId, setActiveParentObjectId] = useState(0);
+    const [activeParentCodeValue, setActiveParentCodeValue] = useState(null);
     const [editingCurrentNode, setEditingCurrentNode] = useState(false);
     const [showExport, setShowExport] = useState(false);
     const [exportData, setExportData] = useState(null);
@@ -90,21 +91,26 @@ const CodeListEditor = (props, context) => {
     const openAdd = () => {
         setEditObjectId(0);
         setActiveParentObjectId(0);
+        setActiveParentCodeValue(null);
         setEditingCurrentNode(false);
         setShowForm(true);
     };
 
     const openAddChild = () => {
+        const parent = breadcrumb[breadcrumb.length - 1];
         setEditObjectId(0);
-        setActiveParentObjectId(breadcrumb[breadcrumb.length - 1].objectId);
+        setActiveParentObjectId(parent.objectId);
+        setActiveParentCodeValue(parent.codeValue);
         setEditingCurrentNode(false);
         setShowForm(true);
     };
 
     const openEditCurrent = () => {
         const current = breadcrumb[breadcrumb.length - 1];
+        const parent = breadcrumb[breadcrumb.length - 2];
         setEditObjectId(current.objectId);
-        setActiveParentObjectId(breadcrumb[breadcrumb.length - 2]?.objectId ?? 0);
+        setActiveParentObjectId(parent?.objectId ?? 0);
+        setActiveParentCodeValue(parent?.codeValue ?? null);
         setEditingCurrentNode(true);
         setShowForm(true);
     };
@@ -126,6 +132,13 @@ const CodeListEditor = (props, context) => {
             alertUserResponse({ type: resType, response: res, onConfirm });
             if (resType === 'success') {
                 GridManager.reloadAllGrids();
+                if (editingCurrentNode) {
+                    setBreadcrumb(prev => prev.map((crumb, idx) =>
+                        idx === prev.length - 1
+                            ? { ...crumb, codeValue: codesFormData.CODE_VALUE || crumb.codeValue, labelCode: codesFormData.LABEL_CODE || crumb.labelCode }
+                            : crumb
+                    ));
+                }
                 setShowForm(false);
             }
         }).catch(err => {
@@ -226,6 +239,7 @@ const CodeListEditor = (props, context) => {
             <CodeListFormModal
                 show={showForm}
                 objectId={editObjectId}
+                parentCodeValue={activeParentCodeValue}
                 svSession={svSession}
                 fmt={fmt}
                 onHide={() => setShowForm(false)}

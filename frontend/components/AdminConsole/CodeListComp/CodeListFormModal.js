@@ -11,7 +11,7 @@ const extract = (res) => {
     return (d.data && typeof d.data === 'object') ? d.data : d;
 };
 
-const CodeListFormModal = ({ show, objectId, svSession, fmt, onHide, onSave, onDelete, breadcrumb }) => {
+const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, onHide, onSave, onDelete, breadcrumb }) => {
     const [mergedData, setMergedData] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -60,8 +60,18 @@ const CodeListFormModal = ({ show, objectId, svSession, fmt, onHide, onSave, onD
                             },
                         },
                     },
-                    uiSchema: { codes: codes.uiSchema, labels: labels.uiSchema },
-                    formData: { codes: codes.formData || {}, labels: labels.formData || {} },
+                    uiSchema: {
+                        codes: parentCodeValue
+                            ? { ...codes.uiSchema, PARENT_CODE_VALUE: { ...(codes.uiSchema.PARENT_CODE_VALUE || {}), 'ui:disabled': true } }
+                            : codes.uiSchema,
+                        labels: labels.uiSchema,
+                    },
+                    formData: {
+                        codes: parentCodeValue
+                            ? { ...(codes.formData || {}), PARENT_CODE_VALUE: parentCodeValue }
+                            : (codes.formData || {}),
+                        labels: labels.formData || {},
+                    },
                 });
             } catch (err) {
                 console.error(err);
@@ -72,7 +82,7 @@ const CodeListFormModal = ({ show, objectId, svSession, fmt, onHide, onSave, onD
         };
 
         fetchFormData();
-    }, [show, objectId, svSession]);
+    }, [show, objectId, svSession, parentCodeValue]);
 
     const handleCombinedSave = (e) => {
         onSave(e.formData?.codes || {}, e.formData?.labels || {});
