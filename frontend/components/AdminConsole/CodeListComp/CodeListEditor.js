@@ -179,7 +179,6 @@ const CodeListEditor = (props, context) => {
 
     const handleOpenExport = async () => {
         if (exportAbortRef.current) exportAbortRef.current.abort();
-        const current = breadcrumb[breadcrumb.length - 1];
         const { svSession } = props;
         const controller = new AbortController();
         exportAbortRef.current = controller;
@@ -187,7 +186,8 @@ const CodeListEditor = (props, context) => {
         setExportLoading(true);
         setShowExport(true);
         try {
-            const tree = await buildExportTree(svSession, current.objectId, current.codeValue, current.labelCode, controller.signal);
+            const root = breadcrumb[0];
+            const tree = await buildExportTree(svSession, root.objectId, root.codeValue, root.labelCode, controller.signal);
             if (!controller.signal.aborted) setExportData({ children: [tree] });
         } catch (err) {
             if (err.code === 'ERR_CANCELED') return;
