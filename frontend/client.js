@@ -71,6 +71,10 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use(
   (res) => res,
   (error) => {
+    if (!error.response) {
+      alertUserV2({ type: 'error', title: 'Unable to connect to the server', message: 'Please try again later' })
+      return Promise.reject(error)
+    }
     if (error.response?.status) {
       switch (error.response.status) {
         case 302:
