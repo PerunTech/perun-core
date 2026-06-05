@@ -18,17 +18,20 @@ const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, on
     useEffect(() => {
         if (!show || !svSession) return;
 
+        const controller = new AbortController();
+        const { signal } = controller;
+
         const fetchFormData = async () => {
             setMergedData(null);
             setLoading(true);
             try {
                 const [codesSchemaRes, codesUiRes, codesDataRes, labelsSchemaRes, labelsUiRes, labelsDataRes] = await Promise.all([
-                    axios.get(`${window.server}/ReactElements/getTableJSONSchema/${svSession}/${TABLE_NAME}`),
-                    axios.get(`${window.server}/ReactElements/getTableUISchema/${svSession}/${TABLE_NAME}`),
-                    axios.get(`${window.server}/ReactElements/getTableFormData/${svSession}/${objectId}/${TABLE_NAME}`),
-                    axios.get(`${window.server}/ReactElements/getTableJSONSchema/${svSession}/${LABELS_TABLE_NAME}`),
-                    axios.get(`${window.server}/ReactElements/getTableUISchema/${svSession}/${LABELS_TABLE_NAME}`),
-                    axios.get(`${window.server}/ReactElements/getTableFormData/${svSession}/0/${LABELS_TABLE_NAME}`),
+                    axios.get(`${window.server}/ReactElements/getTableJSONSchema/${svSession}/${TABLE_NAME}`, { signal }),
+                    axios.get(`${window.server}/ReactElements/getTableUISchema/${svSession}/${TABLE_NAME}`, { signal }),
+                    axios.get(`${window.server}/ReactElements/getTableFormData/${svSession}/${objectId}/${TABLE_NAME}`, { signal }),
+                    axios.get(`${window.server}/ReactElements/getTableJSONSchema/${svSession}/${LABELS_TABLE_NAME}`, { signal }),
+                    axios.get(`${window.server}/ReactElements/getTableUISchema/${svSession}/${LABELS_TABLE_NAME}`, { signal }),
+                    axios.get(`${window.server}/ReactElements/getTableFormData/${svSession}/0/${LABELS_TABLE_NAME}`, { signal }),
                 ]);
                 const codes = {
                     schema: extract(codesSchemaRes),
@@ -74,6 +77,7 @@ const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, on
                     },
                 });
             } catch (err) {
+                if (err.code === 'ERR_CANCELED') return;
                 console.error(err);
                 alertUserResponse({ response: err });
             } finally {
@@ -82,6 +86,7 @@ const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, on
         };
 
         fetchFormData();
+        return () => controller.abort();
     }, [show, objectId, svSession, parentCodeValue]);
 
     const handleCombinedSave = (e) => {

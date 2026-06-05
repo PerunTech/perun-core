@@ -7,7 +7,7 @@ export const FORM_ID = 'SVAROG_CODES_FORM';
 export const LABELS_FORM_ID = 'SVAROG_CODES_LABELS_FORM';
 export const COMBINED_FORM_ID = 'SVAROG_CODES_COMBINED_FORM';
 
-const getField = (row, field) =>
+export const getRowField = (row, field) =>
     field === 'LABEL_CODE'
         ? row[`FIELD.${TABLE_NAME}.${field}`] || ''
         : row[`${TABLE_NAME}.${field}`] || '';
@@ -19,9 +19,9 @@ const buildNode = async (svSession, objectId, codeValue, labelCode, signal) => {
     const children = await Promise.all(
         rows.map(row => buildNode(
             svSession,
-            getField(row, 'OBJECT_ID'),
-            getField(row, 'CODE_VALUE'),
-            getField(row, 'LABEL_CODE'),
+            getRowField(row, 'OBJECT_ID'),
+            getRowField(row, 'CODE_VALUE'),
+            getRowField(row, 'LABEL_CODE'),
             signal
         ))
     );
@@ -42,8 +42,3 @@ export const downloadJsonFile = (obj, filename) => {
     a.click();
     URL.revokeObjectURL(url);
 };
-
-export const getRowField = (row, field) =>
-    field === 'LABEL_CODE'
-        ? row[`FIELD.${TABLE_NAME}.${field}`] || ''
-        : row[`${TABLE_NAME}.${field}`] || '';

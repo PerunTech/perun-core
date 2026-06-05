@@ -178,6 +178,7 @@ const CodeListEditor = (props, context) => {
     };
 
     const handleOpenExport = async () => {
+        if (!breadcrumb.length) return;
         if (exportAbortRef.current) exportAbortRef.current.abort();
         const { svSession } = props;
         const controller = new AbortController();
