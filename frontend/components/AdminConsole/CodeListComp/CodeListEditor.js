@@ -27,7 +27,6 @@ const CodeListEditor = (props, context) => {
 
     const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
 
-    // Ensure search grid fully unmounts before remounting with new URL
     useEffect(() => {
         if (pendingSearch !== null && searchParams === null) {
             setSearchParams(pendingSearch);
@@ -35,7 +34,6 @@ const CodeListEditor = (props, context) => {
         }
     }, [pendingSearch, searchParams]);
 
-    // Clean up the children grid reducer state whenever it changes or on unmount
     useEffect(() => {
         return () => {
             if (childrenGridId) ComponentManager.cleanComponentReducerState(childrenGridId);
@@ -177,11 +175,9 @@ const CodeListEditor = (props, context) => {
                 alertUserResponse({ type: resType, response: res, onConfirm });
                 if (resType === 'success') {
                     setShowForm(false);
-                    if (editingCurrentNode) {
-                        navigateTo(breadcrumb.slice(0, -1));
-                    } else {
-                        GridManager.reloadAllGrids();
-                    }
+                    const newBreadcrumb = breadcrumb.slice(0, -1);
+                    navigateTo(newBreadcrumb);
+                    if (newBreadcrumb.length === 0) GridManager.reloadAllGrids();
                 }
             }
         }).catch(err => {
