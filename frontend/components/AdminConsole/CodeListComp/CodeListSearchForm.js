@@ -37,7 +37,7 @@ const CodeListSearchForm = ({
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/${TABLE_NAME}`}
                 dataTableName={`/ReactElements/getTableWithLike/${svSession}/${TABLE_NAME}/CODE_VALUE/${encodeURIComponent(searchParams.CODE_VALUE)}/0`}
                 defaultHeight={false}
-                heightRatio={0.5}
+                heightRatio={0.6}
                 refreshData={true}
                 onRowClickFunct={onRowClick}
             />

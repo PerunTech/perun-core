@@ -131,13 +131,26 @@ const CodeListEditor = (props, context) => {
             const resType = res?.data?.type?.toLowerCase() || 'info';
             alertUserResponse({ type: resType, response: res, onConfirm });
             if (resType === 'success') {
-                GridManager.reloadAllGrids();
                 if (editingCurrentNode) {
+                    GridManager.reloadAllGrids();
                     setBreadcrumb(prev => prev.map((crumb, idx) =>
                         idx === prev.length - 1
                             ? { ...crumb, codeValue: codesFormData.CODE_VALUE || crumb.codeValue, labelCode: codesFormData.LABEL_CODE || crumb.labelCode }
                             : crumb
                     ));
+                } else if (editObjectId === 0 && activeParentObjectId === 0 && codesFormData.CODE_VALUE) {
+                    const codeValue = codesFormData.CODE_VALUE.trim().toUpperCase();
+                    const newParams = { CODE_VALUE: codeValue };
+                    setSearchFormData({ CODE_VALUE: codeValue });
+                    if (searchParams) {
+                        ComponentManager.cleanComponentReducerState(GRID_ID);
+                        setSearchParams(null);
+                        setPendingSearch(newParams);
+                    } else {
+                        setSearchParams(newParams);
+                    }
+                } else {
+                    GridManager.reloadAllGrids();
                 }
                 setShowForm(false);
             }
