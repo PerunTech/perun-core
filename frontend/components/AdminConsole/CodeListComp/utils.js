@@ -13,7 +13,7 @@ export const getRowField = (row, field) =>
         : row[`${TABLE_NAME}.${field}`] || '';
 
 const buildNode = async (svSession, objectId, codeValue, labelCode, signal) => {
-    const url = `${window.server}/ReactElements/getObjectsByParentId/${svSession}/${objectId}/${TABLE_NAME}/0`;
+    const url = `${window.server}/ReactElements/getObjectsByParentId/${svSession}/${objectId}/${TABLE_NAME}/0/SORT_ORDER`;
     const res = await axios.get(url, { signal });
     const rows = res?.data || [];
     const children = await Promise.all(
