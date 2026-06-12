@@ -136,10 +136,19 @@ async function loadLocaleData(locale) {
 }
 
 // Google Analytics
-if (process.env.GA_TRACKING_ID) {
-  ReactGA.initialize(process.env.GA_TRACKING_ID);
-  ReactGA.pageview('/');
+function initializeGoogleAnalytics() {
+  const url = `${window.server}/WsConf/params/get/sys/GOOGLE_ANALYTICS_ID`
+  axios.get(url).then(res => {
+    const trackingId = res?.data?.VALUE
+    if (trackingId) {
+      ReactGA.initialize(trackingId);
+      ReactGA.pageview('/');
+    }
+  }).catch(err => {
+    console.error(err)
+  })
 }
+initializeGoogleAnalytics()
 
 // App component
 const App = () => (

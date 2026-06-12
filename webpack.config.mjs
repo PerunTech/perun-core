@@ -50,7 +50,6 @@ export default (env, params) => {
             new webpack.DefinePlugin({
                 'process.env.DEBUG': JSON.stringify(env.DEBUG),
                 'process.env.MODE': JSON.stringify(params.mode),
-                'process.env.GA_TRACKING_ID': JSON.stringify(process.env.GA_TRACKING_ID || ''),
             })
         ],
         module: {
