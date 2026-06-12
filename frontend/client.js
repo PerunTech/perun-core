@@ -131,7 +131,7 @@ async function loadLocaleData(locale) {
 
 // Google Analytics
 function initializeGoogleAnalytics() {
-  const url = `${window.server}/WsConf/params/get/sys/GA_TRACKING_ID`
+  const url = `${window.server}/WsConf/params/get/sys/GOOGLE_ANALYTICS_ID`
   axios.get(url).then(res => {
     const trackingId = res?.data?.VALUE
     if (trackingId) {
