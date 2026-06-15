@@ -150,6 +150,23 @@ function initializeGoogleAnalytics() {
 }
 initializeGoogleAnalytics()
 
+// reCAPTCHA
+function initializeRecaptcha() {
+  const url = `${window.server}/WsConf/params/get/sys/GOOGLE_CAPTCHA_ENABLED`
+  axios.get(url).then(res => {
+    if (res?.data?.VALUE === 'true') {
+      const script = document.createElement('script')
+      script.src = 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit'
+      script.async = true
+      script.defer = true
+      document.body.appendChild(script)
+    }
+  }).catch(err => {
+    console.error(err)
+  })
+}
+initializeRecaptcha()
+
 // App component
 const App = () => (
   <Provider store={redux.store}>
