@@ -26,17 +26,7 @@ npm install
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GA_TRACKING_ID` | Google Analytics tracking ID | No |
-
-For local development, create a `.env` file in the project root:
-
-```
-GA_TRACKING_ID=UA-XXXXXXXXX-X
-```
-
-For CI/CD, set the variable in your GitLab CI/CD settings under **Settings > CI/CD > Variables**.
+This project has no required build-time environment variables. Google Analytics is configured at runtime via the `GOOGLE_ANALYTICS_ID` system parameter fetched from the server (`WsConf/params/get/sys/GOOGLE_ANALYTICS_ID`). reCAPTCHA is loaded conditionally based on the `GOOGLE_CAPTCHA_ENABLED` system parameter (`WsConf/params/get/sys/GOOGLE_CAPTCHA_ENABLED`); set it to `"true"` to enable it.
 
 ## Local Development Guide
 
