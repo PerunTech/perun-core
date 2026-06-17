@@ -34,6 +34,10 @@ const JsonEditor = ({ value, originalValue, onSave, onDownload }, context) => {
     isValidRef.current = markers.length === 0;
   }, []);
 
+  const handleEditorMount = useCallback((editor) => {
+    editorRef.current = editor;
+  }, []);
+
   const handleFormat = useCallback(() => {
     editorRef.current?.getAction('editor.action.formatDocument')?.run();
   }, []);
@@ -118,6 +122,7 @@ const JsonEditor = ({ value, originalValue, onSave, onDownload }, context) => {
           language='json'
           theme={theme}
           defaultValue={originalRaw}
+          onMount={handleEditorMount}
           onChange={handleChange}
           onValidate={handleValidate}
           options={BASE_OPTIONS}
