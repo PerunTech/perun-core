@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
-import { alertUserResponse, ReactBootstrap } from '../../elements'
+import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../elements'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -30,6 +30,12 @@ const BusinessType = (props, context) => {
       if (res?.data?.VALUE) {
         const objectTypeName = res.data.VALUE
         setState({ businessObjectTypeName: objectTypeName, gridId: `${objectTypeName}_GRID`, canRender: true })
+      } else {
+        alertUserV2({
+          type: 'warning',
+          title: context.intl.formatMessage({ id: 'perun.admin_console.business_type_name_missing_title', defaultMessage: 'perun.admin_console.business_type_name_missing_title' }),
+          message: context.intl.formatMessage({ id: 'perun.admin_console.business_type_name_missing_message', defaultMessage: 'perun.admin_console.business_type_name_missing_message' }),
+        })
       }
     }).catch(err => {
       setState({ loading: false })
