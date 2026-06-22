@@ -64,7 +64,7 @@ const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, on
                         },
                     },
                     uiSchema: {
-                        codes: parentCodeValue
+                        codes: (parentCodeValue || objectId !== 0)
                             ? { ...codes.uiSchema, PARENT_CODE_VALUE: { ...(codes.uiSchema.PARENT_CODE_VALUE || {}), 'ui:disabled': true } }
                             : codes.uiSchema,
                         labels: labels.uiSchema,
