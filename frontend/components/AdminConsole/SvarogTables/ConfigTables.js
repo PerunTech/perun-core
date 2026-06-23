@@ -1,13 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
 import { TABLE_UISCHEMA_OVERRIDE } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
+import PerunMenuWrapper from '../PerunMenu/PerunMenuWrapper'
+import SvarogMenuWrapper from '../SvarogMenuWrapper'
+import ConfigMenuWrapper from '../ConfigMenuWrapper'
+import SystemConfLogsWrapper from '../SystemConfLogsWrapper'
 
 const TABLE_ADDITIONAL_WIDGETS = { CustomCheckboxWidget }
+
+const RECORD_WRAPPERS = {
+  PERUN_MENU: PerunMenuWrapper,
+  SVAROG_MENU: SvarogMenuWrapper,
+  SVAROG_PERUN_PLUGIN: ConfigMenuWrapper,
+}
+
+const CONF_LOG_WIDGETS = {
+  logText: ({ value }) => <pre className='conf-log-note-text'>{value || ''}</pre>,
+  label: ({ value }) => <strong className='conf-log-note-name'>{value || ''}</strong>,
+}
+const CONF_LOG_UISCHEMA = { NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -18,11 +34,11 @@ const ConfigTables = (props, context) => {
   const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
 
   const initialState = {
-    loading: false, show: false, objectId: 0, selectedTableName: '',
+    show: false, objectId: 0, selectedTableName: '',
     activeTab: 'definition', showRecordModal: false, recordObjectId: 0,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ loading, show, objectId, selectedTableName, activeTab, showRecordModal, recordObjectId }, setState] = useReducer(reducer, initialState)
+  const [{ show, objectId, selectedTableName, activeTab, showRecordModal, recordObjectId }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     return () => { ComponentManager.cleanComponentReducerState(GRID_ID) }
@@ -157,7 +173,7 @@ const ConfigTables = (props, context) => {
           dataTableName={`/ReactElements/getTableData/${svSession}/${selectedTableName}/0`}
           onRowClickFunct={handleRecordRowClick}
           refreshData={true}
-          toggleCustomButton={true}
+          toggleCustomButton={selectedTableName !== 'SVAROG_CONFIG_LOG'}
           customButton={() => setState({ recordObjectId: 0, showRecordModal: true })}
           customButtonLabel={fmt('perun.admin_console.add')}
           heightRatio={0.6}
@@ -169,6 +185,8 @@ const ConfigTables = (props, context) => {
 
   const generateRecordModal = () => {
     const { svSession } = props
+    const isConfLog = selectedTableName === 'SVAROG_CONFIG_LOG'
+    const formTableName = isConfLog ? 'SVAROG_NOTES' : selectedTableName
     return (
       <Modal className='admin-console-unit-modal' show={showRecordModal} onHide={() => setState({ showRecordModal: false })}>
         <Modal.Header className='admin-console-unit-modal-header' closeButton />
@@ -177,13 +195,19 @@ const ConfigTables = (props, context) => {
             params='READ_URL'
             key={recordFormId}
             id={recordFormId}
-            method={`/ReactElements/getTableJSONSchema/${svSession}/${selectedTableName}`}
-            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${selectedTableName}`}
-            tableFormDataMethod={`/ReactElements/getTableFormData/${svSession}/${recordObjectId}/${selectedTableName}`}
-            addSaveFunction={(e) => saveRecord(e)}
-            hideBtns={recordObjectId === 0 ? 'closeAndDelete' : 'close'}
-            addDeleteFunction={deleteRecord}
-            className='admin-settings-forms'
+            method={`/ReactElements/getTableJSONSchema/${svSession}/${formTableName}`}
+            uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${formTableName}`}
+            tableFormDataMethod={isConfLog
+              ? `/ReactElements/getFormDataByParentId/${svSession}/${recordObjectId}/${formTableName}`
+              : `/ReactElements/getTableFormData/${svSession}/${recordObjectId}/${selectedTableName}`}
+            addSaveFunction={isConfLog ? undefined : (e) => saveRecord(e)}
+            hideBtns={isConfLog ? 'all' : (recordObjectId === 0 ? 'closeAndDelete' : 'close')}
+            addDeleteFunction={isConfLog ? undefined : deleteRecord}
+            className={isConfLog ? 'admin-settings-forms conf-log-preview-form' : 'admin-settings-forms'}
+            inputWrapper={isConfLog ? SystemConfLogsWrapper : RECORD_WRAPPERS[selectedTableName]}
+            additionalWidgets={isConfLog ? CONF_LOG_WIDGETS : undefined}
+            uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
+            objectId={recordObjectId}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />
@@ -193,7 +217,6 @@ const ConfigTables = (props, context) => {
 
   return (
     <>
-      {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{fmt('perun.admin_console.svarog_config_tables')}</p>
