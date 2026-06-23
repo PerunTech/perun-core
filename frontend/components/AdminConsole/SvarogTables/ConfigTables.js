@@ -226,7 +226,7 @@ const ConfigTables = (props, context) => {
           key={GRID_ID}
           id={GRID_ID}
           configTableName={`/ReactElements/getTableFieldList/${props.svSession}/${TABLE_NAME}`}
-          dataTableName={`/ReactElements/getTableWithMultipleFilters/${props.svSession}/SVAROG_TABLES/IS_CONFIG_TABLE/AND/true/0`}
+          dataTableName={`/ReactElements/getTableWithFilter/${props.svSession}/SVAROG_TABLES/IS_CONFIG_TABLE/true/0`}
           onRowClickFunct={handleRowClick}
           refreshData={true}
           toggleCustomButton={true}
