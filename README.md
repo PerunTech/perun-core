@@ -4,7 +4,7 @@ The front-end module of the Svarog framework, containing the core functionalitie
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Node.js](https://nodejs.org/) (v18.12.0 or higher)
 - [npm](https://www.npmjs.com/) (v8 or higher)
 
 ## Getting Started
@@ -26,17 +26,7 @@ npm install
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GA_TRACKING_ID` | Google Analytics tracking ID | No |
-
-For local development, create a `.env` file in the project root:
-
-```
-GA_TRACKING_ID=UA-XXXXXXXXX-X
-```
-
-For CI/CD, set the variable in your GitLab CI/CD settings under **Settings > CI/CD > Variables**.
+This project has no required build-time environment variables. Google Analytics is configured at runtime via the `GOOGLE_ANALYTICS_ID` system parameter fetched from the server (`WsConf/params/get/sys/GOOGLE_ANALYTICS_ID`). reCAPTCHA is loaded conditionally based on the `GOOGLE_CAPTCHA_ENABLED` system parameter (`WsConf/params/get/sys/GOOGLE_CAPTCHA_ENABLED`); set it to `"true"` to enable it.
 
 ## Local Development Guide
 
@@ -116,6 +106,14 @@ window.server = 'http://<host>:<port>/services'
 ```
 
 > **Note:** This is a simplified template. The full boilerplate is available at [`docs/index.html.template`](docs/index.html.template) — copy it into your project's `backend/www` directory and customize as needed.
+
+### Server Unavailability Handling
+
+`index.html` loads `sweetalert2.all.min.js` from the assets server before the inline script runs. If the backend is temporarily unavailable (e.g. during a restart or deploy), the `getServer` script will fail to set `window.server`, and a SweetAlert2 dialog will be shown instead of a blank page.
+
+Make sure `sweetalert2.all.min.js` is present in your assets project at `perun-assets/js/`. The file can be obtained from the [SweetAlert2 releases page](https://github.com/sweetalert2/sweetalert2/releases).
+
+To simulate a server unavailability scenario locally, block the `getServer` request in your browser's DevTools under **Network > Block request URL**, then reload the page.
 
 ### Spatial Support
 

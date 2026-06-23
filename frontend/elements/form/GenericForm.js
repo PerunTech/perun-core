@@ -421,7 +421,7 @@ class GenericForm extends React.Component {
   }
 
   initiateDeleteAction() {
-    if (this.state.params !== 'READ_URL') {
+    if (this.state.params !== 'READ_URL' && this.state.params !== 'FORM_DATA') {
       this.prepDropLinkParams()
     }
 
@@ -571,7 +571,10 @@ class GenericForm extends React.Component {
     if (this.props.bypassInputChange) {
       this.state.bypassInputChange(event.formData, fieldName, fieldValue)
     } else {
-      this.setState({ formTableData: { ...this.state.formTableData, ...event.formData } })
+      const merged = Array.isArray(event.formData)
+        ? event.formData
+        : { ...this.state.formTableData, ...event.formData }
+      this.setState({ formTableData: merged })
     }
   }
 
@@ -611,8 +614,12 @@ class GenericForm extends React.Component {
       fields={{ SchemaField: CustomOnchangeFunction }}
       formContext={formContext}
       schema={enableExcludedFields ? (formWithExcluded || {}) : (formData || {})}
-      uiSchema={uischema}
-      widgets={this.Widgets}
+      uiSchema={this.props.uiSchemaOverride
+        ? Object.assign({}, uischema, ...Object.entries(this.props.uiSchemaOverride).map(([k, v]) => ({
+          [k]: Array.isArray(v) ? v : { ...(uischema?.[k] || {}), ...v }
+        })))
+        : uischema}
+      widgets={{ ...this.Widgets, ...(this.props.additionalWidgets || {}) }}
       formData={formTableData}
       onSubmit={this.saveObject}
       showErrorList={false}

@@ -4,12 +4,16 @@ import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Icon } from "../../elements"
 import { downloadFile } from '../../functions/utils';
-
+import { alertUserResponse } from '../../elements'
+import axios from 'axios';
+import { createHashHistory } from 'history';
 const PerunNavbar = (props, context) => {
+    let hashHistory = createHashHistory();
     const [toggleNavOpt, setToggleNavOpt] = useState(false)
     const [menuBurger, setMenuBurger] = useState(undefined)
     const [toggleBurger, setToggleBurger] = useState(false)
     const [img, setImg] = useState(undefined);
+    const [tasksLength, setTasksLength] = useState(0)
     const navOptRef = useRef(null);
     const burgerRef = useRef(null);
 
@@ -44,6 +48,19 @@ const PerunNavbar = (props, context) => {
         setToggleBurger(true)
     }
 
+    useEffect(() => {
+        if (props.renderTasks) {
+            axios.get(window.server + `/WsControlProgram/getTaskCountByResponsibleVet/${props.svSession}`).then(res => {
+                if (res?.data?.data?.count && res?.data?.data?.count > 0) {
+                    setTasksLength(res?.data?.data?.count)
+                }
+            }).catch(err => {
+                console.error(err)
+                alertUserResponse({ response: err })
+            })
+        }
+    }, [props.renderTasks]);
+
     return (
         <>
             <div className='perun-navbar'>
@@ -61,11 +78,21 @@ const PerunNavbar = (props, context) => {
                 <div className='nav-title'>
                     <p id='identificationScreen'></p>
                 </div>
-                {/* navbar end */}
-                <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
-                    <div className='nav-icon-with-title'>
-                        {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
-                    <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
+                <div className='nav-task-user'>
+                    {props.renderTasks && (
+                        <div className='nav-title-tasks' onClick={() => {
+                            hashHistory.push('/main/control-programs/user-controls/')
+                        }}>
+                            {<Icon name="IconCards" />}
+                            {tasksLength > 0 && <p className='nav-tasks-length'>{tasksLength}</p>}
+                        </div>
+                    )}
+                    {/* navbar end */}
+                    <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
+                        <div className='nav-icon-with-title'>
+                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
+                        <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
+                    </div>
                 </div>
                 {/* navbar end toggle */}
                 {toggleNavOpt && (

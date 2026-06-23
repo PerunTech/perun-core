@@ -15,15 +15,16 @@ import { changeLanguageAndLocale } from '../../client'
 
 const MainMenu = (props) => {
   const hashHistory = createHashHistory()
-  const initialState = { loading: false, navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '' }
+  const initialState = { loading: false, navbarImgJson: [], languageOptions: [], currentUser: '', activeLanguage: '', renderTasks: false }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ loading, navbarImgJson, languageOptions, currentUser, activeLanguage }, setState] = useReducer(reducer, initialState)
+  const [{ loading, navbarImgJson, languageOptions, currentUser, activeLanguage, renderTasks }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     getNavbarImgJson()
     getLanguageOptions()
     getLocale()
     getCurrentUser()
+    shouldRenderTasks()
   }, [])
 
   const getNavbarImgJson = () => {
@@ -59,6 +60,7 @@ const MainMenu = (props) => {
             }
           })
         }
+
 
         // Get the individual system user values (ex. object ID, parent ID), since they're returned separately from the non-system values
         if (isValidObject(resData, 1)) {
@@ -152,10 +154,21 @@ const MainMenu = (props) => {
     })
   }
 
+  const shouldRenderTasks = () => {
+    const url = `${window.server}/WsConf/params/get/sys/SHOW_TASKS_NAVBAR`
+    axios.get(url).then(res => {
+      if (res?.data?.VALUE) {
+        setState({ renderTasks: res.data.VALUE })
+      }
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
   return (
     <React.Fragment>
       {loading && <Loading />}
-      <PerunNavbar logout={logout} activeLanguage={activeLanguage} languageOptions={languageOptions} location={window.location} changeLang={changeLang} />
+      <PerunNavbar logout={logout} activeLanguage={activeLanguage} renderTasks={renderTasks} languageOptions={languageOptions} location={window.location} changeLang={changeLang} />
     </React.Fragment>
   )
 }

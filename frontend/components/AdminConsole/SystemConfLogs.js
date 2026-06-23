@@ -1,16 +1,28 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import axios from 'axios'
 import { ComponentManager, ExportableGrid, GenericForm } from '../../client'
-import { ReactBootstrap } from '../../elements'
+import { alertUserResponse, ReactBootstrap } from '../../elements'
 import SystemConfLogsWrapper from './SystemConfLogsWrapper'
+import { Loading } from '../ComponentsIndex'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
+const LogTextWidget = ({ value }) => (
+  <pre className='conf-log-note-text'>{value || ''}</pre>
+)
+
+const LabelWidget = ({ value }) => (
+  <strong className='conf-log-note-name'>{value || ''}</strong>
+)
+
 const SystemConfLogs = (props, context) => {
-  const initialState = { tableName: 'SVAROG_CONFIG_LOG', formTableName: 'SVAROG_NOTES', gridId: 'SVAROG_CONFIG_LOG_GRID', show: false, objectId: 0 }
+  const initialState = {
+    loading: false, tableName: 'SVAROG_CONFIG_LOG', formTableName: 'SVAROG_NOTES', gridId: 'SVAROG_CONFIG_LOG_GRID', gridConfig: undefined, show: false, objectId: 0
+  }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ tableName, formTableName, gridId, show, objectId }, setState] = useReducer(reducer, initialState)
+  const [{ loading, tableName, formTableName, gridId, gridConfig, show, objectId }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     return () => {
@@ -18,19 +30,45 @@ const SystemConfLogs = (props, context) => {
     }
   }, [gridId])
 
+  useEffect(() => {
+    getAndExtendFieldList()
+  }, [])
+
+  const getAndExtendFieldList = () => {
+    setState({ loading: true })
+    const { svSession } = props
+    const url = `${window.server}/ReactElements/getTableFieldList/${svSession}/${tableName}`
+    axios.get(url).then(res => {
+      setState({ loading: false })
+      const fields = Array.isArray(res.data) ? res.data : res.data?.data || []
+      const dtInsertField = {
+        key: `${tableName}.DT_INSERT`,
+        TABLE_NAME: tableName,
+        FIELD_NAME: 'DT_INSERT',
+        name: context.intl.formatMessage({ id: 'perun.grid_labels.svarog_config_log.dt_insert', defaultMessage: 'perun.grid_labels.svarog_config_log.dt_insert' }),
+        filterable: true,
+        resizable: true
+      }
+      setState({ gridConfig: [...fields, dtInsertField] })
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err })
+    })
+  }
+
   const handleRowClick = (_id, _rowIdx, row) => {
     setState({ objectId: row[`${tableName}.OBJECT_ID`] || 0, show: true })
   }
 
   const generateConfLogGrid = () => {
-    const { svSession } = props
     return (
       <ExportableGrid
-        gridType='READ_URL'
+        gridType='SEARCH_GRID_DATA'
         key={gridId}
         id={gridId}
-        configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
-        dataTableName={`/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
+        configTableName={gridConfig}
+        dataTableName={`/ReactElements/getFullTableData/${props.svSession}/${tableName}/0/false`}
         onRowClickFunct={handleRowClick}
         refreshData={true}
         heightRatio={0.75}
@@ -49,19 +87,22 @@ const SystemConfLogs = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${svSession}/${formTableName}`}
         tableFormDataMethod={`/ReactElements/getFormDataByParentId/${svSession}/${objectId}/${formTableName}`}
         hideBtns='all'
-        className={'admin-settings-forms'}
+        className={'admin-settings-forms conf-log-preview-form'}
         inputWrapper={SystemConfLogsWrapper}
+        additionalWidgets={{ logText: LogTextWidget, label: LabelWidget }}
+        uiSchemaOverride={{ NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }}
       />
     )
   }
 
   return (
     <>
+      {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' })}</p>
         </div>
-        {generateConfLogGrid()}
+        {gridConfig && generateConfLogGrid()}
       </div>
       {show && (
         <Modal className='admin-console-unit-modal' show={show} onHide={() => setState({ show: false })}>

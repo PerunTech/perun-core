@@ -19,7 +19,7 @@ const UsersAddGroup = (props) => {
         let url = `${window.server}/WsAdminConsole/updateUserGroup/${props.svSession}/${props.userId}/${row['SVAROG_USER_GROUPS.OBJECT_ID']}/add`
         setLoading(true)
         axios.get(url).then(res => {
-            GridManager.reloadGridData('USER_GROUP_GRID')
+            GridManager.reloadAllGrids()
             alertUserResponse({ response: res })
             setLoading(false)
             props.setAddGroupFlag(false)

@@ -1,233 +1,269 @@
-import React, { useState, useEffect } from "react";
-import { ComponentManager, ExportableGrid, GridManager, Loading, PropTypes } from "../../../client";
+import React, { useState, useEffect, useRef } from "react";
+import { ComponentManager, GridManager, PropTypes, axios } from "../../../client";
 import { connect } from "react-redux";
-import { alertUserResponse, ReactBootstrap } from "../../../elements";
-const { Modal } = ReactBootstrap;
-import axios from "axios";
-import CodeListFormSchema from "./CodeListFormSchema";
-import Form from '@rjsf/core';
-import validator from '@rjsf/validator-ajv8';
-let prevId
+import { alertUserResponse } from "../../../elements";
+import CodeListSearchSchema from "./CodeListSearchSchema";
+import { COMBINED_FORM_ID, GRID_ID, buildExportTree, getRowField } from './utils';
+import CodeListSearchForm from './CodeListSearchForm';
+import CodeListChildrenView from './CodeListChildrenView';
+import CodeListFormModal from './CodeListFormModal';
+import CodeListExportModal from './CodeListExportModal';
 
 const CodeListEditor = (props, context) => {
-    const [show, setShow] = useState(false)
-    const [innerGrid, setInnerGrid] = useState(undefined)
-    const [addChildForm, setAddChildForm] = useState(undefined)
-    const [editChildForm, setEditForm] = useState(undefined)
-    const [prevO, setPrevo] = useState([0])
-    const [arrOP, setArrOP] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [searchFormData, setSearchFormData] = useState({});
+    const [searchParams, setSearchParams] = useState(null);
+    const [pendingSearch, setPendingSearch] = useState(null);
+    const [breadcrumb, setBreadcrumb] = useState([]);
+    const [childrenGridId, setChildrenGridId] = useState(null);
+    const [showForm, setShowForm] = useState(false);
+    const [editObjectId, setEditObjectId] = useState(0);
+    const [activeParentObjectId, setActiveParentObjectId] = useState(0);
+    const [activeParentCodeValue, setActiveParentCodeValue] = useState(null);
+    const [editingCurrentNode, setEditingCurrentNode] = useState(false);
+    const [showExport, setShowExport] = useState(false);
+    const [exportData, setExportData] = useState(null);
+    const [exportLoading, setExportLoading] = useState(false);
+    const exportAbortRef = useRef(null);
+
+    const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
+
     useEffect(() => {
-        generateInnerGrid(null, null)
+        if (pendingSearch !== null && searchParams === null) {
+            setSearchParams(pendingSearch);
+            setPendingSearch(null);
+        }
+    }, [pendingSearch, searchParams]);
+
+    useEffect(() => {
         return () => {
-            ComponentManager.cleanComponentReducerState(prevId);
-            prevId = ""
-        }
-    }, [])
+            if (childrenGridId) ComponentManager.cleanComponentReducerState(childrenGridId);
+        };
+    }, [childrenGridId]);
 
-    const generateInnerGrid = (data, parentC) => {
-        const { svSession } = props
-        ComponentManager.cleanComponentReducerState(prevId);
-        const gridId = 'CODES_GRID_' + Math.floor(Math.random() * 999999).toString(36)
-        prevId = gridId
-        let dataWs = `/ReactElements/getTableData/${svSession}/SVAROG_CODES/0`
-        let heightRatio = 0.75
-        if (data) {
-            dataWs = `/ReactElements/getObjectsByParentId/${svSession}/${data}/SVAROG_CODES/0`
-            heightRatio = 0.35
-        }
-        const grid = (
-            <ExportableGrid
-                gridType={"READ_URL"}
-                key={gridId}
-                id={gridId}
-                configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_CODES`}
-                dataTableName={dataWs}
-                defaultHeight={false}
-                heightRatio={heightRatio}
-                refreshData={true}
-                onRowClickFunct={handleRowClick}
-                toggleCustomButton={true}
-                customButton={() => generateAddChildForm(parentC)}
-                customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add_code_list_editor', defaultMessage: 'perun.admin_console.add_code_list_editor' })}
-            />
-        );
-        setInnerGrid(grid)
-    }
+    useEffect(() => {
+        return () => ComponentManager.cleanComponentReducerState(GRID_ID);
+    }, []);
 
-    const handleRowClick = (_id, _rowIdx, row) => {
-        let prevobj = prevO
-        let arrOfParents = arrOP
-        prevobj.push(row['SVAROG_CODES.OBJECT_ID'])
-        arrOfParents.push(row['SVAROG_CODES.CODE_VALUE'])
-        setPrevo(prevobj)
-        setArrOP(arrOfParents)
-        generateEditForm(row['SVAROG_CODES.OBJECT_ID'])
-        generateInnerGrid(row['SVAROG_CODES.OBJECT_ID'], row['SVAROG_CODES.CODE_VALUE'])
-    }
-
-    const generateAddChildForm = (parentC, edit) => {
-        if (!edit) {
-            setShow(true)
-        }
-        const { schema } = CodeListFormSchema(context);
-        renderAddChildForm(schema, parentC, edit)
+    const navigateTo = (newBreadcrumb) => {
+        const newGridId = newBreadcrumb.length > 0
+            ? 'CODES_CHILDREN_' + Math.random().toString(36).slice(2)
+            : null;
+        setBreadcrumb(newBreadcrumb);
+        setChildrenGridId(newGridId);
     };
 
-    const renderAddChildForm = (schema, parentC, edit) => {
-        let formData = {}
-        let uiSchema = {}
-        if (parentC) {
-            formData = {
-                PARENT_CODE_VALUE: parentC
-            }
+    const handleSearch = (e) => {
+        const codeValue = (e.formData.CODE_VALUE || '').trim().toUpperCase();
+        if (!codeValue) return;
+        const newParams = { CODE_VALUE: codeValue };
+        if (searchParams) {
+            ComponentManager.cleanComponentReducerState(GRID_ID);
+            setSearchParams(null);
+            setPendingSearch(newParams);
+        } else {
+            setSearchParams(newParams);
         }
-        if (edit) {
-            formData = edit
+    };
 
-        }
-        if (prevO[prevO?.length - 1] !== 0) {
-            uiSchema = {
-                PARENT_CODE_VALUE: { "ui:readonly": true }
-            }
-        }
-        const form = (
-            <Form
-                key={'SVAROG_CODES_EDIT'}
-                uiSchema={uiSchema}
-                validator={validator}
-                schema={schema}
-                formData={formData}
-                className={`form-test label-form code-list-form ${edit && 'code-list-edit-form'}`}
-                onSubmit={(e) => {
-                    submitCodeList(e, edit)
-                }}
-            >
-                <></>
-                <div className='admin-console-code-list-btn-holder'>
-                    <div className='admin-console-label-form-btn-container'>
-                        <button className={`btn-success btn_save_form`} type="submit">
-                            {context.intl.formatMessage({ id: 'perun.generalLabel.save', defaultMessage: 'perun.generalLabel.save' })}
-                        </button>
-                    </div>
-                    {edit && edit['PARENT_ID'] !== 0 && (
-                        <div className='admin-console-label-form-btn-container'>
-                            <button className='btn-success btn_save_form admin-console-code-list-remove-btn' type="button" onClick={() => deleteFunc(edit)}>
-                                {context.intl.formatMessage({ id: 'perun.generalLabel.delete', defaultMessage: 'perun.generalLabel.delete' })}
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </Form>
-        )
-        if (edit) {
-            setEditForm(form)
-        }
-        setAddChildForm(form)
-    }
+    const handleSearchRowClick = (_id, _rowIdx, row) => {
+        navigateTo([{
+            objectId: getRowField(row, 'OBJECT_ID'),
+            codeValue: getRowField(row, 'CODE_VALUE'),
+            labelCode: getRowField(row, 'LABEL_CODE'),
+        }]);
+    };
 
-    const deleteFunc = (edit) => {
-        setLoading(true)
-        let restUrl = window.server + '/ReactElements/deleteObject/' + props.svSession + '/false/false'
+    const handleChildRowClick = (_id, _rowIdx, row) => {
+        navigateTo([...breadcrumb, {
+            objectId: getRowField(row, 'OBJECT_ID'),
+            codeValue: getRowField(row, 'CODE_VALUE'),
+            labelCode: getRowField(row, 'LABEL_CODE'),
+        }]);
+    };
+
+    const handleBreadcrumbNav = (idx) => {
+        if (idx === -1) navigateTo([]);
+        else navigateTo(breadcrumb.slice(0, idx + 1));
+    };
+
+    const openAdd = () => {
+        setEditObjectId(0);
+        setActiveParentObjectId(0);
+        setActiveParentCodeValue(null);
+        setEditingCurrentNode(false);
+        setShowForm(true);
+    };
+
+    const openAddChild = () => {
+        const parent = breadcrumb[breadcrumb.length - 1];
+        setEditObjectId(0);
+        setActiveParentObjectId(parent.objectId);
+        setActiveParentCodeValue(parent.codeValue);
+        setEditingCurrentNode(false);
+        setShowForm(true);
+    };
+
+    const openEditCurrent = () => {
+        const current = breadcrumb[breadcrumb.length - 1];
+        const parent = breadcrumb[breadcrumb.length - 2];
+        setEditObjectId(current.objectId);
+        setActiveParentObjectId(parent?.objectId ?? 0);
+        setActiveParentCodeValue(parent?.codeValue ?? null);
+        setEditingCurrentNode(true);
+        setShowForm(true);
+    };
+
+    const handleSave = (codesFormData, labelsFormData) => {
+        const { svSession } = props;
+        const onConfirm = () => ComponentManager.setStateForComponent(COMBINED_FORM_ID, null, { saveExecuted: false });
+
         axios({
             method: 'post',
-            data: JSON.stringify(edit),
-            url: restUrl,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            data: encodeURIComponent(JSON.stringify({
+                SVAROG_CODES: codesFormData,
+                SVAROG_LABELS: labelsFormData,
+            })),
+            url: `${window.server}/WsAdminConsole/save-code-list/sid/${svSession}/parent_id/${activeParentObjectId}`,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         }).then((res) => {
-            setLoading(false)
-            if (res?.data) {
-                alertUserResponse({ response: res.data, onConfirm: () => backButton() })
-                GridManager.reloadGridData(prevId)
+            const resType = res?.data?.type?.toLowerCase() || 'info';
+            alertUserResponse({ type: resType, response: res, onConfirm });
+            if (resType === 'success') {
+                if (editingCurrentNode) {
+                    GridManager.reloadAllGrids();
+                    setBreadcrumb(prev => prev.map((crumb, idx) =>
+                        idx === prev.length - 1
+                            ? { ...crumb, codeValue: codesFormData.CODE_VALUE || crumb.codeValue, labelCode: codesFormData.LABEL_CODE || crumb.labelCode }
+                            : crumb
+                    ));
+                } else if (editObjectId === 0 && activeParentObjectId === 0 && codesFormData.CODE_VALUE) {
+                    const codeValue = codesFormData.CODE_VALUE.trim().toUpperCase();
+                    const newParams = { CODE_VALUE: codeValue };
+                    setSearchFormData({ CODE_VALUE: codeValue });
+                    if (searchParams) {
+                        ComponentManager.cleanComponentReducerState(GRID_ID);
+                        setSearchParams(null);
+                        setPendingSearch(newParams);
+                    } else {
+                        setSearchParams(newParams);
+                    }
+                } else {
+                    GridManager.reloadAllGrids();
+                }
+                setShowForm(false);
             }
         }).catch(err => {
-            console.error(err)
-            setLoading(false)
-            alertUserResponse({ response: err })
-        })
-    }
+            console.error(err);
+            alertUserResponse({ response: err, onConfirm });
+        });
+    };
 
-    const submitCodeList = (e, edit) => {
-        setLoading(true)
+    const handleDelete = (_id, _action, _session, params) => {
         const { svSession } = props;
-        let data = {
-            'SVAROG_CODES': {
-                'CODE_VALUE': e.formData['CODE_VALUE'], 'PARENT_CODE_VALUE': e.formData['PARENT_CODE_VALUE'], 'LABEL_CODE': e.formData['LABEL_CODE'],
-                'SORT_ORDER': e.formData['SORT_ORDER'], ...edit && { 'PKID': e.formData['PKID'], 'OBJECT_ID': e.formData['OBJECT_ID'] }
-            },
-            'SVAROG_LABELS': { 'LABEL_TEXT': e.formData['LABEL_TEXT'], 'LOCALE_ID': e.formData['LOCALE_ID'], ' LABEL_DESCR': e.formData['LABEL_DESCR'] }
-        }
-        let url =
-            window.server + `/WsAdminConsole/save-code-list/sid/${svSession}/parent_id/${edit ? edit['PARENT_ID'] : prevO[prevO?.length - 1]}`
-
+        const onConfirm = () => ComponentManager.setStateForComponent(COMBINED_FORM_ID, null, { deleteExecuted: false });
+        const raw = params[4]?.PARAM_VALUE;
+        const parsed = raw ? JSON.parse(raw) : {};
+        const codesData = parsed.codes || parsed;
         axios({
-            method: "post",
-            data: JSON.stringify(data),
-            url,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            method: 'post',
+            data: encodeURIComponent(JSON.stringify(codesData)),
+            url: `${window.server}/ReactElements/deleteObject/${svSession}`,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         }).then((res) => {
-            setLoading(false)
             if (res?.data) {
-                const resType = res.data?.type?.toLowerCase() || 'info'
-                alertUserResponse({ response: res.data })
+                const resType = res.data?.type?.toLowerCase() || 'info';
+                alertUserResponse({ type: resType, response: res, onConfirm });
                 if (resType === 'success') {
-                    GridManager.reloadGridData(prevId);
-                    setShow(false);
+                    setShowForm(false);
+                    const newBreadcrumb = breadcrumb.slice(0, -1);
+                    navigateTo(newBreadcrumb);
+                    if (newBreadcrumb.length === 0) GridManager.reloadAllGrids();
                 }
             }
         }).catch(err => {
-            console.error(err)
-            setLoading(false)
-            alertUserResponse({ response: err })
-        })
+            console.error(err);
+            alertUserResponse({ response: err, onConfirm });
+        });
     };
 
-    const backButton = () => {
-        let prevobj = prevO
-        let arrOfParents = arrOP
-        prevobj?.pop()
-        setPrevo(prevobj)
-        arrOfParents?.pop()
-        setArrOP(arrOfParents)
-        generateInnerGrid(prevobj[prevobj?.length - 1], arrOfParents[arrOfParents?.length - 1])
-        generateEditForm(prevobj[prevobj?.length - 1])
-    }
-    const generateEditForm = (objid) => {
-        let url = window.server + `/ReactElements/getTableFormData/${props.svSession}/${objid}/SVAROG_CODES`
-        axios.get(url).then(res => {
-            generateAddChildForm(null, res.data)
-        })
-    }
+    const handleOpenExport = async () => {
+        if (!breadcrumb.length) return;
+        if (exportAbortRef.current) exportAbortRef.current.abort();
+        const { svSession } = props;
+        const controller = new AbortController();
+        exportAbortRef.current = controller;
+        setExportData(null);
+        setExportLoading(true);
+        setShowExport(true);
+        try {
+            const root = breadcrumb[0];
+            const tree = await buildExportTree(svSession, root.objectId, root.codeValue, root.labelCode, controller.signal);
+            if (!controller.signal.aborted) setExportData({ children: [tree] });
+        } catch (err) {
+            if (err.code === 'ERR_CANCELED') return;
+            console.error(err);
+            alertUserResponse({ response: err });
+        } finally {
+            setExportLoading(false);
+            exportAbortRef.current = null;
+        }
+    };
+
+    const handleCloseExport = () => {
+        if (exportAbortRef.current) exportAbortRef.current.abort();
+        setExportData(null);
+        setShowExport(false);
+    };
+
+    const { svSession } = props;
+    const { schema, uiSchema } = CodeListSearchSchema(context);
+
     return (
         <React.Fragment>
-            {loading && <Loading />}
-            <div className='admin-console-component-header'>
-                <p>{context.intl.formatMessage({ id: 'perun.admin_console.codelist_editor', defaultMessage: 'perun.admin_console.codelist_editor' })}</p>
-            </div>
-            <div className='admin-console-code-list-content-holder'>
-                {prevO?.length > 1 && <legend className='admin-console-code-list-legend admin-console-legend'>{context.intl.formatMessage({ id: 'perun.admin_console.change_code_list', defaultMessage: 'perun.admin_console.change_code_list' })} {arrOP[arrOP?.length - 1]}</legend>}
-                {prevO?.length > 1 && editChildForm}
-                {innerGrid}
-                {prevO?.length > 1 && (
-                    <button className='btn_save_form admin-console-code-list-back-btn' onClick={backButton}>
-                        {context.intl.formatMessage({ id: 'perun.admin_console.back_button', defaultMessage: 'perun.admin_console.back_button' })}
-                    </button>
-                )}
-            </div>
-            <Modal
-                className='admin-console-unit-modal'
-                show={show}
-                onHide={() => {
-                    setShow(!show)
-                }}
-            >
-                <Modal.Header className='admin-console-unit-modal-header' closeButton>
-                </Modal.Header>
-                <Modal.Body className='admin-console-unit-modal-body'>
-                    {addChildForm}
-                </Modal.Body>
-                <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-            </Modal>
+            {breadcrumb.length === 0 ? (
+                <CodeListSearchForm
+                    schema={schema}
+                    uiSchema={uiSchema}
+                    searchFormData={searchFormData}
+                    searchParams={searchParams}
+                    svSession={svSession}
+                    fmt={fmt}
+                    onSearch={handleSearch}
+                    onFormChange={(e) => setSearchFormData(e.formData)}
+                    onOpenAdd={openAdd}
+                    onRowClick={handleSearchRowClick}
+                />
+            ) : (
+                <CodeListChildrenView
+                    breadcrumb={breadcrumb}
+                    childrenGridId={childrenGridId}
+                    svSession={svSession}
+                    fmt={fmt}
+                    onNavigate={handleBreadcrumbNav}
+                    onEditCurrent={openEditCurrent}
+                    onAddChild={openAddChild}
+                    onExport={handleOpenExport}
+                    onRowClick={handleChildRowClick}
+                />
+            )}
+            <CodeListFormModal
+                show={showForm}
+                objectId={editObjectId}
+                parentCodeValue={activeParentCodeValue}
+                svSession={svSession}
+                fmt={fmt}
+                onHide={() => setShowForm(false)}
+                onSave={handleSave}
+                onDelete={handleDelete}
+                breadcrumb={breadcrumb}
+            />
+            <CodeListExportModal
+                show={showExport}
+                exportData={exportData}
+                exportLoading={exportLoading}
+                fmt={fmt}
+                onHide={handleCloseExport}
+            />
         </React.Fragment>
     );
 };
@@ -237,7 +273,7 @@ const mapStateToProps = (state) => ({
 });
 
 CodeListEditor.contextTypes = {
-    intl: PropTypes.object.isRequired
-}
+    intl: PropTypes.object.isRequired,
+};
 
 export default connect(mapStateToProps)(CodeListEditor);

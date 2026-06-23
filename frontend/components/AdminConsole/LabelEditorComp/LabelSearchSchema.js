@@ -1,30 +1,20 @@
-export default function getDDOptionsFormSchema(context) {
-    const labels = [
-        `${context.intl.formatMessage({ id: 'perun.admin_console.search_label_code', defaultMessage: 'perun.admin_console.search_label_code' })}`,
-        `${context.intl.formatMessage({ id: 'perun.admin_console.search_label_text', defaultMessage: 'perun.admin_console.search_label_text' })}`
-    ]
-    const values = ['LABEL_CODE', 'LABEL_TEXT']
+export default function getLabelSearchSchema(context) {
+    const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
     return {
         schema: {
-            title: `${context.intl.formatMessage({ id: 'perun.admin_console.search_label', defaultMessage: 'perun.admin_console.search_label' })}`,
+            title: fmt('perun.admin_console.search_label'),
             type: 'object',
-            required: ['SEARCH_OPTION', 'SEARCH_VALUES'],
             properties: {
-                SEARCH_OPTION: {
+                LABEL_CODE: {
                     type: 'string',
-                    title: `${context.intl.formatMessage({ id: 'perun.admin_console.choose_search', defaultMessage: 'perun.admin_console.choose_search' })}`,
-                    enum: values,
-                    enumNames: labels
+                    title: fmt('perun.admin_console.search_label_code'),
                 },
-                SEARCH_VALUES: {
+                LABEL_TEXT: {
                     type: 'string',
-                    title: `${context.intl.formatMessage({ id: 'perun.admin_console.search_bar_input', defaultMessage: 'perun.admin_console.search_bar_input' })}`,
-                    placeholder: `${context.intl.formatMessage({ id: 'perun.admin_console.search_value', defaultMessage: 'perun.admin_console.search_value' })}`,
-                }
-            }
+                    title: fmt('perun.admin_console.search_label_text'),
+                },
+            },
         },
-        uiSchema: {
-
-        }
-    }
+        uiSchema: {},
+    };
 }

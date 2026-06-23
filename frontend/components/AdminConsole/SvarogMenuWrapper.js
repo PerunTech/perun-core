@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import JsonView from 'react-json-view';
+import { JsonEditor } from '../JsonEditor';
 import { ReactBootstrap, alertUserV2, alertUserResponse, ComponentManager, GridManager } from '../../elements';
 import { isJSON } from '../../functions/utils';
 const { useState, useEffect } = React;
@@ -12,7 +12,6 @@ const SvarogMenuWrapper = (props, context) => {
   const [show, setShow] = useState(false);
   const [shouldRender, setRender] = useState(false)
   const [fieldJson, setFieldJson] = useState({})
-  const [editedJson, setJson] = useState(undefined)
   useEffect(() => {
     changeField()
   }, [])
@@ -93,10 +92,6 @@ const SvarogMenuWrapper = (props, context) => {
     setShow(true)
   }
 
-  const jsonManipulation = (obj) => {
-    setJson(obj['updated_src'])
-  }
-
   const changeJson = (editedJson) => {
     const { formid } = props
     const formData = ComponentManager.getStateForComponent(formid, "formTableData");
@@ -127,12 +122,7 @@ const SvarogMenuWrapper = (props, context) => {
           <Modal.Header className='admin-console-unit-modal-header  menu-editor-header' closeButton>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body  menu-editor-body'>
-            <div>
-              <JsonView src={fieldJson} onEdit={jsonManipulation} onAdd={jsonManipulation} onDelete={jsonManipulation} collapsed />
-              <div>
-                <button type='button' className='btn-success btn_save_form' onClick={() => { editedJson && changeJson(editedJson) }}>{context.intl.formatMessage({ id: 'perun.admin_console.config_menu_confirm', defaultMessage: 'perun.admin_console.config_menu_confirm' })}</button>
-              </div>
-            </div>
+            <JsonEditor value={fieldJson} onSave={changeJson} />
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer  menu-editor-footer'></Modal.Footer>
         </Modal>

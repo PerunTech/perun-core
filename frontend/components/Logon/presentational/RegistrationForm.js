@@ -71,8 +71,8 @@ const RegistrationForm = (props, context) => {
       {loading && <Loading />}
       {!loading && (
         <div className='linkFormHolder'>
-          <div className='parent'>
-            <form id='submit_form' className='form fadeIn customForm registration-form' onSubmit={onSubmit}>
+          <div className='auth-form-parent'>
+            <form id='submit_form' className='perun-core-form fadeIn customForm registration-form' onSubmit={onSubmit}>
               {alert}
               <h4>
                 {(showFarmReg || showUserReg) ? labels.formatMessage({

@@ -1,232 +1,194 @@
-import React, { useState, useEffect } from "react";
-import {
-    ComponentManager,
-    ExportableGrid,
-    GridManager,
-    PropTypes,
-} from "../../../client";
-import Form from '@rjsf/core';
+import React, { useState, useEffect, useRef } from "react";
+import { ComponentManager, GridManager, PropTypes, axios } from "../../../client";
 import { connect } from "react-redux";
-import { alertUserResponse, ReactBootstrap } from "../../../elements";
-const { Modal } = ReactBootstrap;
-import axios from "axios";
-import LabelSearchSchema from "./LabelSearchSchema"
-import LabelFormSchema from "./LabelFormSchema"
-import validator from '@rjsf/validator-ajv8';
-let prev
+import { alertUserResponse } from "../../../elements";
+import LabelSearchSchema from "./LabelSearchSchema";
+import { TABLE_NAME, FORM_ID, GRID_ID, fetchLocales, generateExport } from './utils';
+import LabelSearchForm from './LabelSearchForm';
+import LabelFormModal from './LabelFormModal';
+import LabelExportModal from './LabelExportModal';
+
 const LabelEditor = (props, context) => {
-    const [grid, setGrid] = useState(undefined)
-    const [show, setShow] = useState(false)
-    const [add, setAdd] = useState(undefined)
-    const [form, setForm] = useState(undefined)
-    const [formAdd, setFormAdd] = useState(undefined)
-    const [formEdit, setFormEdit] = useState(undefined)
+    const [searchParams, setSearchParams] = useState(null);
+    const [pendingSearch, setPendingSearch] = useState(null);
+    const [searchFormData, setSearchFormData] = useState({});
+    const [showForm, setShowForm] = useState(false);
+    const [showExport, setShowExport] = useState(false);
+    const [objectId, setObjectId] = useState(0);
+    const [locales, setLocales] = useState([]);
+    const [selectedLocale, setSelectedLocale] = useState('');
+    const [exportPreview, setExportPreview] = useState('');
+    const [exportLoading, setExportLoading] = useState(false);
+    const exportAbortRef = useRef(null);
+
+    const fmt = (id, defaultMessage) => context.intl.formatMessage({ id, defaultMessage: defaultMessage || id });
+
     useEffect(() => {
-        generateSearchForm();
-        return () => {
-            ComponentManager.cleanComponentReducerState(prev)
+        fetchLocales().then(setLocales).catch(err => console.error('Failed to fetch ENV_LOCALES', err));
+    }, []);
+
+    // When a subsequent search unmounts the grid (searchParams → null) and a pending
+    // search is waiting, remount the grid with the new URL once the old one is gone.
+    useEffect(() => {
+        if (pendingSearch && !searchParams) {
+            setSearchParams(pendingSearch);
+            setPendingSearch(null);
         }
-    }, [])
+    }, [pendingSearch, searchParams]);
 
-    //SearchForm
-    const generateSearchForm = () => {
-        const { schema, uiSchema } = LabelSearchSchema(context);
-        renderForm(schema, uiSchema)
-    }
-    const renderForm = (schema, uiSchema) => {
-        let form = <Form
-            uiSchema={uiSchema}
-            schema={schema}
-            key={'SVAROG_LABELS_SEARCH'}
-            className={`form-test label-form-search`}
-            validator={validator}
-            onSubmit={(e) => {
-                ComponentManager.cleanComponentReducerState(prev)
-                generateLabelsGrid(e.formData)
-            }}
-        >
-            <></>
-            <div className='admin-console-label-search-btn-container'>
-                <button className='btn-success btn_save_form' type="button" onClick={() => addLabel()}>
-                    {context.intl.formatMessage({ id: 'perun.admin_console.create_label', defaultMessage: 'perun.admin_console.create_label' })}
-                </button>
-                <button className='btn-success btn_save_form' type="submit">
-                    {context.intl.formatMessage({ id: 'perun.admin_console.search_button', defaultMessage: 'perun.admin_console.search_button' })}
-                </button>
-            </div>
-        </Form>
-        setForm(form)
-    }
-    //Label Grid
-    const generateLabelsGrid = (data) => {
-        const { svSession } = props;
-        const gridId = 'LABELS_GRID_' + Math.floor(Math.random() * 999999).toString(36)
-        prev = gridId
-        let tablename = 'SVAROG_LABELS'
-        let grid = (
-            <ExportableGrid
-                gridType={"READ_URL"}
-                key={gridId}
-                id={gridId}
-                configTableName={`/ReactElements/getTableFieldList/${svSession}/SVAROG_LABELS`}
-                dataTableName={`/ReactElements/getTableWithLike/${svSession}/${tablename}/${data['SEARCH_OPTION']}/${data['SEARCH_VALUES']}/1`}
-                defaultHeight={false}
-                heightRatio={0.5}
-                refreshData={true}
-                onRowClickFunct={editLabel}
-                minHeight={500}
-            />
-        );
-        setGrid(grid);
-    };
-    //add new label button
-    const addLabel = () => {
-        setShow(true)
-        setAdd(true)
-        generateLabelForm()
-    }
-    //Label add new label form
-    const generateLabelForm = () => {
-        const { schema, uiSchema } = LabelFormSchema(context)
-        let form = (
-            <Form
-                key={'SVAROG_LABELS_ADD'}
-                uiSchema={uiSchema}
-                schema={schema}
-                className={`form-test label-form`}
-                validator={validator}
-                onSubmit={(e) => {
-                    submitLabel(e)
-                }}
-            >
-                <></>
-                <div className='admin-console-label-search-btn-container'>
-                    <button className='btn-success btn_save_form' type="submit">
-                        {context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}
-                    </button>
-                </div>
-            </Form>
-        );
-        setFormAdd(form);
-    };
-    //row click to edit label
-    const editLabel = (_rowIdx, _id, row) => {
-        setShow(true)
-        setAdd(false)
-        generateEditLabel(row['SVAROG_LABELS.OBJECT_ID'])
-    }
+    // Auto-select the only locale when the export modal is open and locales have loaded.
+    // Runs whenever showExport or locales change, covering the race where locales arrive
+    // after the modal is already open.
+    useEffect(() => {
+        if (showExport && locales.length === 1 && !selectedLocale) {
+            setSelectedLocale(locales[0].id);
+            handleGenerateExport(locales[0].id);
+        }
+    }, [showExport, locales]);
 
-    //Edit label form
-    const generateEditLabel = (objid) => {
-        let url =
-            window.server +
-            `/ReactElements/getTableFormData/${props.svSession}/${objid}/SVAROG_LABELS`;
-        axios.get(url).then((res) => {
-            const { schema, uiSchema } = LabelFormSchema(context);
-            renderEditForm(schema, uiSchema, res?.data)
-        }).catch(err => {
-            console.error(err)
-            alertUserResponse({ response: err })
-        })
+    const handleSearch = (e) => {
+        const { LABEL_CODE, LABEL_TEXT } = e.formData;
+        const SEARCH_OPTION = LABEL_CODE ? 'LABEL_CODE' : 'LABEL_TEXT';
+        const SEARCH_VALUES = LABEL_CODE || LABEL_TEXT || '';
+        if (!SEARCH_VALUES) return;
+        const newParams = { SEARCH_OPTION, SEARCH_VALUES };
+        if (searchParams) {
+            ComponentManager.cleanComponentReducerState(GRID_ID);
+            setSearchParams(null);
+            setPendingSearch(newParams);
+        } else {
+            setSearchParams(newParams);
+        }
     };
-    const renderEditForm = (schema, uiSchema, formData) => {
-        let form = <Form
-            uiSchema={uiSchema}
-            schema={schema}
-            key={'SVAROG_LABELS_EDIT'}
-            formData={formData}
-            className={`form-test label-form`}
-            validator={validator}
-            onSubmit={(e) => {
-                submitLabel(e)
-            }}
-        >
-            <></>
-            <div className='admin-console-label-form-btn-container'>
-                <button className='btn-success btn_save_form' type="submit">
-                    {context.intl.formatMessage({ id: 'perun.admin_console.search_button', defaultMessage: 'perun.admin_console.search_button' })}
-                </button>
-                <button className='btn-danger btn_delete_form' onClick={() => {
-                    deleteLabel(formData)
-                }} type="button">
-                    {context.intl.formatMessage({ id: 'perun.generalLabel.delete', defaultMessage: 'perun.generalLabel.delete' })}
-                </button>
-            </div>
-        </Form>
-        setFormEdit(form)
-    }
-    //save label
-    const submitLabel = (e) => {
+
+    const openAdd = () => {
+        setObjectId(0);
+        setShowForm(true);
+    };
+
+    const openEdit = (_rowIdx, _id, row) => {
+        setObjectId(row[`${TABLE_NAME}.OBJECT_ID`]);
+        setShowForm(true);
+    };
+
+    const handleSave = (e) => {
         const { svSession } = props;
-        let tableName = 'SVAROG_LABELS'
-        let data = e.formData;
-        let url =
-            window.server +
-            `/ReactElements/createTableRecordFormData/${svSession}/${tableName}/0`;
-        axios({
-            method: "post",
-            data: JSON.stringify(data),
-            url,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        }).then((res) => {
-            if (res?.data) {
-                const resType = res.data?.type?.toLowerCase() || 'info'
-                alertUserResponse({ response: res.data })
-                if (resType === 'success') {
-                    GridManager.reloadGridData(prev);
-                    setShow(false);
-                }
-            }
-        }).catch(err => {
-            console.error(err)
-            alertUserResponse({ response: err })
-        })
-    };
-    //delete label
-    const deleteLabel = (formData) => {
-        const { svSession } = props
-        let url = window.server + '/ReactElements/deleteObject/' + svSession + '/false/false'
+        const onConfirm = () => ComponentManager.setStateForComponent(FORM_ID, null, { saveExecuted: false });
+        const url = `${window.server}/ReactElements/createTableRecordFormData/${svSession}/${TABLE_NAME}/0`;
         axios({
             method: 'post',
-            data: encodeURIComponent(formData),
+            data: encodeURIComponent(JSON.stringify(e.formData)),
             url,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(res => {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        }).then((res) => {
             if (res?.data) {
-                const resType = res.data?.type?.toLowerCase() || 'info'
-                alertUserResponse({ response: res.data })
+                const resType = res.data?.type?.toLowerCase() || 'info';
+                alertUserResponse({ type: resType, response: res, onConfirm });
                 if (resType === 'success') {
-                    setShow(false)
-                    GridManager.reloadGridData(prev)
+                    if (searchParams) GridManager.reloadAllGrids();
+                    setShowForm(false);
                 }
             }
         }).catch(err => {
-            console.error(err)
-            alertUserResponse({ response: err })
-        })
-    }
+            console.error(err);
+            alertUserResponse({ response: err, onConfirm });
+        });
+    };
+
+    const handleDelete = (_id, _action, _session, params) => {
+        const { svSession } = props;
+        const onConfirm = () => ComponentManager.setStateForComponent(FORM_ID, null, { deleteExecuted: false });
+        const jsonString = params[4]?.PARAM_VALUE;
+        const url = `${window.server}/ReactElements/deleteObject/${svSession}`;
+        axios({
+            method: 'post',
+            data: encodeURIComponent(jsonString),
+            url,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        }).then((res) => {
+            if (res?.data) {
+                const resType = res.data?.type?.toLowerCase() || 'info';
+                alertUserResponse({ type: resType, response: res, onConfirm });
+                if (resType === 'success') {
+                    if (searchParams) GridManager.reloadAllGrids();
+                    setShowForm(false);
+                }
+            }
+        }).catch(err => {
+            console.error(err);
+            alertUserResponse({ response: err, onConfirm });
+        });
+    };
+
+    const handleGenerateExport = async (locale) => {
+        if (exportAbortRef.current) exportAbortRef.current.abort();
+        const { svSession } = props;
+        const controller = new AbortController();
+        exportAbortRef.current = controller;
+        setExportPreview('');
+        setExportLoading(true);
+        try {
+            const output = await generateExport(svSession, locale, controller.signal);
+            if (!controller.signal.aborted) setExportPreview(output);
+        } catch (err) {
+            if (err.code === 'ERR_CANCELED') return;
+            console.error(err);
+            alertUserResponse({ response: err });
+        } finally {
+            setExportLoading(false);
+            exportAbortRef.current = null;
+        }
+    };
+
+    const selectLocale = (localeId) => {
+        setSelectedLocale(localeId);
+        handleGenerateExport(localeId);
+    };
+
+    const handleCloseExport = () => {
+        if (exportAbortRef.current) exportAbortRef.current.abort();
+        setExportPreview('');
+        setSelectedLocale('');
+        setShowExport(false);
+    };
+
+    const { svSession } = props;
+    const { schema, uiSchema } = LabelSearchSchema(context);
 
     return (
         <React.Fragment>
-            <div className='admin-console-label-editor-div'>
-                <div>{form}</div>
-                <div>
-                    {grid}
-                </div>
-            </div>
-
-            <Modal
-                className='admin-console-unit-modal'
-                show={show}
-                onHide={() => setShow(!show)}
-            >
-                <Modal.Header className='admin-console-unit-modal-header' closeButton>
-                </Modal.Header>
-                <Modal.Body className='admin-console-unit-modal-body'>
-                    {add ? formAdd : formEdit}
-                </Modal.Body>
-                <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
-            </Modal>
+            <LabelSearchForm
+                schema={schema}
+                uiSchema={uiSchema}
+                searchFormData={searchFormData}
+                searchParams={searchParams}
+                svSession={svSession}
+                fmt={fmt}
+                onSearch={handleSearch}
+                onFormChange={(e) => setSearchFormData(e.formData)}
+                onOpenAdd={openAdd}
+                onOpenExport={() => setShowExport(true)}
+                onRowClick={openEdit}
+            />
+            <LabelFormModal
+                show={showForm}
+                objectId={objectId}
+                svSession={svSession}
+                fmt={fmt}
+                onHide={() => setShowForm(false)}
+                onSave={handleSave}
+                onDelete={handleDelete}
+            />
+            <LabelExportModal
+                show={showExport}
+                locales={locales}
+                selectedLocale={selectedLocale}
+                exportPreview={exportPreview}
+                exportLoading={exportLoading}
+                fmt={fmt}
+                onHide={handleCloseExport}
+                onSelectLocale={selectLocale}
+            />
         </React.Fragment>
     );
 };
@@ -236,7 +198,7 @@ const mapStateToProps = (state) => ({
 });
 
 LabelEditor.contextTypes = {
-    intl: PropTypes.object.isRequired
-}
+    intl: PropTypes.object.isRequired,
+};
 
 export default connect(mapStateToProps)(LabelEditor);

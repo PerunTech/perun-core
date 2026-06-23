@@ -101,7 +101,7 @@ function generateCsv(grid, context) {
     // transform json to csv and create a link which donwloads the document when it is synthetically clicked
     const csvParser = new Parser({ withBOM: true })
     const csv = csvParser.parse(dataForCsv)
-    const data = new Blob([csv], { type: 'text/csv' }) // eslint-disable-line
+    const data = new Blob([csv], { type: 'text/csv' })
     const csvURL = window.URL.createObjectURL(data)
     const tempLink = document.createElement('a')
     tempLink.href = csvURL

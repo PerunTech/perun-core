@@ -71,6 +71,12 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use(
   (res) => res,
   (error) => {
+    if (!error.response) {
+      if (!axios.isCancel(error)) {
+        alertUserV2({ type: 'error', title: 'Unable to connect to the server', message: 'Please try again later' })
+      }
+      return Promise.reject(error)
+    }
     if (error.response?.status) {
       switch (error.response.status) {
         case 302:
@@ -130,10 +136,36 @@ async function loadLocaleData(locale) {
 }
 
 // Google Analytics
-if (process.env.GA_TRACKING_ID) {
-  ReactGA.initialize(process.env.GA_TRACKING_ID);
-  ReactGA.pageview('/');
+function initializeGoogleAnalytics() {
+  const url = `${window.server}/WsConf/params/get/sys/GOOGLE_ANALYTICS_ID`
+  axios.get(url).then(res => {
+    const trackingId = res?.data?.VALUE
+    if (trackingId) {
+      ReactGA.initialize(trackingId);
+      ReactGA.pageview('/');
+    }
+  }).catch(err => {
+    console.error(err)
+  })
 }
+initializeGoogleAnalytics()
+
+// reCAPTCHA
+function initializeRecaptcha() {
+  const url = `${window.server}/WsConf/params/get/sys/GOOGLE_CAPTCHA_ENABLED`
+  axios.get(url).then(res => {
+    if (res?.data?.VALUE === 'true') {
+      const script = document.createElement('script')
+      script.src = 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit'
+      script.async = true
+      script.defer = true
+      document.body.appendChild(script)
+    }
+  }).catch(err => {
+    console.error(err)
+  })
+}
+initializeRecaptcha()
 
 // App component
 const App = () => (

@@ -15,8 +15,10 @@ import SvarogMenu from './SvarogMenu'
 import PerunMenu from './PerunMenu/PerunMenu'
 import BusinessType from './BusinessType'
 import CodeListEditor from './CodeListComp/CodeListEditor'
+import LabelEditor from './LabelEditorComp/LabelEditor'
 import WorkFlowAutomaton from './Workflow/WorkFlowAutomaton'
 import SvarogTables from './SvarogTables/SvarogTables'
+import ConfigTables from './SvarogTables/ConfigTables'
 
 const AdminConsole = (_props, context) => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
@@ -63,8 +65,10 @@ const AdminConsole = (_props, context) => {
                 {dynamicComponent === 'PerunMenu' && <PerunMenu />}
                 {dynamicComponent === 'BusinessType' && <BusinessType />}
                 {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
+                {dynamicComponent === 'LabelEditor' && <LabelEditor />}
                 {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
                 {dynamicComponent === 'SvarogTables' && <SvarogTables />}
+                {dynamicComponent === 'ConfigTables' && <ConfigTables />}
             </div>
         </div>
     )
