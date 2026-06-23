@@ -4,6 +4,62 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v4.5.5] - 2026-06-23
+
+### New Features
+- **JSON editor**: Replaced the legacy JSON editor/viewer with Monaco editor; extracted JsonEditor utilities; fixed `handleFormat` to populate `editorRef` on mount
+- **reCAPTCHA**: Load script conditionally based on the `GOOGLE_CAPTCHA_ENABLED` system parameter
+- **Google Analytics**: Load script conditionally based on the `GOOGLE_ANALYTICS_ID` system parameter
+- **Tasks**: New tasks component with supporting logic and web services
+- **LabelEditor**: Refactored into focused sub-components; enabled in the UI
+- **Server unavailability**: Graceful handling on page load with SweetAlert2 fallback; applied to `index.html` template
+- **Login CSS**: New login-specific classes replacing generic logon CSS classes
+
+### CodeList Editor
+- Fully refactored the CodeList editor
+- Auto-search new codelist after save
+- Children sorted by `SORT_ORDER` in both the grid and exported tree
+- Pre-fill and disable `PARENT_CODE_VALUE` when adding child codes; disable when editing existing codelist entries
+- Breadcrumb updated on edit
+- Export always includes the full tree from root, regardless of current navigation depth
+
+### Svarog Tables & Fields Admin
+- Added `ConfigTables` component for config-type tables; `SvarogTables` now filtered to non-config tables only
+- Inline field editor with `GUI_METADATA` badge and editing
+- New-table creation flow and fixed table edit form submission
+- Switched fields fetch to `WsCore/children`
+- Field label displayed in the editor; field export no longer drops server-only values
+
+### Export UX
+- Auto-select locale when only one is configured
+- Trigger export on locale select
+- Export loading state; fixed preview race condition on cancel
+- Close modal after export; improved empty-fields hint text
+
+### UI / UX
+- `SystemConfLogs`: improved grid config and log preview
+- `CACHE_TYPE`: show translated value
+- Labels: always show the label (not only when translated); show index as title
+
+### Bug Fixes
+- Axios: suppress alert on cancelled requests; handle connection refused errors
+- Abort in-flight form fetches; deduplicate `getRowField`; guard export on empty breadcrumb
+- `onInputChange`: fix spreading array `formData` into an object (losing array type)
+- `isJSON`: drop `strcmp` dependency, check objects directly, handle null
+- CodeList: fix stale search grid after root node delete
+- Alert when `BUSINESS_OBJECT_TYPE_NAME` parameter is missing
+- Export locale auto-select: use `useEffect` for locales arriving after modal opens; validate parsed array before use
+
+### Build & Tooling
+- CI: updated Node.js version; switched to `npm ci` with `.npm` cache; webpack filesystem cache with absolute cache path
+- Overrode `dompurify` to 3.4.0
+- Multiple `npm audit` fixes
+
+### Docs
+- Clarified Google Analytics and reCAPTCHA configuration docs
+
+---
+
 ## [v4.5.4] - 2026-04-17
 
 ### Build & Tooling
