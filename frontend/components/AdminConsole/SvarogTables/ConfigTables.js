@@ -196,7 +196,7 @@ const ConfigTables = (props, context) => {
       {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
-          <p>{fmt('perun.admin_console.config_tables')}</p>
+          <p>{fmt('perun.admin_console.svarog_config_tables')}</p>
         </div>
         <ExportableGrid
           gridType='READ_URL'
