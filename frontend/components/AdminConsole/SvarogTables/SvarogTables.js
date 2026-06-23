@@ -35,7 +35,7 @@ const SvarogTables = (props, context) => {
         key={gridId}
         id={gridId}
         configTableName={`/ReactElements/getTableFieldList/${svSession}/${tableName}`}
-        dataTableName={`/ReactElements/getTableData/${props.svSession}/${tableName}/0`}
+        dataTableName={`/ReactElements/getTableWithMultipleFilters/${props.svSession}/SVAROG_TABLES/IS_CONFIG_TABLE/AND/false/0`}
         onRowClickFunct={handleRowClick}
         refreshData={true}
         toggleCustomButton={true}
