@@ -469,7 +469,7 @@ class DependentElements extends React.Component {
           newTableData = baseArray
           ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
         } else {
-          newTableData = Object.assign({}, currentData)
+          newTableData = Object.assign({}, this.props.formInstance.state.formTableData)
           if (groupPath) {
             if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
               newTableData[groupPath][coreType] = selectedVal
