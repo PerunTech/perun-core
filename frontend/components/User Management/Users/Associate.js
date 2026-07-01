@@ -20,16 +20,22 @@ const Associate = (props, context) => {
     }, [])
 
     const getLinkedTables = () => {
+        setLoading(true)
         const url = window.server + `/ReactElements/getLinkedTableNamesByUserObjectType/${props.svSession}/${props.userType}`
         axios.get(url).then(res => {
+            setLoading(false)
             if (res?.data && res?.data?.length > 0) {
                 setLinkedTables(res?.data)
-                setActiveTab(res?.data[0])
+                setActiveTab(getTableName(res?.data[0]))
             }
         }).catch(err => {
             console.error(err)
+            setLoading(false)
         })
     }
+
+    const getTableName = (table) => table?.table_name || table
+    const getTableLabel = (table) => table?.label || getTableName(table)
 
     const setActiveFunc = (tab) => {
         setSearchResults(undefined);
@@ -40,21 +46,24 @@ const Associate = (props, context) => {
     const getTabClass = (tab) => (tab === activeTab ? 'user-tab-title active' : 'user-tab-title');
 
     const generateTabs = () => {
-        if (linkedTables?.length > 0) {
-            return linkedTables.map((table, index) => (
+        if (!linkedTables?.length) return null;
+
+        return linkedTables.map((table, index) => {
+            const tableName = getTableName(table)
+            const tableLabel = getTableLabel(table)
+
+            return (
                 <div
-                    key={index}
-                    onClick={() => setActiveFunc(table.table_name)}
-                    className={getTabClass(table.table_name)}
+                    key={tableName || index}
+                    onClick={() => setActiveFunc(tableName)}
+                    className={getTabClass(tableName)}
                 >
                     <p>
-                        {context.intl.formatMessage({ id: table.label, defaultMessage: table.label, })}
+                        {tableLabel}
                     </p>
                 </div>
-            ));
-        }
-
-        return null;
+            )
+        });
     };
 
     const searchData = (table, formData) => {
@@ -85,7 +94,7 @@ const Associate = (props, context) => {
     const linkFunction = (row, shouldLink) => {
         const title = shouldLink ? `${context.intl.formatMessage({ id: 'perun.admin_console.link_user', defaultMessage: 'perun.admin_console.link_user' })}` : `${context.intl.formatMessage({ id: 'perun.admin_console.unlink_user', defaultMessage: 'perun.admin_console.unlink_user' })}`
 
-        const confirmButtonText = shouldLink ? `${context.intl.formatMessage({ id: 'perun.admin_console.link_user', defaultMessage: 'perun.admin_console.link_user' })}` : `${context.intl.formatMessage({ id: 'perun.admin_console.unlink_user', defaultMessage: 'perun.admin_console.unlink_user' })}`
+        const confirmButtonText = shouldLink ? `${context.intl.formatMessage({ id: 'perun.admin_console.btn_link_user', defaultMessage: 'perun.admin_console.btn_link_user' })}` : `${context.intl.formatMessage({ id: 'perun.admin_console.btn_unlink_user', defaultMessage: 'perun.admin_console.btn_unlink_user' })}`
 
         const url = shouldLink ? `/ReactElements/linkObjects/${props.svSession}/${props.userId}/SVAROG_USERS/${row[`${activeTab}.OBJECT_ID`]}/${activeTab}/POA` : `/ReactElements/dropLink/${props.svSession}/${row[`${activeTab}.OBJECT_ID`]}/${activeTab}/${props.userId}/SVAROG_USERS/POA`
         alertUserV2({
@@ -135,7 +144,7 @@ const Associate = (props, context) => {
                             minHeight={500}
                             refreshData={true}
                             onRowClickFunct={(_id, _rowIdx, row) => linkFunction(row, false)}
-                            customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.add', defaultMessage: 'perun.admin_console.add' })}
+                            customButtonLabel={context.intl.formatMessage({ id: 'perun.admin_console.create_link', defaultMessage: 'perun.admin_console.create_link' })}
                             toggleCustomButton={true}
                             customButton={() => {
                                 setShow(true)
