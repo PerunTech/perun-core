@@ -455,13 +455,19 @@ class DependentElements extends React.Component {
       }
 
       if (this.props.formInstance) {
-        const currentData = this.props.formInstance.state.formTableData
         let newTableData
         if (this.isArraySchema()) {
           const idx = parseInt(this.getArrayIndexFromElementId(elementId))
+          // clearFormData updates ComponentManager synchronously; read from it so we
+          // see the cleared dependent fields instead of the stale pre-batch React state.
+          let currentData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
+          if (!Array.isArray(currentData)) {
+            currentData = this.props.formInstance.state.formTableData
+          }
           const baseArray = Array.isArray(currentData) ? currentData.map(item => ({ ...item })) : []
           baseArray[idx] = { ...(baseArray[idx] || {}), [coreType]: selectedVal }
           newTableData = baseArray
+          ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
         } else {
           newTableData = Object.assign({}, currentData)
           if (groupPath) {
