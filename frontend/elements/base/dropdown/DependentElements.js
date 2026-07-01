@@ -39,12 +39,36 @@ class DependentElements extends React.Component {
     }
   }
 
+  isArraySchema = () => {
+    return this.props.formConfig?.type === 'array'
+  }
+
+  // Extracts the array index from an rjsf array item element ID.
+  // "root_0_DEPARTMENT" -> "0", "root_12_LAB_OBJ_ID" -> "12"
+  getArrayIndexFromElementId = (elementId) => {
+    const withoutRoot = elementId.replace(/^root_/, '')
+    return withoutRoot.substring(0, withoutRoot.indexOf('_'))
+  }
+
   componentDidMount() {
     const { formConfig, sectionName } = this.props
-    const formData = Object.assign({}, this.props.formData)
-    if (formData && formData.constructor === Object && Object.keys(formData).length > 0) {
-      if (formData[sectionName]) { //section
-        const subEls = Object.keys(formData[sectionName])
+    const formData = this.props.formData
+
+    if (this.isArraySchema()) {
+      const arrayIndex = parseInt(this.getArrayIndexFromElementId(this.props.elementId))
+      const rowData = Array.isArray(formData) ? formData[arrayIndex] : null
+      if (rowData && Object.keys(rowData).length > 0) {
+        this.generateExisting()
+      } else {
+        this.fetchInitialCodelist()
+      }
+      return
+    }
+
+    const formDataCopy = Object.assign({}, formData)
+    if (formDataCopy && formDataCopy.constructor === Object && Object.keys(formDataCopy).length > 0) {
+      if (formDataCopy[sectionName]) { //section
+        const subEls = Object.keys(formDataCopy[sectionName])
         if (subEls.length > 0) {
           this.generateExisting()
         } else {
@@ -52,7 +76,7 @@ class DependentElements extends React.Component {
         }
       } else { //no section
         const formFields = Object.keys(formConfig.properties)
-        const finalFormData = Object.assign({}, formData)
+        const finalFormData = Object.assign({}, formDataCopy)
         // Append an empty string as the value of each field that doesn't have a value
         formFields.forEach(field => {
           if (!finalFormData[field]) {
@@ -103,6 +127,13 @@ class DependentElements extends React.Component {
   }
 
   findCoreType = (stringId) => {
+    if (this.isArraySchema()) {
+      // elementId is "root_0_DEPARTMENT" or "root_0_LAB_OBJ_ID"
+      // Schema lookups use sectionName ("items"); strip "root_{index}_" to get the field name.
+      const withoutRoot = stringId.replace(/^root_/, '')
+      const coreType = withoutRoot.substring(withoutRoot.indexOf('_') + 1)
+      return [this.props.sectionName, coreType]
+    }
     let string = `root_`
     if (this.props.sectionName) {
       string = `root_${this.props.sectionName}_`
@@ -134,7 +165,10 @@ class DependentElements extends React.Component {
     const coreType = this.findCoreType(elementId)[1]
     let labelText
     let requiredFieldsArr
-    if (!this.props.sectionName) {
+    if (this.isArraySchema()) {
+      labelText = this.props.formConfig.items.properties[coreType]?.title
+      requiredFieldsArr = this.props.formConfig.items.required
+    } else if (!this.props.sectionName) {
       labelText = this.props.formConfig.properties[coreType].title
       requiredFieldsArr = this.props.formConfig.required
     } else {
@@ -183,8 +217,34 @@ class DependentElements extends React.Component {
   }
 
   generateExisting = async () => {
-    const { formSchema, sectionName, formData } = this.props;
+    const { formSchema, sectionName, formData, elementId } = this.props;
     let formObjectsArray = [];
+
+    if (this.isArraySchema()) {
+      const arrayIndex = this.getArrayIndexFromElementId(elementId)
+      const itemsSchema = formSchema['items'] || {}
+      const rowData = Array.isArray(formData) ? (formData[parseInt(arrayIndex)] || {}) : {}
+
+      Object.keys(itemsSchema).forEach(key => {
+        if (itemsSchema[key]?.order) {
+          formObjectsArray.push({
+            ...itemsSchema[key],
+            value: rowData[key],
+            parentVal: rowData[itemsSchema[key]['dependentOnField']],
+            coreType: key
+          })
+        } else if (itemsSchema[key]?.order === 0) {
+          this.fetchInitialCodelist(rowData[key])
+        }
+      })
+
+      const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order)
+      for (const el of sortedArr) {
+        await this.generateDropdownInOrder(el.codelistName, arrayIndex, el.value, el.parentVal, el.coreType)
+        this.setFormData(arrayIndex, el.coreType, el.value)
+      }
+      return
+    }
 
     if (sectionName) {
       Object.keys(formSchema[sectionName]).forEach(key => {
@@ -250,7 +310,15 @@ class DependentElements extends React.Component {
   setFormData = (groupPath, coreType, selectedVal) => {
     if (this.props.formInstance) {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
-      if (groupPath) {
+      if (this.isArraySchema()) {
+        const idx = parseInt(groupPath)
+        if (!Array.isArray(newTableData)) {
+          newTableData = this.props.formInstance.state.formTableData
+        }
+        const baseArray = Array.isArray(newTableData) ? newTableData.map(item => ({ ...item })) : []
+        baseArray[idx] = { ...(baseArray[idx] || {}), [coreType]: selectedVal }
+        newTableData = baseArray
+      } else if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
           newTableData[groupPath][coreType] = selectedVal
         } else {
@@ -273,7 +341,17 @@ class DependentElements extends React.Component {
   clearFormData = (fieldName, groupPath) => {
     if (this.props.formInstance) {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
-      if (groupPath) {
+      if (this.isArraySchema()) {
+        const idx = parseInt(this.getArrayIndexFromElementId(this.props.elementId))
+        if (!Array.isArray(newTableData)) {
+          newTableData = this.props.formInstance.state.formTableData
+        }
+        if (Array.isArray(newTableData) && newTableData[idx]) {
+          const baseArray = newTableData.map(item => ({ ...item }))
+          baseArray[idx] = { ...baseArray[idx], [fieldName]: undefined }
+          newTableData = baseArray
+        }
+      } else if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
           newTableData[groupPath][fieldName] = undefined
         } else {
@@ -305,7 +383,7 @@ class DependentElements extends React.Component {
     const elementProperties = this.findCoreType(elementId)
     let groupPath
     if (this.props.sectionName) {
-      groupPath = elementProperties[0]
+      groupPath = elementProperties[0]  // "items" for array schemas
     }
     const coreType = elementProperties[1]
     let elementOrder = formSchema[coreType]?.order
@@ -334,12 +412,20 @@ class DependentElements extends React.Component {
     })
     const codelistName = nextElementObj?.codelistName || ''
 
+    // For array schemas the element ID uses the numeric array index, not "items"
+    const generateGroupPath = this.isArraySchema()
+      ? this.getArrayIndexFromElementId(elementId)
+      : groupPath
+
     try {
       const form = document.getElementById(this.props.formId)
       const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
       const index = ddls.findIndex(el => el.id === elementId);
       if (index > -1) {
         ddls.slice(index + 1).forEach((el, i) => {
+          if (this.isArraySchema() && this.getArrayIndexFromElementId(el.id) !== this.getArrayIndexFromElementId(elementId)) {
+            return
+          }
           if (form?.contains(el)) {
             const parentNode = el.parentNode;
             el.value = '';
@@ -369,20 +455,35 @@ class DependentElements extends React.Component {
       }
 
       if (this.props.formInstance) {
-        let newTableData = Object.assign({}, this.props.formInstance.state.formTableData)
-        if (groupPath) {
-          if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
-            newTableData[groupPath][coreType] = selectedVal
-          } else {
-            newTableData[groupPath] = {}
-            newTableData[groupPath][coreType] = selectedVal
+        let newTableData
+        if (this.isArraySchema()) {
+          const idx = parseInt(this.getArrayIndexFromElementId(elementId))
+          // clearFormData updates ComponentManager synchronously; read from it so we
+          // see the cleared dependent fields instead of the stale pre-batch React state.
+          let currentData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
+          if (!Array.isArray(currentData)) {
+            currentData = this.props.formInstance.state.formTableData
           }
+          const baseArray = Array.isArray(currentData) ? currentData.map(item => ({ ...item })) : []
+          baseArray[idx] = { ...(baseArray[idx] || {}), [coreType]: selectedVal }
+          newTableData = baseArray
+          ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
         } else {
-          if (newTableData && newTableData.constructor === Object) {
-            newTableData[coreType] = selectedVal
+          newTableData = Object.assign({}, this.props.formInstance.state.formTableData)
+          if (groupPath) {
+            if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
+              newTableData[groupPath][coreType] = selectedVal
+            } else {
+              newTableData[groupPath] = {}
+              newTableData[groupPath][coreType] = selectedVal
+            }
           } else {
-            newTableData = {}
-            newTableData[coreType] = selectedVal
+            if (newTableData && newTableData.constructor === Object) {
+              newTableData[coreType] = selectedVal
+            } else {
+              newTableData = {}
+              newTableData[coreType] = selectedVal
+            }
           }
         }
         this.props.formInstance.setState({ formTableData: newTableData })
@@ -410,7 +511,7 @@ class DependentElements extends React.Component {
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data
             }
-            this.generateDropdown(finalResponse, newElement, groupPath)
+            this.generateDropdown(finalResponse, newElement, generateGroupPath)
           }
         }).catch((error) => {
           console.error(error)
@@ -463,7 +564,10 @@ class DependentElements extends React.Component {
 
     let labelText
     let requiredFieldsArr
-    if (!this.props.sectionName) {
+    if (this.isArraySchema()) {
+      labelText = this.props.formConfig.items.properties[coreType]?.title
+      requiredFieldsArr = this.props.formConfig.items.required
+    } else if (!this.props.sectionName) {
       labelText = this.props.formConfig.properties[coreType].title
       requiredFieldsArr = this.props.formConfig.required
     } else {
