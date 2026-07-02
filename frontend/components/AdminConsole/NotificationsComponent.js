@@ -5,10 +5,13 @@ import { connect } from 'react-redux'
 import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
+import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
+import AdminConsoleHelpOverlay from './Help/AdminConsoleHelpOverlay'
+import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
 import validator from '@rjsf/validator-ajv8'
-const { useReducer, useEffect } = React
+const { useReducer, useEffect, useState } = React
 const { Modal } = ReactBootstrap
 
 const NotificationsComponent = (props, context) => {
@@ -18,6 +21,7 @@ const NotificationsComponent = (props, context) => {
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, loading, gridId, show, objectId, selectedRow, formData }, setState] = useReducer(reducer, initialState)
+  const [showFormHelp, setShowFormHelp] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -27,6 +31,7 @@ const NotificationsComponent = (props, context) => {
 
   const onHide = () => {
     setState({ show: false, objectId: 0, selectedRow: undefined, formData: undefined })
+    setShowFormHelp(false)
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
@@ -146,7 +151,7 @@ const NotificationsComponent = (props, context) => {
     const onSubmit = (e) => saveNotification(e, url)
 
     return (
-      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
+      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit} templates={{ FieldTemplate: AdminConsoleFieldTemplate }}>
         <></>
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
@@ -164,24 +169,40 @@ const NotificationsComponent = (props, context) => {
     )
   }
 
+  const announcementMsg = { id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' }
+
   return (
     <>
       {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
-          <p>{context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}</p>
+          <p>{context.intl.formatMessage(announcementMsg)}</p>
+          <AdminConsoleHelpButton title={announcementMsg} />
         </div>
         {generateNotificationsGrid()}
       </div>
       {show && (
         <Modal className='admin-console-unit-modal' show={show} onHide={() => onHide()}>
-          <Modal.Header className='admin-console-unit-modal-header' closeButton>
+          <Modal.Header className='admin-console-unit-modal-header'>
             <Modal.Title>
-              {context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}
+              {context.intl.formatMessage(announcementMsg)}
             </Modal.Title>
+            <div className='admin-console-modal-header-actions'>
+              <AdminConsoleHelpButton
+                title={announcementMsg}
+                formLevel
+                onToggle={() => setShowFormHelp(v => !v)}
+                active={showFormHelp}
+              />
+              <button type='button' className='btn-close' aria-label='Close' onClick={() => onHide()} />
+            </div>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateNotificationForm(objectId)}
+            <AdminConsoleHelpOverlay
+              onClose={() => setShowFormHelp(false)}
+              show={showFormHelp}
+            />
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
         </Modal>
