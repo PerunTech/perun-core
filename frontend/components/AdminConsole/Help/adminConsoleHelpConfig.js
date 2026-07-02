@@ -7,7 +7,7 @@ export async function loadHelpConfig() {
     const res = await fetch(url)
     const json = await res.json()
     helpConfig = json
-  } catch { }
+  } catch (err) { throw err }
 }
 
 export function getHelpConfig() {
