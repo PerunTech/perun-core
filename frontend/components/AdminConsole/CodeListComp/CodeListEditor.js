@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ComponentManager, GridManager, PropTypes, axios } from "../../../client";
 import { connect } from "react-redux";
 import { alertUserResponse } from "../../../elements";
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton';
 import CodeListSearchSchema from "./CodeListSearchSchema";
 import { COMBINED_FORM_ID, GRID_ID, buildExportTree, getRowField } from './utils';
 import CodeListSearchForm from './CodeListSearchForm';
@@ -220,6 +221,10 @@ const CodeListEditor = (props, context) => {
 
     return (
         <React.Fragment>
+            <div className='admin-console-component-header'>
+                <p>{fmt('perun.admin_console.code_list_editor')}</p>
+                <AdminConsoleHelpButton title={{ id: 'perun.admin_console.code_list_editor', defaultMessage: 'perun.admin_console.code_list_editor' }} />
+            </div>
             {breadcrumb.length === 0 ? (
                 <CodeListSearchForm
                     schema={schema}

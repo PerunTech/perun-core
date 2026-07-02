@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ComponentManager, GridManager, PropTypes, axios } from "../../../client";
 import { connect } from "react-redux";
 import { alertUserResponse } from "../../../elements";
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton';
 import LabelSearchSchema from "./LabelSearchSchema";
 import { TABLE_NAME, FORM_ID, GRID_ID, fetchLocales, generateExport } from './utils';
 import LabelSearchForm from './LabelSearchForm';
@@ -157,6 +158,10 @@ const LabelEditor = (props, context) => {
 
     return (
         <React.Fragment>
+            <div className='admin-console-component-header'>
+                <p>{fmt('perun.admin_console.label_editor')}</p>
+                <AdminConsoleHelpButton title={{ id: 'perun.admin_console.label_editor', defaultMessage: 'perun.admin_console.label_editor' }} />
+            </div>
             <LabelSearchForm
                 schema={schema}
                 uiSchema={uiSchema}

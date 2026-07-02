@@ -212,7 +212,6 @@ const ConfigTables = (props, context) => {
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
             templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
-            fieldHelpIconSize={16}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />

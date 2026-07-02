@@ -3,6 +3,7 @@ import { GenericForm, Loading, axios } from "../../../client";
 import { ReactBootstrap, alertUserResponse } from "../../../elements";
 const { Modal } = ReactBootstrap;
 import Icon from '../../../elements/util/Icon';
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate';
 import { TABLE_NAME, LABELS_TABLE_NAME, COMBINED_FORM_ID } from './utils';
 
 const extract = (res) => {
@@ -131,6 +132,7 @@ const CodeListFormModal = ({ show, objectId, parentCodeValue, svSession, fmt, on
                         addDeleteFunction={onDelete}
                         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
                         className='code-list-form'
+                        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
                     />
                 )}
             </Modal.Body>

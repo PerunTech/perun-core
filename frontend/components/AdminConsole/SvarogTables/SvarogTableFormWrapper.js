@@ -230,7 +230,6 @@ const SvarogTableFormWrapper = (props, context) => {
         additionalWidgets={FIELD_ADDITIONAL_WIDGETS}
         uiSchemaOverride={FIELD_UISCHEMA_OVERRIDE}
         templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
-        fieldHelpIconSize={16}
       />
     )
   }
