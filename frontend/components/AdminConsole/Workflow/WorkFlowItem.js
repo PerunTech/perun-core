@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
 import { alertUserResponse, ReactBootstrap } from '../../../elements'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 import WorkFlowItemParams from './WorkFlowItemParams.'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
@@ -90,6 +91,7 @@ const WorkFlowItem = (props, context) => {
         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }
