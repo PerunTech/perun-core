@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { loadHelpConfig } from './Help/adminConsoleHelpConfig'
 import AdminConsoleContext from './Help/AdminConsoleContext'
 import ACSideMenu from './ACSideMenu'
 // COMPONENTS
@@ -30,7 +29,6 @@ const AdminConsole = (_props, context) => {
     }
     useEffect(() => {
         getMenu()
-        loadHelpConfig()
         transformIdScreen()
     }, [])
     const transformIdScreen = () => {

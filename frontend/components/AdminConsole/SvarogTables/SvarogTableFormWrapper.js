@@ -9,6 +9,7 @@ import SvarogFieldsPanel from './SvarogFieldsPanel'
 import { parseDbDataArray, normalizeField, formDataToDbDataObject, applyFormDataOverrides, downloadJson, FIELD_UISCHEMA_OVERRIDE, isTrue, FLAG_META } from './svarogTableUtils'
 import InvertedMandatoryCheckbox from './InvertedMandatoryCheckbox'
 import GuiMetadataWidget from './GuiMetadataWidget'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 
 const FIELD_ADDITIONAL_WIDGETS = { InvertedMandatoryCheckbox }
 const { useReducer, useEffect, useRef } = React
@@ -228,6 +229,8 @@ const SvarogTableFormWrapper = (props, context) => {
         className={'admin-settings-forms'}
         additionalWidgets={FIELD_ADDITIONAL_WIDGETS}
         uiSchemaOverride={FIELD_UISCHEMA_OVERRIDE}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
+        fieldHelpIconSize={16}
       />
     )
   }

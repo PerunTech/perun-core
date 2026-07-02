@@ -5,6 +5,8 @@ import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } fro
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements';
 import { Loading } from '../../ComponentsIndex';
 import PerunMenuWrapper from './PerunMenuWrapper';
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
@@ -103,6 +105,7 @@ const PerunMenu = (props, context) => {
         className={'admin-settings-forms'}
         inputWrapper={PerunMenuWrapper}
         objectId={objectId}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   };
@@ -178,6 +181,7 @@ const PerunMenu = (props, context) => {
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.perun_menu', defaultMessage: 'perun.admin_console.perun_menu' })}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.perun_menu', defaultMessage: 'perun.admin_console.perun_menu' }} />
         </div>
         {generatePerunMenuGrid()}
       </div>

@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../../client'
 import { alertUserResponse, ReactBootstrap } from '../../../elements'
 import WorkFlowItem from './WorkFlowItem'
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -90,6 +92,7 @@ const WorkFlowAutomaton = (props, context) => {
         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }
@@ -125,6 +128,7 @@ const WorkFlowAutomaton = (props, context) => {
         <div className='admin-console-grid-container'>
           <div className='admin-console-component-header'>
             <p>{context.intl.formatMessage({ id: 'perun.admin_console.work_flow_auto', defaultMessage: 'perun.admin_console.work_flow_auto' })}</p>
+            <AdminConsoleHelpButton title={{ id: 'perun.admin_console.work_flow_auto', defaultMessage: 'perun.admin_console.work_flow_auto' }} />
           </div>
           {generateWorkFlowGrid()}
         </div>

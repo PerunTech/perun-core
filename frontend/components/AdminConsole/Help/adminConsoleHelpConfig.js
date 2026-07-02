@@ -1,18 +1,4 @@
-let helpConfig = null
 const labelTextCache = {}
-
-export async function loadHelpConfig() {
-  const url = `${window.location.origin}${window.assets}/json/config/AppSettingsHelp.json`
-  try {
-    const res = await fetch(url)
-    const json = await res.json()
-    helpConfig = json
-  } catch (err) { throw err }
-}
-
-export function getHelpConfig() {
-  return helpConfig
-}
 
 export async function fetchLabelText(labelCode, svSession) {
   if (labelTextCache[labelCode] !== undefined) return labelTextCache[labelCode]

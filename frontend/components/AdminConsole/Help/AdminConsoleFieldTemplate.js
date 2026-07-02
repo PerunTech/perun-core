@@ -33,11 +33,41 @@ const AdminConsoleFieldTemplate = ({
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>
   }
-  const fieldName = id ? id.split('_').pop().toLowerCase() : null
+
+  const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
   const labelCode = sectionId && fieldName ? `perun.admin_console.${sectionId}.form.${fieldName}.help` : null
   const helpText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : null
 
   const WrapIfAdditionalTemplate = registry?.templates?.WrapIfAdditionalTemplate
+  const isCheckbox = schema?.type === 'boolean'
+  const iconSize = registry?.formContext?.fieldHelpIconSize ?? 22
+
+  const helpButton = helpText && (
+    <button
+      ref={btnRef}
+      type='button'
+      className={`admin-console-field-help-btn${showHelp ? ' admin-console-field-help-btn--active' : ''}`}
+      onClick={() => setShowHelp(v => !v)}
+    >
+      <Icon name={showHelp ? 'IconHelpCircleFilled' : 'IconHelpCircle'} size={iconSize} stroke={1.5} />
+    </button>
+  )
+
+  const helpOverlay = helpText && (
+    <Overlay
+      target={btnRef.current}
+      show={showHelp}
+      placement='right'
+      rootClose
+      onHide={() => setShowHelp(false)}
+    >
+      {overlayProps => (
+        <Popover {...overlayProps} className='admin-console-field-help-popover'>
+          <Popover.Body>{helpText}</Popover.Body>
+        </Popover>
+      )}
+    </Overlay>
+  )
 
   const labelRow = displayLabel && label && (
     <div className='admin-console-field-label-row'>
@@ -45,33 +75,18 @@ const AdminConsoleFieldTemplate = ({
         {label}
         {required && <span className='required'>{'*'}</span>}
       </label>
-      {helpText && (
-        <>
-          <button
-            ref={btnRef}
-            type='button'
-            className={`admin-console-field-help-btn${showHelp ? ' admin-console-field-help-btn--active' : ''}`}
-            onClick={() => setShowHelp(v => !v)}
-          >
-            <Icon name={showHelp ? 'IconHelpCircleFilled' : 'IconHelpCircle'} size={16} stroke={1.5} />
-          </button>
-          <Overlay
-            target={btnRef.current}
-            show={showHelp}
-            placement='right'
-            rootClose
-            onHide={() => setShowHelp(false)}
-          >
-            {overlayProps => (
-              <Popover {...overlayProps} className='admin-console-field-help-popover'>
-                <Popover.Body>{helpText}</Popover.Body>
-              </Popover>
-            )}
-          </Overlay>
-        </>
-      )}
+      {helpButton}
+      {helpOverlay}
     </div>
   )
+
+  const fieldChildren = isCheckbox && helpText ? (
+    <div className='admin-console-checkbox-field-row'>
+      {children}
+      {helpButton}
+      {helpOverlay}
+    </div>
+  ) : children
 
   if (WrapIfAdditionalTemplate) {
     return (
@@ -91,7 +106,7 @@ const AdminConsoleFieldTemplate = ({
       >
         {labelRow}
         {displayLabel && description}
-        {children}
+        {fieldChildren}
         {errors}
         {help}
       </WrapIfAdditionalTemplate>
@@ -102,7 +117,7 @@ const AdminConsoleFieldTemplate = ({
     <div className={classNames} style={style}>
       {labelRow}
       {displayLabel && description}
-      {children}
+      {fieldChildren}
       {errors}
       {help}
     </div>

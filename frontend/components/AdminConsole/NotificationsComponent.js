@@ -6,7 +6,6 @@ import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
-import AdminConsoleHelpOverlay from './Help/AdminConsoleHelpOverlay'
 import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
@@ -21,8 +20,6 @@ const NotificationsComponent = (props, context) => {
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, loading, gridId, show, objectId, selectedRow, formData }, setState] = useReducer(reducer, initialState)
-  const [showFormHelp, setShowFormHelp] = useState(false)
-
   useEffect(() => {
     return () => {
       ComponentManager.cleanComponentReducerState(gridId)
@@ -31,7 +28,6 @@ const NotificationsComponent = (props, context) => {
 
   const onHide = () => {
     setState({ show: false, objectId: 0, selectedRow: undefined, formData: undefined })
-    setShowFormHelp(false)
   }
 
   const handleRowClick = (_id, _rowIdx, row) => {
@@ -183,26 +179,13 @@ const NotificationsComponent = (props, context) => {
       </div>
       {show && (
         <Modal className='admin-console-unit-modal' show={show} onHide={() => onHide()}>
-          <Modal.Header className='admin-console-unit-modal-header'>
+          <Modal.Header className='admin-console-unit-modal-header' closeButton>
             <Modal.Title>
               {context.intl.formatMessage(announcementMsg)}
             </Modal.Title>
-            <div className='admin-console-modal-header-actions'>
-              <AdminConsoleHelpButton
-                title={announcementMsg}
-                formLevel
-                onToggle={() => setShowFormHelp(v => !v)}
-                active={showFormHelp}
-              />
-              <button type='button' className='btn-close' aria-label='Close' onClick={() => onHide()} />
-            </div>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>
             {generateNotificationForm(objectId)}
-            <AdminConsoleHelpOverlay
-              onClose={() => setShowFormHelp(false)}
-              show={showFormHelp}
-            />
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer'></Modal.Footer>
         </Modal>

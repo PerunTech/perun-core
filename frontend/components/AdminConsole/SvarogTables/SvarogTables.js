@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading } from '../../../client'
 import { alertUserV2, ReactBootstrap } from '../../../elements'
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
 import { TABLE_UISCHEMA_OVERRIDE } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
@@ -80,6 +82,7 @@ const SvarogTables = (props, context) => {
         objectId={objectId}
         selectedTableName={selectedTableName}
         onClose={doClose}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }
@@ -111,6 +114,7 @@ const SvarogTables = (props, context) => {
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_tables', defaultMessage: 'perun.admin_console.svarog_tables' })}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.svarog_tables', defaultMessage: 'perun.admin_console.svarog_tables' }} />
         </div>
         {generateSvarogTablesGrid()}
       </div>

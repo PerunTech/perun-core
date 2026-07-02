@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
+import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
 import { TABLE_UISCHEMA_OVERRIDE } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
@@ -157,6 +159,7 @@ const ConfigTables = (props, context) => {
         objectId={objectId}
         selectedTableName={selectedTableName}
         onClose={doClose}
+        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }
@@ -208,6 +211,8 @@ const ConfigTables = (props, context) => {
             additionalWidgets={isConfLog ? CONF_LOG_WIDGETS : undefined}
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
+            templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
+            fieldHelpIconSize={16}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />
@@ -220,6 +225,7 @@ const ConfigTables = (props, context) => {
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{fmt('perun.admin_console.svarog_config_tables')}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.svarog_config_tables', defaultMessage: 'perun.admin_console.svarog_config_tables' }} />
         </div>
         <ExportableGrid
           gridType='READ_URL'

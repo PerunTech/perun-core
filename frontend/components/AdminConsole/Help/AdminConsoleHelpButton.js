@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { ReactBootstrap, Icon } from '../../../elements'
-import { getHelpConfig, loadHelpConfig, fetchLabelText } from './adminConsoleHelpConfig'
+import { fetchLabelText } from './adminConsoleHelpConfig'
 import AdminConsoleContext from './AdminConsoleContext'
 
 const { useState, useEffect, useContext } = React
@@ -11,28 +11,21 @@ const { Modal } = ReactBootstrap
 const AdminConsoleHelpButton = ({ title, formLevel, onToggle, active }, context) => {
   const { sectionId } = useContext(AdminConsoleContext)
   const [show, setShow] = useState(false)
-  const [config, setConfig] = useState(getHelpConfig)
-  const [longHelpText, setLongHelpText] = useState('')
+  const [apiText, setApiText] = useState('')
   const svSession = useSelector(state => state.security.svSession)
 
-  const labelId = formLevel ? config?.[sectionId]?.form : config?.[sectionId]?.page
-  const isLong = labelId?.endsWith('_l')
+  const labelCode = sectionId ? `perun.admin_console.${sectionId}.${formLevel ? 'form.' : ''}help` : null
 
   useEffect(() => {
-    if (!config) {
-      loadHelpConfig().then(() => setConfig(getHelpConfig()))
+    if (labelCode && svSession) {
+      fetchLabelText(`${labelCode}_l`, svSession).then(setApiText)
     }
-  }, [])
+  }, [labelCode, svSession])
 
-  useEffect(() => {
-    if (isLong && labelId && svSession) {
-      fetchLabelText(labelId.replace(/_l$/, ''), svSession).then(setLongHelpText)
-    }
-  }, [isLong, labelId, svSession])
+  const shortText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : ''
+  const helpText = apiText || shortText
+  if (!helpText) return null
 
-  if (!labelId) return null
-
-  const helpText = isLong ? longHelpText : context.intl.formatMessage({ id: labelId, defaultMessage: '' })
   const titleText = context.intl.formatMessage(title)
   const handleClick = onToggle || (() => setShow(true))
   const isActive = onToggle ? active : show

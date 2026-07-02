@@ -602,7 +602,9 @@ class GenericForm extends React.Component {
     }
 
     const formContext = {
-      onFieldChange: this.onFieldChange
+      onFieldChange: this.onFieldChange,
+      helpSectionId: this.props.helpSectionId,
+      fieldHelpIconSize: this.props.fieldHelpIconSize
     };
 
     const loading = <div><Loading /></div>
@@ -620,6 +622,7 @@ class GenericForm extends React.Component {
         })))
         : uischema}
       widgets={{ ...this.Widgets, ...(this.props.additionalWidgets || {}) }}
+      templates={this.props.templates}
       formData={formTableData}
       onSubmit={this.saveObject}
       showErrorList={false}
