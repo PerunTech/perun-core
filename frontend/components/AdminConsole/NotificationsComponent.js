@@ -10,7 +10,7 @@ import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
 import validator from '@rjsf/validator-ajv8'
-const { useReducer, useEffect, useState } = React
+const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
 const NotificationsComponent = (props, context) => {
