@@ -18,7 +18,7 @@ const AdminConsoleHelpButton = ({ title, formLevel, onToggle, active }, context)
 
   useEffect(() => {
     if (labelCode && svSession) {
-      fetchLabelText(`${labelCode}_l`, svSession).then(setApiText)
+      fetchLabelText(labelCode, svSession).then(setApiText)
     }
   }, [labelCode, svSession])
 

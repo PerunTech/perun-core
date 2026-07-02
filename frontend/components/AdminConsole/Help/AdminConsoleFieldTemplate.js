@@ -1,7 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { useSelector } from 'react-redux'
 import { Icon, ReactBootstrap } from '../../../elements'
 import AdminConsoleContext from './AdminConsoleContext'
+import { fetchLabelText } from './adminConsoleHelpConfig'
 
 const { useState, useRef, useContext } = React
 const { Overlay, Popover } = ReactBootstrap
@@ -27,33 +29,51 @@ const AdminConsoleFieldTemplate = ({
   onKeyChange
 }, context) => {
   const [showHelp, setShowHelp] = useState(false)
+  const [apiText, setApiText] = useState('')
+  const [loading, setLoading] = useState(false)
   const btnRef = useRef(null)
+  const fetchedRef = useRef(false)
   const { sectionId } = useContext(AdminConsoleContext)
+  const svSession = useSelector(state => state.security.svSession)
+
+  const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
+  const labelCode = sectionId && fieldName ? `perun.admin_console.${sectionId}.form.${fieldName}.help` : null
 
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>
   }
 
-  const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
-  const labelCode = sectionId && fieldName ? `perun.admin_console.${sectionId}.form.${fieldName}.help` : null
-  const helpText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : null
+  const shortText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : ''
+  const helpText = apiText || shortText || null
 
   const WrapIfAdditionalTemplate = registry?.templates?.WrapIfAdditionalTemplate
   const isCheckbox = schema?.type === 'boolean'
   const iconSize = registry?.formContext?.fieldHelpIconSize ?? 22
 
-  const helpButton = helpText && (
+  const handleHelpClick = () => {
+    if (!fetchedRef.current && labelCode && svSession) {
+      fetchedRef.current = true
+      setLoading(true)
+      fetchLabelText(labelCode, svSession).then(text => {
+        setApiText(text)
+        setLoading(false)
+      })
+    }
+    setShowHelp(v => !v)
+  }
+
+  const helpButton = shortText && (
     <button
       ref={btnRef}
       type='button'
       className={`admin-console-field-help-btn${showHelp ? ' admin-console-field-help-btn--active' : ''}`}
-      onClick={() => setShowHelp(v => !v)}
+      onClick={handleHelpClick}
     >
       <Icon name={showHelp ? 'IconHelpCircleFilled' : 'IconHelpCircle'} size={iconSize} stroke={1.5} />
     </button>
   )
 
-  const helpOverlay = helpText && (
+  const helpOverlay = shortText && (
     <Overlay
       target={btnRef.current}
       show={showHelp}
@@ -63,7 +83,12 @@ const AdminConsoleFieldTemplate = ({
     >
       {overlayProps => (
         <Popover {...overlayProps} className='admin-console-field-help-popover'>
-          <Popover.Body>{helpText}</Popover.Body>
+          <Popover.Body>
+            {loading
+              ? <span className='admin-console-field-help-popover-loading'><Icon name='IconLoader2' size={16} stroke={1.5} /></span>
+              : helpText
+            }
+          </Popover.Body>
         </Popover>
       )}
     </Overlay>
@@ -80,7 +105,7 @@ const AdminConsoleFieldTemplate = ({
     </div>
   )
 
-  const fieldChildren = isCheckbox && helpText ? (
+  const fieldChildren = isCheckbox && shortText ? (
     <div className='admin-console-checkbox-field-row'>
       {children}
       {helpButton}
