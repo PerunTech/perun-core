@@ -39,7 +39,7 @@ const OrganizationalUnit = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
         hideBtns="all"
-        className={'form-test add-edit-users-form'}
+        className={'admin-settings-forms'}
         disabled={true}
         templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
