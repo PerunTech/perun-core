@@ -54,7 +54,7 @@ const CodeListChildrenView = ({
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/${TABLE_NAME}`}
                 dataTableName={`/ReactElements/getObjectsByParentId/${svSession}/${currentEntry.objectId}/${TABLE_NAME}/0/SORT_ORDER`}
                 defaultHeight={false}
-                heightRatio={0.7}
+                heightRatio={0.6}
                 refreshData={true}
                 onRowClickFunct={onRowClick}
             />
