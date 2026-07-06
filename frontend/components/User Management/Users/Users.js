@@ -12,6 +12,7 @@ import AddUserWrapper from './AddUserWrapper'
 import EditUserWrapper from './EditUserWrapper'
 import Associate from './Associate'
 import Swal from 'sweetalert2'
+import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate'
 const Users = (props, context) => {
     const [loading, setLoading] = useState(false)
     const [show, setShow] = useState(false)
@@ -48,13 +49,13 @@ const Users = (props, context) => {
                 break;
             case 'add':
                 inputWrapper = AddUserWrapper;
-                classNames = 'form-test add-edit-users-form add-user-wrapper';
+                classNames = 'form-test admin-settings-forms add-user-wrapper';
                 label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
                 method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
             case 'edit':
                 inputWrapper = EditUserWrapper;
-                classNames = 'form-test add-edit-users-form edit-user-wrapper';
+                classNames = 'form-test admin-settings-forms edit-user-wrapper';
                 label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
                 method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
@@ -79,6 +80,8 @@ const Users = (props, context) => {
                 afterSaveCleanUp={() => { refreshGrid(); setShow(false); }}
                 customSaveButtonName={label}
                 customSave
+                helpSectionId={formType !== 'search' ? tableName : undefined}
+                templates={formType !== 'search' ? { FieldTemplate: AdminConsoleFieldTemplate } : undefined}
             />
         );
     };

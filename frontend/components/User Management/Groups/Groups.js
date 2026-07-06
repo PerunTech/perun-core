@@ -7,6 +7,7 @@ const { useEffect } = React
 const { Modal } = ReactBootstrap
 import { alertUserResponse } from '../../../elements'
 import AssignAcl from '../../AdminConsole/AssignAcl'
+import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate'
 // id cleanups
 // development note: refresh grids,add group menagement
 const Groups = (props, context) => {
@@ -49,7 +50,9 @@ const Groups = (props, context) => {
             tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
             addSaveFunction={(e) => handleFormSave(e, gridId)}
             hideBtns={'closeAndDelete'}
-            className={'form-test add-edit-users-form'}
+            className={'form-test admin-settings-forms'}
+            helpSectionId={tableName}
+            templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
         />
     }
     const handleFormSave = (e, gridId) => {

@@ -5,6 +5,7 @@ import { ComponentManager, ExportableGrid, GenericForm } from '../../../client'
 import { ReactBootstrap } from '../../../elements'
 import CreateAclCodes from '../../AdminConsole/CreateAclCodes'
 import AssignAcl from '../../AdminConsole/AssignAcl'
+import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate'
 const { useEffect } = React
 
 const { Modal } = ReactBootstrap
@@ -39,6 +40,8 @@ const Privileges = (props, context) => {
             hideBtns={'all'}
             className={classNames}
             disabled
+            helpSectionId={tableName}
+            templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
         />
     }
 
