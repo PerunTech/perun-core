@@ -37,7 +37,9 @@ const AdminConsoleFieldTemplate = ({
   const svSession = useSelector(state => state.security.svSession)
 
   const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
-  const labelCode = sectionId && fieldName ? `perun.admin_console.${sectionId}.form.${fieldName}.help` : null
+  const helpSectionId = registry?.formContext?.helpSectionId
+  const helpScope = helpSectionId ? helpSectionId.toLowerCase() : sectionId
+  const labelCode = helpScope && fieldName ? `perun.admin_console.${helpScope}.form.${fieldName}.help` : null
 
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>

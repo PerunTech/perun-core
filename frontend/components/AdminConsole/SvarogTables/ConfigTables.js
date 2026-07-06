@@ -211,6 +211,7 @@ const ConfigTables = (props, context) => {
             additionalWidgets={isConfLog ? CONF_LOG_WIDGETS : undefined}
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
+            helpSectionId={formTableName}
             templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
           />
         </Modal.Body>
