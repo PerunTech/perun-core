@@ -50,6 +50,30 @@ class DependentElements extends React.Component {
     return withoutRoot.substring(0, withoutRoot.indexOf('_'))
   }
 
+  // Looks up a field title in array schema, checking allOf conditional branches as fallback.
+  getArrayItemTitle = (coreType) => {
+    const items = this.props.formConfig?.items
+    if (!items) return undefined
+    if (items.properties?.[coreType]?.title) return items.properties[coreType].title
+    for (const clause of (items.allOf || [])) {
+      if (clause.then?.properties?.[coreType]?.title) return clause.then.properties[coreType].title
+    }
+    return undefined
+  }
+
+  // Returns true if `key` transitively depends on `fieldCode` via dependentOnField links.
+  isInChain = (key, fieldCode, itemsSchema) => {
+    let current = key
+    const visited = new Set()
+    while (current && !visited.has(current)) {
+      visited.add(current)
+      const depOn = itemsSchema[current]?.dependentOnField
+      if (depOn === fieldCode) return true
+      current = depOn
+    }
+    return false
+  }
+
   componentDidMount() {
     const { formConfig, sectionName } = this.props
     const formData = this.props.formData
@@ -126,6 +150,34 @@ class DependentElements extends React.Component {
     })
   }
 
+  componentWillUnmount = () => {
+    if (!this.isArraySchema()) return
+
+    const { fieldCode, formSchema } = this.props
+    const itemsSchema = formSchema?.items || {}
+    const arrayIndex = this.getArrayIndexFromElementId(this.props.elementId)
+
+    // Remove DOM-injected chain dropdowns (not the React-managed root).
+    Array.from(document.getElementsByClassName('dependent-dropdown')).forEach(el => {
+      if (this.getArrayIndexFromElementId(el.id) !== arrayIndex) return
+      const elCoreType = this.findCoreType(el.id)[1]
+      if (!this.isInChain(elCoreType, fieldCode, itemsSchema)) return
+      el.parentNode?.parentNode?.removeChild(el.parentNode)
+    })
+
+    // rjsf unmounts this component before GenericForm's onChange fires, so
+    // ComponentManager is stale here. Defer until after onChange has updated it.
+    setTimeout(() => {
+      if (!document.getElementById(this.props.formId)) return
+      this.clearFormData(fieldCode)
+      Object.keys(itemsSchema).forEach(key => {
+        if (this.isInChain(key, fieldCode, itemsSchema)) {
+          this.clearFormData(key)
+        }
+      })
+    }, 0)
+  }
+
   findCoreType = (stringId) => {
     if (this.isArraySchema()) {
       // elementId is "root_0_DEPARTMENT" or "root_0_LAB_OBJ_ID"
@@ -166,7 +218,7 @@ class DependentElements extends React.Component {
     let labelText
     let requiredFieldsArr
     if (this.isArraySchema()) {
-      labelText = this.props.formConfig.items.properties[coreType]?.title
+      labelText = this.getArrayItemTitle(coreType)
       requiredFieldsArr = this.props.formConfig.items.required
     } else if (!this.props.sectionName) {
       labelText = this.props.formConfig.properties[coreType].title
@@ -224,22 +276,26 @@ class DependentElements extends React.Component {
       const arrayIndex = this.getArrayIndexFromElementId(elementId)
       const itemsSchema = formSchema['items'] || {}
       const rowData = Array.isArray(formData) ? (formData[parseInt(arrayIndex)] || {}) : {}
+      const fieldCode = this.props.fieldCode
 
       Object.keys(itemsSchema).forEach(key => {
-        if (itemsSchema[key]?.order) {
+        if (key === fieldCode) {
+          // Root of this chain: fetch its codelist (with any existing selected value)
+          this.fetchInitialCodelist(rowData[key])
+        } else if (this.isInChain(key, fieldCode, itemsSchema)) {
           formObjectsArray.push({
             ...itemsSchema[key],
             value: rowData[key],
             parentVal: rowData[itemsSchema[key]['dependentOnField']],
             coreType: key
           })
-        } else if (itemsSchema[key]?.order === 0) {
-          this.fetchInitialCodelist(rowData[key])
         }
       })
 
       const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order)
       for (const el of sortedArr) {
+        // If parent has no value, the chain stops here — don't fetch further dependents
+        if (el.parentVal === undefined || el.parentVal === null || el.parentVal === '') break
         await this.generateDropdownInOrder(el.codelistName, arrayIndex, el.value, el.parentVal, el.coreType)
         this.setFormData(arrayIndex, el.coreType, el.value)
       }
@@ -423,8 +479,15 @@ class DependentElements extends React.Component {
       const index = ddls.findIndex(el => el.id === elementId);
       if (index > -1) {
         ddls.slice(index + 1).forEach((el, i) => {
-          if (this.isArraySchema() && this.getArrayIndexFromElementId(el.id) !== this.getArrayIndexFromElementId(elementId)) {
-            return
+          if (this.isArraySchema()) {
+            if (this.getArrayIndexFromElementId(el.id) !== this.getArrayIndexFromElementId(elementId)) {
+              return
+            }
+            // Skip elements that belong to a different dependency chain
+            const elCoreType = this.findCoreType(el.id)[1]
+            if (!this.isInChain(elCoreType, this.props.fieldCode, this.props.formSchema?.items || {})) {
+              return
+            }
           }
           if (form?.contains(el)) {
             const parentNode = el.parentNode;
@@ -565,7 +628,7 @@ class DependentElements extends React.Component {
     let labelText
     let requiredFieldsArr
     if (this.isArraySchema()) {
-      labelText = this.props.formConfig.items.properties[coreType]?.title
+      labelText = this.getArrayItemTitle(coreType)
       requiredFieldsArr = this.props.formConfig.items.required
     } else if (!this.props.sectionName) {
       labelText = this.props.formConfig.properties[coreType].title
