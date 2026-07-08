@@ -72,8 +72,16 @@ class GenericForm extends React.Component {
 
   DependencyDropdown = (elementProps) => {
     const elementId = elementProps.id
-    const fieldCode = findWidget(this.state.uischema, 'ui:widget', 'DependencyDropdown')
-    const sectionName = findSectionName(this.state.uischema, fieldCode)
+    let fieldCode, sectionName
+    if (this.state.formData?.type === 'array') {
+      // elementId is "root_0_FIELDNAME"; strip "root_{index}_" to get the actual field name
+      const withoutRoot = elementId.replace(/^root_/, '')
+      fieldCode = withoutRoot.replace(/^\d+_/, '')
+      sectionName = findSectionName(this.state.uischema, fieldCode)
+    } else {
+      fieldCode = findWidget(this.state.uischema, 'ui:widget', 'DependencyDropdown')
+      sectionName = findSectionName(this.state.uischema, fieldCode)
+    }
     return (
       <DependencyDropdown
         customDependencyDropdownComponent={this.state.customDependencyDropdownComponent}
