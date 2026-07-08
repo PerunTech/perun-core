@@ -7,7 +7,6 @@ import { alertUserResponse, ReactBootstrap } from '../../elements'
 import SystemConfLogsWrapper from './SystemConfLogsWrapper'
 import { Loading } from '../ComponentsIndex'
 import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -93,7 +92,6 @@ const SystemConfLogs = (props, context) => {
         inputWrapper={SystemConfLogsWrapper}
         additionalWidgets={{ logText: LogTextWidget, label: LabelWidget }}
         uiSchemaOverride={{ NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }
