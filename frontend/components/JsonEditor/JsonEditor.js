@@ -82,13 +82,14 @@ const JsonEditor = ({ value, originalValue, onSave, onDownload }, context) => {
     alertUserV2({
       type: 'question',
       title: fmt('perun.admin_console.json_reset_confirm'),
-      showCancel: true,
-      cancelButtonText: fmt('perun.admin_console.cancel'),
+      confirmButtonText: fmt('perun.admin_console.yes'),
       confirmButtonColor: '#87adbd',
       onConfirm: () => {
         setCurrentRaw(originalRaw);
         setStats(getStats(originalRaw));
       },
+      showCancel: true,
+      cancelButtonText: fmt('perun.admin_console.no'),
     });
   }, [originalRaw]);
 
