@@ -7,7 +7,6 @@ import { ReactBootstrap, alertUserV2, ComponentManager, alertUserResponse, Icon 
 import { Loading } from '../../ComponentsIndex';
 import { isJSON } from '../../../functions/utils';
 import SideMenu from './SideMenu';
-import Swal from 'sweetalert2';
 const { useState, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
@@ -18,6 +17,7 @@ const PerunMenuWrapper = (props, context) => {
   const [shouldRender, setRender] = useState(false)
   const [fieldJson, setFieldJson] = useState({})
   const [configuration, setConfig] = useState(undefined)
+  const [showDownloadOptions, setShowDownloadOptions] = useState(false)
 
   useEffect(() => {
     changeField()
@@ -104,26 +104,38 @@ const PerunMenuWrapper = (props, context) => {
   }
 
   const downloadMenu = () => {
+    setShowDownloadOptions(true)
+  }
+
+  const downloadResolvedMenu = (resolveImports) => {
     const { formid, svSession } = props
     const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const menuCode = formData['MENU_CODE']
-    const download = (resolveImports) => {
-      const url = `${window.server}/Menu/download/${svSession}/${menuCode}/${resolveImports}`
-      window.open(url, '_blank')
-    }
-    alertUserV2({
-      type: 'info',
-      title: `${context.intl.formatMessage({ id: 'perun.admin_console.download_menu', defaultMessage: 'perun.admin_console.download_menu' })}: ${menuCode}`,
-      message: context.intl.formatMessage({ id: 'perun.admin_console.resolve_imports_prompt', defaultMessage: 'perun.admin_console.resolve_imports_prompt' }),
-      showCancel: true,
-      showDeny: true,
-      confirmButtonText: context.intl.formatMessage({ id: 'perun.admin_console.yes', defaultMessage: 'perun.admin_console.yes' }),
-      cancelButtonText: context.intl.formatMessage({ id: 'perun.admin_console.cancel', defaultMessage: 'perun.admin_console.cancel' }),
-      denyButtonText: context.intl.formatMessage({ id: 'perun.admin_console.no', defaultMessage: 'perun.admin_console.no' }),
-      denyButtonColor: '#7cd1f9',
-      onConfirm: () => download(true),
-      onCancel: () => Swal.close(),
-      onDeny: () => download(false),
+    const url = `${window.server}/Menu/download/${svSession}/${menuCode}/${resolveImports}`
+    window.open(url, '_blank')
+    setShowDownloadOptions(false)
+  }
+
+  const downloadObjectJson = () => {
+    const { formid, svSession } = props
+    const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
+    const menuCode = formData['MENU_CODE']
+    const url = `${window.server}/WsCore/object/${svSession}/${objectId}/PERUN_MENU`
+    setLoading(true)
+    axios.get(url).then(res => {
+      setLoading(false)
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `${menuCode}.json`;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+      setShowDownloadOptions(false)
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+      alertUserResponse({ response: err })
     })
   }
 
@@ -160,6 +172,34 @@ const PerunMenuWrapper = (props, context) => {
             {configuration && <SideMenu configuration={configuration} />}
           </Modal.Body>
           <Modal.Footer className='admin-console-unit-modal-footer  menu-editor-footer'></Modal.Footer>
+        </Modal>
+      )}
+      {showDownloadOptions && (
+        <Modal
+          className='admin-console-unit-modal menu-download-modal'
+          show={showDownloadOptions}
+          onHide={() => setShowDownloadOptions(false)}>
+          <Modal.Header className='admin-console-unit-modal-header menu-download-header' closeButton>
+            <Modal.Title>{context.intl.formatMessage({ id: 'perun.admin_console.download_menu', defaultMessage: 'perun.admin_console.download_menu' })}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className='admin-console-unit-modal-body menu-download-body'>
+            <p>{context.intl.formatMessage({ id: 'perun.admin_console.resolve_imports_prompt', defaultMessage: 'perun.admin_console.resolve_imports_prompt' })}</p>
+            <div className='perun-menu-buttons-container menu-download-buttons'>
+              <button className='btn-success btn_save_form menu-download-resolved-btn' onClick={() => downloadResolvedMenu(true)}>
+                {context.intl.formatMessage({ id: 'perun.admin_console.download_resolved', defaultMessage: 'perun.admin_console.download_resolved' })}
+                <span className='download-span'>{<Icon name="IconDownload" />}</span>
+              </button>
+              <button className='btn-success btn_save_form menu-download-unresolved-btn' onClick={() => downloadResolvedMenu(false)}>
+                {context.intl.formatMessage({ id: 'perun.admin_console.download_unresolved', defaultMessage: 'perun.admin_console.download_unresolved' })}
+                <span className='download-span'>{<Icon name="IconDownload" />}</span>
+              </button>
+              <button className='btn-success btn_save_form menu-download-json-btn' onClick={downloadObjectJson}>
+                {context.intl.formatMessage({ id: 'perun.admin_console.download_object_json', defaultMessage: 'perun.admin_console.download_object_json' })}
+                <span className='download-span'>{<Icon name="IconDatabaseExport" />}</span>
+              </button>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className='admin-console-unit-modal-footer menu-download-footer'></Modal.Footer>
         </Modal>
       )}
     </>
