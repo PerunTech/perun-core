@@ -62,6 +62,15 @@ class DependentElements extends React.Component {
   }
 
   // Returns true if `key` transitively depends on `fieldCode` via dependentOnField links.
+  // Looks up a property definition from the JSON schema, checking allOf conditional branches as fallback.
+  getSchemaProperty = (formConfig, coreType) => {
+    if (formConfig?.properties?.[coreType]) return formConfig.properties[coreType]
+    for (const clause of (formConfig?.allOf || [])) {
+      if (clause.then?.properties?.[coreType]) return clause.then.properties[coreType]
+    }
+    return undefined
+  }
+
   isInChain = (key, fieldCode, itemsSchema) => {
     let current = key
     const visited = new Set()
@@ -221,7 +230,7 @@ class DependentElements extends React.Component {
       labelText = this.getArrayItemTitle(coreType)
       requiredFieldsArr = this.props.formConfig.items.required
     } else if (!this.props.sectionName) {
-      labelText = this.props.formConfig.properties[coreType].title
+      labelText = this.getSchemaProperty(this.props.formConfig, coreType)?.title
       requiredFieldsArr = this.props.formConfig.required
     } else {
       labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType].title
@@ -633,7 +642,7 @@ class DependentElements extends React.Component {
       labelText = this.getArrayItemTitle(coreType)
       requiredFieldsArr = this.props.formConfig.items.required
     } else if (!this.props.sectionName) {
-      labelText = this.props.formConfig.properties[coreType].title
+      labelText = this.getSchemaProperty(this.props.formConfig, coreType)?.title
       requiredFieldsArr = this.props.formConfig.required
     } else {
       labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType]?.title
