@@ -184,7 +184,7 @@ const PerunMenuWrapper = (props, context) => {
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body menu-download-body'>
             <p>{context.intl.formatMessage({ id: 'perun.admin_console.resolve_imports_prompt', defaultMessage: 'perun.admin_console.resolve_imports_prompt' })}</p>
-            <div className='perun-menu-buttons-container menu-download-buttons'>
+            <div className='menu-download-buttons'>
               <button className='btn-success btn_save_form menu-download-resolved-btn' onClick={() => downloadResolvedMenu(true)}>
                 {context.intl.formatMessage({ id: 'perun.admin_console.download_resolved', defaultMessage: 'perun.admin_console.download_resolved' })}
                 <span className='download-span'>{<Icon name="IconDownload" />}</span>
