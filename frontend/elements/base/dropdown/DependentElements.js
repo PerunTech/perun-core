@@ -61,7 +61,6 @@ class DependentElements extends React.Component {
     return undefined
   }
 
-  // Returns true if `key` transitively depends on `fieldCode` via dependentOnField links.
   // Looks up a property definition from the JSON schema, checking allOf conditional branches as fallback.
   getSchemaProperty = (formConfig, coreType) => {
     if (formConfig?.properties?.[coreType]) return formConfig.properties[coreType]
@@ -71,6 +70,7 @@ class DependentElements extends React.Component {
     return undefined
   }
 
+  // Returns true if `key` transitively depends on `fieldCode` via dependentOnField links.
   isInChain = (key, fieldCode, itemsSchema) => {
     let current = key
     const visited = new Set()
