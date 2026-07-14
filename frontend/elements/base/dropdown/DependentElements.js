@@ -311,11 +311,12 @@ class DependentElements extends React.Component {
         }
       });
     } else {
+      const fieldCode = this.props.fieldCode
       Object.keys(formSchema).forEach(key => {
-        if (formSchema[key]?.order) {
-          formObjectsArray.push({ ...formSchema[key], value: formData[key], parentVal: formData[formSchema[key]['dependentOnField']], coreType: key });
-        } else if (formSchema[key]?.order === 0) {
+        if (key === fieldCode) {
           this.fetchInitialCodelist(formData[key])
+        } else if (this.isInChain(key, fieldCode, formSchema)) {
+          formObjectsArray.push({ ...formSchema[key], value: formData[key], parentVal: formData[formSchema[key]['dependentOnField']], coreType: key });
         }
       });
     }
@@ -323,6 +324,7 @@ class DependentElements extends React.Component {
     const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order);
 
     for (const el of sortedArr) {
+      if (el.parentVal === undefined || el.parentVal === null || el.parentVal === '') break
       await this.generateDropdownInOrder(el.codelistName, sectionName, el.value, el.parentVal, el.coreType);
       this.setFormData(sectionName, el.coreType, el.value);
     }
@@ -453,14 +455,14 @@ class DependentElements extends React.Component {
         if (key === groupPath) {
           const sectionFormSchema = formSchema[groupPath]
           Object.keys(sectionFormSchema).forEach(nestedKey => {
-            if (sectionFormSchema[nestedKey]?.dependentOnField && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
+            if (sectionFormSchema[nestedKey]?.dependentOnField === coreType && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
               nextElementObj = sectionFormSchema[nestedKey]
               newElement = nestedKey
             }
           })
         }
       } else {
-        if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
+        if (formSchema[key]?.dependentOnField === coreType && formSchema[key]?.order === elementOrder + 1) {
           nextElementObj = formSchema[key]
           newElement = key
         }

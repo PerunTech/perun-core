@@ -79,8 +79,17 @@ class GenericForm extends React.Component {
       fieldCode = withoutRoot.replace(/^\d+_/, '')
       sectionName = findSectionName(this.state.uischema, fieldCode)
     } else {
-      fieldCode = findWidget(this.state.uischema, 'ui:widget', 'DependencyDropdown')
-      sectionName = findSectionName(this.state.uischema, fieldCode)
+      const derivedCode = elementId.replace(/^root_/, '')
+      if (this.state.uischema?.[derivedCode]) {
+        // Flat schema — derive fieldCode directly from element ID so each
+        // DependencyDropdown root gets its own correct fieldCode.
+        fieldCode = derivedCode
+        sectionName = null
+      } else {
+        // Sectioned schema — field is nested; fall back to findWidget.
+        fieldCode = findWidget(this.state.uischema, 'ui:widget', 'DependencyDropdown')
+        sectionName = findSectionName(this.state.uischema, fieldCode)
+      }
     }
     return (
       <DependencyDropdown
