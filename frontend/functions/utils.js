@@ -168,6 +168,15 @@ export const getObjectValueByKey = (obj, target) =>
     }, undefined);
 
 /**
+ * Extracts the array index from an rjsf array item element ID.
+ * @param {string} elementId - The rjsf element ID, e.g. "root_0_DEPARTMENT" -> "0", "root_12_LAB_OBJ_ID" -> "12".
+ */
+export const getArrayIndexFromElementId = (elementId) => {
+  const withoutRoot = elementId.replace(/^root_/, '')
+  return withoutRoot.substring(0, withoutRoot.indexOf('_'))
+}
+
+/**
  * Retrieves a localized label using a label code, module name, and internationalization context.
  *
  * @param {string} labelCode - The key used to identify the label (e.g., `'submit'`, `'title'`).

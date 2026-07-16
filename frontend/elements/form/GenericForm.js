@@ -7,11 +7,11 @@ import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
 import { labelBasePath } from '../../config/config';
 import { getFormData, saveFormData, dropLinkObjectsAction, store } from '../../model';
-import { WrapItUp, DependencyDropdown, findWidget, findSectionName, alertUserV2, alertUserResponse } from '..';
+import { WrapItUp, DependencyDropdown, DependentValueField, findWidget, findSectionName, alertUserV2, alertUserResponse } from '..';
 import { CustomOnchangeFunction } from './CustomOnchangeFunction'
 import validator from '@rjsf/validator-ajv8';
 import { Loading } from '../../components/ComponentsIndex';
-import { getObjectValueByKey, isValidObject } from '../../functions/utils';
+import { getObjectValueByKey, isValidObject, getArrayIndexFromElementId } from '../../functions/utils';
 let fieldName
 let fieldValue
 
@@ -66,7 +66,8 @@ class GenericForm extends React.Component {
       CustomMultiSelectDropdown: this.CustomMultiSelectDropdown.bind(this),
       CustomDateWithNowButton: this.CustomDateWithNowButton.bind(this),
       GPSCoordinate: this.GPSCoordinate.bind(this),
-      DependencyDropdown: this.DependencyDropdown.bind(this)
+      DependencyDropdown: this.DependencyDropdown.bind(this),
+      DependentValueField: this.DependentValueField.bind(this)
     }
   }
 
@@ -108,6 +109,29 @@ class GenericForm extends React.Component {
         triggerAutoDependentDropdownOnChange={this.state.triggerAutoDependentDropdownOnChange}
         disableInitialDependentDropdown={this.state.disableInitialDependentDropdown}
         spread='right'
+      />
+    )
+  }
+
+  DependentValueField = (elementProps) => {
+    const elementId = elementProps.id
+    const isArray = this.state.formData?.type === 'array'
+    const withoutRoot = elementId.replace(/^root_/, '')
+    const fieldCode = isArray ? withoutRoot.replace(/^\d+_/, '') : withoutRoot
+    const fieldSchema = isArray ? this.state.uischema?.items?.[fieldCode] : this.state.uischema?.[fieldCode]
+    const { dependentOnField } = fieldSchema || {}
+
+    const rowData = isArray
+      ? this.state.formTableData?.[parseInt(getArrayIndexFromElementId(elementId))]
+      : this.state.formTableData
+
+    return (
+      <DependentValueField
+        {...elementProps}
+        formId={this.state.id}
+        dependentOnField={dependentOnField}
+        attributeName={fieldCode}
+        sourceValue={rowData?.[dependentOnField]}
       />
     )
   }

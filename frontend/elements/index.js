@@ -15,6 +15,7 @@ export { ReducerTemplater } from './ReducerTemplater.js';
 export { Button } from './base/button/Button';
 export { Dropdown } from './base/dropdown/Dropdown';
 export { default as DependencyDropdown } from './base/dropdown/DependencyDropdown';
+export { default as DependentValueField } from './base/dropdown/DependentValueField';
 export { default as InputElement } from './base/InputElement/InputElement';
 
 /* form */
