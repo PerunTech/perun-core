@@ -124,6 +124,7 @@ const PerunMenuWrapper = (props, context) => {
     setLoading(true)
     axios.get(url).then(res => {
       setLoading(false)
+      if (!res?.data) return
       const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
