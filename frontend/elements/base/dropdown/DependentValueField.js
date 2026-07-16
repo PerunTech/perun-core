@@ -7,7 +7,7 @@ import { ComponentManager } from '../..';
 // which passes it as attributeName), so uiSchema only needs to declare
 // `dependentOnField`, nothing else.
 const DependentValueField = (props) => {
-  const { id, formId, dependentOnField, attributeName, sourceValue, onChange, schema, value, disabled, readonly } = props
+  const { id, label, formId, dependentOnField, attributeName, sourceValue, onChange, schema, value, disabled, readonly } = props
 
   useEffect(() => {
     const dataByField = ComponentManager.getStateForComponent(formId, 'dependentFieldData') || {}
@@ -27,7 +27,24 @@ const DependentValueField = (props) => {
 
   const isDisabled = disabled || readonly
   if (schema?.type === 'boolean') {
-    return <input id={id} type='checkbox' checked={!!value} disabled={isDisabled} readOnly />
+    // Matches rjsf's own CheckboxWidget markup, so this renders identically to
+    // a default boolean field (the outer form-group/field wrapper comes from
+    // rjsf's field template, applied to any widget, not from here).
+    return (
+      <div className={`checkbox ${isDisabled ? 'disabled' : ''}`}>
+        <label>
+          <input
+            type='checkbox'
+            id={id}
+            name={id}
+            checked={!!value}
+            disabled={isDisabled}
+            aria-describedby={`${id}__error ${id}__description ${id}__help`}
+          />
+          <span>{label}</span>
+        </label>
+      </div>
+    )
   }
   return <input id={id} type='text' className='form-control' value={value ?? ''} disabled={isDisabled} readOnly />
 }
