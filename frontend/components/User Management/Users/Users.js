@@ -12,7 +12,6 @@ import AddUserWrapper from './AddUserWrapper'
 import EditUserWrapper from './EditUserWrapper'
 import Associate from './Associate'
 import Swal from 'sweetalert2'
-import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate'
 const Users = (props, context) => {
     const [loading, setLoading] = useState(false)
     const [show, setShow] = useState(false)
@@ -81,7 +80,7 @@ const Users = (props, context) => {
                 customSaveButtonName={label}
                 customSave
                 helpSectionId={formType !== 'search' ? tableName : undefined}
-                templates={formType !== 'search' ? { FieldTemplate: AdminConsoleFieldTemplate } : undefined}
+                disableHelpButtons={formType === 'search'}
             />
         );
     };

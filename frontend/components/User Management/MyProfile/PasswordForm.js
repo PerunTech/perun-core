@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import md5 from 'md5';
 import { alertUserResponse, Icon } from '../../../elements';
 import axios from 'axios';
-import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate';
 
 const PasswordWidget = ({ value, onChange }) => {
     const [visible, setVisible] = useState(false);
@@ -49,9 +48,9 @@ const PasswordForm = (props) => {
     };
 
     const uiSchema = {
-        confUserPassword: { 'ui:widget': 'passwordWidget' },
-        userPassword: { 'ui:widget': 'passwordWidget' },
-        ...(!isNewUser && { oldPassword: { 'ui:widget': 'passwordWidget' } }),
+        confUserPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.confUserPassword.help' },
+        userPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.userPassword.help' },
+        ...(!isNewUser && { oldPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.oldPassword.help' } }),
     };
 
     const handleSubmit = ({ formData }) => {
@@ -101,8 +100,7 @@ const PasswordForm = (props) => {
             additionalWidgets={widgets}
             addSaveFunction={handleSubmit}
             hideBtns='closeAndDelete'
-            helpSectionId='my_profile'
-            templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
+
         >
             <div>
                 <p className='dont-match'>{passwordMatch ? fmt('perun.my_profile.password_dont') : ''}</p>

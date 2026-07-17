@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
+
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
 import { TABLE_UISCHEMA_OVERRIDE, downloadJson } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
@@ -200,7 +200,7 @@ const ConfigTables = (props, context) => {
         objectId={objectId}
         selectedTableName={selectedTableName}
         onClose={doClose}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
+        helpSectionId={TABLE_NAME}
       />
     )
   }
@@ -253,7 +253,6 @@ const ConfigTables = (props, context) => {
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
             helpSectionId={isConfLog ? undefined : formTableName}
-            templates={isConfLog ? undefined : { FieldTemplate: AdminConsoleFieldTemplate }}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />

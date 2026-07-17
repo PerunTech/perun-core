@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import AdminConsoleContext from './Help/AdminConsoleContext'
+import HelpContext from '../../elements/help/HelpContext'
 import ACSideMenu from './ACSideMenu'
 // COMPONENTS
 import UserManagement from '../User Management/UserManagement'
@@ -55,7 +55,7 @@ const AdminConsole = (_props, context) => {
                 json={json}
                 setDynamicComponentFunction={setDynamicComponentFunction}
             />}
-            <AdminConsoleContext.Provider value={{ sectionId }}>
+            <HelpContext.Provider value={{ sectionId }}>
                 <div className="admin-console-content">
                     {dynamicComponent === 'UserManagement' && <UserManagement />}
                     {dynamicComponent === 'GeoLayerTypes' && <GeoLayerTypes />}
@@ -74,7 +74,7 @@ const AdminConsole = (_props, context) => {
                     {dynamicComponent === 'SvarogTables' && <SvarogTables />}
                     {dynamicComponent === 'ConfigTables' && <ConfigTables />}
                 </div>
-            </AdminConsoleContext.Provider>
+            </HelpContext.Provider>
         </div>
     )
 }

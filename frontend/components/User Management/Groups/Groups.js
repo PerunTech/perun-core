@@ -7,7 +7,6 @@ const { useEffect } = React
 const { Modal } = ReactBootstrap
 import { alertUserResponse } from '../../../elements'
 import AssignAcl from '../../AdminConsole/AssignAcl'
-import AdminConsoleFieldTemplate from '../../AdminConsole/Help/AdminConsoleFieldTemplate'
 // id cleanups
 // development note: refresh grids,add group menagement
 const Groups = (props, context) => {
@@ -52,7 +51,6 @@ const Groups = (props, context) => {
             hideBtns={'closeAndDelete'}
             className={'form-test admin-settings-forms'}
             helpSectionId={tableName}
-            templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
         />
     }
     const handleFormSave = (e, gridId) => {

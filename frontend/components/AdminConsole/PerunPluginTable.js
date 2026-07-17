@@ -7,7 +7,6 @@ const { useState, useEffect } = React;
 import { alertUserResponse, ReactBootstrap } from "../../elements";
 import ConfigMenuWrapper from './ConfigMenuWrapper';
 import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton';
-import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate';
 const { Modal } = ReactBootstrap;
 
 const tableName = "SVAROG_PERUN_PLUGIN";
@@ -92,7 +91,6 @@ const PerunPluginTable = (props, context) => {
                 addDeleteFunction={deleteFunc}
                 className={'admin-settings-forms'}
                 inputWrapper={ConfigMenuWrapper}
-                templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
             />
         )
     };

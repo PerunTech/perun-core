@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -91,7 +90,6 @@ const GeoLayerTypes = (props, context) => {
         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }

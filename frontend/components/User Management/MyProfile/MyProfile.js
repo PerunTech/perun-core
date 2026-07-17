@@ -242,6 +242,7 @@ const MyProfile = (props, context) => {
                     addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"
+                    helpSectionId='SVAROG_USERS'
                     noValidate={true}
                 />
                 <div className='my-profile-back-btn' onClick={() => handleBack()}>

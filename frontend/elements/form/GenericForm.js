@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Form from '@rjsf/core';
 import { connect } from 'react-redux';
+import HelpFieldTemplate from '../help/HelpFieldTemplate';
+import HelpContext from '../help/HelpContext';
 
 import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";
@@ -14,6 +16,15 @@ import { Loading } from '../../components/ComponentsIndex';
 import { getObjectValueByKey, isValidObject, getArrayIndexFromElementId } from '../../functions/utils';
 let fieldName
 let fieldValue
+
+function hasHelpCode(schema) {
+  if (!schema || typeof schema !== 'object') return false
+  for (const [key, val] of Object.entries(schema)) {
+    if (key === 'ui:helpCode') return true
+    if (val && typeof val === 'object' && hasHelpCode(val)) return true
+  }
+  return false
+}
 
 class GenericForm extends React.Component {
   constructor(props) {
@@ -645,7 +656,8 @@ class GenericForm extends React.Component {
     const formContext = {
       onFieldChange: this.onFieldChange,
       helpSectionId: this.props.helpSectionId,
-      fieldHelpIconSize: this.props.fieldHelpIconSize
+      fieldHelpIconSize: this.props.fieldHelpIconSize,
+      disableHelpButtons: this.props.disableHelpButtons || false
     };
 
     const loading = <div><Loading /></div>
@@ -663,7 +675,7 @@ class GenericForm extends React.Component {
         })))
         : uischema}
       widgets={{ ...this.Widgets, ...(this.props.additionalWidgets || {}) }}
-      templates={this.props.templates}
+      templates={this.props.templates || ((this.props.helpSectionId || this.props.helpContextSectionId || hasHelpCode(uischema)) ? { FieldTemplate: HelpFieldTemplate } : undefined)}
       formData={formTableData}
       onSubmit={this.saveObject}
       showErrorList={false}
@@ -750,4 +762,9 @@ const mapStateToProps = state => ({
   gridLang: state.intl.locale
 })
 
-export default WrapItUp(connect(mapStateToProps)(GenericForm), 'GenericForm', undefined, false)
+const ConnectedGenericForm = connect(mapStateToProps)(GenericForm)
+const GenericFormWithHelpContext = (props) => {
+  const { sectionId } = React.useContext(HelpContext)
+  return <ConnectedGenericForm {...props} helpContextSectionId={sectionId} />
+}
+export default WrapItUp(GenericFormWithHelpContext, 'GenericForm', undefined, false)

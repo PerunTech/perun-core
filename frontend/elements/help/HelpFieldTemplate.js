@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
-import { Icon, ReactBootstrap } from '../../../elements'
-import AdminConsoleContext from './AdminConsoleContext'
-import { fetchLabelText } from './adminConsoleHelpConfig'
+import { Icon, ReactBootstrap } from '../index'
+import HelpContext from './HelpContext'
+import { fetchLabelText } from './helpConfig'
 
 const { useState, useRef, useContext } = React
 const { Overlay, Popover } = ReactBootstrap
 
-const AdminConsoleFieldTemplate = ({
+const HelpFieldTemplate = ({
   id,
   label,
   required,
@@ -33,26 +33,31 @@ const AdminConsoleFieldTemplate = ({
   const [loading, setLoading] = useState(false)
   const btnRef = useRef(null)
   const fetchedRef = useRef(false)
-  const { sectionId } = useContext(AdminConsoleContext)
+  const { sectionId } = useContext(HelpContext)
   const svSession = useSelector(state => state.security.svSession)
 
   const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
+  const uiHelpCode = uiSchema?.['ui:helpCode'] || null
   const helpSectionId = registry?.formContext?.helpSectionId
   const helpScope = helpSectionId ? helpSectionId.toLowerCase() : sectionId
-  const labelCode = helpScope && fieldName ? `perun.admin_console.${helpScope}.form.${fieldName}.help` : null
+  const derivedCode = helpScope && fieldName ? `perun.admin_console.${helpScope}.form.${fieldName}.help` : null
+  const labelCode = uiHelpCode || derivedCode
 
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>
   }
 
-  const shortText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : ''
+  const disableHelpButtons = registry?.formContext?.disableHelpButtons
+
+  const shortText = !disableHelpButtons && labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: labelCode }) : ''
   const helpText = apiText || shortText || null
 
   const WrapIfAdditionalTemplate = registry?.templates?.WrapIfAdditionalTemplate
   const isCheckbox = schema?.type === 'boolean'
   const iconSize = registry?.formContext?.fieldHelpIconSize ?? 22
 
-  const handleHelpClick = () => {
+  const handleHelpClick = (e) => {
+    e.stopPropagation()
     if (!fetchedRef.current && labelCode && svSession) {
       fetchedRef.current = true
       setLoading(true)
@@ -151,11 +156,11 @@ const AdminConsoleFieldTemplate = ({
   )
 }
 
-AdminConsoleFieldTemplate.contextTypes = {
+HelpFieldTemplate.contextTypes = {
   intl: PropTypes.object.isRequired
 }
 
-AdminConsoleFieldTemplate.propTypes = {
+HelpFieldTemplate.propTypes = {
   id: PropTypes.string,
   label: PropTypes.string,
   required: PropTypes.bool,
@@ -176,4 +181,4 @@ AdminConsoleFieldTemplate.propTypes = {
   onKeyChange: PropTypes.func
 }
 
-export default AdminConsoleFieldTemplate
+export default HelpFieldTemplate

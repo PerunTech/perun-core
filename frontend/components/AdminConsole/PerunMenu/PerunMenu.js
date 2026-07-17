@@ -6,7 +6,6 @@ import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../element
 import { Loading } from '../../ComponentsIndex';
 import PerunMenuWrapper from './PerunMenuWrapper';
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React;
 const { Modal } = ReactBootstrap;
 
@@ -105,7 +104,6 @@ const PerunMenu = (props, context) => {
         className={'admin-settings-forms'}
         inputWrapper={PerunMenuWrapper}
         objectId={objectId}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   };

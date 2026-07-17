@@ -2,7 +2,6 @@ import React from "react";
 import { GenericForm } from "../../../client";
 import { ReactBootstrap } from "../../../elements";
 const { Modal } = ReactBootstrap;
-import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate';
 import { TABLE_NAME, FORM_ID } from './utils';
 
 const LabelFormModal = ({ show, objectId, svSession, fmt, onHide, onSave, onDelete }) => (
@@ -26,7 +25,6 @@ const LabelFormModal = ({ show, objectId, svSession, fmt, onHide, onSave, onDele
                 addDeleteFunction={onDelete}
                 hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
                 className='form-test label-form'
-                templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
             />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />

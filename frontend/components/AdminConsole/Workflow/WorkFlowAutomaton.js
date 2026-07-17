@@ -5,7 +5,6 @@ import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, ax
 import { alertUserResponse, ReactBootstrap } from '../../../elements'
 import WorkFlowItem from './WorkFlowItem'
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -92,7 +91,6 @@ const WorkFlowAutomaton = (props, context) => {
         hideBtns={objectId === 0 ? 'closeAndDelete' : 'close'}
         addDeleteFunction={deleteFunc}
         className={'admin-settings-forms'}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     )
   }

@@ -6,7 +6,7 @@ import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
 import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from './Help/AdminConsoleFieldTemplate'
+import { HelpFieldTemplate } from '../../client'
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -147,7 +147,7 @@ const NotificationsComponent = (props, context) => {
     const onSubmit = (e) => saveNotification(e, url)
 
     return (
-      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit} templates={{ FieldTemplate: AdminConsoleFieldTemplate }}>
+      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit} templates={{ FieldTemplate: HelpFieldTemplate }}>
         <></>
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>

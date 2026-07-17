@@ -6,7 +6,6 @@ import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../element
 import OrgUserModal from './OrgUserModal'
 import OrgMunicModal from './OrgMunicModal'
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
-import AdminConsoleFieldTemplate from '../Help/AdminConsoleFieldTemplate'
 import { Loading } from '../../ComponentsIndex'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
@@ -41,7 +40,6 @@ const OrganizationalUnit = (props, context) => {
         hideBtns="all"
         className={'admin-settings-forms'}
         disabled={true}
-        templates={{ FieldTemplate: AdminConsoleFieldTemplate }}
       />
     );
   };

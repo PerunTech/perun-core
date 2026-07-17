@@ -2,14 +2,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { ReactBootstrap, Icon } from '../../../elements'
-import { fetchLabelText } from './adminConsoleHelpConfig'
-import AdminConsoleContext from './AdminConsoleContext'
+import { fetchLabelText } from '../../../elements/help/helpConfig'
+import HelpContext from '../../../elements/help/HelpContext'
 
 const { useState, useEffect, useContext } = React
 const { Modal } = ReactBootstrap
 
 const AdminConsoleHelpButton = ({ title, formLevel, onToggle, active }, context) => {
-  const { sectionId } = useContext(AdminConsoleContext)
+  const { sectionId } = useContext(HelpContext)
   const [show, setShow] = useState(false)
   const [apiText, setApiText] = useState('')
   const svSession = useSelector(state => state.security.svSession)
