@@ -67,10 +67,10 @@ const PerunNavbar = (props, context) => {
                 {/* navbar start */}
                 <div className='nav-title-start'>
                     <Link to='/main' className='nav-icon' title='Home'>
-                        {<Icon name="IconHomeFilled" />}
+                        {<Icon name="IconHome" />}
                     </Link>
                     <div className={`nav-icon-with-title ${toggleBurger && 'active'}`} title={context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })} onClick={() => showBurgerMenu()}>
-                        {<Icon name="IconCategoryFilled" />}
+                        {<Icon name="IconCategory" />}
                         <p>{context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })}</p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ const PerunNavbar = (props, context) => {
                     {/* navbar end */}
                     <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
                         <div className='nav-icon-with-title'>
-                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
+                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUser" />} <p>{props.userInfo.username}</p> </div>
                         <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
                     </div>
                 </div>
