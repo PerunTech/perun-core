@@ -92,6 +92,7 @@ const SystemConfLogs = (props, context) => {
         inputWrapper={SystemConfLogsWrapper}
         additionalWidgets={{ logText: LogTextWidget, label: LabelWidget }}
         uiSchemaOverride={{ NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }}
+        disableHelpButtons
       />
     )
   }

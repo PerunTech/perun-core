@@ -253,6 +253,7 @@ const ConfigTables = (props, context) => {
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
             helpSectionId={isConfLog ? undefined : formTableName}
+            disableHelpButtons={isConfLog}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />
