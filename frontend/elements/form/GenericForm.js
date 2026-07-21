@@ -130,19 +130,16 @@ class GenericForm extends React.Component {
     const withoutRoot = elementId.replace(/^root_/, '')
     const fieldCode = isArray ? withoutRoot.replace(/^\d+_/, '') : withoutRoot
     const fieldSchema = isArray ? this.state.uischema?.items?.[fieldCode] : this.state.uischema?.[fieldCode]
-    const { dependentOnField } = fieldSchema || {}
-
-    const rowData = isArray
-      ? this.state.formTableData?.[parseInt(getArrayIndexFromElementId(elementId))]
-      : this.state.formTableData
+    const { dependentOnField, codelistName } = fieldSchema || {}
 
     return (
       <DependentValueField
         {...elementProps}
         formId={this.state.id}
         dependentOnField={dependentOnField}
+        codelistName={codelistName}
         attributeName={fieldCode}
-        sourceValue={rowData?.[dependentOnField]}
+        arrayIndex={isArray ? parseInt(getArrayIndexFromElementId(elementId)) : undefined}
       />
     )
   }
