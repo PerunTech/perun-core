@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { ComponentManager, alertUserResponse } from '../..';
+import { Loading } from '../../../components/ComponentsIndex';
 
 // Generic rjsf widget: value mirrors an attribute off whatever codelist row
 // is currently selected on another field. The attribute looked up is this
@@ -19,6 +20,7 @@ import { ComponentManager, alertUserResponse } from '../..';
 //   fetched from the dedicated getDependentFieldValue endpoint instead.
 const DependentValueField = (props) => {
   const { id, label, formId, svSession, dependentOnField, codelistName, attributeName, sourceValue, onChange, schema, value, disabled, readonly } = props
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!dependentOnField) return
@@ -34,6 +36,7 @@ const DependentValueField = (props) => {
         return
       }
       let cancelled = false
+      setLoading(true)
       const wsPath = `ReactElements/getDependentFieldValue/sid/${svSession}/codelist-name/${codelistName}/parent-code-value/${sourceValue}/attribute/${attributeName}`
       axios.get(`${window.server}/${wsPath}`).then((response) => {
         if (cancelled) return
@@ -42,6 +45,8 @@ const DependentValueField = (props) => {
       }).catch((error) => {
         console.error(error)
         alertUserResponse({ response: error })
+      }).finally(() => {
+        if (!cancelled) setLoading(false)
       })
       // Drop a stale response if sourceValue changes again (or the widget
       // unmounts) before this request resolves.
@@ -64,22 +69,30 @@ const DependentValueField = (props) => {
     // a default boolean field (the outer form-group/field wrapper comes from
     // rjsf's field template, applied to any widget, not from here).
     return (
-      <div className={`checkbox ${isDisabled ? 'disabled' : ''}`}>
-        <label>
-          <input
-            type='checkbox'
-            id={id}
-            name={id}
-            checked={!!value}
-            disabled={isDisabled}
-            aria-describedby={`${id}__error ${id}__description ${id}__help`}
-          />
-          <span>{label}</span>
-        </label>
-      </div>
+      <React.Fragment>
+        {loading && <Loading />}
+        <div className={`checkbox ${isDisabled ? 'disabled' : ''}`}>
+          <label>
+            <input
+              type='checkbox'
+              id={id}
+              name={id}
+              checked={!!value}
+              disabled={isDisabled}
+              aria-describedby={`${id}__error ${id}__description ${id}__help`}
+            />
+            <span>{label}</span>
+          </label>
+        </div>
+      </React.Fragment>
     )
   }
-  return <input id={id} type='text' className='form-control' value={value ?? ''} disabled={isDisabled} readOnly />
+  return (
+    <React.Fragment>
+      {loading && <Loading />}
+      <input id={id} type='text' className='form-control' value={value ?? ''} disabled={isDisabled} readOnly />
+    </React.Fragment>
+  )
 }
 
 // sourceValue is read straight from the form's redux slice here, rather than
