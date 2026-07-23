@@ -41,7 +41,8 @@ const HelpFieldTemplate = ({
   const helpSectionId = registry?.formContext?.helpSectionId
   const helpScope = helpSectionId ? helpSectionId.toLowerCase() : sectionId
   const derivedCode = helpScope && fieldName ? `perun.admin_console.${helpScope}.form.${fieldName}.help` : null
-  const labelCode = uiHelpCode || derivedCode
+  const isDependencyDropdown = uiSchema?.['ui:widget'] === 'DependencyDropdown'
+  const labelCode = isDependencyDropdown ? uiHelpCode : (uiHelpCode || derivedCode)
 
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>
@@ -101,7 +102,7 @@ const HelpFieldTemplate = ({
     </Overlay>
   )
 
-  const labelRow = displayLabel && label && (
+  const labelRow = !isDependencyDropdown && displayLabel && label && (
     <div className='admin-console-field-label-row'>
       <label className='control-label' htmlFor={id}>
         {label}

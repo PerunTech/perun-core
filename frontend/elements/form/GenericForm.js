@@ -103,6 +103,8 @@ class GenericForm extends React.Component {
         sectionName = findSectionName(this.state.uischema, fieldCode)
       }
     }
+    const hideInternalLabel = !!(this.props.helpSectionId || this.props.helpContextSectionId || hasHelpCode(this.state.uischema))
+    const helpCode = elementProps.uiSchema?.['ui:helpCode'] || null
     return (
       <DependencyDropdown
         customDependencyDropdownComponent={this.state.customDependencyDropdownComponent}
@@ -120,6 +122,8 @@ class GenericForm extends React.Component {
         triggerAutoDependentDropdownOnChange={this.state.triggerAutoDependentDropdownOnChange}
         disableInitialDependentDropdown={this.state.disableInitialDependentDropdown}
         spread='right'
+        hideInternalLabel={hideInternalLabel}
+        helpCode={helpCode}
       />
     )
   }

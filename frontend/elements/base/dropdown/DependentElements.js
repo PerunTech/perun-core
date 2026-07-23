@@ -6,6 +6,7 @@ import { svConfig } from '../../../config';
 import { Dropdown, ComponentManager, alertUserResponse } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject, getArrayIndexFromElementId } from '../../../functions/utils';
+import FieldHelpButton from '../../help/FieldHelpButton';
 
 const right = {
   'display': 'inline-table'
@@ -251,12 +252,12 @@ class DependentElements extends React.Component {
       })
     }
 
-    const newElement = <Dropdown
+    const dropdown = <Dropdown
       className='dependent-dropdown'
       id={elementId}
       key={elementId + '_depddl'}
-      labelText={labelText}
-      style={this.style}
+      labelText={this.props.hideInternalLabel ? undefined : labelText}
+      style={this.props.hideInternalLabel ? undefined : this.style}
       defaultValue='default'
       name='initialDropdown'
       onChange={() => this.onChange(elementId, true)}
@@ -264,6 +265,18 @@ class DependentElements extends React.Component {
       required={requiredAttr}
       disabled={isDisabled}
     />
+    const newElement = this.props.hideInternalLabel ? (
+      <div key={elementId + '_wrap'} style={this.style}>
+        <div className='admin-console-field-label-row'>
+          <label className='control-label'>
+            {labelText}
+            {requiredAttr && <span className='required'>{'*'}</span>}
+          </label>
+          {this.props.helpCode && <FieldHelpButton labelCode={this.props.helpCode} />}
+        </div>
+        {dropdown}
+      </div>
+    ) : dropdown
     this.setState({ initialDropdown: newElement })
     if (triggerAutoOnChange) {
       this.onChange(elementId, true)
@@ -437,8 +450,14 @@ class DependentElements extends React.Component {
 
   removeElements = (parentNode, ddls, index) => {
     parentNode.removeChild(ddls[index])
-    parentNode.removeChild(parentNode.childNodes[0])
-    parentNode.parentNode.removeChild(parentNode)
+    if (parentNode.childNodes.length > 0) {
+      parentNode.removeChild(parentNode.childNodes[0])
+    }
+    const wrapper = parentNode.parentNode
+    wrapper.removeChild(parentNode)
+    if (wrapper.classList?.contains('dependent-dropdown-wrapper')) {
+      wrapper.parentNode?.removeChild(wrapper)
+    }
   }
 
   onChange = (elementId, isInitial) => {
@@ -661,19 +680,43 @@ class DependentElements extends React.Component {
       requiredAttr = true
     }
 
-    ddlList.push(
-      <Dropdown
-        className='dependent-dropdown'
-        id={elementId}
-        style={this.additionalStyle}
-        labelText={labelText}
-        key={elementId + '_depddl'}
-        name={elementId}
-        onChange={() => this.onChange(elementId)}
-        options={options}
-        required={requiredAttr}
-      />
-    )
+    const chainDropdown = <Dropdown
+      className='dependent-dropdown'
+      id={elementId}
+      style={this.props.hideInternalLabel ? undefined : this.additionalStyle}
+      labelText={this.props.hideInternalLabel ? undefined : labelText}
+      key={elementId + '_depddl'}
+      name={elementId}
+      onChange={() => this.onChange(elementId)}
+      options={options}
+      required={requiredAttr}
+    />
+
+    let chainElement
+    if (this.props.hideInternalLabel) {
+      const chainUiSchema = this.isArraySchema()
+        ? this.props.formSchema?.['items']?.[coreType]
+        : this.props.sectionName
+          ? this.props.formSchema?.[this.props.sectionName]?.[coreType]
+          : this.props.formSchema?.[coreType]
+      const chainHelpCode = chainUiSchema?.['ui:helpCode'] || null
+      chainElement = (
+        <div key={elementId + '_wrap'} className='dependent-dropdown-wrapper' style={this.additionalStyle}>
+          <div className='admin-console-field-label-row'>
+            <label className='control-label'>
+              {labelText}
+              {requiredAttr && <span className='required'>{'*'}</span>}
+            </label>
+            {chainHelpCode && <FieldHelpButton labelCode={chainHelpCode} />}
+          </div>
+          {chainDropdown}
+        </div>
+      )
+    } else {
+      chainElement = chainDropdown
+    }
+
+    ddlList.push(chainElement)
     this.setState({ dynamicDropdowns: ddlList })
   }
 
