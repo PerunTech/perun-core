@@ -291,10 +291,7 @@ class GenericGrid extends React.Component {
           defaultMessage: `${labelBasePath}.grid_labels.${element.key.toLowerCase()}`
         })
       })
-      // Print action column: inserted as the first entry so it lands right after the
-      // built-in row-selection checkbox column when enableMultiSelect is on, or as the
-      // very first column when it is off (react-data-grid renders the checkbox column,
-      // driven by rowSelection, outside of this columns array).
+      //Adds print col in 0 || 1 position based on menu_conf 
       if (nextProps.printout && !currGrid.some((col) => col.key === PRINT_COLUMN_KEY)) {
         currGrid.unshift({
           key: PRINT_COLUMN_KEY,
