@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
-import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
+import { alertUserResponse, alertUserV2, Icon, ReactBootstrap } from '../../../elements'
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
 
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
@@ -179,6 +179,32 @@ const ConfigTables = (props, context) => {
     })
   }
 
+  const exportTableRecords = () => {
+    const rows = ComponentManager.getStateForComponent(recordsGridId, 'rows') || []
+    setState({ loading: true })
+    const { svSession } = props
+    const toItems = (data) => (Array.isArray(data) ? data : data ? [data] : [])
+    const recordFetches = rows.map(row => {
+      const rowObjectId = row[`${selectedTableName}.OBJECT_ID`]
+      return axios.get(`${window.server}/WsCore/object/${svSession}/${rowObjectId}/${selectedTableName}`)
+    })
+    Promise.all([...recordFetches, axios.get(`${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`)])
+      .then(results => {
+        const tableRes = results.pop()
+        const items = [...toItems(tableRes?.data)]
+        results.forEach(recordRes => items.push(...toItems(recordRes?.data)))
+        const exportData = {
+          'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
+        }
+        downloadJson(exportData, selectedTableName || 'CONFIG_TABLE_RECORDS_EXPORT')
+        setState({ loading: false })
+      }).catch(err => {
+        console.error(err)
+        setState({ loading: false })
+        alertUserResponse({ response: err })
+      })
+  }
+
   const generateTableDefinitionTab = () => {
     const { svSession } = props
     return (
@@ -209,6 +235,12 @@ const ConfigTables = (props, context) => {
     const { svSession } = props
     return (
       <div className='ct-records-tab'>
+        <div className='svarog-table-buttons-container'>
+          <button className='btn-success btn_save_form svarog-table-export-btn' onClick={exportTableRecords}>
+            {fmt('perun.admin_console.export_table_and_records')}
+            <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>
+          </button>
+        </div>
         <ExportableGrid
           gridType='READ_URL'
           key={recordsGridId}
