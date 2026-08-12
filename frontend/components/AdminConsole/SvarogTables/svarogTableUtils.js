@@ -97,6 +97,15 @@ export const applyFormDataOverrides = (items, overrides) => {
   }
 }
 
+export const fetchInBatches = async (items, batchSize, fetchFn) => {
+  const results = []
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize)
+    results.push(...await Promise.all(batch.map(fetchFn)))
+  }
+  return results
+}
+
 export const downloadJson = (data, fileName) => {
   if (!data) return
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

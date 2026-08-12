@@ -6,7 +6,7 @@ import { alertUserResponse, alertUserV2, Icon, ReactBootstrap } from '../../../e
 import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
 
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
-import { TABLE_UISCHEMA_OVERRIDE, downloadJson } from './svarogTableUtils'
+import { TABLE_UISCHEMA_OVERRIDE, downloadJson, fetchInBatches } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
 import PerunMenuWrapper from '../PerunMenu/PerunMenuWrapper'
 import SvarogMenuWrapper from '../SvarogMenuWrapper'
@@ -31,6 +31,7 @@ const { Modal } = ReactBootstrap
 
 const TABLE_NAME = 'SVAROG_TABLES'
 const GRID_ID = 'CONFIG_TABLES_GRID'
+const RECORDS_EXPORT_BATCH_SIZE = 15
 
 const ConfigTables = (props, context) => {
   const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
@@ -184,25 +185,25 @@ const ConfigTables = (props, context) => {
     setState({ loading: true })
     const { svSession } = props
     const toItems = (data) => (Array.isArray(data) ? data : data ? [data] : [])
-    const recordFetches = rows.map(row => {
-      const rowObjectId = row[`${selectedTableName}.OBJECT_ID`]
-      return axios.get(`${window.server}/WsCore/object/${svSession}/${rowObjectId}/${selectedTableName}`)
+    Promise.all([
+      fetchInBatches(rows, RECORDS_EXPORT_BATCH_SIZE, row => {
+        const rowObjectId = row[`${selectedTableName}.OBJECT_ID`]
+        return axios.get(`${window.server}/WsCore/object/${svSession}/${rowObjectId}/${selectedTableName}`)
+      }),
+      axios.get(`${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`),
+    ]).then(([recordResults, tableRes]) => {
+      const items = [...toItems(tableRes?.data)]
+      recordResults.forEach(recordRes => items.push(...toItems(recordRes?.data)))
+      const exportData = {
+        'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
+      }
+      downloadJson(exportData, selectedTableName || 'CONFIG_TABLE_RECORDS_EXPORT')
+      setState({ loading: false })
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err })
     })
-    Promise.all([...recordFetches, axios.get(`${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`)])
-      .then(results => {
-        const tableRes = results.pop()
-        const items = [...toItems(tableRes?.data)]
-        results.forEach(recordRes => items.push(...toItems(recordRes?.data)))
-        const exportData = {
-          'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
-        }
-        downloadJson(exportData, selectedTableName || 'CONFIG_TABLE_RECORDS_EXPORT')
-        setState({ loading: false })
-      }).catch(err => {
-        console.error(err)
-        setState({ loading: false })
-        alertUserResponse({ response: err })
-      })
   }
 
   const generateTableDefinitionTab = () => {
