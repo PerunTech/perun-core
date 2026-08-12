@@ -160,12 +160,12 @@ const ConfigTables = (props, context) => {
     Promise.all(fetches).then(results => {
       results.forEach(([fieldsRes, tableRes], i) => {
         const items = []
-        const dbDataArray = fieldsRes?.data?.['com.prtech.svarog_common.DbDataArray']
-        if (dbDataArray?.items) items.push(...dbDataArray.items)
         if (tableRes?.data) {
           const tableItems = Array.isArray(tableRes.data) ? tableRes.data : [tableRes.data]
           items.push(...tableItems)
         }
+        const dbDataArray = fieldsRes?.data?.['com.prtech.svarog_common.DbDataArray']
+        if (dbDataArray?.items) items.push(...dbDataArray.items)
         const exportData = {
           'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
         }
