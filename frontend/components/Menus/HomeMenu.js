@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { store } from '../../model'
 import { isValidObject } from '../../functions/utils'
 import axios from 'axios'
+import { getServerOrigin } from '../../elements/util/utils'
 
 const HomeMenu = (props, context) => {
   const [menuItems, setMenuItems] = useState([]);
@@ -23,7 +24,7 @@ const HomeMenu = (props, context) => {
   }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
-    const url = `${window.location.origin}${window.assets}/json/config/Header.json`;
+    const url = `${getServerOrigin()}${window.assets}/json/config/Header.json`;
     try {
       const response = await fetch(url);
       const json = await response.json();

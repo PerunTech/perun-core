@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Icon } from "../../elements"
 import { downloadFile } from '../../functions/utils';
-import { alertUserResponse } from '../../elements'
+import { alertUserResponse, getServerOrigin } from '../../elements'
 import axios from 'axios';
 import { createHashHistory } from 'history';
 const PerunNavbar = (props, context) => {
@@ -124,7 +124,7 @@ const PerunNavbar = (props, context) => {
                         !el['cardHidden'] && (
                             <Link key={el.id} className='nav-burger-option' to={`/main/${el.id}`} onClick={() => setToggleBurger(false)}>
                                 <div className='nav-burger-img'>
-                                    <img src={`${window.location.origin}${el.imgPath}`} />
+                                    <img src={`${getServerOrigin()}${el.imgPath}`} />
                                 </div>
                                 <p>{el.title}</p>
                             </Link>

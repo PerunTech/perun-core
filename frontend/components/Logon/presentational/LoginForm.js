@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import LogonActions from '../functional/LogonActions'
 import LogonFunctions from '../functional/LogonFunctions'
-import { InputElement } from '../../../elements';
+import { InputElement, getServerOrigin } from '../../../elements';
 import { Link } from 'react-router-dom'
 import * as config from 'config/config.js'
 import { getCapsLockState } from '../../../functions/utils';
@@ -29,7 +29,7 @@ const LoginForm = (props, context) => {
   }, [])
 
   const getLoginLinks = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/LoginLinks.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/LoginLinks.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setLoginLinks(json)
@@ -38,7 +38,7 @@ const LoginForm = (props, context) => {
   }
 
   const getLogonImgJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/LogonImg.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/LogonImg.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setLogonImgJson(json)
@@ -47,7 +47,7 @@ const LoginForm = (props, context) => {
   }
 
   const getProjectImgJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/ProjectImg.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/ProjectImg.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setProjectImgJson(json)
@@ -56,7 +56,7 @@ const LoginForm = (props, context) => {
   }
 
   const generateSsoBtn = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/AltLogin.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/AltLogin.json`
     fetch(url).then(res => res.json()).then(json => {
       if (componentIsMounted.current) {
         setSsoData(json)

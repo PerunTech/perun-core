@@ -265,7 +265,7 @@ class ModuleMenu extends React.Component {
       >
         <div className='box'>
           <div className='cardImgTop'>
-            <img src={window.location.origin + plugin.imgPath} />
+            <img src={this.server + plugin.imgPath} />
           </div>
           <div title={plugin.text} className='cardBody' >
             <h5 className='card-title'>{plugin.title}</h5>

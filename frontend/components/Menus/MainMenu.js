@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import axios from 'axios'
 import { createHashHistory } from 'history'
 import { store, logoutUser, isValidObject } from '../../model';
-import { alertUserResponse } from '../../elements'
+import { alertUserResponse, getServerOrigin } from '../../elements'
 import { svConfig } from '../../config';
 import * as cookies from '../../functions/cookies'
 import { submitForm } from '../Logon/utils'
@@ -28,14 +28,14 @@ const MainMenu = (props) => {
   }, [])
 
   const getNavbarImgJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/NavbarImg.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/NavbarImg.json`
     fetch(url).then(res => res.json()).then(json => {
       setState({ navbarImgJson: json })
     }).catch(err => { throw err })
   }
 
   const getLanguageOptions = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/LanguageOptions.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/LanguageOptions.json`
     fetch(url).then(res => res.json()).then(json => {
       setState({ languageOptions: json })
     }).catch(err => { throw err })

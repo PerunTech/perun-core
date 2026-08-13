@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import HelpContext from '../../elements/help/HelpContext'
+import { getServerOrigin } from '../../elements/util/utils'
 import ACSideMenu from './ACSideMenu'
 // COMPONENTS
 import UserManagement from '../User Management/UserManagement'
@@ -40,7 +41,7 @@ const AdminConsole = (_props, context) => {
         }
     }
     const getMenu = () => {
-        const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
+        const url = `${getServerOrigin()}${window.assets}/json/config/AppSettings.json`
         fetch(url).then(res => res.json()).then(json => {
             if (json?.length > 0) {
                 setJson(json)

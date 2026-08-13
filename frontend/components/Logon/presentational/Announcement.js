@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer, useRef } from 'react'
+import { getServerOrigin } from '../../../elements/util/utils'
 
 const Announcement = () => {
   const initialState = { announcements: [] }
@@ -15,7 +16,7 @@ const Announcement = () => {
   }, [])
 
   const getAnnouncements = () => {
-    const url = `${window.location.origin}${window.assets}/json/guide/external/AnnouncementJson.json`
+    const url = `${getServerOrigin()}${window.assets}/json/guide/external/AnnouncementJson.json`
     fetch(url)
       .then(res => res.json())
       .then(json => setState({ announcements: json }))
