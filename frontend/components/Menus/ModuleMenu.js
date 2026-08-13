@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { Loading } from '../ComponentsIndex';
 import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
-import { alertUserResponse } from '../../elements';
+import { alertUserResponse, getServerOrigin } from '../../elements';
 import { svConfig } from '../../config';
 
 let arrayOfBundles
@@ -16,7 +16,7 @@ class ModuleMenu extends React.Component {
     super(props)
     this.state = { cards: {}, loading: false, hasCardForDirectAccess: false }// is Object of pluginName: pluginCard properties.
     // backend location
-    this.server = String(svConfig.restSvcBaseUrl).split('/').slice(0, 3).join('/');
+    this.server = getServerOrigin();
 
     // Internal map of the registered plugins. Create reference at beginning of call. 
     // Mutable, pluginManager is responsible. Do not put into state.
