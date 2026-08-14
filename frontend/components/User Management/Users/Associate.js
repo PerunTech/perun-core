@@ -31,6 +31,7 @@ const Associate = (props, context) => {
         }).catch(err => {
             console.error(err)
             setLoading(false)
+            alertUserResponse({ response: err })
         })
     }
 
