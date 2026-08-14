@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { store } from '../model';
-import { getServerOrigin } from '../elements/util/utils';
+import { getServerOrigin } from '../functions/utils';
 import * as localRoutes from '.';
 
 let storageBundles = [];

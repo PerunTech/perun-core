@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Icon } from "../../elements"
-import { downloadFile } from '../../functions/utils';
-import { alertUserResponse, getServerOrigin } from '../../elements'
+import { downloadFile, getServerOrigin } from '../../functions/utils';
+import { alertUserResponse } from '../../elements'
 import axios from 'axios';
 import { createHashHistory } from 'history';
 const PerunNavbar = (props, context) => {

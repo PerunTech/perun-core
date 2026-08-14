@@ -1,5 +1,5 @@
 import { router } from './Router';
-import { getServerOrigin } from '../elements/util/utils';
+import { getServerOrigin } from '../functions/utils';
 
 /**
  * The set of registered plugins for the current session.

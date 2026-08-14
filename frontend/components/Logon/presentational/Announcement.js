@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef } from 'react'
-import { getServerOrigin } from '../../../elements/util/utils'
+import { getServerOrigin } from '../../../functions/utils'
 
 const Announcement = () => {
   const initialState = { announcements: [] }

@@ -1,7 +1,7 @@
 import * as ReactBootstrap from 'react-bootstrap';
 import Form from '@rjsf/core';
 /* util */
-export { findWidget, findSectionName, replaceConfigParamsWithFieldVals, $, getServerOrigin } from './util/utils';
+export { findWidget, findSectionName, replaceConfigParamsWithFieldVals, $ } from './util/utils';
 export { alertUser } from './util/alertUser';
 export { alertUserV2, alertUserResponse } from './util/alertUserV2';
 export { default as Icon } from './util/Icon'

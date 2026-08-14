@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 import LogonActions from '../functional/LogonActions'
 import LogonFunctions from '../functional/LogonFunctions'
-import { InputElement, getServerOrigin } from '../../../elements';
+import { InputElement } from '../../../elements';
 import { Link } from 'react-router-dom'
 import * as config from 'config/config.js'
-import { getCapsLockState } from '../../../functions/utils';
+import { getCapsLockState, getServerOrigin } from '../../../functions/utils';
 
 const LoginForm = (props, context) => {
   const { alert, errors, username, password } = props.internalComponentState

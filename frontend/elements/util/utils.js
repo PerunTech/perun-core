@@ -2,15 +2,6 @@ export function $(x) {
   return document.getElementById(x)
 }
 
-/* Resolves the backend/assets server origin. window.location.origin is wrong for this when running
-locally (eg. webpack-dev-server on localhost:PORT) since the actual backend/assets host is configured
-separately via window.server/window.json (see www/config.js) - use this instead of window.location.origin
-whenever building a URL to fetch static JSON config or images from that server. */
-export function getServerOrigin() {
-  const fromWindow = window.bundleServer || window.json || window.server || window.location.origin
-  return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '')
-}
-
 export function replaceConfigParamsWithFieldVals(string, session) {
   string = string.replace('{token}', session)
   const array = string.split('/')

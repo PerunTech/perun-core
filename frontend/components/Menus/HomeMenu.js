@@ -6,9 +6,8 @@ import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import PropTypes from 'prop-types';
 import { store } from '../../model'
-import { isValidObject } from '../../functions/utils'
+import { isValidObject, getServerOrigin } from '../../functions/utils'
 import axios from 'axios'
-import { getServerOrigin } from '../../elements/util/utils'
 
 const HomeMenu = (props, context) => {
   const [menuItems, setMenuItems] = useState([]);

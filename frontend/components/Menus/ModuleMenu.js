@@ -7,8 +7,9 @@ import { connect } from 'react-redux'
 import { Loading } from '../ComponentsIndex';
 import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
-import { alertUserResponse, getServerOrigin } from '../../elements';
+import { alertUserResponse } from '../../elements';
 import { svConfig } from '../../config';
+import { getServerOrigin } from '../../functions/utils';
 
 let arrayOfBundles
 class ModuleMenu extends React.Component {

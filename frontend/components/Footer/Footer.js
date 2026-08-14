@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { getServerOrigin } from '../../elements/util/utils'
+import { getServerOrigin } from '../../functions/utils'
 
 const Footer = (props) => {
   const [json, setJson] = useState([])

@@ -5,9 +5,10 @@ import { connect } from 'react-redux'
 import axios from 'axios'
 import { createHashHistory } from 'history'
 import { store, logoutUser, isValidObject } from '../../model';
-import { alertUserResponse, getServerOrigin } from '../../elements'
+import { alertUserResponse } from '../../elements'
 import { svConfig } from '../../config';
 import * as cookies from '../../functions/cookies'
+import { getServerOrigin } from '../../functions/utils'
 import { submitForm } from '../Logon/utils'
 import PerunNavbar from '../Navbar/PerunNavbar'
 import Loading from 'components/Loading/Loading'
