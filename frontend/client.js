@@ -45,6 +45,7 @@ import Swal from 'sweetalert2'
 // Utility functions
 import * as utils from './functions/utils'
 import * as cookies from './functions/cookies'
+import { clearLabelTextCache } from './elements/help/helpConfig'
 
 // Exports
 export {
@@ -213,6 +214,7 @@ function getAdditionalLabels(allLabels, locale, language, additionalLabels) {
 
 // Switch the app language by reloading labels from the server and re-rendering
 export function changeLanguageAndLocale(locale, language) {
+  clearLabelTextCache()
   ReactDOM.render(<Loading />, app);
   persistStore(redux.store, persistConfig, () => {
     redux.dataToRedux((response) => {

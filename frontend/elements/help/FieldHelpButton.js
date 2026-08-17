@@ -12,8 +12,8 @@ const FieldHelpButton = ({ labelCode, iconSize = 22 }, context) => {
   const [apiText, setApiText] = useState('')
   const [loading, setLoading] = useState(false)
   const btnRef = useRef(null)
-  const fetchedRef = useRef(false)
   const svSession = useSelector(state => state.security.svSession)
+  const locale = useSelector(state => state.intl.locale)
 
   if (!labelCode) return null
 
@@ -24,10 +24,9 @@ const FieldHelpButton = ({ labelCode, iconSize = 22 }, context) => {
 
   const handleHelpClick = (e) => {
     e.stopPropagation()
-    if (!fetchedRef.current && svSession) {
-      fetchedRef.current = true
+    if (!apiText && svSession) {
       setLoading(true)
-      fetchLabelText(labelCode, svSession).then(text => {
+      fetchLabelText(labelCode, svSession, locale).then(text => {
         setApiText(text)
         setLoading(false)
       })

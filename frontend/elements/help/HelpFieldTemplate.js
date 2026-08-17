@@ -32,9 +32,9 @@ const HelpFieldTemplate = ({
   const [apiText, setApiText] = useState('')
   const [loading, setLoading] = useState(false)
   const btnRef = useRef(null)
-  const fetchedRef = useRef(false)
   const { sectionId } = useContext(HelpContext)
   const svSession = useSelector(state => state.security.svSession)
+  const locale = useSelector(state => state.intl.locale)
 
   const fieldName = id ? id.replace(/^root_/, '').toLowerCase() : null
   const uiHelpCode = uiSchema?.['ui:helpCode'] || null
@@ -59,10 +59,9 @@ const HelpFieldTemplate = ({
 
   const handleHelpClick = (e) => {
     e.stopPropagation()
-    if (!fetchedRef.current && labelCode && svSession) {
-      fetchedRef.current = true
+    if (!apiText && labelCode && svSession) {
       setLoading(true)
-      fetchLabelText(labelCode, svSession).then(text => {
+      fetchLabelText(labelCode, svSession, locale).then(text => {
         setApiText(text)
         setLoading(false)
       })
