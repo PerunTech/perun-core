@@ -10,6 +10,7 @@ import { alertUserResponse } from '../../../elements'
 import UsersAddGroup from './UsersAddGroup'
 import AddUserWrapper from './AddUserWrapper'
 import EditUserWrapper from './EditUserWrapper'
+import Associate from './Associate'
 import Swal from 'sweetalert2'
 const Users = (props, context) => {
     const [loading, setLoading] = useState(false)
@@ -47,13 +48,13 @@ const Users = (props, context) => {
                 break;
             case 'add':
                 inputWrapper = AddUserWrapper;
-                classNames = 'form-test add-edit-users-form add-user-wrapper';
+                classNames = 'form-test admin-settings-forms add-user-wrapper';
                 label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
                 method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
             case 'edit':
                 inputWrapper = EditUserWrapper;
-                classNames = 'form-test add-edit-users-form edit-user-wrapper';
+                classNames = 'form-test admin-settings-forms edit-user-wrapper';
                 label = context.intl.formatMessage({ id: 'perun.admin_console.save', defaultMessage: 'perun.admin_console.save' });
                 method = `/ReactElements/getTableJSONSchema/${props.svSession}/${tableName}`;
                 break;
@@ -78,6 +79,8 @@ const Users = (props, context) => {
                 afterSaveCleanUp={() => { refreshGrid(); setShow(false); }}
                 customSaveButtonName={label}
                 customSave
+                helpSectionId={formType !== 'search' ? tableName : undefined}
+                disableHelpButtons={formType === 'search'}
             />
         );
     };
@@ -224,6 +227,7 @@ const Users = (props, context) => {
                                 <div className={'user-control'} onClick={() => changeUserStatus()}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_status', defaultMessage: 'perun.user_mng.chg_status' })}</div>
                                 <div className={getTabClass('GROUP')} onClick={() => { setActive('GROUP') }}>{context.intl.formatMessage({ id: 'perun.user_mng.chg_user_group', defaultMessage: 'perun.user_mng.chg_user_group' })}</div>
                                 <div className={getTabClass('PRIVILEGES')} onClick={() => { setActive('PRIVILEGES') }}>{context.intl.formatMessage({ id: 'perun.user_mng.show_privileges', defaultMessage: 'perun.user_mng.show_privileges' })}</div>
+                                <div className={getTabClass('ASSOCIATE')} onClick={() => { setActive('ASSOCIATE') }}>{context.intl.formatMessage({ id: 'perun.user_mng.associate_user', defaultMessage: 'perun.user_mng.associate_user' })}</div>
                             </div>}
                             {/* RENDER ACTIVE*/}
                             <div className='user-dash-content'>
@@ -239,7 +243,7 @@ const Users = (props, context) => {
                                         id={'USER_GROUP_DEFAULT_GRID'}
                                         gridType={'READ_URL'}
                                         configTableName={`/ReactElements/getTableFieldList/${props.svSession}/SVAROG_USER_GROUPS`}
-                                        dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/${row['SVAROG_USERS.OBJECT_ID']}/Y`}
+                                        dataTableName={`/WsAdminConsole/getLinkedGroups/${props.svSession}/ReactElements/getLinkedTableNamesByUserObjectType/{sessionId}/{userObjectType}"}/Y`}
                                         minHeight={100}
                                         refreshData={true}
                                         onRowClickFunct={(_id, _rowIdx, row) => alertUserV2({
@@ -280,6 +284,7 @@ const Users = (props, context) => {
                                     minHeight={500}
                                     refreshData={true}
                                 />}
+                                {active === 'ASSOCIATE' && <Associate userId={row['SVAROG_USERS.OBJECT_ID']} userType={row['SVAROG_USERS.OBJECT_TYPE']} />}
                             </div>
                         </div>
                     </Modal.Body>

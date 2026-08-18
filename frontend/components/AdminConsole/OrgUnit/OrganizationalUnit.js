@@ -5,6 +5,7 @@ import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } fro
 import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
 import OrgUserModal from './OrgUserModal'
 import OrgMunicModal from './OrgMunicModal'
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
 import { Loading } from '../../ComponentsIndex'
 const { useEffect } = React
 const { Modal } = ReactBootstrap
@@ -37,7 +38,7 @@ const OrganizationalUnit = (props, context) => {
         uiSchemaConfigMethod={`/ReactElements/getTableUISchema/${props.svSession}/${tableName}`}
         tableFormDataMethod={`/ReactElements/getTableFormData/${props.svSession}/${objectId}/${tableName}`}
         hideBtns="all"
-        className={'form-test add-edit-users-form'}
+        className={'admin-settings-forms'}
         disabled={true}
       />
     );
@@ -118,9 +119,8 @@ const OrganizationalUnit = (props, context) => {
       {/* INITIAL ORG UNIT CONTAINER */}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
-          <p>{
-            context.intl.formatMessage({ id: 'perun.admin_console.organizational_units', defaultMessage: 'perun.admin_console.organizational_units' })
-          }</p>
+          <p>{context.intl.formatMessage({ id: 'perun.admin_console.organizational_units', defaultMessage: 'perun.admin_console.organizational_units' })}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.organizational_units', defaultMessage: 'perun.admin_console.organizational_units' }} />
         </div>
         <ExportableGrid
           gridType='READ_URL'

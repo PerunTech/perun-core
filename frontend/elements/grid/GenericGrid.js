@@ -11,9 +11,11 @@ import CustomGridToolbar from './CustomGridToolbar';
 import ContextMenuPopup from './ContextMenuPopup';
 import { customRowRenderer } from './RowRenderer';
 import { customRowRendererSecondary } from './RowRendererSecondary';
+import PrintButtonFormatter from './PrintButtonFormatter';
 import { GridManager } from '..';
 import { isValidArray } from '../../functions/utils';
 
+const PRINT_COLUMN_KEY = '__printout_action__'
 const { ContextMenuTrigger } = Menu
 const { Selectors } = Data
 // Possible values for filters are : NumericFilter, AutoCompleteFilter
@@ -289,6 +291,19 @@ class GenericGrid extends React.Component {
           defaultMessage: `${labelBasePath}.grid_labels.${element.key.toLowerCase()}`
         })
       })
+      //Adds print col in 0 || 1 position based on menu_conf 
+      if (nextProps.printout && !currGrid.some((col) => col.key === PRINT_COLUMN_KEY)) {
+        currGrid.unshift({
+          key: PRINT_COLUMN_KEY,
+          name: '',
+          width: 50,
+          sortable: false,
+          resizable: false,
+          filterable: false,
+          cellClass: 'print-button-cell',
+          formatter: <PrintButtonFormatter printout={nextProps.printout} />
+        })
+      }
       this.setState({ gridConfig: currGrid })
     }
     if (nextProps.gridData && nextProps.gridConfig) {

@@ -6,7 +6,7 @@ import { changeLanguageAndLocale } from '../../client'
 import * as cookies from '../../functions/cookies'
 import PropTypes from 'prop-types';
 import { store } from '../../model'
-import { isValidObject } from '../../functions/utils'
+import { isValidObject, getServerOrigin } from '../../functions/utils'
 import axios from 'axios'
 
 const HomeMenu = (props, context) => {
@@ -23,7 +23,7 @@ const HomeMenu = (props, context) => {
   }, [props.svSession]);
 
   const fetchHeaderJson = async () => {
-    const url = `${window.location.origin}${window.assets}/json/config/Header.json`;
+    const url = `${getServerOrigin()}${window.assets}/json/config/Header.json`;
     try {
       const response = await fetch(url);
       const json = await response.json();

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import HelpContext from '../../elements/help/HelpContext'
+import { getServerOrigin } from '../../functions/utils'
 import ACSideMenu from './ACSideMenu'
 // COMPONENTS
 import UserManagement from '../User Management/UserManagement'
@@ -39,37 +41,41 @@ const AdminConsole = (_props, context) => {
         }
     }
     const getMenu = () => {
-        const url = `${window.location.origin}${window.assets}/json/config/AppSettings.json`
+        const url = `${getServerOrigin()}${window.assets}/json/config/AppSettings.json`
         fetch(url).then(res => res.json()).then(json => {
             if (json?.length > 0) {
                 setJson(json)
             }
         }).catch(err => { throw err });
     }
+    const sectionId = json.find(item => item.component === dynamicComponent)?.id
+
     return (
         <div className="admin-console-main-container">
             {json && <ACSideMenu
                 json={json}
                 setDynamicComponentFunction={setDynamicComponentFunction}
             />}
-            <div className="admin-console-content">
-                {dynamicComponent === 'UserManagement' && <UserManagement />}
-                {dynamicComponent === 'GeoLayerTypes' && <GeoLayerTypes />}
-                {dynamicComponent === 'SvarogSystemParams' && <SvarogSystemParams />}
-                {dynamicComponent === 'NotificationsComponent' && <NotificationsComponent />}
-                {dynamicComponent === 'DirectAccess' && <DirectAccess />}
-                {dynamicComponent === 'SystemConfLogs' && <SystemConfLogs />}
-                {dynamicComponent === 'OrganizationalUnit' && <OrganizationalUnit />}
-                {dynamicComponent === 'PerunPluginTable' && <PerunPluginTable />}
-                {dynamicComponent === 'SvarogMenu' && <SvarogMenu />}
-                {dynamicComponent === 'PerunMenu' && <PerunMenu />}
-                {dynamicComponent === 'BusinessType' && <BusinessType />}
-                {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
-                {dynamicComponent === 'LabelEditor' && <LabelEditor />}
-                {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
-                {dynamicComponent === 'SvarogTables' && <SvarogTables />}
-                {dynamicComponent === 'ConfigTables' && <ConfigTables />}
-            </div>
+            <HelpContext.Provider value={{ sectionId }}>
+                <div className="admin-console-content">
+                    {dynamicComponent === 'UserManagement' && <UserManagement />}
+                    {dynamicComponent === 'GeoLayerTypes' && <GeoLayerTypes />}
+                    {dynamicComponent === 'SvarogSystemParams' && <SvarogSystemParams />}
+                    {dynamicComponent === 'NotificationsComponent' && <NotificationsComponent />}
+                    {dynamicComponent === 'DirectAccess' && <DirectAccess />}
+                    {dynamicComponent === 'SystemConfLogs' && <SystemConfLogs />}
+                    {dynamicComponent === 'OrganizationalUnit' && <OrganizationalUnit />}
+                    {dynamicComponent === 'PerunPluginTable' && <PerunPluginTable />}
+                    {dynamicComponent === 'SvarogMenu' && <SvarogMenu />}
+                    {dynamicComponent === 'PerunMenu' && <PerunMenu />}
+                    {dynamicComponent === 'BusinessType' && <BusinessType />}
+                    {dynamicComponent === 'CodeListEditor' && <CodeListEditor />}
+                    {dynamicComponent === 'LabelEditor' && <LabelEditor />}
+                    {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
+                    {dynamicComponent === 'SvarogTables' && <SvarogTables />}
+                    {dynamicComponent === 'ConfigTables' && <ConfigTables />}
+                </div>
+            </HelpContext.Provider>
         </div>
     )
 }

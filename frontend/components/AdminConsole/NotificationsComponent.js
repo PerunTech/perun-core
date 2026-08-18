@@ -5,6 +5,8 @@ import { connect } from 'react-redux'
 import Form from '@rjsf/core'
 import { ComponentManager, ExportableGrid, GridManager, Loading } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
+import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
+import HelpFieldTemplate from '../../elements/help/HelpFieldTemplate';
 import { getNotificationsFormSchema } from './utils/notificationsFormSchema'
 import { flattenObject } from '../../model/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -18,7 +20,6 @@ const NotificationsComponent = (props, context) => {
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{ tableName, loading, gridId, show, objectId, selectedRow, formData }, setState] = useReducer(reducer, initialState)
-
   useEffect(() => {
     return () => {
       ComponentManager.cleanComponentReducerState(gridId)
@@ -146,7 +147,7 @@ const NotificationsComponent = (props, context) => {
     const onSubmit = (e) => saveNotification(e, url)
 
     return (
-      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit}>
+      <Form validator={validator} className='notifications-form' schema={schema} uiSchema={uiSchema} formData={data} onSubmit={onSubmit} templates={{ FieldTemplate: HelpFieldTemplate }}>
         <></>
         <div id='buttonHolder'>
           <div id='btnSeparator' style={{ width: 'auto', float: 'right' }}>
@@ -164,12 +165,15 @@ const NotificationsComponent = (props, context) => {
     )
   }
 
+  const announcementMsg = { id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' }
+
   return (
     <>
       {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
-          <p>{context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}</p>
+          <p>{context.intl.formatMessage(announcementMsg)}</p>
+          <AdminConsoleHelpButton title={announcementMsg} />
         </div>
         {generateNotificationsGrid()}
       </div>
@@ -177,7 +181,7 @@ const NotificationsComponent = (props, context) => {
         <Modal className='admin-console-unit-modal' show={show} onHide={() => onHide()}>
           <Modal.Header className='admin-console-unit-modal-header' closeButton>
             <Modal.Title>
-              {context.intl.formatMessage({ id: 'perun.admin_console.announcement', defaultMessage: 'perun.admin_console.announcement' })}
+              {context.intl.formatMessage(announcementMsg)}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className='admin-console-unit-modal-body'>

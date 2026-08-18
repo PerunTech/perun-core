@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ComponentManager, ExportableGrid, GenericForm, Loading, GridManager, axios } from '../../client'
 import { alertUserV2, alertUserResponse, ReactBootstrap } from '../../elements'
+import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -124,6 +125,7 @@ const GeoLayerTypes = (props, context) => {
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.geo_layer_types', defaultMessage: 'perun.admin_console.geo_layer_types' })}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.geo_layer_types', defaultMessage: 'perun.admin_console.geo_layer_types' }} />
         </div>
         {generateGeoLayerTypeGrid()}
       </div>

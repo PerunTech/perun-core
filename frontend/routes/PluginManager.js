@@ -1,4 +1,5 @@
 import { router } from './Router';
+import { getServerOrigin } from '../functions/utils';
 
 /**
  * The set of registered plugins for the current session.
@@ -7,10 +8,6 @@ import { router } from './Router';
  * @type {Object}
  */
 const _plugins = {};
-const getBundlesBaseUrl = () => {
-  const fromWindow = window.bundleServer || window.json || window.server || window.location.origin;
-  return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '');
-};
 
 const resolveScriptUrl = (url) => {
   if (!url) {
@@ -20,7 +17,7 @@ const resolveScriptUrl = (url) => {
     return url;
   }
   const normalizedPath = url.startsWith('/') ? url : `/${url}`;
-  return `${getBundlesBaseUrl()}${normalizedPath}`;
+  return `${getServerOrigin()}${normalizedPath}`;
 };
 
 /**

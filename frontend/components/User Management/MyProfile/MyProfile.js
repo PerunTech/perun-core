@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { GenericForm, Loading, axios, createHashHistory, ComponentManager } from '../../../client';
 import { downloadFile } from '../../../functions/utils';
-import { alertUserV2, alertUserResponse, Icon } from '../../../elements';
-import ReactDOM from 'react-dom';
+import { alertUserV2, alertUserResponse, Icon, ReactBootstrap } from '../../../elements';
 import { store } from '../../../model';
 import PasswordForm from './PasswordForm';
+const { Modal } = ReactBootstrap
 
 const MyProfile = (props, context) => {
     const history = createHashHistory()
     const [loading, setLoading] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [img, setImg] = useState(undefined);
     const avatarInputRef = useRef(null);
     useEffect(() => {
@@ -183,17 +184,7 @@ const MyProfile = (props, context) => {
         alertUserV2(alertParams)
     }
 
-    const changePassword = () => {
-        const customElement = document.createElement('div')
-        ReactDOM.render((
-            <PasswordForm userInfo={props.userInfo} svSession={props.svSession} context={context} />
-        ), customElement)
-        const alertParams = {
-            showConfirm: false,
-            html: customElement
-        }
-        alertUserV2(alertParams)
-    }
+    const changePassword = () => setShowPasswordModal(true)
 
     const handleEditProfile = (e) => {
         let url = `${window.server}/WsAdminConsole/editUser/${props.svSession}/${props.userInfo.userObjectId}`
@@ -251,6 +242,7 @@ const MyProfile = (props, context) => {
                     addSaveFunction={handleEditProfile}
                     hideBtns="closeAndDelete"
                     className="hide-all-form-legends my-profile-form"
+                    helpSectionId='SVAROG_USERS'
                     noValidate={true}
                 />
                 <div className='my-profile-back-btn' onClick={() => handleBack()}>
@@ -260,6 +252,21 @@ const MyProfile = (props, context) => {
                     <p>{context.intl.formatMessage({ id: 'perun.my_profile.back', defaultMessage: 'perun.my_profile.back' })}</p>
                 </div>
             </div>
+            {showPasswordModal && (
+                <Modal className='admin-console-unit-modal edit-user-password-modal' show={showPasswordModal} onHide={() => setShowPasswordModal(false)}>
+                    <Modal.Header className='admin-console-unit-modal-header' closeButton />
+                    <Modal.Body className='admin-console-unit-modal-body'>
+                        <PasswordForm
+                            userInfo={props.userInfo}
+                            svSession={props.svSession}
+                            context={context}
+                            isEdit
+                            setShow={setShowPasswordModal}
+                        />
+                    </Modal.Body>
+                    <Modal.Footer className='admin-console-unit-modal-footer' />
+                </Modal>
+            )}
         </div>
     );
 };

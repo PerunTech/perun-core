@@ -39,6 +39,7 @@ const Privileges = (props, context) => {
             hideBtns={'all'}
             className={classNames}
             disabled
+            helpSectionId={tableName}
         />
     }
 

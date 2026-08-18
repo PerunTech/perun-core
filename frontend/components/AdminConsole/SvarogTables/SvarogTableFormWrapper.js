@@ -113,7 +113,7 @@ const SvarogTableFormWrapper = (props, context) => {
         const fieldFormDataEntries = props.admConsoleFormData.filter(item => item.recordType === 'FIELD' && !item.deleted)
         const items = fieldFormDataEntries.map(fd => formDataToDbDataObject(fd, userId))
         if (tableFormData) {
-          items.push(formDataToDbDataObject(tableFormData, userId))
+          items.unshift(formDataToDbDataObject(tableFormData, userId))
         }
         const exportData = {
           'com.prtech.svarog_common.DbDataArray': {
@@ -160,11 +160,11 @@ const SvarogTableFormWrapper = (props, context) => {
             const tableItem = Array.isArray(tableData) ? tableData : [tableData]
             const serverDbDataArray = serverJson?.['com.prtech.svarog_common.DbDataArray']
             if (serverDbDataArray) {
-              serverDbDataArray.items.push(...JSON.parse(JSON.stringify(tableItem)))
+              serverDbDataArray.items.unshift(...JSON.parse(JSON.stringify(tableItem)))
             }
             const tableOverrides = props.admConsoleFormData.filter(item => item.recordType === 'TABLE')
             applyFormDataOverrides(tableItem, tableOverrides)
-            dbDataArray.items.push(...tableItem)
+            dbDataArray.items.unshift(...tableItem)
           }
         }
         const exportData = fieldsData[0] || {}

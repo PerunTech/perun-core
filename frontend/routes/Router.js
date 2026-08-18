@@ -1,14 +1,11 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { store } from '../model';
+import { getServerOrigin } from '../functions/utils';
 import * as localRoutes from '.';
 
 let storageBundles = [];
 const loadingScripts = {};
-const getBundlesBaseUrl = () => {
-    const fromWindow = window.bundleServer || window.json || window.server || window.location.origin;
-    return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '');
-};
 
 const resolveScriptUrl = (url) => {
     if (!url) {
@@ -18,7 +15,7 @@ const resolveScriptUrl = (url) => {
         return url;
     }
     const normalizedPath = url.startsWith('/') ? url : `/${url}`;
-    return `${getBundlesBaseUrl()}${normalizedPath}`;
+    return `${getServerOrigin()}${normalizedPath}`;
 };
 /**
  * Loads a plugin by dynamically creating a script element.

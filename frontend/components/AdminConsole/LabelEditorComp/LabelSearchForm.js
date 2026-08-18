@@ -40,10 +40,9 @@ const LabelSearchForm = ({
                 configTableName={`/ReactElements/getTableFieldList/${svSession}/${TABLE_NAME}`}
                 dataTableName={`/ReactElements/getTableWithLike/${svSession}/${TABLE_NAME}/${searchParams.SEARCH_OPTION}/${encodeURIComponent(searchParams.SEARCH_VALUES)}/0`}
                 defaultHeight={false}
-                heightRatio={0.5}
+                heightRatio={0.6}
                 refreshData={true}
                 onRowClickFunct={onRowClick}
-                minHeight={500}
             />
         )}
     </div>

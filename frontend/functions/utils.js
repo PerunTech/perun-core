@@ -132,6 +132,17 @@ export function getCapsLockState(event, callback) {
   }
 }
 
+/**
+ * Resolves the backend/assets server origin. window.location.origin is wrong for this when running
+ * locally (eg. webpack-dev-server on localhost:PORT) since the actual backend/assets host is configured
+ * separately via window.server/window.json (see www/config.js) - use this instead of window.location.origin
+ * whenever building a URL to fetch static JSON config or images from that server.
+ */
+export function getServerOrigin() {
+  const fromWindow = window.bundleServer || window.json || window.server || window.location.origin
+  return String(fromWindow).replace(/\/services\/?$/, '').replace(/\/$/, '')
+}
+
 export const downloadFile = (file, svSession, callback) => {
   if (file['objectId'] && file['fileName']) {
     const url = `${window.server}/ReactElements/downloadFile/sid/${svSession}/object-id/${file['objectId']}/file-name/${file['fileName']}`;
@@ -166,6 +177,15 @@ export const getObjectValueByKey = (obj, target) =>
       if (acc !== undefined) return acc;
       if (typeof val === 'object') return getObjectValueByKey(val, target);
     }, undefined);
+
+/**
+ * Extracts the array index from an rjsf array item element ID.
+ * @param {string} elementId - The rjsf element ID, e.g. "root_0_DEPARTMENT" -> "0", "root_12_LAB_OBJ_ID" -> "12".
+ */
+export const getArrayIndexFromElementId = (elementId) => {
+  const withoutRoot = elementId.replace(/^root_/, '')
+  return withoutRoot.substring(0, withoutRoot.indexOf('_'))
+}
 
 /**
  * Retrieves a localized label using a label code, module name, and internationalization context.

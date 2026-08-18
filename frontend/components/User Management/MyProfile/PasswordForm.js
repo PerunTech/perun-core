@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import Form from '@rjsf/core';
-import validator from '@rjsf/validator-ajv8';
+import { GenericForm } from '../../../client';
 import { strcmp } from '../../../model/utils';
 import Swal from 'sweetalert2';
 import md5 from 'md5';
@@ -9,18 +8,17 @@ import axios from 'axios';
 
 const PasswordWidget = ({ value, onChange }) => {
     const [visible, setVisible] = useState(false);
-
     return (
-        <div className="my-profile-password-widget">
+        <div className='my-profile-password-widget'>
             <input
                 type={visible ? 'text' : 'password'}
                 value={value || ''}
                 onChange={(e) => onChange(e.target.value)}
-                className="my-profile-password-input"
+                className='my-profile-password-input'
             />
             <button
-                type="button"
-                className="my-profile-toggle-visibility"
+                type='button'
+                className='my-profile-toggle-visibility'
                 onClick={() => setVisible(!visible)}
             >
                 {visible ? <Icon name='IconEyeOff' /> : <Icon name='IconEye' />}
@@ -29,114 +27,91 @@ const PasswordWidget = ({ value, onChange }) => {
     );
 };
 
-const widgets = {
-    passwordWidget: PasswordWidget
-};
+const widgets = { passwordWidget: PasswordWidget };
 
 const PasswordForm = (props) => {
-    const [passwordMatch, setDontMatch] = useState(false);
-    const [formDat, setDat] = useState({});
+    const { context, isNewUser, isEdit, svSession, userInfo, onSave, setShow } = props;
+    const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id });
+
+    const [passwordMatch, setPasswordMatch] = useState(false);
+    const [formDat, setFormDat] = useState({});
 
     const schema = {
-        title: `${props.isNewUser ? props.context.intl.formatMessage({ id: 'perun.my_profile.set_user_password', defaultMessage: 'perun.my_profile.set_user_password' }) : props.context.intl.formatMessage({ id: 'perun.my_profile.change_password', defaultMessage: 'perun.my_profile.change_password' })}`,
+        title: fmt(isNewUser ? 'perun.my_profile.set_user_password' : 'perun.my_profile.change_password'),
         type: 'object',
         properties: {
-
-            confUserPassword: {
-                type: 'string',
-                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.confirm_password', defaultMessage: 'perun.my_profile.confirm_password' })}`
-            },
-            userPassword: {
-                type: 'string',
-                title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.password', defaultMessage: 'perun.my_profile.password' })}`
-            },
+            confUserPassword: { type: 'string', title: fmt('perun.my_profile.confirm_password') },
+            userPassword: { type: 'string', title: fmt('perun.my_profile.password') },
+            ...(!isNewUser && { oldPassword: { type: 'string', title: fmt('perun.my_profile.old_password') } }),
         },
-        required: ['confUserPassword', 'userPassword']
+        required: ['confUserPassword', 'userPassword', ...(!isNewUser ? ['oldPassword'] : [])],
     };
-
-    if (!props.isNewUser) {
-        schema.properties.oldPassword = {
-            type: 'string',
-            title: `${props.context.intl.formatMessage({ id: 'perun.my_profile.old_password', defaultMessage: 'perun.my_profile.old_password' })}`
-        };
-        schema.required.push('oldPassword');
-    }
 
     const uiSchema = {
-        confUserPassword: {
-            'ui:widget': 'passwordWidget'
-        }, userPassword: {
-            'ui:widget': 'passwordWidget'
-        },
-
+        confUserPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.confUserPassword.help' },
+        userPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.userPassword.help' },
+        ...(!isNewUser && { oldPassword: { 'ui:widget': 'passwordWidget', 'ui:helpCode': 'perun.my_profile.form.oldPassword.help' } }),
     };
 
-    if (!props.isNewUser) {
-        uiSchema.oldPassword = { 'ui:widget': 'passwordWidget' };
-    }
-
     const handleSubmit = ({ formData }) => {
-
-        setDat(formData);
+        setFormDat(formData);
 
         if (!strcmp(formData.confUserPassword, formData.userPassword)) {
-            setDontMatch(true);
+            setPasswordMatch(true);
             return;
-        } else {
-            setDontMatch(false);
-            if (props.isNewUser) {
-                props.onSave(formData);
-            }
-            if (props.isEdit) {
-                props.setShow(false)
-            }
         }
 
-        if (!props.isNewUser && !props.isEdit) {
-            Swal.close();
+        setPasswordMatch(false);
+
+        if (isNewUser) {
+            onSave(formData);
+            return;
         }
-        if (!props.isNewUser) {
 
+        if (isEdit) setShow(false);
+        if (!isEdit) Swal.close();
 
-            let data = {
-                ...formData,
-                userName: props.userInfo.username,
-                userPassword: md5(formData.userPassword).toUpperCase(),
-                confUserPassword: md5(formData.confUserPassword).toUpperCase(),
-                oldPassword: md5(formData.oldPassword).toUpperCase()
-            };
+        const data = {
+            ...formData,
+            userName: userInfo.username,
+            userPassword: md5(formData.userPassword).toUpperCase(),
+            confUserPassword: md5(formData.confUserPassword).toUpperCase(),
+            oldPassword: md5(formData.oldPassword).toUpperCase(),
+        };
 
-            let url = window.server + `/WsAdminConsole/changePassword/${props.svSession}`;
-            axios.post(url, JSON.stringify(data), { headers: { "Content-Type": "application/x-www-form-urlencoded" } })
-                .then(res => alertUserResponse({ response: res }))
-                .catch(err => alertUserResponse({ response: err, type: 'error' }));
-        }
+        axios.post(
+            `${window.server}/WsAdminConsole/changePassword/${svSession}`,
+            JSON.stringify(data),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        )
+            .then(res => alertUserResponse({ response: res }))
+            .catch(err => alertUserResponse({ response: err, type: 'error' }));
     };
 
     return (
-        <Form
-            className={`my-profile-change-password ${props.isNewUser && 'add-user-password-form'}`}
-            validator={validator}
-            schema={schema}
-            uiSchema={uiSchema}
-            widgets={widgets}
-            onSubmit={handleSubmit}
-            formData={formDat}
+        <GenericForm
+            params='FORM_DATA'
+            className={`my-profile-change-password${isNewUser ? ' add-user-password-form' : ''}`}
+            key='PASSWORD_FORM'
+            id='PASSWORD_FORM'
+            method={schema}
+            uiSchemaConfigMethod={uiSchema}
+            tableFormDataMethod={formDat}
+            additionalWidgets={widgets}
+            addSaveFunction={handleSubmit}
+            hideBtns='closeAndDelete'
+
         >
             <div>
-                <p className='dont-match'>{passwordMatch ? props.context.intl.formatMessage({ id: 'perun.my_profile.password_dont', defaultMessage: 'perun.my_profile.password_dont' }) : ''}</p>
+                <p className='dont-match'>{passwordMatch ? fmt('perun.my_profile.password_dont') : ''}</p>
             </div>
             <div className='my-profile-alert-btns'>
-                <div className='cancel-btn' onClick={() => {
-                    if (!props.isEdit) {
-                        Swal.close()
-                    } else {
-                        props.setShow(false)
-                    }
-                }}>{props.context.intl.formatMessage({ id: 'perun.my_profile.cancel', defaultMessage: 'perun.my_profile.cancel' })}</div>
-                <button className='btn btn-info' type='submit'>{props.context.intl.formatMessage({ id: 'perun.adminConsole.save', defaultMessage: 'perun.adminConsole.save' })}</button>
+                <div className='cancel-btn' onClick={() => isEdit ? setShow(false) : Swal.close()}>
+                    {fmt('perun.my_profile.cancel')}
+                </div>
+                <button className='btn btn-info' type='submit'>{fmt('perun.adminConsole.save')}</button>
             </div>
-        </Form>
+        </GenericForm>
     );
 };
 

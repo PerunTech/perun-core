@@ -34,6 +34,7 @@ export const buildExportTree = (svSession, objectId, codeValue, labelCode, signa
     buildNode(svSession, objectId, codeValue, labelCode, signal);
 
 export const downloadJsonFile = (obj, filename) => {
+    if (!obj) return;
     const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

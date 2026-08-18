@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Users from './Users/Users';
 import Groups from './Groups/Groups';
 import Privileges from './Privileges/Privileges';
+import AdminConsoleHelpButton from '../AdminConsole/Help/AdminConsoleHelpButton';
 
 const UserManagement = (_props, context) => {
     const [activeTab, setActiveTab] = useState('USERS');
@@ -16,8 +17,9 @@ const UserManagement = (_props, context) => {
 
     return (
         <div className='user-mng'>
-            <div className='user-mng-header'>
+            <div className='user-mng-header admin-console-component-header'>
                 <p>{context.intl.formatMessage({ id: 'perun.user_mng', defaultMessage: 'perun.user_mng' })}</p>
+                <AdminConsoleHelpButton title={{ id: 'perun.user_mng', defaultMessage: 'perun.user_mng' }} />
             </div>
             <div className='user-mng-tabs'>
                 <div onClick={() => setActiveFunc('USERS')} className={getTabClass('USERS')}>

@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 const { useState, useEffect } = React;
 import { alertUserResponse, ReactBootstrap } from "../../elements";
 import ConfigMenuWrapper from './ConfigMenuWrapper';
+import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton';
 const { Modal } = ReactBootstrap;
 
 const tableName = "SVAROG_PERUN_PLUGIN";
@@ -124,6 +125,7 @@ const PerunPluginTable = (props, context) => {
             <div className='admin-console-grid-container'>
                 <div className='admin-console-component-header'>
                     <p>{context.intl.formatMessage({ id: 'perun.admin_console.perun_plugin_table_editor', defaultMessage: 'perun.admin_console.perun_plugin_table_editor' })}</p>
+                    <AdminConsoleHelpButton title={{ id: 'perun.admin_console.perun_plugin_table_editor', defaultMessage: 'perun.admin_console.perun_plugin_table_editor' }} />
                 </div>
                 {generatePluginTable()}
             </div>

@@ -6,6 +6,7 @@ import { ComponentManager, ExportableGrid, GenericForm } from '../../client'
 import { alertUserResponse, ReactBootstrap } from '../../elements'
 import SystemConfLogsWrapper from './SystemConfLogsWrapper'
 import { Loading } from '../ComponentsIndex'
+import AdminConsoleHelpButton from './Help/AdminConsoleHelpButton'
 const { useReducer, useEffect } = React
 const { Modal } = ReactBootstrap
 
@@ -91,6 +92,7 @@ const SystemConfLogs = (props, context) => {
         inputWrapper={SystemConfLogsWrapper}
         additionalWidgets={{ logText: LogTextWidget, label: LabelWidget }}
         uiSchemaOverride={{ NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }}
+        disableHelpButtons
       />
     )
   }
@@ -101,6 +103,7 @@ const SystemConfLogs = (props, context) => {
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{context.intl.formatMessage({ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' })}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.svarog_config_log', defaultMessage: 'perun.admin_console.svarog_config_log' }} />
         </div>
         {gridConfig && generateConfLogGrid()}
       </div>

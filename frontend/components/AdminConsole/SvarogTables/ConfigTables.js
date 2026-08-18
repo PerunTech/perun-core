@@ -1,10 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { ComponentManager, ExportableGrid, GenericForm, GridManager, axios } from '../../../client'
-import { alertUserResponse, alertUserV2, ReactBootstrap } from '../../../elements'
+import { ComponentManager, ExportableGrid, GenericForm, GridManager, Loading, axios } from '../../../client'
+import { alertUserResponse, alertUserV2, Icon, ReactBootstrap } from '../../../elements'
+import AdminConsoleHelpButton from '../Help/AdminConsoleHelpButton'
+
 import SvarogTableFormWrapper from './SvarogTableFormWrapper'
-import { TABLE_UISCHEMA_OVERRIDE } from './svarogTableUtils'
+import { TABLE_UISCHEMA_OVERRIDE, downloadJson, fetchInBatches } from './svarogTableUtils'
 import CustomCheckboxWidget from './CustomCheckboxWidget'
 import PerunMenuWrapper from '../PerunMenu/PerunMenuWrapper'
 import SvarogMenuWrapper from '../SvarogMenuWrapper'
@@ -24,11 +26,12 @@ const CONF_LOG_WIDGETS = {
   label: ({ value }) => <strong className='conf-log-note-name'>{value || ''}</strong>,
 }
 const CONF_LOG_UISCHEMA = { NOTE_TEXT: { 'ui:widget': 'logText' }, NOTE_NAME: { 'ui:widget': 'label' } }
-const { useReducer, useEffect } = React
+const { useReducer, useEffect, useRef } = React
 const { Modal } = ReactBootstrap
 
 const TABLE_NAME = 'SVAROG_TABLES'
 const GRID_ID = 'CONFIG_TABLES_GRID'
+const RECORDS_EXPORT_BATCH_SIZE = 15
 
 const ConfigTables = (props, context) => {
   const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
@@ -36,13 +39,17 @@ const ConfigTables = (props, context) => {
   const initialState = {
     show: false, objectId: 0, selectedTableName: '',
     activeTab: 'definition', showRecordModal: false, recordObjectId: 0,
+    selectedTableRows: [], loading: false,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ show, objectId, selectedTableName, activeTab, showRecordModal, recordObjectId }, setState] = useReducer(reducer, initialState)
+  const [{ show, objectId, selectedTableName, activeTab, showRecordModal, recordObjectId, selectedTableRows, loading }, setState] = useReducer(reducer, initialState)
 
   useEffect(() => {
     return () => { ComponentManager.cleanComponentReducerState(GRID_ID) }
   }, [])
+
+  const selectedTableRowsRef = useRef(selectedTableRows)
+  selectedTableRowsRef.current = selectedTableRows
 
   const tableFormId = `${TABLE_NAME}_FORM`
   const recordsGridId = selectedTableName ? `${selectedTableName}_RECORDS_GRID` : ''
@@ -136,6 +143,69 @@ const ConfigTables = (props, context) => {
     setState({ recordObjectId: row[`${selectedTableName}.OBJECT_ID`] || 0, showRecordModal: true })
   }
 
+  const exportSelectedTables = () => {
+    const rows = selectedTableRowsRef.current
+    if (rows.length === 0) {
+      alertUserV2({ type: 'info', title: fmt('perun.admin_console.no_rows_selected') })
+      return
+    }
+    setState({ loading: true })
+    const { svSession } = props
+    const fetches = rows.map(row => {
+      const objId = row[`${TABLE_NAME}.OBJECT_ID`]
+      return Promise.all([
+        axios.get(`${window.server}/WsCore/children/${svSession}/${objId}/SVAROG_FIELDS`),
+        axios.get(`${window.server}/WsCore/object/${svSession}/${objId}/SVAROG_TABLES`),
+      ])
+    })
+    Promise.all(fetches).then(results => {
+      results.forEach(([fieldsRes, tableRes], i) => {
+        const items = []
+        if (tableRes?.data) {
+          const tableItems = Array.isArray(tableRes.data) ? tableRes.data : [tableRes.data]
+          items.push(...tableItems)
+        }
+        const dbDataArray = fieldsRes?.data?.['com.prtech.svarog_common.DbDataArray']
+        if (dbDataArray?.items) items.push(...dbDataArray.items)
+        const exportData = {
+          'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
+        }
+        downloadJson(exportData, rows[i][`${TABLE_NAME}.TABLE_NAME`] || 'CONFIG_TABLES_EXPORT')
+      })
+      setState({ loading: false })
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err })
+    })
+  }
+
+  const exportTableRecords = () => {
+    const rows = ComponentManager.getStateForComponent(recordsGridId, 'rows') || []
+    setState({ loading: true })
+    const { svSession } = props
+    const toItems = (data) => (Array.isArray(data) ? data : data ? [data] : [])
+    Promise.all([
+      fetchInBatches(rows, RECORDS_EXPORT_BATCH_SIZE, row => {
+        const rowObjectId = row[`${selectedTableName}.OBJECT_ID`]
+        return axios.get(`${window.server}/WsCore/object/${svSession}/${rowObjectId}/${selectedTableName}`)
+      }),
+      axios.get(`${window.server}/WsCore/object/${svSession}/${objectId}/SVAROG_TABLES`),
+    ]).then(([recordResults, tableRes]) => {
+      const items = [...toItems(tableRes?.data)]
+      recordResults.forEach(recordRes => items.push(...toItems(recordRes?.data)))
+      const exportData = {
+        'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
+      }
+      downloadJson(exportData, selectedTableName || 'CONFIG_TABLE_RECORDS_EXPORT')
+      setState({ loading: false })
+    }).catch(err => {
+      console.error(err)
+      setState({ loading: false })
+      alertUserResponse({ response: err })
+    })
+  }
+
   const generateTableDefinitionTab = () => {
     const { svSession } = props
     return (
@@ -157,6 +227,7 @@ const ConfigTables = (props, context) => {
         objectId={objectId}
         selectedTableName={selectedTableName}
         onClose={doClose}
+        helpSectionId={TABLE_NAME}
       />
     )
   }
@@ -165,6 +236,12 @@ const ConfigTables = (props, context) => {
     const { svSession } = props
     return (
       <div className='ct-records-tab'>
+        <div className='svarog-table-buttons-container'>
+          <button className='btn-success btn_save_form svarog-table-export-btn' onClick={exportTableRecords}>
+            {fmt('perun.admin_console.export_table_and_records')}
+            <span className='download-span'>{<Icon name='IconDatabaseExport' />}</span>
+          </button>
+        </div>
         <ExportableGrid
           gridType='READ_URL'
           key={recordsGridId}
@@ -208,6 +285,8 @@ const ConfigTables = (props, context) => {
             additionalWidgets={isConfLog ? CONF_LOG_WIDGETS : undefined}
             uiSchemaOverride={isConfLog ? CONF_LOG_UISCHEMA : undefined}
             objectId={recordObjectId}
+            helpSectionId={isConfLog ? undefined : formTableName}
+            disableHelpButtons={isConfLog}
           />
         </Modal.Body>
         <Modal.Footer className='admin-console-unit-modal-footer' />
@@ -217,9 +296,11 @@ const ConfigTables = (props, context) => {
 
   return (
     <>
+      {loading && <Loading />}
       <div className='admin-console-grid-container'>
         <div className='admin-console-component-header'>
           <p>{fmt('perun.admin_console.svarog_config_tables')}</p>
+          <AdminConsoleHelpButton title={{ id: 'perun.admin_console.svarog_config_tables', defaultMessage: 'perun.admin_console.svarog_config_tables' }} />
         </div>
         <ExportableGrid
           gridType='READ_URL'
@@ -229,9 +310,12 @@ const ConfigTables = (props, context) => {
           dataTableName={`/ReactElements/getTableWithFilter/${props.svSession}/SVAROG_TABLES/IS_CONFIG_TABLE/true/0`}
           onRowClickFunct={handleRowClick}
           refreshData={true}
-          toggleCustomButton={true}
-          customButton={() => setState({ show: true, objectId: 0, activeTab: 'definition' })}
-          customButtonLabel={fmt('perun.admin_console.add')}
+          enableMultiSelect={true}
+          onSelectChangeFunct={(rows) => setState({ selectedTableRows: rows })}
+          buttonsArray={[
+            { id: 'add_config_table', name: fmt('perun.admin_console.add'), action: () => setState({ show: true, objectId: 0, activeTab: 'definition' }) },
+            { id: 'export_selected_config_tables', name: fmt('perun.admin_console.export_selected'), action: exportSelectedTables },
+          ]}
           heightRatio={0.75}
           editContextFunc={handleRowClick}
         />

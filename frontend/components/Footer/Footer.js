@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
+import { getServerOrigin } from '../../functions/utils'
 
 const Footer = (props) => {
   const [json, setJson] = useState([])
@@ -10,7 +11,7 @@ const Footer = (props) => {
   }, [])
 
   const getFooterJson = () => {
-    const url = `${window.location.origin}${window.assets}/json/config/Footer.json`
+    const url = `${getServerOrigin()}${window.assets}/json/config/Footer.json`
     fetch(url)
       .then(res => res.json())
       .then(json => setJson(json))

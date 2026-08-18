@@ -5,7 +5,8 @@ import { store } from '../../../model'
 import { svConfig } from '../../../config';
 import { Dropdown, ComponentManager, alertUserResponse } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
-import { isValidArray, isValidObject } from '../../../functions/utils';
+import { isValidArray, isValidObject, getArrayIndexFromElementId } from '../../../functions/utils';
+import FieldHelpButton from '../../help/FieldHelpButton';
 
 const right = {
   'display': 'inline-table'
@@ -39,12 +40,62 @@ class DependentElements extends React.Component {
     }
   }
 
+  isArraySchema = () => {
+    return this.props.formConfig?.type === 'array'
+  }
+
+  // Looks up a field title in array schema, checking allOf conditional branches as fallback.
+  getArrayItemTitle = (coreType) => {
+    const items = this.props.formConfig?.items
+    if (!items) return undefined
+    if (items.properties?.[coreType]?.title) return items.properties[coreType].title
+    for (const clause of (items.allOf || [])) {
+      if (clause.then?.properties?.[coreType]?.title) return clause.then.properties[coreType].title
+    }
+    return undefined
+  }
+
+  // Looks up a property definition from the JSON schema, checking allOf conditional branches as fallback.
+  getSchemaProperty = (formConfig, coreType) => {
+    if (formConfig?.properties?.[coreType]) return formConfig.properties[coreType]
+    for (const clause of (formConfig?.allOf || [])) {
+      if (clause.then?.properties?.[coreType]) return clause.then.properties[coreType]
+    }
+    return undefined
+  }
+
+  // Returns true if `key` transitively depends on `fieldCode` via dependentOnField links.
+  isInChain = (key, fieldCode, itemsSchema) => {
+    let current = key
+    const visited = new Set()
+    while (current && !visited.has(current)) {
+      visited.add(current)
+      const depOn = itemsSchema[current]?.dependentOnField
+      if (depOn === fieldCode) return true
+      current = depOn
+    }
+    return false
+  }
+
   componentDidMount() {
     const { formConfig, sectionName } = this.props
-    const formData = Object.assign({}, this.props.formData)
-    if (formData && formData.constructor === Object && Object.keys(formData).length > 0) {
-      if (formData[sectionName]) { //section
-        const subEls = Object.keys(formData[sectionName])
+    const formData = this.props.formData
+
+    if (this.isArraySchema()) {
+      const arrayIndex = parseInt(getArrayIndexFromElementId(this.props.elementId))
+      const rowData = Array.isArray(formData) ? formData[arrayIndex] : null
+      if (rowData && Object.keys(rowData).length > 0) {
+        this.generateExisting()
+      } else {
+        this.fetchInitialCodelist()
+      }
+      return
+    }
+
+    const formDataCopy = Object.assign({}, formData)
+    if (formDataCopy && formDataCopy.constructor === Object && Object.keys(formDataCopy).length > 0) {
+      if (formDataCopy[sectionName]) { //section
+        const subEls = Object.keys(formDataCopy[sectionName])
         if (subEls.length > 0) {
           this.generateExisting()
         } else {
@@ -52,7 +103,7 @@ class DependentElements extends React.Component {
         }
       } else { //no section
         const formFields = Object.keys(formConfig.properties)
-        const finalFormData = Object.assign({}, formData)
+        const finalFormData = Object.assign({}, formDataCopy)
         // Append an empty string as the value of each field that doesn't have a value
         formFields.forEach(field => {
           if (!finalFormData[field]) {
@@ -102,7 +153,42 @@ class DependentElements extends React.Component {
     })
   }
 
+  componentWillUnmount = () => {
+    if (!this.isArraySchema()) return
+
+    const { fieldCode, formSchema } = this.props
+    const itemsSchema = formSchema?.items || {}
+    const arrayIndex = getArrayIndexFromElementId(this.props.elementId)
+
+    // Remove DOM-injected chain dropdowns (not the React-managed root).
+    Array.from(document.getElementsByClassName('dependent-dropdown')).forEach(el => {
+      if (getArrayIndexFromElementId(el.id) !== arrayIndex) return
+      const elCoreType = this.findCoreType(el.id)[1]
+      if (!this.isInChain(elCoreType, fieldCode, itemsSchema)) return
+      el.parentNode?.parentNode?.removeChild(el.parentNode)
+    })
+
+    // rjsf unmounts this component before GenericForm's onChange fires, so
+    // ComponentManager is stale here. Defer until after onChange has updated it.
+    setTimeout(() => {
+      if (!document.getElementById(this.props.formId)) return
+      this.clearFormData(fieldCode)
+      Object.keys(itemsSchema).forEach(key => {
+        if (this.isInChain(key, fieldCode, itemsSchema)) {
+          this.clearFormData(key)
+        }
+      })
+    }, 0)
+  }
+
   findCoreType = (stringId) => {
+    if (this.isArraySchema()) {
+      // elementId is "root_0_DEPARTMENT" or "root_0_LAB_OBJ_ID"
+      // Schema lookups use sectionName ("items"); strip "root_{index}_" to get the field name.
+      const withoutRoot = stringId.replace(/^root_/, '')
+      const coreType = withoutRoot.substring(withoutRoot.indexOf('_') + 1)
+      return [this.props.sectionName, coreType]
+    }
     let string = `root_`
     if (this.props.sectionName) {
       string = `root_${this.props.sectionName}_`
@@ -134,8 +220,11 @@ class DependentElements extends React.Component {
     const coreType = this.findCoreType(elementId)[1]
     let labelText
     let requiredFieldsArr
-    if (!this.props.sectionName) {
-      labelText = this.props.formConfig.properties[coreType].title
+    if (this.isArraySchema()) {
+      labelText = this.getArrayItemTitle(coreType)
+      requiredFieldsArr = this.props.formConfig.items.required
+    } else if (!this.props.sectionName) {
+      labelText = this.getSchemaProperty(this.props.formConfig, coreType)?.title
       requiredFieldsArr = this.props.formConfig.required
     } else {
       labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType].title
@@ -163,12 +252,12 @@ class DependentElements extends React.Component {
       })
     }
 
-    const newElement = <Dropdown
+    const dropdown = <Dropdown
       className='dependent-dropdown'
       id={elementId}
       key={elementId + '_depddl'}
-      labelText={labelText}
-      style={this.style}
+      labelText={this.props.hideInternalLabel ? undefined : labelText}
+      style={this.props.hideInternalLabel ? undefined : this.style}
       defaultValue='default'
       name='initialDropdown'
       onChange={() => this.onChange(elementId, true)}
@@ -176,6 +265,18 @@ class DependentElements extends React.Component {
       required={requiredAttr}
       disabled={isDisabled}
     />
+    const newElement = this.props.hideInternalLabel ? (
+      <div key={elementId + '_wrap'} style={this.style}>
+        <div className='admin-console-field-label-row'>
+          <label className='control-label'>
+            {labelText}
+            {requiredAttr && <span className='required'>{'*'}</span>}
+          </label>
+          {this.props.helpCode && <FieldHelpButton labelCode={this.props.helpCode} />}
+        </div>
+        {dropdown}
+      </div>
+    ) : dropdown
     this.setState({ initialDropdown: newElement })
     if (triggerAutoOnChange) {
       this.onChange(elementId, true)
@@ -183,23 +284,58 @@ class DependentElements extends React.Component {
   }
 
   generateExisting = async () => {
-    const { formSchema, sectionName, formData } = this.props;
+    const { formSchema, sectionName, formData, elementId } = this.props;
     let formObjectsArray = [];
+
+    if (this.isArraySchema()) {
+      const arrayIndex = getArrayIndexFromElementId(elementId)
+      const itemsSchema = formSchema['items'] || {}
+      const rowData = Array.isArray(formData) ? (formData[parseInt(arrayIndex)] || {}) : {}
+      const fieldCode = this.props.fieldCode
+
+      Object.keys(itemsSchema).forEach(key => {
+        if (key === fieldCode) {
+          // Root of this chain: fetch its codelist (with any existing selected value)
+          this.fetchInitialCodelist(rowData[key])
+        } else if (itemsSchema[key]?.['ui:widget'] === 'hidden' && this.isInChain(key, fieldCode, itemsSchema)) {
+          // Only DOM-injected chain dropdowns belong here. A field can declare
+          // dependentOnField for its own unrelated reasons (e.g. DependentValueField
+          // deriving its value from a separate codelist) without being part of
+          // this hidden-dropdown chain.
+          formObjectsArray.push({
+            ...itemsSchema[key],
+            value: rowData[key],
+            parentVal: rowData[itemsSchema[key]['dependentOnField']],
+            coreType: key
+          })
+        }
+      })
+
+      const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order)
+      for (const el of sortedArr) {
+        // If parent has no value, the chain stops here — don't fetch further dependents
+        if (el.parentVal === undefined || el.parentVal === null || el.parentVal === '') break
+        await this.generateDropdownInOrder(el.codelistName, arrayIndex, el.value, el.parentVal, el.coreType)
+        this.setFormData(arrayIndex, el.coreType, el.value)
+      }
+      return
+    }
 
     if (sectionName) {
       Object.keys(formSchema[sectionName]).forEach(key => {
-        if (formSchema[sectionName][key]?.order) {
-          formObjectsArray.push({ ...formSchema[sectionName][key], value: formData[sectionName][key], parentVal: formData[sectionName][formSchema[sectionName][key]['dependentOnField']], coreType: key });
-        } else if (formSchema[sectionName][key]?.order === 0) {
+        if (formSchema[sectionName][key]?.order === 0) {
           this.fetchInitialCodelist(formData[sectionName][key])
+        } else if (formSchema[sectionName][key]?.['ui:widget'] === 'hidden' && formSchema[sectionName][key]?.order) {
+          formObjectsArray.push({ ...formSchema[sectionName][key], value: formData[sectionName][key], parentVal: formData[sectionName][formSchema[sectionName][key]['dependentOnField']], coreType: key });
         }
       });
     } else {
+      const fieldCode = this.props.fieldCode
       Object.keys(formSchema).forEach(key => {
-        if (formSchema[key]?.order) {
-          formObjectsArray.push({ ...formSchema[key], value: formData[key], parentVal: formData[formSchema[key]['dependentOnField']], coreType: key });
-        } else if (formSchema[key]?.order === 0) {
+        if (key === fieldCode) {
           this.fetchInitialCodelist(formData[key])
+        } else if (formSchema[key]?.['ui:widget'] === 'hidden' && this.isInChain(key, fieldCode, formSchema)) {
+          formObjectsArray.push({ ...formSchema[key], value: formData[key], parentVal: formData[formSchema[key]['dependentOnField']], coreType: key });
         }
       });
     }
@@ -207,6 +343,7 @@ class DependentElements extends React.Component {
     const sortedArr = formObjectsArray.sort((a, b) => a.order - b.order);
 
     for (const el of sortedArr) {
+      if (el.parentVal === undefined || el.parentVal === null || el.parentVal === '') break
       await this.generateDropdownInOrder(el.codelistName, sectionName, el.value, el.parentVal, el.coreType);
       this.setFormData(sectionName, el.coreType, el.value);
     }
@@ -250,7 +387,15 @@ class DependentElements extends React.Component {
   setFormData = (groupPath, coreType, selectedVal) => {
     if (this.props.formInstance) {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
-      if (groupPath) {
+      if (this.isArraySchema()) {
+        const idx = parseInt(groupPath)
+        if (!Array.isArray(newTableData)) {
+          newTableData = this.props.formInstance.state.formTableData
+        }
+        const baseArray = Array.isArray(newTableData) ? newTableData.map(item => ({ ...item })) : []
+        baseArray[idx] = { ...(baseArray[idx] || {}), [coreType]: selectedVal }
+        newTableData = baseArray
+      } else if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
           newTableData[groupPath][coreType] = selectedVal
         } else {
@@ -273,7 +418,17 @@ class DependentElements extends React.Component {
   clearFormData = (fieldName, groupPath) => {
     if (this.props.formInstance) {
       let newTableData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
-      if (groupPath) {
+      if (this.isArraySchema()) {
+        const idx = parseInt(getArrayIndexFromElementId(this.props.elementId))
+        if (!Array.isArray(newTableData)) {
+          newTableData = this.props.formInstance.state.formTableData
+        }
+        if (Array.isArray(newTableData) && newTableData[idx]) {
+          const baseArray = newTableData.map(item => ({ ...item }))
+          baseArray[idx] = { ...baseArray[idx], [fieldName]: undefined }
+          newTableData = baseArray
+        }
+      } else if (groupPath) {
         if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
           newTableData[groupPath][fieldName] = undefined
         } else {
@@ -295,8 +450,14 @@ class DependentElements extends React.Component {
 
   removeElements = (parentNode, ddls, index) => {
     parentNode.removeChild(ddls[index])
-    parentNode.removeChild(parentNode.childNodes[0])
-    parentNode.parentNode.removeChild(parentNode)
+    if (parentNode.childNodes.length > 0) {
+      parentNode.removeChild(parentNode.childNodes[0])
+    }
+    const wrapper = parentNode.parentNode
+    wrapper.removeChild(parentNode)
+    if (wrapper.classList?.contains('dependent-dropdown-wrapper')) {
+      wrapper.parentNode?.removeChild(wrapper)
+    }
   }
 
   onChange = (elementId, isInitial) => {
@@ -305,7 +466,7 @@ class DependentElements extends React.Component {
     const elementProperties = this.findCoreType(elementId)
     let groupPath
     if (this.props.sectionName) {
-      groupPath = elementProperties[0]
+      groupPath = elementProperties[0]  // "items" for array schemas
     }
     const coreType = elementProperties[1]
     let elementOrder = formSchema[coreType]?.order
@@ -319,14 +480,14 @@ class DependentElements extends React.Component {
         if (key === groupPath) {
           const sectionFormSchema = formSchema[groupPath]
           Object.keys(sectionFormSchema).forEach(nestedKey => {
-            if (sectionFormSchema[nestedKey]?.dependentOnField && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
+            if (sectionFormSchema[nestedKey]?.['ui:widget'] === 'hidden' && sectionFormSchema[nestedKey]?.dependentOnField === coreType && sectionFormSchema[nestedKey]?.order === elementOrder + 1) {
               nextElementObj = sectionFormSchema[nestedKey]
               newElement = nestedKey
             }
           })
         }
       } else {
-        if (formSchema[key]?.dependentOnField && formSchema[key]?.order === elementOrder + 1) {
+        if (formSchema[key]?.['ui:widget'] === 'hidden' && formSchema[key]?.dependentOnField === coreType && formSchema[key]?.order === elementOrder + 1) {
           nextElementObj = formSchema[key]
           newElement = key
         }
@@ -334,12 +495,27 @@ class DependentElements extends React.Component {
     })
     const codelistName = nextElementObj?.codelistName || ''
 
+    // For array schemas the element ID uses the numeric array index, not "items"
+    const generateGroupPath = this.isArraySchema()
+      ? getArrayIndexFromElementId(elementId)
+      : groupPath
+
     try {
       const form = document.getElementById(this.props.formId)
       const ddls = Array.from(document.getElementsByClassName('dependent-dropdown'));
       const index = ddls.findIndex(el => el.id === elementId);
       if (index > -1) {
         ddls.slice(index + 1).forEach((el, i) => {
+          if (this.isArraySchema()) {
+            if (getArrayIndexFromElementId(el.id) !== getArrayIndexFromElementId(elementId)) {
+              return
+            }
+            // Skip elements that belong to a different dependency chain
+            const elCoreType = this.findCoreType(el.id)[1]
+            if (!this.isInChain(elCoreType, this.props.fieldCode, this.props.formSchema?.items || {})) {
+              return
+            }
+          }
           if (form?.contains(el)) {
             const parentNode = el.parentNode;
             el.value = '';
@@ -369,20 +545,35 @@ class DependentElements extends React.Component {
       }
 
       if (this.props.formInstance) {
-        let newTableData = Object.assign({}, this.props.formInstance.state.formTableData)
-        if (groupPath) {
-          if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
-            newTableData[groupPath][coreType] = selectedVal
-          } else {
-            newTableData[groupPath] = {}
-            newTableData[groupPath][coreType] = selectedVal
+        let newTableData
+        if (this.isArraySchema()) {
+          const idx = parseInt(getArrayIndexFromElementId(elementId))
+          // clearFormData updates ComponentManager synchronously; read from it so we
+          // see the cleared dependent fields instead of the stale pre-batch React state.
+          let currentData = ComponentManager.getStateForComponent(this.props.formId, 'formTableData')
+          if (!Array.isArray(currentData)) {
+            currentData = this.props.formInstance.state.formTableData
           }
+          const baseArray = Array.isArray(currentData) ? currentData.map(item => ({ ...item })) : []
+          baseArray[idx] = { ...(baseArray[idx] || {}), [coreType]: selectedVal }
+          newTableData = baseArray
+          ComponentManager.setStateForComponent(this.props.formId, 'formTableData', newTableData)
         } else {
-          if (newTableData && newTableData.constructor === Object) {
-            newTableData[coreType] = selectedVal
+          newTableData = Object.assign({}, this.props.formInstance.state.formTableData)
+          if (groupPath) {
+            if (newTableData[groupPath] && newTableData[groupPath].constructor === Object) {
+              newTableData[groupPath][coreType] = selectedVal
+            } else {
+              newTableData[groupPath] = {}
+              newTableData[groupPath][coreType] = selectedVal
+            }
           } else {
-            newTableData = {}
-            newTableData[coreType] = selectedVal
+            if (newTableData && newTableData.constructor === Object) {
+              newTableData[coreType] = selectedVal
+            } else {
+              newTableData = {}
+              newTableData[coreType] = selectedVal
+            }
           }
         }
         this.props.formInstance.setState({ formTableData: newTableData })
@@ -410,7 +601,7 @@ class DependentElements extends React.Component {
             if (isValidObject(finalResponse.data, 1) && isValidArray(finalResponse.data?.items, 1)) {
               finalResponse = finalResponse.data
             }
-            this.generateDropdown(finalResponse, newElement, groupPath)
+            this.generateDropdown(finalResponse, newElement, generateGroupPath)
           }
         }).catch((error) => {
           console.error(error)
@@ -427,6 +618,7 @@ class DependentElements extends React.Component {
       prefix = 'root_' + groupPath
     }
     const elementId = prefix + '_' + newElement
+    const coreType = newElement || this.findCoreType(elementId)[1]
     // Default blank dropdown option
     let options = [{
       id: 'default',
@@ -455,16 +647,29 @@ class DependentElements extends React.Component {
           selected: selected
         })
       }
+
+      // Publish the fetched rows keyed by field name, so a DependentValueField
+      // watching this field (via dependentOnField) can derive its value from
+      // the row already fetched here, with no extra request.
+      const existingDependentFieldData = ComponentManager.getStateForComponent(this.props.formId, 'dependentFieldData') || {}
+      const rowsByCode = {}
+      dbDataArray.items.forEach(item => { rowsByCode[item['CODE_VALUE']] = item })
+      ComponentManager.setStateForComponent(this.props.formId, 'dependentFieldData', {
+        ...existingDependentFieldData,
+        [coreType]: rowsByCode
+      })
     }
 
     // Generate the dropdown selector, labels and icons
     const ddlList = this.state.dynamicDropdowns.slice()
-    const coreType = newElement || this.findCoreType(elementId)[1]
 
     let labelText
     let requiredFieldsArr
-    if (!this.props.sectionName) {
-      labelText = this.props.formConfig.properties[coreType].title
+    if (this.isArraySchema()) {
+      labelText = this.getArrayItemTitle(coreType)
+      requiredFieldsArr = this.props.formConfig.items.required
+    } else if (!this.props.sectionName) {
+      labelText = this.getSchemaProperty(this.props.formConfig, coreType)?.title
       requiredFieldsArr = this.props.formConfig.required
     } else {
       labelText = this.props.formConfig.properties[this.props.sectionName].properties[coreType]?.title
@@ -475,19 +680,43 @@ class DependentElements extends React.Component {
       requiredAttr = true
     }
 
-    ddlList.push(
-      <Dropdown
-        className='dependent-dropdown'
-        id={elementId}
-        style={this.additionalStyle}
-        labelText={labelText}
-        key={elementId + '_depddl'}
-        name={elementId}
-        onChange={() => this.onChange(elementId)}
-        options={options}
-        required={requiredAttr}
-      />
-    )
+    const chainDropdown = <Dropdown
+      className='dependent-dropdown'
+      id={elementId}
+      style={this.props.hideInternalLabel ? undefined : this.additionalStyle}
+      labelText={this.props.hideInternalLabel ? undefined : labelText}
+      key={elementId + '_depddl'}
+      name={elementId}
+      onChange={() => this.onChange(elementId)}
+      options={options}
+      required={requiredAttr}
+    />
+
+    let chainElement
+    if (this.props.hideInternalLabel) {
+      const chainUiSchema = this.isArraySchema()
+        ? this.props.formSchema?.['items']?.[coreType]
+        : this.props.sectionName
+          ? this.props.formSchema?.[this.props.sectionName]?.[coreType]
+          : this.props.formSchema?.[coreType]
+      const chainHelpCode = chainUiSchema?.['ui:helpCode'] || null
+      chainElement = (
+        <div key={elementId + '_wrap'} className='dependent-dropdown-wrapper' style={this.additionalStyle}>
+          <div className='admin-console-field-label-row'>
+            <label className='control-label'>
+              {labelText}
+              {requiredAttr && <span className='required'>{'*'}</span>}
+            </label>
+            {chainHelpCode && <FieldHelpButton labelCode={chainHelpCode} />}
+          </div>
+          {chainDropdown}
+        </div>
+      )
+    } else {
+      chainElement = chainDropdown
+    }
+
+    ddlList.push(chainElement)
     this.setState({ dynamicDropdowns: ddlList })
   }
 

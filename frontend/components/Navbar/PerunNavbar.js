@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Icon } from "../../elements"
-import { downloadFile } from '../../functions/utils';
+import { downloadFile, getServerOrigin } from '../../functions/utils';
 import { alertUserResponse } from '../../elements'
 import axios from 'axios';
 import { createHashHistory } from 'history';
@@ -67,10 +67,10 @@ const PerunNavbar = (props, context) => {
                 {/* navbar start */}
                 <div className='nav-title-start'>
                     <Link to='/main' className='nav-icon' title='Home'>
-                        {<Icon name="IconHomeFilled" />}
+                        {<Icon name="IconHome" />}
                     </Link>
                     <div className={`nav-icon-with-title ${toggleBurger && 'active'}`} title={context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })} onClick={() => showBurgerMenu()}>
-                        {<Icon name="IconCategoryFilled" />}
+                        {<Icon name="IconCategory" />}
                         <p>{context.intl.formatMessage({ id: 'perun.navbar.menu', defaultMessage: 'perun.navbar.menu' })}</p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ const PerunNavbar = (props, context) => {
                     {/* navbar end */}
                     <div onClick={() => setToggleNavOpt(true)} className={`nav-title-end ${toggleNavOpt && 'active'}`}>
                         <div className='nav-icon-with-title'>
-                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUserFilled" />} <p>{props.userInfo.username}</p> </div>
+                            {img ? <img className="my-profile-icon-avatar" src={img} alt="User Avatar" /> : <Icon name="IconUser" />} <p>{props.userInfo.username}</p> </div>
                         <div className='perun-navbar-arrow'>{<Icon name="IconChevronDown" />}</div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@ const PerunNavbar = (props, context) => {
                         !el['cardHidden'] && (
                             <Link key={el.id} className='nav-burger-option' to={`/main/${el.id}`} onClick={() => setToggleBurger(false)}>
                                 <div className='nav-burger-img'>
-                                    <img src={`${window.location.origin}${el.imgPath}`} />
+                                    <img src={`${getServerOrigin()}${el.imgPath}`} />
                                 </div>
                                 <p>{el.title}</p>
                             </Link>

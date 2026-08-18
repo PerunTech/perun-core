@@ -9,6 +9,7 @@ import { store } from '../../model';
 import { pluginManager } from '../../routes/PluginManager';
 import { alertUserResponse } from '../../elements';
 import { svConfig } from '../../config';
+import { getServerOrigin } from '../../functions/utils';
 
 let arrayOfBundles
 class ModuleMenu extends React.Component {
@@ -16,7 +17,7 @@ class ModuleMenu extends React.Component {
     super(props)
     this.state = { cards: {}, loading: false, hasCardForDirectAccess: false }// is Object of pluginName: pluginCard properties.
     // backend location
-    this.server = String(svConfig.restSvcBaseUrl).split('/').slice(0, 3).join('/');
+    this.server = getServerOrigin();
 
     // Internal map of the registered plugins. Create reference at beginning of call. 
     // Mutable, pluginManager is responsible. Do not put into state.
@@ -265,7 +266,7 @@ class ModuleMenu extends React.Component {
       >
         <div className='box'>
           <div className='cardImgTop'>
-            <img src={window.location.origin + plugin.imgPath} />
+            <img src={this.server + plugin.imgPath} />
           </div>
           <div title={plugin.text} className='cardBody' >
             <h5 className='card-title'>{plugin.title}</h5>
