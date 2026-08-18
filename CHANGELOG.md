@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v4.5.6] - 2026-08-18
+
+### New Features
+- **Admin Console help system**: page/form/field-level help with lazy-fetched labels, filtered by active locale; `HelpFieldTemplate` for per-field help in `GenericForm`; rendered above dependency dropdowns; added to LabelEditor, CodeListEditor, User Management, and ConfigTables forms; suppressed on read-only conf-log preview forms
+- **Dependent dropdowns**: array-schema support in `DependentElements` with isolated dropdown chains per array row and `allOf`-conditional field cleanup; `DependentValueField` gained dedicated-endpoint lookups and was wired into `GenericForm`
+- **Exports**: multi-table and table-records export added to ConfigTables, with batched WsCore requests for performance; JSON export option added to the Perun Menu download modal
+- **GenericGrid**: print feature driven by menu config
+- **JsonEditor**: segmented theme toggle; improved save/reset reliability
+- **Tables & Fields**: "associate user with table" preview; loading indicator
+
+### Bug Fixes
+- Fixed crash in `allOf` conditional field title lookup and dependency-dropdown chain isolation in flat schemas
+- Fixed array-row cleanup scoping and form-data sync via `ComponentManager` in `onChange`
+- Blob download helpers now guard against null/undefined input
+- Fixed `ModuleMenu` image URLs wrongly including `/services` when `window.server` is a relative path; asset URLs now use the configured server origin instead of `window.location.origin`
+- Fixed PasswordForm modal rendering; matched `DependentValueField` checkbox markup to rjsf's default `CheckboxWidget`
+
+### Build & Tooling
+- Updated `react-router-dom` to 5.3.4 to remove the deprecated `mini-create-react-context` dependency
+- Moved `getServerOrigin` from `elements/util` into the general `functions/utils` module; exported from `elements`
+- Multiple `npm audit` fixes
+- Maven build now runs from the repo root
+
+---
+
 ## [v4.5.5] - 2026-06-23
 
 ### New Features
