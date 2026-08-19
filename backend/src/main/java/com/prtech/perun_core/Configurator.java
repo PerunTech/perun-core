@@ -1,6 +1,7 @@
 package com.prtech.perun_core;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ import com.prtech.svarog_common.DbSearchExpression;
 import com.prtech.svarog_common.DbSearchCriterion.DbCompareOperand;
 import com.prtech.svarog_interfaces.ISvConfigurationMulti;
 import com.prtech.svarog_interfaces.ISvCore;
+import com.prtech.svarog_interfaces.ISvConfiguration.UpdateType;
 
 public class Configurator implements ISvConfigurationMulti {
 
@@ -93,13 +95,15 @@ public class Configurator implements ISvConfigurationMulti {
 	@Override
 	public int getVersion(int currentVersion) {
 		// TODO Auto-generated method stub
-		return 2;
+		return 1;
 	}
 
 	@Override
 	public List<UpdateType> getUpdateTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		List<UpdateType> types = new ArrayList<UpdateType>();
+		types.add(UpdateType.ACL);
+		types.add(UpdateType.FINAL);
+		return types;
 	}
 
 	/**
