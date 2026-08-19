@@ -73,6 +73,7 @@ public class Configurator implements ISvConfigurationMulti {
 					"EXECUTE", true, svw, svr);
 			createAclObject("PERUN_CORE_EXEC.LOGOFF_USER", "PERUN_CORE_EXEC.LOGOFF_USER", svCONST.OBJECT_TYPE_TABLE,
 					"READ", true, svw, svr);
+			svw.dbCommit();
 		}
 		return null;
 	}
@@ -92,7 +93,7 @@ public class Configurator implements ISvConfigurationMulti {
 	@Override
 	public int getVersion(int currentVersion) {
 		// TODO Auto-generated method stub
-		return 1;
+		return 2;
 	}
 
 	@Override
