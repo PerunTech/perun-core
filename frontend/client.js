@@ -13,8 +13,8 @@ import { Link } from 'react-router-dom';
 import { generatePath } from 'react-router'
 import { createHashHistory } from 'history';
 // i18n
-import { addLocaleData } from 'react-intl';
 import { IntlProvider, updateIntl } from 'react-intl-redux';
+import IntlLegacyBridge from './elements/IntlLegacyBridge';
 // Google Analytics
 import ReactGA from 'react-ga';
 // Local modules
@@ -120,21 +120,6 @@ const whitelistRoot = [
 // Use the default locale defined in the assets project.
 // Falls back to English (en_US) if not set.
 const defaultLocale = cookies.getCookie('defaultLocale') || 'en_US'
-let localeData = ['en']
-if (utils.isJSON(cookies.getCookie('localeData'))) {
-  localeData = JSON.parse(cookies.getCookie('localeData'))
-}
-localeData.forEach((locale) => loadLocaleData(locale))
-
-// Dynamically import and register locale data for react-intl
-async function loadLocaleData(locale) {
-  try {
-    const localeData = await import(`react-intl/locale-data/${locale}`);
-    addLocaleData(localeData.default);
-  } catch (error) {
-    console.error(`Error loading locale data for "${locale}":`, error);
-  }
-}
 
 // Google Analytics
 function initializeGoogleAnalytics() {
@@ -172,7 +157,9 @@ initializeRecaptcha()
 const App = () => (
   <Provider store={redux.store}>
     <IntlProvider>
-      <Routes />
+      <IntlLegacyBridge>
+        <Routes />
+      </IntlLegacyBridge>
     </IntlProvider>
   </Provider>
 )
