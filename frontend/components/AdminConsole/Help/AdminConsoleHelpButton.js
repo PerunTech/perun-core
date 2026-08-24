@@ -13,14 +13,15 @@ const AdminConsoleHelpButton = ({ title, formLevel, onToggle, active }, context)
   const [show, setShow] = useState(false)
   const [apiText, setApiText] = useState('')
   const svSession = useSelector(state => state.security.svSession)
+  const locale = useSelector(state => state.intl.locale)
 
   const labelCode = sectionId ? `perun.admin_console.${sectionId}.${formLevel ? 'form.' : ''}help` : null
 
   useEffect(() => {
     if (labelCode && svSession) {
-      fetchLabelText(labelCode, svSession).then(setApiText)
+      fetchLabelText(labelCode, svSession, locale).then(setApiText)
     }
-  }, [labelCode, svSession])
+  }, [labelCode, svSession, locale])
 
   const shortText = labelCode ? context.intl.formatMessage({ id: labelCode, defaultMessage: '' }) : ''
   const helpText = apiText || shortText
