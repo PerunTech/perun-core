@@ -34,6 +34,7 @@ const AdminConsoleHelpButton = ({ title, formLevel, onToggle, active }, context)
   return (
     <>
       <button
+        tabIndex={-1}
         className={`admin-console-help-btn${isActive ? ' admin-console-help-btn--active' : ''}`}
         onClick={handleClick}
       >
