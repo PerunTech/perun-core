@@ -21,6 +21,7 @@ import LabelEditor from './LabelEditorComp/LabelEditor'
 import WorkFlowAutomaton from './Workflow/WorkFlowAutomaton'
 import SvarogTables from './SvarogTables/SvarogTables'
 import ConfigTables from './SvarogTables/ConfigTables'
+import UserGuidesAdmin from './Help/UserGuidesAdmin'
 
 const AdminConsole = (_props, context) => {
     const [dynamicComponent, setDynamicComponent] = useState('UserManagement')
@@ -74,6 +75,7 @@ const AdminConsole = (_props, context) => {
                     {dynamicComponent === 'WorkFlowAutomaton' && <WorkFlowAutomaton />}
                     {dynamicComponent === 'SvarogTables' && <SvarogTables />}
                     {dynamicComponent === 'ConfigTables' && <ConfigTables />}
+                    {dynamicComponent === 'UserGuidesAdmin' && <UserGuidesAdmin />}
                 </div>
             </HelpContext.Provider>
         </div>
