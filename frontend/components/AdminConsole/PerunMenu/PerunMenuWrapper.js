@@ -122,6 +122,13 @@ const PerunMenuWrapper = (props, context) => {
     const formData = ComponentManager.getStateForComponent(formid, 'formTableData');
     const menuCode = formData['MENU_CODE']
     const toItems = (data) => (Array.isArray(data) ? data : data ? [data] : [])
+    const applyDefaultSchema = (item) => {
+      const dbo = item?.['com.prtech.svarog_common.DbDataObject']
+      if (dbo?.values) {
+        dbo.values = dbo.values.map(entry => ('SCHEMA' in entry ? { SCHEMA: '{DEFAULT_SCHEMA}' } : entry))
+      }
+      return item
+    }
     setLoading(true)
     axios.get(`${window.server}/ReactElements/getTableWithFilter/${svSession}/SVAROG_TABLES/TABLE_NAME/PERUN_MENU/0`).then(tableLookupRes => {
       const tableRowId = tableLookupRes?.data?.[0]?.['SVAROG_TABLES.OBJECT_ID']
@@ -132,7 +139,7 @@ const PerunMenuWrapper = (props, context) => {
     }).then(([recordRes, tableRes]) => {
       setLoading(false)
       if (!recordRes?.data) return
-      const items = [...toItems(tableRes?.data), ...toItems(recordRes.data)]
+      const items = [...toItems(tableRes?.data).map(applyDefaultSchema), ...toItems(recordRes.data)]
       const exportData = {
         'com.prtech.svarog_common.DbDataArray': { indexField: null, filter: null, items, idxItems: [] }
       }
