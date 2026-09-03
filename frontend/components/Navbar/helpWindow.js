@@ -80,7 +80,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 20px;
+  padding: clamp(8px, 1.4vw, 12px) clamp(12px, 2.6vw, 22px);
   background: var(--md-sunk);
   border-bottom: 1px solid var(--md-border);
 }
@@ -103,17 +103,26 @@ html, body {
   cursor: pointer;
 }
 .help-window-bar button:hover { background: var(--md-sunk); }
+/* The drawer is a panel of fixed width, so the 13.5px base .md-preview sets is right there. A
+   standalone window is a reading surface the reader sizes themselves, so the type and the gutters
+   scale with it here. The measure stays capped in ch, which means a wider window buys wider
+   margins rather than a longer, harder to track line. Everything below the base is already
+   expressed in em, so headings, code and tables follow on their own. */
 .help-window-doc {
+  font-size: clamp(13.5px, 0.4vw + 12px, 17px);
   max-width: 72ch;
   margin: 0 auto;
-  padding: 28px 24px 64px;
+  padding: clamp(18px, 3vw, 32px) clamp(14px, 2.6vw, 24px) 64px;
 }
 .help-window-doc img { max-width: 100%; height: auto; }
-.help-window-doc pre, .help-window-doc table { max-width: 100%; overflow-x: auto; }
+/* Tables are handled by the shared .md-preview rule, which gives them a scroll container. */
+.help-window-doc pre { max-width: 100%; overflow-x: auto; }
 
 @media print {
   .help-window-bar { display: none; }
-  .help-window-doc { max-width: none; padding: 0; }
+  /* Pinned rather than left to the clamp: vw resolves against the page box when printing, so the
+     type would size itself off the paper rather than off anything the reader chose. */
+  .help-window-doc { max-width: none; padding: 0; font-size: 13.5px; }
 
   /* A figure taller than the space left on the page is sliced across the break rather than moved
      down, which cuts a screenshot in half. The cap is what actually fixes that: an image that fits
