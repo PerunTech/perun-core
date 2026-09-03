@@ -13,11 +13,39 @@ import { renderMarkdown } from '../MarkdownEditor/renderMarkdown'
  * from the drawer fixes that, which is the trade for not booting the app twice.
  */
 
-// The app's own stylesheets are injected as <style> elements by style-loader rather than served as
-// files, so they are copied across as text. Nothing in them matches the popup's markup except the
-// md-preview rules, which is exactly what is wanted.
-const appStyles = () =>
+// Styles reach the application two ways and the popup needs both. webpack's style-loader injects
+// <style> blocks, which are copied across as text; the deployment's assets project is linked from
+// index.html as files, which are relinked by href rather than read, because those files are served
+// from the backend origin and reading cssRules across origins throws.
+//
+// Nothing in either matches the popup's markup except the md-preview rules, which is the point.
+const inlineStyles = () =>
   [...document.querySelectorAll('style')].map(node => node.textContent).join('\n')
+
+/**
+ * Copies the application's styling into the popup.
+ *
+ * @returns {HTMLLinkElement[]} the relinked stylesheets, which load asynchronously and so have to
+ *   be waited on before an auto-print, or the guide prints before its own rules arrive.
+ */
+const copyAppStyles = (win) => {
+  const links = [...document.querySelectorAll('link[rel="stylesheet"]')].map(node => {
+    const link = win.document.createElement('link')
+    link.rel = 'stylesheet'
+    // The href property is already absolute, so it resolves from a document with no base URL.
+    link.href = node.href
+    win.document.head.appendChild(link)
+    return link
+  })
+
+  // Appended after the links so it wins the cascade on ties, which is what lets WINDOW_CSS
+  // override a global body rule the application carries.
+  const style = win.document.createElement('style')
+  style.textContent = `${inlineStyles()}\n${WINDOW_CSS}`
+  win.document.head.appendChild(style)
+
+  return links
+}
 
 // The --md-* tokens are declared on .md-editor and .help-panel, neither of which exists here, so
 // the preview rules would resolve to nothing without this. Appended after the app styles so it
@@ -32,10 +60,17 @@ const WINDOW_CSS = `
   --md-accent: #87adbd;
   --md-radius: 3px;
 }
+/* The deployment's shell pins the page so the application can manage its own scroll regions, and
+   that rule is copied in with everything else: body { height: 100vh; overflow: hidden } leaves the
+   guide clipped at the window edge with nothing to scroll. Overriding those two hands the document
+   back to normal flow. The same rule paints the app's grey ground with !important, which a plain
+   declaration cannot beat, so the guide's own ground has to answer in kind. */
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--md-bg);
+  height: auto;
+  overflow: visible;
+  background: var(--md-bg) !important;
   color: var(--md-text);
 }
 .help-window-bar {
@@ -127,16 +162,27 @@ export const openGuideWindow = (record, waitingText = '') => {
   return win
 }
 
-/** Resolves once every figure has settled, so an auto-print does not fire on a page of gaps. */
-const figuresSettled = (win) => {
-  const pending = [...win.document.images].filter(image => !image.complete)
+const loaded = (node) => new Promise(done => {
+  node.addEventListener('load', done, { once: true })
+  node.addEventListener('error', done, { once: true })
+})
+
+/**
+ * Resolves once the figures and the relinked stylesheets have settled, so an auto-print fires on a
+ * finished page rather than on one of gaps or one with no styling yet.
+ *
+ * The load event is waited on rather than link.sheet, which stays null for a stylesheet served
+ * cross-origin without CORS even though the rules do apply.
+ */
+const pageSettled = (win, links) => {
+  const pending = [
+    ...[...win.document.images].filter(image => !image.complete),
+    ...links,
+  ]
   if (!pending.length) return Promise.resolve()
 
   return Promise.race([
-    Promise.all(pending.map(image => new Promise(done => {
-      image.addEventListener('load', done, { once: true })
-      image.addEventListener('error', done, { once: true })
-    }))),
+    Promise.all(pending.map(loaded)),
     new Promise(done => win.setTimeout(done, 3000)),
   ])
 }
@@ -161,9 +207,7 @@ export const renderGuideWindow = (win, { title, body, resolveImage, labels = {},
   // cannot escape into the document.
   win.document.title = title
 
-  const style = win.document.createElement('style')
-  style.textContent = `${appStyles()}\n${WINDOW_CSS}`
-  win.document.head.appendChild(style)
+  const links = copyAppStyles(win)
 
   const bar = win.document.createElement('div')
   bar.className = 'help-window-bar'
@@ -192,7 +236,7 @@ export const renderGuideWindow = (win, { title, body, resolveImage, labels = {},
   win.document.body.appendChild(article)
   win.focus()
 
-  if (autoPrint) figuresSettled(win).then(() => { if (!win.closed) win.print() })
+  if (autoPrint) pageSettled(win, links).then(() => { if (!win.closed) win.print() })
   return true
 }
 
