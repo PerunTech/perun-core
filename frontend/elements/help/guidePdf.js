@@ -530,12 +530,5 @@ const loadPdfMake = () => {
 /** Renders one guide to a PDF blob, ready to download. */
 export const renderGuidePdf = async ({ title, body, figures }) => {
   const pdfMake = await loadPdfMake()
-  const document = pdfMake.createPdf(guideDocDefinition({ title, body, figures }))
-  return new Promise((resolve, reject) => {
-    try {
-      document.getBlob(resolve)
-    } catch (err) {
-      reject(err)
-    }
-  })
+  return pdfMake.createPdf(guideDocDefinition({ title, body, figures })).getBlob()
 }
