@@ -44,6 +44,15 @@ const UPLOAD_UI_SCHEMA = {
   order: { 'ui:classNames': 'user-guides-field' },
 }
 
+/** The metadata a stored manual already carries, for a replacement that keeps all of it. */
+const metaOf = (record) => ({
+  route: record.notes?.route ?? '',
+  title: record.notes?.title ?? '',
+  order: record.notes?.order,
+  locale: record.locale,
+  slug: record.slug,
+})
+
 /** A file size a person reads rather than a byte count, for the chosen manual. */
 const fileSize = (bytes) => {
   if (!Number.isFinite(bytes)) return ''
@@ -58,11 +67,12 @@ const UserGuidesAdmin = (props, context) => {
   const initialState = {
     loading: true, saving: false, exporting: false,
     modules: [], docs: [], locales: [], editing: null, imageUrls: {},
-    uploading: false, uploadFile: null,
+    uploading: false, uploadFile: null, replacing: null,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{
     loading, saving, exporting, modules, docs, locales, editing, imageUrls, uploading, uploadFile,
+    replacing,
   }, setState] = useReducer(reducer, initialState)
 
   const cache = useRef(createBlobCache())
@@ -289,7 +299,7 @@ const UserGuidesAdmin = (props, context) => {
       })
       clearHelpIndexCache()
       await loadDocs(modules)
-      setState({ saving: false, uploading: false, uploadFile: null })
+      setState({ saving: false, uploading: false, uploadFile: null, replacing: null })
       alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
     } catch (err) {
       console.error(err)
@@ -315,10 +325,39 @@ const UserGuidesAdmin = (props, context) => {
       alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_pdf'), message: file.name })
       return
     }
+
+    // A replacement asks nothing further: the route, title, locale and slug are the ones the
+    // manual already answers on, and editing them here would move the document rather than
+    // replace it, leaving the original behind under the old name.
+    if (replacing) {
+      const record = replacing
+      setState({ replacing: null })
+      await uploadManual({ file, meta: metaOf(record) })
+      return
+    }
     setState({ uploadFile: file, uploading: true })
   }
 
-  const cancelUpload = () => setState({ uploading: false, uploadFile: null })
+  /**
+   * Swaps the file behind an uploaded manual.
+   *
+   * No confirmation, because a save writes a new version rather than overwriting one: the previous
+   * file is still stored if the new one turns out to be wrong. The plain upload path clears
+   * `replacing` for the opposite reason, that cancelling a file dialog fires no event at all,
+   * which would otherwise leave the next upload silently replacing this row.
+   */
+  const startReplace = (event, record) => {
+    event.stopPropagation()
+    setState({ replacing: record })
+    manualInputRef.current?.click()
+  }
+
+  const startUpload = () => {
+    setState({ replacing: null })
+    manualInputRef.current?.click()
+  }
+
+  const cancelUpload = () => setState({ uploading: false, uploadFile: null, replacing: null })
 
   const uploadSchema = useMemo(
     () => getMetadataSchema(context, { locales, routes }),
@@ -345,7 +384,16 @@ const UserGuidesAdmin = (props, context) => {
   }), [routes, locales, uploadFile])
 
   const openDoc = async (record) => {
-    if (record.kind === PDF_KIND) return
+    // A manual is bytes nobody here authored, so there is nothing for the editor to open. Saying
+    // so beats the row appearing dead, and it points at the action that does work on it.
+    if (record.kind === PDF_KIND) {
+      alertUserV2({
+        type: 'info',
+        title: fmt('perun.admin_console.user_guides_pdf_not_editable'),
+        message: record.fileName,
+      })
+      return
+    }
     try {
       setState({ loading: true })
       const markdown = await fetchHelpText(svSession, record)
@@ -485,7 +533,7 @@ const UserGuidesAdmin = (props, context) => {
         <button
           type='button'
           className='md-btn user-guides-upload-btn'
-          onClick={() => manualInputRef.current?.click()}
+          onClick={startUpload}
           disabled={!modules.length}
         >
           <Icon name='IconUpload' size={16} stroke={1.7} />
@@ -603,6 +651,17 @@ const UserGuidesAdmin = (props, context) => {
                     onClick={event => exportDoc(event, doc, 'source')}
                   >
                     <Icon name='IconFileZip' size={17} stroke={1.6} />
+                  </button>
+                  <button
+                    type='button'
+                    className='user-guides-action'
+                    hidden={doc.kind !== PDF_KIND}
+                    disabled={saving}
+                    title={fmt('perun.admin_console.user_guides_replace')}
+                    aria-label={fmt('perun.admin_console.user_guides_replace')}
+                    onClick={event => startReplace(event, doc)}
+                  >
+                    <Icon name='IconUpload' size={17} stroke={1.6} />
                   </button>
                   <button
                     type='button'
