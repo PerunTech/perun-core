@@ -100,19 +100,6 @@ export const renderMarkdown = (markdown, resolveImage) => {
   return fragment;
 };
 
-// Matches the Markdown image form only. Raw <img> tags in a document are rendered correctly but
-// are not reported here, which is fine for the prefetch this feeds.
-const IMAGE_REF = /!\[[^\]]*\]\(\s*([^)\s]+)/g;
-
-/**
- * Names of every image a document references, in document order, for prefetching.
- * Deliberately a scan rather than a parse: this runs alongside typing, where a full
- * parse-and-sanitize pass would repeat the render cost for no extra information.
- */
-export const collectImageNames = (markdown) => {
-  const names = [];
-  for (const match of String(markdown ?? '').matchAll(IMAGE_REF)) {
-    if (!names.includes(match[1])) names.push(match[1]);
-  }
-  return names;
-};
+// One definition, shared with the exporters: the preview, the source archive and the PDF all have
+// to agree on what counts as a figure reference.
+export { figureNames as collectImageNames } from '../../elements/help/figureRefs';

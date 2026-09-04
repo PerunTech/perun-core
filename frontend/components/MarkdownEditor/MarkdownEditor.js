@@ -158,11 +158,13 @@ const MarkdownEditor = ({
   );
 
   // Exports the buffer as it stands, resolver included: the parent stores figures but only this
-  // component knows about the ones dropped in this session and not yet uploaded, so a printed draft
-  // shows exactly what the preview shows.
+  // component knows about the ones dropped in this session and not yet uploaded, so an exported
+  // draft carries exactly what the preview shows.
   const exportNow = useCallback(
-    (action) => onExport?.(
-      action,
+    // Named around the component's own `form`, which holds the metadata and is what the two lines
+    // below read.
+    (exportForm) => onExport?.(
+      exportForm,
       serializeFrontMatter({ route: form.route, title: form.title, order: form.order }, body),
       resolvePreviewImage
     ),
@@ -435,8 +437,8 @@ const MarkdownEditor = ({
         </div>
 
         <div className='md-tool-group md-tool-group--end'>
-          {onExport && tool('IconPrinter', 'perun.help_panel.print', () => exportNow('print'))}
-          {onExport && tool('IconDownload', 'perun.help_panel.download', () => exportNow('download'))}
+          {onExport && tool('IconFileTypePdf', 'perun.help_panel.download_pdf', () => exportNow('pdf'))}
+          {onExport && tool('IconFileZip', 'perun.help_panel.download_source', () => exportNow('source'))}
           {tool(showPreview ? 'IconEyeOff' : 'IconEye', 'perun.help_editor.toggle_preview', () => setShowPreview(v => !v))}
           <span className='md-stats'>{stats}</span>
           {onCancel && (

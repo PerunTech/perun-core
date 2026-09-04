@@ -31,6 +31,12 @@ export default (env, params) => {
         output: {
             path: path.resolve(__dirname, 'www'),
             filename: 'perun-core.js',
+            // Chunks loaded on demand are emitted beside the bundle and fetched from wherever it
+            // was served from, so a dependent project has to carry them across with it. Naming them
+            // rather than numbering them is what keeps that a fixed list: a chunk given a name in
+            // its import() keeps that file name from build to build, where an id can shift as soon
+            // as the module graph does.
+            chunkFilename: '[name].perun-core.js',
             library: { name: 'perun-core', type: 'umd' },
             globalObject: 'this'
         },

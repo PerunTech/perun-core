@@ -22,20 +22,14 @@ import { renderMarkdown } from '../MarkdownEditor/renderMarkdown'
 const inlineStyles = () =>
   [...document.querySelectorAll('style')].map(node => node.textContent).join('\n')
 
-/**
- * Copies the application's styling into the popup.
- *
- * @returns {HTMLLinkElement[]} the relinked stylesheets, which load asynchronously and so have to
- *   be waited on before an auto-print, or the guide prints before its own rules arrive.
- */
+/** Copies the application's styling into the popup. */
 const copyAppStyles = (win) => {
-  const links = [...document.querySelectorAll('link[rel="stylesheet"]')].map(node => {
+  [...document.querySelectorAll('link[rel="stylesheet"]')].forEach(node => {
     const link = win.document.createElement('link')
     link.rel = 'stylesheet'
     // The href property is already absolute, so it resolves from a document with no base URL.
     link.href = node.href
     win.document.head.appendChild(link)
-    return link
   })
 
   // Appended after the links so it wins the cascade on ties, which is what lets WINDOW_CSS
@@ -43,8 +37,6 @@ const copyAppStyles = (win) => {
   const style = win.document.createElement('style')
   style.textContent = `${inlineStyles()}\n${WINDOW_CSS}`
   win.document.head.appendChild(style)
-
-  return links
 }
 
 // The --md-* tokens are declared on .md-editor and .help-panel, neither of which exists here, so
@@ -144,67 +136,29 @@ const windowName = (record) =>
   `perun_help_${record?.locale ?? ''}_${record?.slug ?? ''}`.replace(/[^\w]/g, '_')
 
 /**
- * Opens the window and nothing else.
- *
- * Kept separate from filling it because a popup is only allowed to open inside the click that asked
- * for it. Callers that must fetch the guide first open the window here, then render into it when
- * the body arrives; doing the fetch first would put window.open outside the gesture and get it
- * blocked.
+ * Opens the window, empty.
  *
  * @returns {Window|null} null when the browser blocked it
  */
-export const openGuideWindow = (record, waitingText = '') => {
+const openGuideWindow = (record) => {
   const win = window.open('', windowName(record), 'width=780,height=940,scrollbars=yes,resizable=yes')
   if (!win) return null
 
   win.document.open()
   win.document.write('<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>')
   win.document.close()
-
-  if (waitingText) {
-    const note = win.document.createElement('p')
-    note.textContent = waitingText
-    note.setAttribute('style', 'margin:28px;font:14px system-ui,sans-serif;color:#6b787e')
-    win.document.body.appendChild(note)
-  }
   win.focus()
   return win
 }
 
-const loaded = (node) => new Promise(done => {
-  node.addEventListener('load', done, { once: true })
-  node.addEventListener('error', done, { once: true })
-})
-
 /**
- * Resolves once the figures and the relinked stylesheets have settled, so an auto-print fires on a
- * finished page rather than on one of gaps or one with no styling yet.
- *
- * The load event is waited on rather than link.sheet, which stays null for a stylesheet served
- * cross-origin without CORS even though the rules do apply.
- */
-const pageSettled = (win, links) => {
-  const pending = [
-    ...[...win.document.images].filter(image => !image.complete),
-    ...links,
-  ]
-  if (!pending.length) return Promise.resolve()
-
-  return Promise.race([
-    Promise.all(pending.map(loaded)),
-    new Promise(done => win.setTimeout(done, 3000)),
-  ])
-}
-
-/**
- * @param {object}   record        the guide being read, for its title and window name
  * @param {string}   title         heading to show in the window's own bar
  * @param {string}   body          markdown, front matter already stripped
  * @param {Function} resolveImage  figure name to object URL
- * @param {object}   labels        { print }
+ * @param {object[]} actions       { label, onClick }, one button each, in the order given
  * @returns {boolean} false when the browser blocked the popup
  */
-export const renderGuideWindow = (win, { title, body, resolveImage, labels = {}, autoPrint = false, onDownload }) => {
+const renderGuideWindow = (win, { title, body, resolveImage, actions = [] }) => {
   if (!win || win.closed) return false
 
   // Reopening reuses the named window, so it is rewritten from scratch rather than appended to.
@@ -216,26 +170,21 @@ export const renderGuideWindow = (win, { title, body, resolveImage, labels = {},
   // cannot escape into the document.
   win.document.title = title
 
-  const links = copyAppStyles(win)
+  copyAppStyles(win)
 
   const bar = win.document.createElement('div')
   bar.className = 'help-window-bar'
   const label = win.document.createElement('h1')
   label.textContent = title
-  const print = win.document.createElement('button')
-  print.type = 'button'
-  print.textContent = labels.print ?? 'Print'
-  print.addEventListener('click', () => win.print())
   bar.appendChild(label)
 
-  if (onDownload) {
-    const download = win.document.createElement('button')
-    download.type = 'button'
-    download.textContent = labels.download ?? 'Download'
-    download.addEventListener('click', onDownload)
-    bar.appendChild(download)
-  }
-  bar.appendChild(print)
+  actions.forEach(({ label: text, onClick }) => {
+    const button = win.document.createElement('button')
+    button.type = 'button'
+    button.textContent = text
+    button.addEventListener('click', onClick)
+    bar.appendChild(button)
+  })
 
   const article = win.document.createElement('article')
   article.className = 'md-preview help-window-doc'
@@ -244,12 +193,15 @@ export const renderGuideWindow = (win, { title, body, resolveImage, labels = {},
   win.document.body.appendChild(bar)
   win.document.body.appendChild(article)
   win.focus()
-
-  if (autoPrint) pageSettled(win, links).then(() => { if (!win.closed) win.print() })
   return true
 }
 
-/** Open and fill in one step, for callers that already hold the body. */
+/**
+ * Opens one guide in its own window.
+ *
+ * The caller has to hold the body already: window.open is only permitted inside the click that
+ * asked for it, so there is nowhere in here to wait for a fetch.
+ */
 export const openHelpWindow = (record, options) => {
   const win = openGuideWindow(record)
   return win ? renderGuideWindow(win, options) : false

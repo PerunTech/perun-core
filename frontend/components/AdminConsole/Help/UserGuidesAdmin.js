@@ -14,8 +14,7 @@ import {
 import {
   clearHelpIndexCache, figureResolver, loadGuideFigures, ownerModuleForRoute
 } from '../../../elements/help/routeGuides'
-import { downloadText } from '../../../elements/help/helpExport'
-import { openGuideWindow, renderGuideWindow } from '../../Navbar/helpWindow'
+import { downloadGuideArchive, downloadGuidePdf } from '../../../elements/help/helpExport'
 import { parseFrontMatter } from '../../MarkdownEditor/frontMatter'
 import { collectImageNames } from '../../MarkdownEditor/renderMarkdown'
 
@@ -35,11 +34,11 @@ const UserGuidesAdmin = (props, context) => {
   const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
 
   const initialState = {
-    loading: true, saving: false,
+    loading: true, saving: false, exporting: false,
     modules: [], docs: [], locales: [], editing: null, imageUrls: {},
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
-  const [{ loading, saving, modules, docs, locales, editing, imageUrls }, setState] =
+  const [{ loading, saving, exporting, modules, docs, locales, editing, imageUrls }, setState] =
     useReducer(reducer, initialState)
 
   const cache = useRef(createBlobCache())
@@ -180,73 +179,58 @@ const UserGuidesAdmin = (props, context) => {
   }, [svSession, editingModule, anchorFor])
 
   /**
-   * Print or download one guide from the list.
+   * Exports one stored guide, as a PDF to read or as its source to edit.
    *
-   * Printing goes through the same standalone window the reader uses, so there is one print surface
-   * rather than a print stylesheet fighting the Admin Console's own layout. The window is opened
-   * before the fetch because a popup is only allowed inside the click that asked for it.
+   * The figures are read the way the reader reads them, so the PDF carries its screenshots rather
+   * than a column of gaps and the archive carries the files the Markdown names.
    */
-  const exportDoc = async (event, record, action) => {
+  const exportDoc = async (event, record, form) => {
     event.stopPropagation()
-    const win = action === 'print' ? openGuideWindow(record, fmt('perun.main.loading')) : null
-    if (action === 'print' && !win) {
-      alertUserV2({ type: 'warning', title: fmt('perun.help_panel.popup_blocked') })
-      return
-    }
+    setState({ exporting: true })
 
     try {
       const raw = await fetchHelpText(svSession, record)
-      if (action !== 'print') {
-        downloadText(record.fileName, raw)
-        return
-      }
-
-      // Figures are fetched for the print the same way the reader fetches them, so a printed guide
-      // carries its screenshots instead of a column of gaps.
       const { body } = parseFrontMatter(raw)
       const anchor = { anchorId: anchorFor(record.module), locale: record.locale, slug: record.slug }
       const images = await loadGuideFigures(svSession, anchor, collectImageNames(body), cache.current)
+      const resolveUrl = figureResolver(images)
 
-      renderGuideWindow(win, {
-        title: record.notes?.title || record.slug,
-        body,
-        resolveImage: figureResolver(images),
-        autoPrint: true,
-        labels: { print: fmt('perun.help_panel.print'), download: fmt('perun.help_panel.download') },
-        onDownload: () => downloadText(record.fileName, raw),
-      })
+      if (form === 'pdf') {
+        await downloadGuidePdf(record.fileName, { title: record.notes?.title || record.slug, body, resolveUrl })
+      } else {
+        await downloadGuideArchive(record.fileName, raw, resolveUrl)
+      }
     } catch (err) {
       console.error(err)
-      win?.close()
       alertUserResponse({ response: err })
+    } finally {
+      setState({ exporting: false })
     }
   }
 
-  // Exports what is on screen rather than what is stored, so an author can print a draft before
-  // committing it. The editor hands over the recombined document; nothing here re-reads the store.
-  const exportEditing = (action, document, resolveFigure) => {
+  /**
+   * Exports what is on screen rather than what is stored, so an author can take a draft away before
+   * committing it. The editor hands over the recombined document and its own resolver, which covers
+   * figures dropped in this session and not yet uploaded, so a draft exports as it previews.
+   */
+  const exportEditing = async (form, document, resolveFigure) => {
     const fileName = `${editing.locale}_${editing.slug || 'untitled'}.md`
-    if (action !== 'print') {
-      downloadText(fileName, document)
-      return
+    setState({ exporting: true })
+
+    try {
+      const resolveUrl = resolveFigure ?? resolveImage
+      if (form === 'pdf') {
+        const { meta, body } = parseFrontMatter(document)
+        await downloadGuidePdf(fileName, { title: meta.title || editing.slug, body, resolveUrl })
+      } else {
+        await downloadGuideArchive(fileName, document, resolveUrl)
+      }
+    } catch (err) {
+      console.error(err)
+      alertUserResponse({ response: err })
+    } finally {
+      setState({ exporting: false })
     }
-    const record = { locale: editing.locale, slug: editing.slug || 'untitled' }
-    const win = openGuideWindow(record, fmt('perun.main.loading'))
-    if (!win) {
-      alertUserV2({ type: 'warning', title: fmt('perun.help_panel.popup_blocked') })
-      return
-    }
-    const { meta, body } = parseFrontMatter(document)
-    renderGuideWindow(win, {
-      title: meta.title || editing.slug,
-      body,
-      // The editor's own resolver rather than this one: a figure dropped in this session has not
-      // been uploaded yet, and printing the draft has to show it exactly as the preview does.
-      resolveImage: resolveFigure ?? resolveImage,
-      autoPrint: true,
-      labels: { print: fmt('perun.help_panel.print'), download: fmt('perun.help_panel.download') },
-      onDownload: () => downloadText(fileName, document),
-    })
   }
 
   const openDoc = async (record) => {
@@ -373,6 +357,7 @@ const UserGuidesAdmin = (props, context) => {
           onExport={exportEditing}
           saving={saving}
         />
+        {exporting && <Loading />}
       </React.Fragment>
     )
   }
@@ -387,7 +372,7 @@ const UserGuidesAdmin = (props, context) => {
         </button>
       </div>
 
-      {(loading || saving) && <Loading />}
+      {(loading || saving || exporting) && <Loading />}
 
       {!loading && !saving && !docs.length && (
         <p className='user-guides-empty'>{fmt('perun.admin_console.user_guides_empty')}</p>
@@ -419,20 +404,22 @@ const UserGuidesAdmin = (props, context) => {
                   <button
                     type='button'
                     className='user-guides-action'
-                    title={fmt('perun.help_panel.print')}
-                    aria-label={fmt('perun.help_panel.print')}
-                    onClick={event => exportDoc(event, doc, 'print')}
+                    disabled={exporting}
+                    title={fmt('perun.help_panel.download_pdf')}
+                    aria-label={fmt('perun.help_panel.download_pdf')}
+                    onClick={event => exportDoc(event, doc, 'pdf')}
                   >
-                    <Icon name='IconPrinter' size={17} stroke={1.6} />
+                    <Icon name='IconFileTypePdf' size={17} stroke={1.6} />
                   </button>
                   <button
                     type='button'
                     className='user-guides-action'
-                    title={fmt('perun.help_panel.download')}
-                    aria-label={fmt('perun.help_panel.download')}
-                    onClick={event => exportDoc(event, doc, 'download')}
+                    disabled={exporting}
+                    title={fmt('perun.help_panel.download_source')}
+                    aria-label={fmt('perun.help_panel.download_source')}
+                    onClick={event => exportDoc(event, doc, 'source')}
                   >
-                    <Icon name='IconDownload' size={17} stroke={1.6} />
+                    <Icon name='IconFileZip' size={17} stroke={1.6} />
                   </button>
                   <button
                     type='button'

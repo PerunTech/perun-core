@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import { Icon, alertUserV2 } from '../../elements'
 import { createBlobCache, fetchHelpText } from '../../elements/help/helpFiles'
-import { downloadText } from '../../elements/help/helpExport'
+import { downloadGuideArchive, downloadGuidePdf } from '../../elements/help/helpExport'
 import {
   CORE_MODULE, figureResolver, getHelpIndexVersion, guideTitle, guidesForRoute, loadDocIndex,
   loadGuideFigures, loadHelpModules, moduleIdFromPath, subscribeHelpIndex
@@ -12,7 +12,8 @@ import {
 import { parseFrontMatter } from '../MarkdownEditor/frontMatter'
 import { collectImageNames } from '../MarkdownEditor/renderMarkdown'
 import MarkdownPreview from '../MarkdownEditor/MarkdownPreview'
-import { openGuideWindow, openHelpWindow, renderGuideWindow } from './helpWindow'
+import Loading from '../Loading/Loading'
+import { openHelpWindow } from './helpWindow'
 
 /**
  * Route-aware user guides.
@@ -60,6 +61,9 @@ const NavbarHelp = (props, context) => {
   const [zoom, setZoom] = useState(null)
   const [toc, setToc] = useState([])
   const [showToc, setShowToc] = useState(false)
+  // One guide at a time: a PDF of a long guide takes a moment to lay out, and a second click
+  // while the first is still working would only queue a duplicate download.
+  const [exporting, setExporting] = useState(false)
   // The drawer hangs below the navbar rather than over it, so the Help button stays reachable to
   // toggle it shut. The navbar's own height comes from the deployment's stylesheet, so it is
   // measured rather than assumed.
@@ -317,59 +321,64 @@ const NavbarHelp = (props, context) => {
     [fmt]
   )
 
-  const saveGuide = useCallback((record, text) => {
-    downloadText(record.fileName, text)
-  }, [])
+  /**
+   * Downloads one guide, as a PDF to read or as its source to edit.
+   *
+   * Both forms want the same two things, the document and the figures it references, so the form
+   * only decides which exporter they are handed to.
+   */
+  const exportGuide = useCallback(async (record, { raw, body, resolve }, form) => {
+    setExporting(true)
+    try {
+      if (form === 'pdf') {
+        await downloadGuidePdf(record.fileName, { title: guideTitle(record), body, resolveUrl: resolve })
+      } else {
+        await downloadGuideArchive(record.fileName, raw, resolve)
+      }
+    } catch (err) {
+      console.error(err)
+      alertUserV2({ type: 'error', title: fmt('perun.help_panel.export_failed') })
+    } finally {
+      setExporting(false)
+    }
+  }, [fmt])
 
-  const windowOptions = useCallback((record, body, autoPrint) => ({
-    title: guideTitle(record),
-    body,
-    resolveImage,
-    autoPrint,
-    labels: { print: fmt('perun.help_panel.print'), download: fmt('perun.help_panel.download') },
-    onDownload: () => saveGuide(record, doc.raw),
-  }), [resolveImage, fmt, saveGuide, doc.raw])
+  const exportActive = useCallback((form) => {
+    if (active) exportGuide(active, { raw: doc.raw, body: doc.body, resolve: resolveImage }, form)
+  }, [active, doc.raw, doc.body, resolveImage, exportGuide])
 
-  const openWindow = useCallback((autoPrint = false) => {
+  const openWindow = useCallback(() => {
     if (!active) return
-    if (!openHelpWindow(active, windowOptions(active, doc.body, autoPrint))) blocked()
-  }, [active, doc.body, windowOptions, blocked])
+    const options = {
+      title: guideTitle(active),
+      body: doc.body,
+      resolveImage,
+      actions: [
+        { label: fmt('perun.help_panel.download_pdf'), onClick: () => exportActive('pdf') },
+        { label: fmt('perun.help_panel.download_source'), onClick: () => exportActive('source') },
+      ],
+    }
+    if (!openHelpWindow(active, options)) blocked()
+  }, [active, doc.body, resolveImage, fmt, exportActive, blocked])
 
   /**
-   * Print or download a guide from the list, where its body has not been fetched.
+   * Exports a guide straight from the list, where its body has not been fetched yet.
    *
-   * The window is opened first and filled once the text arrives, because a popup is only permitted
-   * inside the click that asked for it; awaiting the fetch first would put window.open outside the
-   * gesture and get it blocked.
+   * The figures are read the same way the panel reads them, so a guide exports identically whether
+   * or not it happens to be the one open.
    */
-  const actOnGuide = useCallback(async (event, record, action) => {
+  const actOnGuide = useCallback(async (event, record, form) => {
     event.stopPropagation()
-    const win = action === 'print' ? openGuideWindow(record, fmt('perun.help_panel.loading')) : null
-    if (action === 'print' && !win) { blocked(); return }
-
     try {
       const raw = await fetchHelpText(svSession, record)
       const { body } = parseFrontMatter(raw)
-      if (action !== 'print') {
-        saveGuide(record, raw)
-        return
-      }
-
       const images = await loadGuideFigures(svSession, record, collectImageNames(body), cache.current)
-      renderGuideWindow(win, {
-        title: guideTitle(record),
-        body,
-        resolveImage: figureResolver(images),
-        autoPrint: true,
-        labels: { print: fmt('perun.help_panel.print'), download: fmt('perun.help_panel.download') },
-        onDownload: () => saveGuide(record, raw),
-      })
+      await exportGuide(record, { raw, body, resolve: figureResolver(images) }, form)
     } catch (err) {
       console.error(err)
-      win?.close()
-      alertUserV2({ type: 'error', title: fmt('perun.help_panel.failed') })
+      alertUserV2({ type: 'error', title: fmt('perun.help_panel.export_failed') })
     }
-  }, [svSession, fmt, blocked, saveGuide])
+  }, [svSession, fmt, exportGuide])
 
   const toggle = useCallback(() => {
     setOpen(current => {
@@ -427,27 +436,29 @@ const NavbarHelp = (props, context) => {
             {active && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
-                onClick={() => openWindow(true)}
-                title={fmt('perun.help_panel.print')}
-                aria-label={fmt('perun.help_panel.print')}
+                onClick={() => exportActive('pdf')}
+                disabled={exporting}
+                title={fmt('perun.help_panel.download_pdf')}
+                aria-label={fmt('perun.help_panel.download_pdf')}
               >
-                <Icon name='IconPrinter' size={17} stroke={1.6} />
+                <Icon name='IconFileTypePdf' size={17} stroke={1.6} />
               </button>
             )}
             {active && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
-                onClick={() => saveGuide(active, doc.raw)}
-                title={fmt('perun.help_panel.download')}
-                aria-label={fmt('perun.help_panel.download')}
+                onClick={() => exportActive('source')}
+                disabled={exporting}
+                title={fmt('perun.help_panel.download_source')}
+                aria-label={fmt('perun.help_panel.download_source')}
               >
-                <Icon name='IconDownload' size={17} stroke={1.6} />
+                <Icon name='IconFileZip' size={17} stroke={1.6} />
               </button>
             )}
             {active && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
-                onClick={() => openWindow(false)}
+                onClick={openWindow}
                 title={fmt('perun.help_panel.open_window')}
                 aria-label={fmt('perun.help_panel.open_window')}
               >
@@ -514,18 +525,20 @@ const NavbarHelp = (props, context) => {
                     </button>
                     <span className='help-panel-list-actions'>
                       <button
-                        onClick={(event) => actOnGuide(event, guide, 'print')}
-                        title={fmt('perun.help_panel.print')}
-                        aria-label={fmt('perun.help_panel.print')}
+                        onClick={(event) => actOnGuide(event, guide, 'pdf')}
+                        disabled={exporting}
+                        title={fmt('perun.help_panel.download_pdf')}
+                        aria-label={fmt('perun.help_panel.download_pdf')}
                       >
-                        <Icon name='IconPrinter' size={16} stroke={1.6} />
+                        <Icon name='IconFileTypePdf' size={16} stroke={1.6} />
                       </button>
                       <button
-                        onClick={(event) => actOnGuide(event, guide, 'download')}
-                        title={fmt('perun.help_panel.download')}
-                        aria-label={fmt('perun.help_panel.download')}
+                        onClick={(event) => actOnGuide(event, guide, 'source')}
+                        disabled={exporting}
+                        title={fmt('perun.help_panel.download_source')}
+                        aria-label={fmt('perun.help_panel.download_source')}
                       >
-                        <Icon name='IconDownload' size={16} stroke={1.6} />
+                        <Icon name='IconFileZip' size={16} stroke={1.6} />
                       </button>
                     </span>
                   </li>
@@ -539,6 +552,7 @@ const NavbarHelp = (props, context) => {
             )}
           </div>
           </div>
+          {exporting && <Loading />}
       </div>
 
       {zoom && (
