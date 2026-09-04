@@ -4,13 +4,30 @@ stages:
   - 3_mvn_install
   - 4_sonarqube
 
-cache:
+# The runner has no distributed cache, so every cache entry is a zip written to and read from the
+# runner's own disk. .webpack_cache is around 450MB of mostly incompressible pack files, and at the
+# default level the runner spends longer deflating it than it saves.
+variables:
+  CACHE_COMPRESSION_LEVEL: "fastest"
+
+# Two entries rather than one, because the two directories change on entirely different clocks.
+# .npm is settled by the lockfile and only turns over when a dependency does; .webpack_cache is
+# rewritten by every build. Held together under one key, a build rezipped the npm cache along with
+# its own, and a job that ran neither npm nor webpack rezipped both.
+.npm_cache: &npm_cache
   key:
     files:
       - package-lock.json
+    prefix: npm
+  paths:
+    - .npm/
+
+# Written by one job and read by the rest. Every job that pushes it pays to rezip all 450MB on the
+# way out, and only the first build of a pipeline has anything new to contribute.
+.webpack_cache: &webpack_cache
+  key: "webpack-$CI_COMMIT_REF_SLUG"
   paths:
     - .webpack_cache/
-    - .npm/
 
 before_script:
   - pwd
@@ -26,27 +43,36 @@ after_script:
   - git pull origin $CI_COMMIT_REF_NAME
 
 1_npm_install_test_build:
+  cache:
+    - *npm_cache
+    - *webpack_cache
   stage: 1_linter
   script:
     - pwd
     - git reset --hard HEAD
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts --no-audit --no-fund
     - npm run test
     - npm run build
 
 1_build_test_java:
+  cache: []
   stage: 2_build_and_install
   script:
     - mvn clean
     - mvn test
     
 1_perun-core-dev-install:
+  cache:
+    - <<: *npm_cache
+      policy: pull
+    - <<: *webpack_cache
+      policy: pull
   stage: 3_mvn_install
   script:  
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts --no-audit --no-fund
     - rm -rf www/*.js
     - npm run build-dev
     - pwd
@@ -55,12 +81,17 @@ after_script:
     - dev
 
 1_perun-core-dev-generate-js:
+  cache:
+    - <<: *npm_cache
+      policy: pull
+    - <<: *webpack_cache
+      policy: pull
   stage: 3_mvn_install
   script:  
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts --no-audit --no-fund
     - rm -rf www/*.js
     - npm run build-dev
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -74,12 +105,17 @@ after_script:
   when: manual
 
 2_perun-core-stable-generate-js:
+  cache:
+    - <<: *npm_cache
+      policy: pull
+    - <<: *webpack_cache
+      policy: pull
   stage: 3_mvn_install
   script:  
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts --no-audit --no-fund
     - rm -rf www/*.js
     - npm run build
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -93,12 +129,17 @@ after_script:
   when: manual
 
 2_perun-core-stable-install:
+  cache:
+    - <<: *npm_cache
+      policy: pull
+    - <<: *webpack_cache
+      policy: pull
   stage: 3_mvn_install
   script:  
     - pwd
     - cd $CI_PROJECT_DIR/
     - git reset --hard HEAD
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts --no-audit --no-fund
     - rm -rf www/*.js
     - npm run build
     - pwd
@@ -107,6 +148,7 @@ after_script:
     - main
 
 1_perun-sonarqube_backend:
+  cache: []
   stage: 4_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
@@ -114,6 +156,7 @@ after_script:
   when: manual
 
 2_perun-sonarqube_backend_publish:
+  cache: []
   stage: 4_sonarqube
   script:
     - cd $CI_PROJECT_DIR/
@@ -125,6 +168,7 @@ after_script:
   when: manual
 
 3_sonarqube_frontend:
+  cache: []
   stage: 4_sonarqube
   script:
     - sonar-scanner -Dsonar.sources=. -Dsonar.projectKey=$CI_PROJECT_NAME -Dsonar.analysis.mode=preview -Dsonar.login=a02003f1f8f90382d7570b57a85c00c38132f85f -Dsonar.branch=$CI_BUILD_REF_NAME -Dsonar.projectName=$CI_PROJECT_NAME -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID
