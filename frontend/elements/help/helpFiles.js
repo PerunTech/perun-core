@@ -96,6 +96,33 @@ export const mimeFromName = (fileName) => {
   return MIME_BY_EXTENSION[extension] ?? 'application/octet-stream'
 }
 
+// `%PDF`. The specification puts the marker at the start of the file, but readers accept it
+// anywhere in the first kilobyte and files carrying a preamble exist, so the same latitude is
+// given here rather than turning away a manual that every reader on the author's desk opens.
+const PDF_MARKER = [0x25, 0x50, 0x44, 0x46]
+const PDF_HEAD_BYTES = 1024
+
+/**
+ * Whether a picked file really is a PDF.
+ *
+ * Answered from the bytes rather than from `file.type`, because the type is the OS's guess from
+ * the extension and is therefore exactly as trustworthy as the extension: renaming a spreadsheet
+ * to .pdf satisfies both. `accept` on the input is weaker still, being a filter every file dialog
+ * offers a way past. MyProfile checks avatar uploads against the photo signatures the same way.
+ *
+ * A file that cannot be read answers false, being no more uploadable than a wrong one.
+ */
+export const isPdfFile = async (file) => {
+  if (!file) return false
+  try {
+    const head = new Uint8Array(await file.slice(0, PDF_HEAD_BYTES).arrayBuffer())
+    return head.some((byte, at) => PDF_MARKER.every((marker, index) => head[at + index] === marker))
+  } catch (err) {
+    console.error('The chosen file could not be read', err)
+    return false
+  }
+}
+
 /* ------------------------------------------------------------------ notes -- */
 
 // FILE_NOTES travels to the server as a path segment on the upload URL, and the endpoint is

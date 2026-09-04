@@ -12,6 +12,7 @@ import {
   HELP_IMAGE, PDF_KIND,
   listHelpModules, fetchHelpText, saveHelpDoc, savePdfManual, uploadHelpFile,
   buildImageName, displayImageName, createBlobCache, docStem, deleteHelpDoc, kindExtension,
+  isPdfFile,
 } from '../../../elements/help/helpFiles'
 import {
   clearHelpIndexCache, figureResolver, loadGuideFigures, loadGuideIndex, loadImageIndex,
@@ -298,15 +299,23 @@ const UserGuidesAdmin = (props, context) => {
   }
 
   /**
-   * Opens the metadata form on the file that was picked.
+   * Opens the metadata form on the file that was picked, once it turns out to be a PDF.
    *
    * The input is cleared afterwards so choosing the same file twice fires a change event again;
-   * without it, cancelling an upload and re-picking the same manual would do nothing.
+   * without it, cancelling an upload and re-picking the same manual would do nothing. The type is
+   * checked here rather than left to `accept`, which every file dialog offers a way past: a manual
+   * that is not a PDF uploads happily and fails only when a reader opens it.
    */
-  const pickManual = (event) => {
+  const pickManual = async (event) => {
     const file = event.target.files?.[0] ?? null
     if (manualInputRef.current) manualInputRef.current.value = ''
-    if (file) setState({ uploadFile: file, uploading: true })
+    if (!file) return
+
+    if (!await isPdfFile(file)) {
+      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_pdf'), message: file.name })
+      return
+    }
+    setState({ uploadFile: file, uploading: true })
   }
 
   const cancelUpload = () => setState({ uploading: false, uploadFile: null })

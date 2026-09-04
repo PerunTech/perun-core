@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import Editor from '@monaco-editor/react';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
-import { Icon } from '../../elements';
+import { Icon, alertUserV2 } from '../../elements';
 import MarkdownPreview from './MarkdownPreview';
 import { parseFrontMatter, serializeFrontMatter } from './frontMatter';
 import { collectImageNames, LINE_ATTR } from './renderMarkdown';
 import getMetadataSchema, { transformMetadataErrors } from './metadataSchema';
 import {
   EDITOR_OPTIONS, insertAtCursor, wrapSelection, prefixLines,
-  toSlug, formatStats, imageFilesFrom, uniqueImageName, projectScroll,
+  toSlug, formatStats, filesFrom, isImageFile, uniqueImageName, projectScroll,
 } from './utils';
 
 // Rendering the preview costs a full marked parse plus a DOMPurify pass over the whole document,
@@ -289,8 +289,27 @@ const MarkdownEditor = ({
     setPending(taken);
   }, [resolveImage]);
 
+  /**
+   * The images out of a selection, having said out loud what it turned away.
+   *
+   * `accept` on the picker is a hint every file dialog offers a way past, and a drop or a paste
+   * never consults it at all, so a file the editor cannot use was discarded in silence: nothing
+   * appeared in the document and nothing said why.
+   */
+  const acceptedImages = useCallback((files) => {
+    const rejected = files.filter(file => !isImageFile(file));
+    if (rejected.length) {
+      alertUserV2({
+        type: 'info',
+        title: fmt('perun.help_editor.error_not_image'),
+        message: rejected.map(file => file.name).join(', '),
+      });
+    }
+    return files.filter(isImageFile);
+  }, [fmt]);
+
   const handlePaste = useCallback((event) => {
-    const files = imageFilesFrom(event.clipboardData);
+    const files = filesFrom(event.clipboardData);
 
     if (!files.length) {
       // A pasted document leaves Monaco scrolled to the end of the insertion, where the caret
@@ -312,20 +331,22 @@ const MarkdownEditor = ({
 
     // Without this Monaco pastes the filename as text alongside the upload.
     event.preventDefault();
-    addImages(files);
-  }, [addImages, withScrollLock]);
+    addImages(acceptedImages(files));
+  }, [addImages, acceptedImages, withScrollLock]);
 
   const handleDrop = useCallback((event) => {
-    const files = imageFilesFrom(event.dataTransfer);
+    // Files rather than images, so a dropped PDF is answered rather than ignored. An empty list is
+    // a drag that carried no file at all, such as a selection of text, and is left to the editor.
+    const files = filesFrom(event.dataTransfer);
     setDragging(false);
     if (!files.length) return;
     event.preventDefault();
     event.stopPropagation();
-    addImages(files);
-  }, [addImages]);
+    addImages(acceptedImages(files));
+  }, [addImages, acceptedImages]);
 
   const handleFilePick = (event) => {
-    addImages([...(event.target.files ?? [])]);
+    addImages(acceptedImages([...(event.target.files ?? [])]));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

@@ -101,16 +101,30 @@ export const formatStats = (raw) => {
   return `${words} words · ${size}`;
 };
 
-/** Files a drop or paste event carries that we are willing to upload as figures. */
-export const imageFilesFrom = (dataTransfer) => {
+// The browser's own type is the answer when it has one, but it comes back empty often enough (a
+// drag out of an archive, an extension the OS does not recognise) that the name has to be able to
+// answer for it. No signature check, unlike the manual upload: the editor takes whatever the
+// browser will render, which spans a text format and several whose marker sits at its own offset.
+const IMAGE_NAME = /\.(png|jpe?g|gif|webp|avif|bmp|svg)$/i;
+
+/** Whether the editor is willing to store a file as a figure. */
+export const isImageFile = (file) =>
+  Boolean(file) && (file.type ? file.type.startsWith('image/') : IMAGE_NAME.test(file.name ?? ''));
+
+/**
+ * Every file a drop or paste event carries, by whichever of the two routes it exposes them.
+ *
+ * Unfiltered on purpose. A file the editor cannot use is reported rather than discarded in
+ * silence, so the caller is handed the whole selection and has to decide out loud. Items are the
+ * clipboard's usual shape for an image copied out of another page, where `files` is empty.
+ */
+export const filesFrom = (dataTransfer) => {
   const files = [...(dataTransfer?.files ?? [])];
-  const items = [...(dataTransfer?.items ?? [])]
-    .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
+  if (files.length) return files;
+  return [...(dataTransfer?.items ?? [])]
+    .filter(item => item.kind === 'file')
     .map(item => item.getAsFile())
     .filter(Boolean);
-
-  const all = files.length ? files : items;
-  return all.filter(file => file.type.startsWith('image/'));
 };
 
 /**
