@@ -12,14 +12,15 @@ import {
   HELP_IMAGE, PDF_KIND,
   listHelpModules, fetchHelpText, saveHelpDoc, savePdfManual, uploadHelpFile,
   buildImageName, displayImageName, createBlobCache, docStem, deleteHelpDoc, kindExtension,
-  isPdfFile,
+  isPdfFile, parseDocName,
 } from '../../../elements/help/helpFiles'
 import {
   clearHelpIndexCache, figureResolver, loadGuideFigures, loadGuideIndex, loadImageIndex,
   ownerModuleForRoute
 } from '../../../elements/help/routeGuides'
 import { downloadGuideArchive, downloadGuidePdf } from '../../../elements/help/helpExport'
-import { parseFrontMatter } from '../../MarkdownEditor/frontMatter'
+import { readGuideUpload } from '../../../elements/help/guideImport'
+import { applyFrontMatter, parseFrontMatter } from '../../MarkdownEditor/frontMatter'
 import getMetadataSchema, { transformMetadataErrors } from '../../MarkdownEditor/metadataSchema'
 import { collectImageNames } from '../../MarkdownEditor/renderMarkdown'
 
@@ -34,6 +35,11 @@ const { useReducer, useEffect, useRef, useCallback, useMemo } = React
 // another, and the anchor is derived from the metadata, so the guide would be stored under the
 // wrong module.
 const blankDoc = (route) => `---\nroute: ${route}\ntitle: \norder: 1\n---\n`
+
+// A manual arrives finished and is stored as it stands; a guide arrives as its source and is
+// stored the way the editor would have stored it. The picker takes all three because to an author
+// they are one gesture: this is the file, put it in.
+const GUIDE_SOURCE = /\.(md|zip)$/i
 
 const UPLOAD_UI_SCHEMA = {
   'ui:order': ['route', 'title', 'locale', 'slug', 'order'],
@@ -67,12 +73,12 @@ const UserGuidesAdmin = (props, context) => {
   const initialState = {
     loading: true, saving: false, exporting: false,
     modules: [], docs: [], locales: [], editing: null, imageUrls: {},
-    uploading: false, uploadFile: null, replacing: null,
+    uploading: false, uploadFile: null, replacing: null, importing: null,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{
     loading, saving, exporting, modules, docs, locales, editing, imageUrls, uploading, uploadFile,
-    replacing,
+    replacing, importing,
   }, setState] = useReducer(reducer, initialState)
 
   const cache = useRef(createBlobCache())
@@ -129,13 +135,22 @@ const UserGuidesAdmin = (props, context) => {
         await loadDocs(moduleList)
       } catch (err) {
         console.error(err)
+        // A request already in flight when the session changed rejects after this effect has been
+        // torn down. The reader is on their way to the login screen by then, so reporting it is
+        // noise about something they did on purpose.
+        if (cancelled) return
         alertUserResponse({ response: err })
       } finally {
         if (!cancelled) setState({ loading: false })
       }
     }
 
-    boot()
+    // No session is a logout in progress, not a section that failed to load. Asking anyway would
+    // return a 401, which the global interceptor swallows into a resolved empty answer, which
+    // requireResponse then has to throw on.
+    if (svSession) boot()
+    else setState({ loading: false })
+
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [svSession, loadDocs])
@@ -299,7 +314,7 @@ const UserGuidesAdmin = (props, context) => {
       })
       clearHelpIndexCache()
       await loadDocs(modules)
-      setState({ saving: false, uploading: false, uploadFile: null, replacing: null })
+      setState({ saving: false, uploading: false, uploadFile: null, replacing: null, importing: null })
       alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
     } catch (err) {
       console.error(err)
@@ -320,6 +335,11 @@ const UserGuidesAdmin = (props, context) => {
     const file = event.target.files?.[0] ?? null
     if (manualInputRef.current) manualInputRef.current.value = ''
     if (!file) return
+
+    if (GUIDE_SOURCE.test(file.name)) {
+      await startImport(file)
+      return
+    }
 
     if (!await isPdfFile(file)) {
       alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_pdf'), message: file.name })
@@ -353,11 +373,96 @@ const UserGuidesAdmin = (props, context) => {
   }
 
   const startUpload = () => {
-    setState({ replacing: null })
+    setState({ replacing: null, importing: null })
     manualInputRef.current?.click()
   }
 
-  const cancelUpload = () => setState({ uploading: false, uploadFile: null, replacing: null })
+  /**
+   * Opens the metadata form on a guide read out of a .md or an archive.
+   *
+   * The file is read before the form is shown so the form can be filled from what the document
+   * says about itself, and so a file that is not a guide is refused at the point it was picked
+   * rather than at the point it was submitted.
+   *
+   * Figures the document names but the file did not carry are reported rather than silently
+   * dropped: the guide still imports, and the author is told which references will not resolve.
+   * That is every figure of a bare .md, which is the honest answer to importing one.
+   */
+  const startImport = async (file) => {
+    try {
+      setState({ saving: true })
+      const source = await readGuideUpload(file)
+      setState({
+        saving: false,
+        uploading: true,
+        uploadFile: file,
+        importing: { ...source, ...parseFrontMatter(source.markdown), doc: parseDocName(source.name) },
+      })
+      if (source.missing.length) {
+        alertUserV2({
+          type: 'info',
+          title: fmt('perun.admin_console.user_guides_missing_figures'),
+          message: source.missing.join(', '),
+        })
+      }
+    } catch (err) {
+      console.error(err)
+      setState({ saving: false })
+      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_a_guide'), message: file.name })
+    }
+  }
+
+  /**
+   * Stores an imported guide as though the editor had just saved it.
+   *
+   * The form is the authority on the routing metadata rather than the file, so the document is
+   * rewritten with what was confirmed on screen. Without that a guide imported onto a different
+   * route would carry the old one in its front matter and export it back out again.
+   */
+  const importGuide = async ({ markdown, figures, meta }) => {
+    const module = ownerModuleForRoute(meta.route, modules)
+    const objectId = anchorFor(module)
+    if (!objectId) {
+      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_no_anchor') })
+      return
+    }
+
+    try {
+      setState({ saving: true })
+      const stem = `${meta.locale}_${meta.slug}`
+      await saveHelpDoc(svSession, {
+        objectId,
+        locale: meta.locale,
+        slug: meta.slug,
+        markdown: applyFrontMatter(markdown, { route: meta.route, title: meta.title, order: meta.order }),
+        notes: { route: meta.route, title: meta.title, order: meta.order, locale: meta.locale, module },
+      })
+
+      // Stored under the name the Markdown uses, which is what resolveImageRecord looks for. One
+      // at a time rather than in parallel: the store answers a burst of uploads on one object with
+      // a lock contention error often enough to matter.
+      for (const figure of figures) {
+        await uploadHelpFile(svSession, {
+          objectId,
+          fileType: HELP_IMAGE,
+          file: figure.file,
+          fileName: buildImageName(stem, figure.name),
+          notes: { doc: stem },
+        })
+      }
+
+      clearHelpIndexCache()
+      await loadDocs(modules)
+      setState({ saving: false, uploading: false, uploadFile: null, importing: null })
+      alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
+    } catch (err) {
+      console.error(err)
+      setState({ saving: false })
+      alertUserResponse({ response: err })
+    }
+  }
+
+  const cancelUpload = () => setState({ uploading: false, uploadFile: null, replacing: null, importing: null })
 
   const uploadSchema = useMemo(
     () => getMetadataSchema(context, { locales, routes }),
@@ -371,17 +476,25 @@ const UserGuidesAdmin = (props, context) => {
    * The schema's slug pattern is strict, so the file name is folded to fit it rather than offered
    * as-is and rejected on submit.
    */
-  const uploadDefaults = useMemo(() => ({
-    route: routes[0]?.value ?? '',
-    locale: locales[0]?.value ?? '',
-    order: 1,
-    slug: (uploadFile?.name ?? '')
-      .replace(/\.pdf$/i, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, ''),
-    title: (uploadFile?.name ?? '').replace(/\.pdf$/i, ''),
-  }), [routes, locales, uploadFile])
+  const uploadDefaults = useMemo(() => {
+    const stem = (uploadFile?.name ?? '').replace(/\.(pdf|md|zip)$/i, '')
+    // An imported guide states its own route and title in its front matter and its locale and slug
+    // in its file name, so the form opens on what the document says. Offered only as a default:
+    // a route or locale this deployment does not have falls back rather than seeding a value the
+    // schema would reject, and the form is shown for review before any of it is stored.
+    const meta = importing?.meta ?? {}
+    const doc = importing?.doc
+    const offered = (value, options) =>
+      (options.some(option => option.value === value) ? value : options[0]?.value ?? '')
+
+    return {
+      route: offered(meta.route, routes),
+      locale: offered(doc?.locale, locales),
+      order: Number(meta.order) || 1,
+      slug: doc?.slug ?? stem.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      title: meta.title || stem,
+    }
+  }, [routes, locales, uploadFile, importing])
 
   const openDoc = async (record) => {
     // A manual is bytes nobody here authored, so there is nothing for the editor to open. Saying
@@ -544,7 +657,7 @@ const UserGuidesAdmin = (props, context) => {
       <input
         ref={manualInputRef}
         type='file'
-        accept='application/pdf,.pdf'
+        accept='application/pdf,.pdf,text/markdown,.md,application/zip,.zip'
         className='md-file-input'
         onChange={pickManual}
       />
@@ -552,7 +665,7 @@ const UserGuidesAdmin = (props, context) => {
       {uploading && uploadFile && (
         <section className='user-guides-upload' aria-label={fmt('perun.admin_console.user_guides_upload')}>
           <header className='user-guides-upload-head'>
-            <h3>{fmt('perun.admin_console.user_guides_upload')}</h3>
+            <h3>{fmt(importing ? 'perun.admin_console.user_guides_import' : 'perun.admin_console.user_guides_upload')}</h3>
             <button
               type='button'
               className='user-guides-upload-close'
@@ -565,7 +678,7 @@ const UserGuidesAdmin = (props, context) => {
           </header>
 
           <p className='user-guides-upload-file'>
-            <Icon name='IconFileTypePdf' size={22} stroke={1.5} />
+            <Icon name={importing ? 'IconFileText' : 'IconFileTypePdf'} size={22} stroke={1.5} />
             <span className='user-guides-upload-name'>{uploadFile.name}</span>
             <span className='user-guides-upload-size'>{fileSize(uploadFile.size)}</span>
             <button type='button' className='user-guides-upload-swap' onClick={() => manualInputRef.current?.click()}>
@@ -584,7 +697,9 @@ const UserGuidesAdmin = (props, context) => {
             showErrorList={false}
             noHtml5Validate
             className='user-guides-upload-form'
-            onSubmit={({ formData }) => uploadManual({ file: uploadFile, meta: formData })}
+            onSubmit={({ formData }) => (importing
+              ? importGuide({ ...importing, meta: formData })
+              : uploadManual({ file: uploadFile, meta: formData }))}
           >
             <div className='user-guides-upload-actions'>
               <button type='button' className='md-btn md-btn--ghost' onClick={cancelUpload}>
@@ -592,7 +707,7 @@ const UserGuidesAdmin = (props, context) => {
               </button>
               <button type='submit' className='md-btn md-btn--primary' disabled={saving}>
                 <Icon name='IconUpload' size={16} stroke={1.7} />
-                <span>{fmt('perun.admin_console.user_guides_upload')}</span>
+                <span>{fmt(importing ? 'perun.admin_console.user_guides_import' : 'perun.admin_console.user_guides_upload')}</span>
               </button>
             </div>
           </Form>

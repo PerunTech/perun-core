@@ -1,9 +1,13 @@
 /**
- * A zip writer, enough to package one guide with its figures.
+ * A zip writer and reader, enough to move one guide with its figures.
  *
  * Entries are stored rather than deflated. Compression would mean carrying an implementation this
  * project does not have, and would buy close to nothing: the figures are already PNG and JPEG, and
  * the Markdown beside them is a few kilobytes. Every extractor reads a stored entry.
+ *
+ * Reading is the looser half of the two. What we write we read back, but an archive that has been
+ * through another tool on the way is still a guide, so a deflated entry is inflated rather than
+ * refused.
  *
  * Nothing here handles zip64, which an archive of this size cannot need: the 32-bit size and offset
  * fields only run out past 4GB.
@@ -128,4 +132,95 @@ export const zipBlob = async (entries, when = new Date()) => {
   end.setUint16(20, 0, true)
 
   return new Blob([...parts, ...central, end.buffer], { type: 'application/zip' })
+}
+
+/* ------------------------------------------------------------------ read -- */
+
+const LOCAL_SIGNATURE = 0x04034b50
+const CENTRAL_SIGNATURE = 0x02014b50
+const END_SIGNATURE = 0x06054b50
+
+// Bit 0 of the general purpose flags. An encrypted entry reads as noise rather than failing, so it
+// has to be turned away by name.
+const ENCRYPTED = 0x0001
+
+const STORED = 0
+const DEFLATED = 8
+
+/**
+ * The end record sits last, but a zip comment may follow it, so it is searched for backwards over
+ * the comment's maximum length rather than assumed to be at a fixed offset from the end.
+ */
+const findEndRecord = (view) => {
+  const earliest = Math.max(0, view.byteLength - END_RECORD - 0xffff)
+  for (let at = view.byteLength - END_RECORD; at >= earliest; at -= 1) {
+    if (view.getUint32(at, true) === END_SIGNATURE) return at
+  }
+  return -1
+}
+
+// A zip entry holds a bare deflate stream, with none of zlib's header or checksum around it, which
+// is what deflate-raw means. Browsers without DecompressionStream get a clear failure rather than
+// a corrupt figure.
+const inflate = async (bytes) => {
+  if (typeof DecompressionStream !== 'function') throw new Error('zip: deflate is not supported here')
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))
+  return new Uint8Array(await new Response(stream).arrayBuffer())
+}
+
+/**
+ * Unpacks an archive.
+ *
+ * The central directory is read rather than the local headers, because an entry written with a
+ * data descriptor (general purpose bit 3) carries zeros for its sizes in the local header and the
+ * true ones only in the directory. Our writer does not do that; other tools do.
+ *
+ * @param {Blob} blob the archive
+ * @returns {Promise<Array<{name: string, data: Uint8Array}>>} its files, directories left out
+ */
+export const unzipEntries = async (blob) => {
+  const buffer = await blob.arrayBuffer()
+  const view = new DataView(buffer)
+  const end = findEndRecord(view)
+  if (end < 0) throw new Error('zip: no end record, this is not an archive')
+
+  const count = view.getUint16(end + 10, true)
+  const decoder = new TextDecoder()
+  const entries = []
+  let at = view.getUint32(end + 16, true)
+
+  for (let index = 0; index < count; index += 1) {
+    if (at + CENTRAL_HEADER > view.byteLength || view.getUint32(at, true) !== CENTRAL_SIGNATURE) {
+      throw new Error('zip: damaged central directory')
+    }
+
+    const flags = view.getUint16(at + 8, true)
+    const method = view.getUint16(at + 10, true)
+    const compressed = view.getUint32(at + 20, true)
+    const nameLength = view.getUint16(at + 28, true)
+    const extraLength = view.getUint16(at + 30, true)
+    const commentLength = view.getUint16(at + 32, true)
+    const localAt = view.getUint32(at + 42, true)
+    const name = decoder.decode(new Uint8Array(buffer, at + CENTRAL_HEADER, nameLength))
+    at += CENTRAL_HEADER + nameLength + extraLength + commentLength
+
+    // A trailing slash is the format's only mark of a directory, and it carries no data.
+    if (name.endsWith('/')) continue
+    if (flags & ENCRYPTED) throw new Error(`zip: ${name} is encrypted`)
+
+    if (view.getUint32(localAt, true) !== LOCAL_SIGNATURE) throw new Error(`zip: ${name} is misplaced`)
+    // The local copies of these two lengths are the ones that locate the data. The central
+    // directory's extra field is allowed to differ in length from the local one.
+    const dataAt = localAt + LOCAL_HEADER
+      + view.getUint16(localAt + 26, true)
+      + view.getUint16(localAt + 28, true)
+    if (dataAt + compressed > view.byteLength) throw new Error(`zip: ${name} runs past the end`)
+
+    const data = new Uint8Array(buffer, dataAt, compressed)
+    if (method === STORED) entries.push({ name, data: data.slice() })
+    else if (method === DEFLATED) entries.push({ name, data: await inflate(data) })
+    else throw new Error(`zip: ${name} uses compression method ${method}`)
+  }
+
+  return entries
 }
