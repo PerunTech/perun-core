@@ -1,7 +1,7 @@
 import { matchPath } from 'react-router-dom'
 import {
-  HELP_DOC, HELP_IMAGE, displayImageName, listHelpFiles, listHelpModules, newestByName,
-  resolveImageRecord
+  ALL_FILE_TYPES, HELP_DOC, HELP_IMAGE, HELP_PDF, displayImageName, helpFileType, listHelpFiles,
+  listHelpModules, newestByName, resolveImageRecord
 } from './helpFiles'
 
 // perun-core owns the guides that are not specific to any one module, so it is always consulted
@@ -14,8 +14,9 @@ export const CORE_MODULE = 'perun-core'
 // mutating one, so a cached index can only ever be missing a new document, never serving a stale
 // one; the admin section clears the cache after a save to pick those up.
 let modulePromise = null
-const docIndex = new Map()
-const imageIndex = new Map()
+// One listing per plugin row, holding guides, manuals and figures together. Split by type on read
+// rather than fetched per type, because the store answers all three in a single call.
+const fileIndex = new Map()
 
 // Readers key their fetch on the route, so clearing the cache alone leaves a mounted panel showing
 // what it already had. That matters when an author edits a guide for the screen they are standing
@@ -27,8 +28,7 @@ const listeners = new Set()
 export const clearHelpIndexCache = () => {
   cacheSession = null
   modulePromise = null
-  docIndex.clear()
-  imageIndex.clear()
+  fileIndex.clear()
   indexVersion += 1
   listeners.forEach(notify => notify(indexVersion))
 }
@@ -53,20 +53,30 @@ const forSession = (svSession) => {
   if (cacheSession === svSession) return
   cacheSession = svSession
   modulePromise = null
-  docIndex.clear()
-  imageIndex.clear()
+  fileIndex.clear()
 }
 
-const cachedList = (cache, svSession, objectId, fileType) => {
+/**
+ * Every help file on one plugin row, newest version of each name, cached for the session.
+ *
+ * newestByName keys on the file name, and the three types cannot collide there: a guide and a
+ * manual differ by extension, and a figure carries its document's stem and the `__` separator.
+ */
+const cachedFiles = (svSession, objectId) => {
   forSession(svSession)
-  if (!cache.has(objectId)) {
+  if (!fileIndex.has(objectId)) {
     // The rejected promise is dropped rather than cached, so a failed lookup retries on the next
     // route change instead of pinning the panel shut for the session.
-    cache.set(objectId, listHelpFiles(svSession, objectId, fileType)
+    fileIndex.set(objectId, listHelpFiles(svSession, objectId, ALL_FILE_TYPES)
       .then(newestByName)
-      .catch(err => { cache.delete(objectId); throw err }))
+      .catch(err => { fileIndex.delete(objectId); throw err }))
   }
-  return cache.get(objectId)
+  return fileIndex.get(objectId)
+}
+
+const ofType = async (svSession, objectId, wanted) => {
+  const files = await cachedFiles(svSession, objectId)
+  return files.filter(record => wanted.includes(helpFileType(record)))
 }
 
 export const loadHelpModules = (svSession) => {
@@ -77,8 +87,16 @@ export const loadHelpModules = (svSession) => {
   return modulePromise
 }
 
-export const loadDocIndex = (svSession, objectId) => cachedList(docIndex, svSession, objectId, HELP_DOC)
-export const loadImageIndex = (svSession, objectId) => cachedList(imageIndex, svSession, objectId, HELP_IMAGE)
+export const loadImageIndex = (svSession, objectId) => ofType(svSession, objectId, [HELP_IMAGE])
+
+/**
+ * Every guide a module offers, written here or uploaded as a PDF.
+ *
+ * The two are stored under different file types but are routed by the same notes and are one list
+ * from the reader's point of view, so they are selected together here rather than at each call
+ * site, where a surface could pick up one kind and quietly miss the other.
+ */
+export const loadGuideIndex = (svSession, objectId) => ofType(svSession, objectId, [HELP_DOC, HELP_PDF])
 
 /* ---------------------------------------------------------------- figures -- */
 

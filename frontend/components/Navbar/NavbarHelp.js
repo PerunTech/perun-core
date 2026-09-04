@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import { Icon, alertUserV2 } from '../../elements'
-import { createBlobCache, fetchHelpText } from '../../elements/help/helpFiles'
-import { downloadGuideArchive, downloadGuidePdf } from '../../elements/help/helpExport'
+import { PDF_KIND, createBlobCache, fetchHelpText } from '../../elements/help/helpFiles'
+import { downloadBlob, downloadGuideArchive, downloadGuidePdf } from '../../elements/help/helpExport'
 import {
-  CORE_MODULE, figureResolver, getHelpIndexVersion, guideTitle, guidesForRoute, loadDocIndex,
+  CORE_MODULE, figureResolver, getHelpIndexVersion, guideTitle, guidesForRoute, loadGuideIndex,
   loadGuideFigures, loadHelpModules, moduleIdFromPath, subscribeHelpIndex
 } from '../../elements/help/routeGuides'
 import { parseFrontMatter } from '../MarkdownEditor/frontMatter'
@@ -57,7 +57,7 @@ const NavbarHelp = (props, context) => {
   const [indexVersion, setIndexVersion] = useState(getHelpIndexVersion)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(null)
-  const [doc, setDoc] = useState({ raw: '', body: '', images: {}, loading: false, failed: false })
+  const [doc, setDoc] = useState({ raw: '', body: '', images: {}, pdfUrl: null, loading: false, failed: false })
   const [zoom, setZoom] = useState(null)
   const [toc, setToc] = useState([])
   const [showToc, setShowToc] = useState(false)
@@ -115,7 +115,7 @@ const NavbarHelp = (props, context) => {
         // Records are tagged with the plugin row they came off, so opening one does not have to
         // re-derive its anchor from a lookup table that changes identity on every route change.
         const indexes = await Promise.all(owners.map(async owner => {
-          const records = await loadDocIndex(svSession, owner.objectId)
+          const records = await loadGuideIndex(svSession, owner.objectId)
           return records.map(record => ({ ...record, anchorId: owner.objectId }))
         }))
         if (cancelled) return
@@ -246,8 +246,19 @@ const NavbarHelp = (props, context) => {
     let cancelled = false
 
     const load = async () => {
-      setDoc({ raw: '', body: '', images: {}, loading: true, failed: false })
+      setDoc({ raw: '', body: '', images: {}, pdfUrl: null, loading: true, failed: false })
       try {
+        // An uploaded manual is handed over rather than rendered, so nothing is parsed and no
+        // figures are looked for: the file carries its own. The blob is fetched here anyway,
+        // because downloadFile answers with content-disposition: attachment, so pointing a tab at
+        // the endpoint downloads the file instead of showing it. A blob URL is what lets the
+        // browser's own viewer open it, and the cache means opening it twice costs one fetch.
+        if (active.kind === PDF_KIND) {
+          const pdfUrl = await cache.current.get(svSession, active)
+          if (!cancelled) setDoc({ raw: '', body: '', images: {}, pdfUrl, loading: false, failed: false })
+          return
+        }
+
         // The stored file keeps its routing metadata in a leading --- fence so it survives a
         // download/upload round trip. The reader has already used that metadata to find this
         // document, so only the body is rendered; marked would otherwise show the fence as a rule
@@ -257,10 +268,10 @@ const NavbarHelp = (props, context) => {
         if (cancelled) return
 
         const images = await loadGuideFigures(svSession, active, collectImageNames(body), cache.current)
-        if (!cancelled) setDoc({ raw, body, images, loading: false, failed: false })
+        if (!cancelled) setDoc({ raw, body, images, pdfUrl: null, loading: false, failed: false })
       } catch (err) {
         console.error(err)
-        if (!cancelled) setDoc({ raw: '', body: '', images: {}, loading: false, failed: true })
+        if (!cancelled) setDoc({ raw: '', body: '', images: {}, pdfUrl: null, loading: false, failed: true })
       }
     }
 
@@ -269,6 +280,10 @@ const NavbarHelp = (props, context) => {
   }, [active, svSession])
 
   const resolveImage = useMemo(() => figureResolver(doc.images), [doc.images])
+
+  // Every use of this is paired with !doc.loading, because `active` flips a render before the fetch
+  // for it starts: on its own this would show a manual's chrome over the document still in state.
+  const isPdf = active?.kind === PDF_KIND
 
   // Figures render into a column a few hundred pixels wide, which is unreadable for a screenshot.
   // Delegated rather than bound per image, because the body is replaced wholesale on every render.
@@ -342,6 +357,22 @@ const NavbarHelp = (props, context) => {
       setExporting(false)
     }
   }, [fmt])
+
+  /**
+   * Saves an uploaded manual as it stands.
+   *
+   * Nothing is rendered or repacked here, so this is a plain save of the blob the reader already
+   * holds rather than anything the exporters need to be involved in.
+   */
+  const savePdf = useCallback(async () => {
+    if (!active || !doc.pdfUrl) return
+    try {
+      downloadBlob(active.fileName, await (await fetch(doc.pdfUrl)).blob())
+    } catch (err) {
+      console.error(err)
+      alertUserV2({ type: 'error', title: fmt('perun.help_panel.export_failed') })
+    }
+  }, [active, doc.pdfUrl, fmt])
 
   const exportActive = useCallback((form) => {
     if (active) exportGuide(active, { raw: doc.raw, body: doc.body, resolve: resolveImage }, form)
@@ -433,7 +464,17 @@ const NavbarHelp = (props, context) => {
               </button>
             )}
             <p className='help-panel-title'>{heading}</p>
-            {active && !doc.loading && !doc.failed && (
+            {isPdf && !doc.loading && !doc.failed && (
+              <button
+                className='help-panel-window-btn'
+                onClick={savePdf}
+                title={fmt('perun.help_panel.download_manual')}
+                aria-label={fmt('perun.help_panel.download_manual')}
+              >
+                <Icon name='IconDownload' size={17} stroke={1.6} />
+              </button>
+            )}
+            {active && !isPdf && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
                 onClick={() => exportActive('pdf')}
@@ -444,7 +485,7 @@ const NavbarHelp = (props, context) => {
                 <Icon name='IconFileTypePdf' size={17} stroke={1.6} />
               </button>
             )}
-            {active && !doc.loading && !doc.failed && (
+            {active && !isPdf && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
                 onClick={() => exportActive('source')}
@@ -455,7 +496,7 @@ const NavbarHelp = (props, context) => {
                 <Icon name='IconFileZip' size={17} stroke={1.6} />
               </button>
             )}
-            {active && !doc.loading && !doc.failed && (
+            {active && !isPdf && !doc.loading && !doc.failed && (
               <button
                 className='help-panel-window-btn'
                 onClick={openWindow}
@@ -520,11 +561,12 @@ const NavbarHelp = (props, context) => {
                 {guides.map(guide => (
                   <li key={guide.objectId}>
                     <button className='help-panel-list-open' onClick={() => setActive(guide)}>
-                      <Icon name='IconFileText' size={18} />
+                      <Icon name={guide.kind === PDF_KIND ? 'IconFileTypePdf' : 'IconFileText'} size={18} />
                       <span>{guideTitle(guide)}</span>
                     </button>
                     <span className='help-panel-list-actions'>
                       <button
+                        hidden={guide.kind === PDF_KIND}
                         onClick={(event) => actOnGuide(event, guide, 'pdf')}
                         disabled={exporting}
                         title={fmt('perun.help_panel.download_pdf')}
@@ -533,6 +575,7 @@ const NavbarHelp = (props, context) => {
                         <Icon name='IconFileTypePdf' size={16} stroke={1.6} />
                       </button>
                       <button
+                        hidden={guide.kind === PDF_KIND}
                         onClick={(event) => actOnGuide(event, guide, 'source')}
                         disabled={exporting}
                         title={fmt('perun.help_panel.download_source')}
@@ -547,7 +590,27 @@ const NavbarHelp = (props, context) => {
             )}
             {active && doc.loading && <p className='help-panel-note'>{fmt('perun.help_panel.loading')}</p>}
             {active && doc.failed && <p className='help-panel-note'>{fmt('perun.help_panel.failed')}</p>}
-            {active && !doc.loading && !doc.failed && (
+            {isPdf && !doc.loading && !doc.failed && (
+              <div className='help-panel-manual'>
+                <span className='help-panel-manual-icon'>
+                  <Icon name='IconFileTypePdf' size={34} stroke={1.4} />
+                </span>
+                <p className='help-panel-note'>{fmt('perun.help_panel.manual_note')}</p>
+                <div className='help-panel-manual-actions'>
+                  {/* Iconed because the two are one word apart in most locales, and a reader
+                      reaching for a manual should not have to read to tell them apart. */}
+                  <button className='md-btn md-btn--primary' onClick={() => window.open(doc.pdfUrl, '_blank', 'noopener')}>
+                    <Icon name='IconExternalLink' size={15} stroke={1.7} />
+                    {fmt('perun.help_panel.open_manual')}
+                  </button>
+                  <button className='md-btn md-btn--ghost' onClick={savePdf}>
+                    <Icon name='IconDownload' size={15} stroke={1.7} />
+                    {fmt('perun.help_panel.download_manual')}
+                  </button>
+                </div>
+              </div>
+            )}
+            {active && !isPdf && !doc.loading && !doc.failed && (
               <MarkdownPreview markdown={doc.body} resolveImage={resolveImage} className='help-panel-md' />
             )}
           </div>

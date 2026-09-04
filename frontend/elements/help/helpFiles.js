@@ -8,6 +8,14 @@ import axios from 'axios'
 // Admin Console -> CodeList Editor with no code change and no migration.
 export const HELP_DOC = 'HELP_DOC'
 export const HELP_IMAGE = 'HELP_IMAGE'
+// A manual uploaded as a finished PDF rather than written here. It is routed and listed exactly
+// like a Markdown guide, and differs only in that the reader hands it over instead of rendering it.
+export const HELP_PDF = 'HELP_PDF'
+
+// getUploadedFiles reads "0" as "no filter" and answers with every file on the object, which is the
+// convention the attachment menus already use. One listing per plugin row therefore covers guides,
+// manuals and figures together, where asking per type costs a round trip each.
+export const ALL_FILE_TYPES = '0'
 
 // Documents hang off the owning module's plugin row; perun-core's own row holds the general ones.
 export const PLUGIN_TABLE = 'SVAROG_PERUN_PLUGIN'
@@ -18,9 +26,10 @@ export const PLUGIN_TABLE = 'SVAROG_PERUN_PLUGIN'
 // constant so the two cannot drift apart again.
 export const HELP_ANCHOR_TYPE = PLUGIN_TABLE
 
-// <locale>_<slug>.md, e.g. en_US_searching-holdings.md. Strict on purpose: a malformed name should
-// surface as "not a help document" rather than silently defaulting to some locale.
-const DOC_NAME = /^([a-z]{2}_[A-Z]{2})_(.+)\.md$/
+// <locale>_<slug>.md, e.g. en_US_searching-holdings.md, or the same with .pdf for an uploaded
+// manual. Strict on purpose: a malformed name should surface as "not a help document" rather than
+// silently defaulting to some locale.
+const DOC_NAME = /^([a-z]{2}_[A-Z]{2})_(.+)\.(md|pdf)$/
 
 // All HELP_IMAGE files share one flat namespace under the plugin row, so uploads are prefixed with
 // the document stem they were added from to keep figure-1.png from colliding across documents.
@@ -36,13 +45,22 @@ const MIME_BY_EXTENSION = {
 
 export const parseDocName = (fileName) => {
   const match = DOC_NAME.exec(fileName ?? '')
-  return match ? { locale: match[1], slug: match[2] } : null
+  if (!match) return null
+  return { locale: match[1], slug: match[2], kind: match[3] === 'pdf' ? PDF_KIND : DOC_KIND }
 }
 
+/** What the reader does with a document: render it, or hand it over. */
+export const DOC_KIND = 'markdown'
+export const PDF_KIND = 'pdf'
+
 export const buildDocName = (locale, slug) => `${locale}_${slug}.md`
+export const buildPdfName = (locale, slug) => `${locale}_${slug}.pdf`
+
+/** The extension a stored guide of either kind carries. */
+export const kindExtension = (kind) => (kind === PDF_KIND ? 'pdf' : 'md')
 
 /** The document stem an image upload is namespaced under, e.g. en_US_searching-holdings. */
-export const docStem = (fileName) => (fileName ?? '').replace(/\.md$/, '')
+export const docStem = (fileName) => (fileName ?? '').replace(/\.(md|pdf)$/i, '')
 
 export const buildImageName = (stem, originalName) => {
   const safe = (originalName ?? '').replace(/[\\/]/g, '_').trim()
@@ -53,6 +71,24 @@ export const buildImageName = (stem, originalName) => {
 export const displayImageName = (storedName) => {
   const at = (storedName ?? '').indexOf(IMAGE_SEPARATOR)
   return at === -1 ? storedName : storedName.slice(at + IMAGE_SEPARATOR.length)
+}
+
+/**
+ * Which of the three help file types a listed row is.
+ *
+ * FILE_TYPE is what the store filters on and is the answer whenever it survives the trip. The name
+ * is consulted only when it does not, because a mixed listing that misfiles a row drops a guide out
+ * of the reader silently, and the naming rules here are ours and unambiguous: a guide or a manual
+ * parses as <locale>_<slug> with a known extension, and a figure carries the `__` separator.
+ * Anything matching neither belongs to some other feature on the same row and is not ours.
+ */
+export const helpFileType = (record) => {
+  const declared = record?.fileType
+  if (declared === HELP_DOC || declared === HELP_IMAGE || declared === HELP_PDF) return declared
+
+  const parsed = parseDocName(record?.fileName)
+  if (parsed) return parsed.kind === PDF_KIND ? HELP_PDF : HELP_DOC
+  return String(record?.fileName ?? '').includes(IMAGE_SEPARATOR) ? HELP_IMAGE : null
 }
 
 export const mimeFromName = (fileName) => {
@@ -152,7 +188,8 @@ const toRecord = (item) => {
     contentType: readValue(item, 'CONTENT_TYPE') || mimeFromName(fileName),
     notes: decodeNotes(readValue(item, 'FILE_NOTES')),
     locale: parsed?.locale ?? null,
-    slug: parsed?.slug ?? null
+    slug: parsed?.slug ?? null,
+    kind: parsed?.kind ?? null
   }
 }
 
@@ -204,6 +241,18 @@ export const saveHelpDoc = (svSession, { objectId, locale, slug, markdown, notes
   return uploadHelpFile(svSession, { objectId, fileType: HELP_DOC, file, fileName, notes })
 }
 
+/**
+ * Stores an uploaded PDF as a manual.
+ *
+ * Named and noted exactly like a Markdown guide, because that is what makes it routable: the notes
+ * carry the route the reader matches on, so guidesForRoute sorts the two kinds into one list
+ * without knowing there are two.
+ */
+export const savePdfManual = (svSession, { objectId, locale, slug, file, notes }) =>
+  uploadHelpFile(svSession, {
+    objectId, fileType: HELP_PDF, file, fileName: buildPdfName(locale, slug), notes,
+  })
+
 /* --------------------------------------------------------------- deleting -- */
 
 // svCONST.OBJECT_TYPE_FILE. The delete endpoint takes the type as a number, and the file rows
@@ -235,14 +284,15 @@ export const deleteHelpFile = async (svSession, objectId) => {
  * `<locale>_<slug>__` prefix only, so a locale-neutral image shared with another translation is
  * left alone.
  */
-export const deleteHelpDoc = async (svSession, { objectId, fileName }) => {
+export const deleteHelpDoc = async (svSession, { objectId, fileName, kind = DOC_KIND }) => {
   const stem = docStem(fileName)
 
-  const docs = await listHelpFiles(svSession, objectId, HELP_DOC)
-  const versions = docs.filter(record => record.fileName === fileName)
+  const files = await listHelpFiles(svSession, objectId, ALL_FILE_TYPES)
+  const versions = files.filter(record => record.fileName === fileName)
 
-  const images = await listHelpFiles(svSession, objectId, HELP_IMAGE)
-  const figures = images.filter(record => record.fileName.startsWith(`${stem}${IMAGE_SEPARATOR}`))
+  // An uploaded manual carries its figures inside itself, so there is no figure namespace to sweep.
+  const figures = kind === PDF_KIND ? [] : files.filter(record =>
+    helpFileType(record) === HELP_IMAGE && record.fileName.startsWith(`${stem}${IMAGE_SEPARATOR}`))
 
   for (const record of [...versions, ...figures]) {
     await deleteHelpFile(svSession, record.objectId)
