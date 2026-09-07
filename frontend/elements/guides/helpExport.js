@@ -73,3 +73,20 @@ export const downloadGuidePdf = async (fileName, { title, body, resolveUrl }) =>
   const figures = await loadPdfFigures(body, resolveUrl)
   downloadBlob(named(fileName, 'pdf'), await renderGuidePdf({ title, body, figures }))
 }
+
+/**
+ * Downloads a guide in whichever of the two forms was asked for.
+ *
+ * The fork belongs here rather than at each surface. Which form the reader wants is the surface's
+ * business; that a PDF is laid out from the body while an archive carries the document whole is
+ * this module's, and it was being restated at three call sites that had no other reason to know it.
+ *
+ * @param {'pdf'|'source'} form
+ * @param {string} raw   the document as stored, front matter included
+ * @param {string} body  the same document with its front matter removed
+ */
+export const downloadGuide = (form, fileName, { title, raw, body, resolveUrl }) => (
+  form === 'pdf'
+    ? downloadGuidePdf(fileName, { title, body, resolveUrl })
+    : downloadGuideArchive(fileName, raw, resolveUrl)
+)

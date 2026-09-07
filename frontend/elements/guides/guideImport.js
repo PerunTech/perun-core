@@ -1,5 +1,5 @@
 import { figureNames } from './figureRefs'
-import { mimeFromName } from './helpFiles'
+import { mimeFromName } from './helpNames'
 import { unzipEntries } from './zip'
 
 /**

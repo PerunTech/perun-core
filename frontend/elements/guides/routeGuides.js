@@ -1,8 +1,9 @@
 import { matchPath } from 'react-router-dom'
 import {
-  ALL_FILE_TYPES, HELP_DOC, HELP_IMAGE, HELP_PDF, displayImageName, helpFileType, listHelpFiles,
-  listHelpModules, newestByName, resolveImageRecord
-} from './helpFiles'
+  HELP_DOC, HELP_IMAGE, HELP_PDF, displayImageName, helpFileType, newestByName, resolveImageRecord
+} from './helpNames'
+import { ALL_FILE_TYPES, listHelpFiles } from './helpApi'
+import { listHelpModules } from './helpModules'
 
 // perun-core owns the guides that are not specific to any one module, so it is always consulted
 // alongside whichever module the current route belongs to.
@@ -43,7 +44,7 @@ export const getHelpIndexVersion = () => indexVersion
 
 // What one session was allowed to see is not what the next one sees, so a new session starts from
 // an empty cache. Without this, a lookup that ran against an expired session sticks: the global
-// interceptor turns a 401 into a resolved empty answer (see requireResponse in helpFiles), that
+// interceptor turns a 401 into a resolved empty answer (see requireResponse in helpApi), that
 // empty answer is cached as "this module has no guides", and logging back in does not clear it
 // because a re-login is a state change rather than a page load. The symptom is the navbar button
 // staying missing on a route that has a guide until the tab is reloaded.

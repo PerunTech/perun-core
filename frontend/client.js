@@ -45,7 +45,7 @@ import Swal from 'sweetalert2'
 // Utility functions
 import * as utils from './functions/utils'
 import * as cookies from './functions/cookies'
-import { clearLabelTextCache } from './elements/help/helpConfig'
+import { clearLabelTextCache } from './elements/fieldHelp/helpConfig'
 
 // Exports
 export {

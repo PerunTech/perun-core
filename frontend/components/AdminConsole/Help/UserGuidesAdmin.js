@@ -1,32 +1,24 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import Form from '@rjsf/core'
-import validator from '@rjsf/validator-ajv8'
 import { Icon, alertUserV2, alertUserResponse } from '../../../elements'
-import { getServerOrigin } from '../../../functions/utils'
-import { router } from '../../../routes/Router'
 import { MarkdownEditor } from '../../MarkdownEditor'
 import AdminConsoleHelpButton from './AdminConsoleHelpButton'
+import GuidesTable from './GuidesTable'
+import GuideUploadDialog from './GuideUploadDialog'
+import { useGuideExport } from './useGuideExport'
+import { useGuideFigures } from './useGuideFigures'
+import { useGuideRoutes } from './useGuideRoutes'
+import { useGuideStore } from './useGuideStore'
+import { useGuideUpload } from './useGuideUpload'
 import Loading from '../../Loading/Loading'
+import { PDF_KIND } from '../../../elements/guides/helpNames'
 import {
-  HELP_IMAGE, PDF_KIND,
-  listHelpModules, fetchHelpText, saveHelpDoc, savePdfManual, uploadHelpFile,
-  buildImageName, displayImageName, createBlobCache, docStem, deleteHelpDoc, kindExtension,
-  isPdfFile, parseDocName,
-} from '../../../elements/help/helpFiles'
-import {
-  clearHelpIndexCache, figureResolver, loadGuideFigures, loadGuideIndex, loadImageIndex,
-  moduleIdFromPath, ownerModuleForRoute
-} from '../../../elements/help/routeGuides'
-import { downloadGuideArchive, downloadGuidePdf } from '../../../elements/help/helpExport'
-import { readGuideUpload } from '../../../elements/help/guideImport'
-import { applyFrontMatter, parseFrontMatter } from '../../MarkdownEditor/frontMatter'
-import getMetadataSchema, { transformMetadataErrors } from '../../MarkdownEditor/metadataSchema'
-import RouteWidget from '../../MarkdownEditor/RouteWidget'
-import { collectImageNames } from '../../MarkdownEditor/renderMarkdown'
+  createBlobCache, deleteHelpDoc, fetchHelpText, saveHelpDoc,
+} from '../../../elements/guides/helpApi'
+import { clearHelpIndexCache, ownerModuleForRoute } from '../../../elements/guides/routeGuides'
 
-const { useReducer, useEffect, useRef, useCallback, useMemo } = React
+const { useReducer, useEffect, useRef, useMemo } = React
 
 // No trailing blank line: the fence regex consumes one newline after the closing ---, so a second
 // one survives as the body and opens the editor on an empty first line. serializeFrontMatter
@@ -38,59 +30,18 @@ const { useReducer, useEffect, useRef, useCallback, useMemo } = React
 // wrong module.
 const blankDoc = (route) => `---\nroute: ${route}\ntitle: \norder: 1\n---\n`
 
-// A manual arrives finished and is stored as it stands; a guide arrives as its source and is
-// stored the way the editor would have stored it. The picker takes all three because to an author
-// they are one gesture: this is the file, put it in.
-const GUIDE_SOURCE = /\.(md|zip)$/i
-
-// The editor's own metadata strip lays these out in a row; here they sit on a grid, so the classes
-// differ while the fields and their widgets do not.
-const uploadUiSchema = (routes, fmt) => ({
-  'ui:order': ['route', 'title', 'locale', 'slug', 'order'],
-  route: {
-    'ui:classNames': 'user-guides-field user-guides-field--wide',
-    'ui:widget': RouteWidget,
-    'ui:options': { routes, toggleLabel: fmt('perun.help_editor.show_routes') },
-  },
-  title: { 'ui:classNames': 'user-guides-field user-guides-field--wide' },
-  locale: { 'ui:classNames': 'user-guides-field' },
-  slug: { 'ui:classNames': 'user-guides-field' },
-  order: { 'ui:classNames': 'user-guides-field' },
-})
-
-/** The metadata a stored manual already carries, for a replacement that keeps all of it. */
-const metaOf = (record) => ({
-  route: record.notes?.route ?? '',
-  title: record.notes?.title ?? '',
-  order: record.notes?.order,
-  locale: record.locale,
-  slug: record.slug,
-})
-
-/** A file size a person reads rather than a byte count, for the chosen manual. */
-const fileSize = (bytes) => {
-  if (!Number.isFinite(bytes)) return ''
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 const UserGuidesAdmin = (props, context) => {
   const fmt = (id) => context.intl.formatMessage({ id, defaultMessage: id })
 
   const initialState = {
-    loading: true, saving: false, exporting: false,
-    modules: [], docs: [], locales: [], editing: null, imageUrls: {},
-    uploading: false, uploadFile: null, replacing: null, importing: null,
+    loading: false, saving: false, editing: null,
   }
   const reducer = (currState, update) => ({ ...currState, ...update })
   const [{
-    loading, saving, exporting, modules, docs, locales, editing, imageUrls, uploading, uploadFile,
-    replacing, importing,
+    loading, saving, editing,
   }, setState] = useReducer(reducer, initialState)
 
   const cache = useRef(createBlobCache())
-  const manualInputRef = useRef(null)
   // Object URLs stay alive until revoked, so a section left open would otherwise pin every figure
   // it ever previewed for the life of the tab.
   useEffect(() => {
@@ -100,73 +51,11 @@ const UserGuidesAdmin = (props, context) => {
 
   const { svSession } = props
 
-  /** Guides live under each module's own plugin row, so the list is the union across bundles. */
-  const loadDocs = useCallback(async (moduleList) => {
-    const perModule = await Promise.all(moduleList.map(async (module) => {
-      try {
-        // The reader's cached index rather than a listing of its own: it is the same one call per
-        // plugin row, and every write here clears that cache, so the two cannot drift apart.
-        const records = await loadGuideIndex(svSession, module.objectId)
-        return records.map(record => ({ ...record, module: module.id }))
-      } catch (err) {
-        // One module failing to answer should not blank the whole list.
-        console.error(`Could not read guides for ${module.id}`, err)
-        return []
-      }
-    }))
-    setState({ docs: perModule.flat() })
-  }, [svSession])
+  const { modules, docs, locales, booting, anchorFor, reloadDocs } = useGuideStore(svSession, fmt)
+  const upload = useGuideUpload({ svSession, modules, anchorFor, reloadDocs, fmt })
 
-  useEffect(() => {
-    let cancelled = false
-
-    const boot = async () => {
-      try {
-        const [moduleList, languages] = await Promise.all([
-          listHelpModules(svSession),
-          fetch(`${getServerOrigin()}${window.assets}/json/config/LanguageOptions.json`)
-            .then(res => res.json())
-            .catch(() => []),
-        ])
-        if (cancelled) return
-
-        if (!moduleList.length) {
-          setState({ loading: false })
-          alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_no_anchor') })
-          return
-        }
-
-        setState({
-          modules: moduleList,
-          locales: (languages ?? []).map(item => ({ value: item.language, label: item.label || item.language })),
-        })
-        await loadDocs(moduleList)
-      } catch (err) {
-        console.error(err)
-        // A request already in flight when the session changed rejects after this effect has been
-        // torn down. The reader is on their way to the login screen by then, so reporting it is
-        // noise about something they did on purpose.
-        if (cancelled) return
-        alertUserResponse({ response: err })
-      } finally {
-        if (!cancelled) setState({ loading: false })
-      }
-    }
-
-    // No session is a logout in progress, not a section that failed to load. Asking anyway would
-    // return a 401, which the global interceptor swallows into a resolved empty answer, which
-    // requireResponse then has to throw on.
-    if (svSession) boot()
-    else setState({ loading: false })
-
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [svSession, loadDocs])
-
-  const anchorFor = useCallback(
-    (moduleId) => modules.find(module => module.id === moduleId)?.objectId ?? null,
-    [modules]
-  )
+  // One flag for "the screen is writing", whichever half of it started.
+  const busy = saving || upload.busy
 
   // A guide is only readable from the module that owns its route, so the storage anchor follows the
   // route rather than being chosen. editingModule is what every write below resolves through.
@@ -175,417 +64,13 @@ const UserGuidesAdmin = (props, context) => {
     [editing, modules]
   )
 
-  /**
-   * Path segments a module serves under a name other than its own, as a segment to module id map.
-   *
-   * A module's guides are usually spelled after it, /main/farm-registry, and the segment is the
-   * module id. But a plugin may register whatever paths it likes: farm-registry also serves
-   * /main/registry, whose segment names no module at all. The plugin that registered a route is
-   * the only thing that connects the two, so its own routes are grouped and the segment that does
-   * name a known module is taken as its identity, with its other segments pointed at that.
-   */
-  const segmentOwners = useMemo(() => {
-    const byPlugin = new Map()
-    Object.entries(router.routeOwners?.() ?? {}).forEach(([path, plugin]) => {
-      const segment = moduleIdFromPath(path)
-      if (!segment) return
-      if (!byPlugin.has(plugin)) byPlugin.set(plugin, new Set())
-      byPlugin.get(plugin).add(segment)
-    })
-
-    const index = {}
-    byPlugin.forEach(segments => {
-      // The bundle's own name is not assumed to be the module's context name, so the module is
-      // identified by whichever of its segments the backend actually knows as a module.
-      const known = [...segments].find(segment => modules.some(module => module.id === segment))
-      if (known) segments.forEach(segment => { index[segment] = known })
-    })
-    return index
-  }, [modules])
-
-  /**
-   * The module a route belongs to, as the list and the editor both name it.
-   *
-   * Asked of the route rather than of the row the guide is stored on. Those differ by design:
-   * ownerModuleForRoute falls back to perun-core for any route naming no registered module, so
-   * /main, /main/registry and a `:section(...)` pattern all land on the shared row. Reading that
-   * storage back as a name told the author their guide belonged to whatever the deployment calls
-   * its core plugin, which is a module the guide has nothing to do with.
-   *
-   * Shared is kept for a route that genuinely belongs to no module, /main above all, since that is
-   * exactly what a general manual is.
-   */
-  const moduleLabel = useCallback((route) => {
-    const segment = moduleIdFromPath(route)
-    const id = modules.some(module => module.id === segment) ? segment : segmentOwners[segment]
-    const named = modules.find(module => module.id === id)
-    return named ? (named.title || named.id) : fmt('perun.admin_console.user_guides_module_shared')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules, segmentOwners])
-
-  // Route suggestions come from the registered modules plus whatever existing guides already point
-  // at, which covers the common cases without a Router change.
-  //
-  // The path is part of the label rather than only the value: the route is what decides both where
-  // a guide is stored and where it answers, so an author choosing between two similar module names
-  // is really choosing between two paths and should be able to see them.
-  /**
-   * Every route the application actually registered, as the plugins declared them.
-   *
-   * The module list only yields `/main/<module id>`, which is a guess that holds for a module's
-   * own root and for nothing else: farm-registry also serves /main/registry, a sibling rather than
-   * a child, and no amount of deriving from the module id would produce it. The registry is the
-   * only place the real answer exists, so it is read rather than reconstructed.
-   *
-   * Paths outside /main are dropped. The reader lives in the navbar behind a session, so a guide
-   * routed at the login screen could never be opened.
-   */
-  const appRoutes = useMemo(() => Object.entries(props.routeRegistry ?? {})
-    // `loading` shares this slice with the registry, and a path may be declared as an array.
-    .filter(([, element]) => element?.props?.path)
-    .flatMap(([name, element]) => [element.props.path].flat().map(path => ({ value: path, label: name })))
-    .filter(route => String(route.value).startsWith('/main')), [props.routeRegistry])
-
-  const routes = useMemo(() => {
-    // The name and the path are separate fields because RouteWidget shows them in two columns; a
-    // label carrying its own path would print it twice.
-    const fromModules = modules.map(module => ({ value: `/main/${module.id}`, label: module.title || module.id }))
-    // A route only a saved guide knows about has no name to show, just its path.
-    const fromDocs = docs.map(doc => doc.notes?.route).filter(Boolean).map(route => ({ value: route, label: '' }))
-    // Every screen in the application. Route matching is a prefix match, so a guide here answers
-    // below every module, which is what makes it a general manual; ownerModuleForRoute reads the
-    // missing module segment and stores it on perun-core, which the reader consults everywhere.
-    // Listed first, and so also the schema's default, because routes[0] is what the schema takes:
-    // a guide whose route nobody narrowed is then readable everywhere rather than filed against
-    // whichever module happened to sort first.
-    const general = { value: '/main', label: fmt('perun.admin_console.user_guides_route_all') }
-    // General first, then the module roots, then everything else the application registered, then
-    // any route only a saved guide knows about. First mention of a path wins its label, which is
-    // what keeps a module route labelled with its title rather than the registry's route name.
-    const seen = new Set()
-    return [general, ...fromModules, ...appRoutes, ...fromDocs]
-      .filter(route => !seen.has(route.value) && seen.add(route.value))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules, docs, appRoutes])
-
-  // Figures are fetched only for the module being edited, and only on entering the editor, so
-  // opening the section costs one request per module rather than two.
-  useEffect(() => {
-    if (!editing) return
-    const objectId = anchorFor(editingModule)
-    if (!objectId) return
-    let cancelled = false
-
-    const loadImages = async () => {
-      try {
-        const records = await loadImageIndex(svSession, objectId)
-        if (cancelled) return
-        const stem = `${editing.locale}_${editing.slug}`
-        const mine = records.filter(img => img.fileName.startsWith(`${stem}__`) || !img.fileName.includes('__'))
-        const pairs = await Promise.all(mine.map(async record => [
-          displayImageName(record.fileName),
-          await cache.current.get(svSession, record),
-        ]))
-        if (!cancelled) setState({ imageUrls: Object.fromEntries(pairs) })
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
-    loadImages()
-    return () => { cancelled = true }
-  }, [editing, editingModule, svSession, anchorFor])
-
-  const resolveImage = useCallback((name) => imageUrls[name] ?? null, [imageUrls])
-
-  // Called by the editor on save, once per figure the document still references. The editor has
-  // already chosen a non-colliding display name and written it into the Markdown, so store under
-  // that name rather than the dropped file's own.
-  const uploadImage = useCallback(async (file, { locale, slug, name }) => {
-    const objectId = anchorFor(editingModule)
-    if (!objectId) throw new Error(fmt('perun.admin_console.user_guides_no_anchor'))
-
-    await uploadHelpFile(svSession, {
-      objectId,
-      fileType: HELP_IMAGE,
-      file,
-      fileName: buildImageName(`${locale}_${slug}`, name || file.name),
-      notes: { doc: `${locale}_${slug}` },
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [svSession, editingModule, anchorFor])
-
-  /**
-   * Exports one stored guide, as a PDF to read or as its source to edit.
-   *
-   * The figures are read the way the reader reads them, so the PDF carries its screenshots rather
-   * than a column of gaps and the archive carries the files the Markdown names.
-   */
-  const exportDoc = async (event, record, form) => {
-    event.stopPropagation()
-    setState({ exporting: true })
-
-    try {
-      const raw = await fetchHelpText(svSession, record)
-      const { body } = parseFrontMatter(raw)
-      const anchor = { anchorId: anchorFor(record.module), locale: record.locale, slug: record.slug }
-      const images = await loadGuideFigures(svSession, anchor, collectImageNames(body), cache.current)
-      const resolveUrl = figureResolver(images)
-
-      if (form === 'pdf') {
-        await downloadGuidePdf(record.fileName, { title: record.notes?.title || record.slug, body, resolveUrl })
-      } else {
-        await downloadGuideArchive(record.fileName, raw, resolveUrl)
-      }
-    } catch (err) {
-      console.error(err)
-      alertUserResponse({ response: err })
-    } finally {
-      setState({ exporting: false })
-    }
-  }
-
-  /**
-   * Exports what is on screen rather than what is stored, so an author can take a draft away before
-   * committing it. The editor hands over the recombined document and its own resolver, which covers
-   * figures dropped in this session and not yet uploaded, so a draft exports as it previews.
-   */
-  const exportEditing = async (form, document, resolveFigure) => {
-    const fileName = `${editing.locale}_${editing.slug || 'untitled'}.md`
-    setState({ exporting: true })
-
-    try {
-      const resolveUrl = resolveFigure ?? resolveImage
-      if (form === 'pdf') {
-        const { meta, body } = parseFrontMatter(document)
-        await downloadGuidePdf(fileName, { title: meta.title || editing.slug, body, resolveUrl })
-      } else {
-        await downloadGuideArchive(fileName, document, resolveUrl)
-      }
-    } catch (err) {
-      console.error(err)
-      alertUserResponse({ response: err })
-    } finally {
-      setState({ exporting: false })
-    }
-  }
-
-  /**
-   * Stores an uploaded PDF against the module its route belongs to.
-   *
-   * The anchor is derived from the submitted route exactly as a written guide's is, which is what
-   * keeps an uploaded manual readable at the route it claims: the reader only ever consults the
-   * route's own module and perun-core.
-   */
-  const uploadManual = async ({ file, meta }) => {
-    const module = ownerModuleForRoute(meta.route, modules)
-    const objectId = anchorFor(module)
-    if (!objectId) {
-      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_no_anchor') })
-      return
-    }
-
-    try {
-      setState({ saving: true })
-      await savePdfManual(svSession, {
-        objectId,
-        locale: meta.locale,
-        slug: meta.slug,
-        file,
-        // The same notes a written guide carries, module included: pickLocale groups a document's
-        // translations by module and slug, so a manual without one would share a key with every
-        // other module's manual of that slug and all but one would be dropped from the list.
-        notes: { route: meta.route, title: meta.title, order: meta.order, locale: meta.locale, module },
-      })
-      clearHelpIndexCache()
-      await loadDocs(modules)
-      setState({ saving: false, uploading: false, uploadFile: null, replacing: null, importing: null })
-      alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
-    } catch (err) {
-      console.error(err)
-      setState({ saving: false })
-      alertUserResponse({ response: err })
-    }
-  }
-
-  /**
-   * Opens the metadata form on the file that was picked, once it turns out to be a PDF.
-   *
-   * The input is cleared afterwards so choosing the same file twice fires a change event again;
-   * without it, cancelling an upload and re-picking the same manual would do nothing. The type is
-   * checked here rather than left to `accept`, which every file dialog offers a way past: a manual
-   * that is not a PDF uploads happily and fails only when a reader opens it.
-   */
-  const pickManual = async (event) => {
-    const file = event.target.files?.[0] ?? null
-    if (manualInputRef.current) manualInputRef.current.value = ''
-    if (!file) return
-
-    if (GUIDE_SOURCE.test(file.name)) {
-      await startImport(file)
-      return
-    }
-
-    if (!await isPdfFile(file)) {
-      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_pdf'), message: file.name })
-      return
-    }
-
-    // A replacement asks nothing further: the route, title, locale and slug are the ones the
-    // manual already answers on, and editing them here would move the document rather than
-    // replace it, leaving the original behind under the old name.
-    if (replacing) {
-      const record = replacing
-      setState({ replacing: null })
-      await uploadManual({ file, meta: metaOf(record) })
-      return
-    }
-    setState({ uploadFile: file, uploading: true })
-  }
-
-  /**
-   * Swaps the file behind an uploaded manual.
-   *
-   * No confirmation, because a save writes a new version rather than overwriting one: the previous
-   * file is still stored if the new one turns out to be wrong. The plain upload path clears
-   * `replacing` for the opposite reason, that cancelling a file dialog fires no event at all,
-   * which would otherwise leave the next upload silently replacing this row.
-   */
-  const startReplace = (event, record) => {
-    event.stopPropagation()
-    setState({ replacing: record })
-    manualInputRef.current?.click()
-  }
-
-  const startUpload = () => {
-    setState({ replacing: null, importing: null })
-    manualInputRef.current?.click()
-  }
-
-  /**
-   * Opens the metadata form on a guide read out of a .md or an archive.
-   *
-   * The file is read before the form is shown so the form can be filled from what the document
-   * says about itself, and so a file that is not a guide is refused at the point it was picked
-   * rather than at the point it was submitted.
-   *
-   * Figures the document names but the file did not carry are reported rather than silently
-   * dropped: the guide still imports, and the author is told which references will not resolve.
-   * That is every figure of a bare .md, which is the honest answer to importing one.
-   */
-  const startImport = async (file) => {
-    try {
-      setState({ saving: true })
-      const source = await readGuideUpload(file)
-      setState({
-        saving: false,
-        uploading: true,
-        uploadFile: file,
-        importing: { ...source, ...parseFrontMatter(source.markdown), doc: parseDocName(source.name) },
-      })
-      if (source.missing.length) {
-        alertUserV2({
-          type: 'info',
-          title: fmt('perun.admin_console.user_guides_missing_figures'),
-          message: source.missing.join(', '),
-        })
-      }
-    } catch (err) {
-      console.error(err)
-      setState({ saving: false })
-      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_not_a_guide'), message: file.name })
-    }
-  }
-
-  /**
-   * Stores an imported guide as though the editor had just saved it.
-   *
-   * The form is the authority on the routing metadata rather than the file, so the document is
-   * rewritten with what was confirmed on screen. Without that a guide imported onto a different
-   * route would carry the old one in its front matter and export it back out again.
-   */
-  const importGuide = async ({ markdown, figures, meta }) => {
-    const module = ownerModuleForRoute(meta.route, modules)
-    const objectId = anchorFor(module)
-    if (!objectId) {
-      alertUserV2({ type: 'info', title: fmt('perun.admin_console.user_guides_no_anchor') })
-      return
-    }
-
-    try {
-      setState({ saving: true })
-      const stem = `${meta.locale}_${meta.slug}`
-      await saveHelpDoc(svSession, {
-        objectId,
-        locale: meta.locale,
-        slug: meta.slug,
-        markdown: applyFrontMatter(markdown, { route: meta.route, title: meta.title, order: meta.order }),
-        notes: { route: meta.route, title: meta.title, order: meta.order, locale: meta.locale, module },
-      })
-
-      // Stored under the name the Markdown uses, which is what resolveImageRecord looks for. One
-      // at a time rather than in parallel: the store answers a burst of uploads on one object with
-      // a lock contention error often enough to matter.
-      for (const figure of figures) {
-        await uploadHelpFile(svSession, {
-          objectId,
-          fileType: HELP_IMAGE,
-          file: figure.file,
-          fileName: buildImageName(stem, figure.name),
-          notes: { doc: stem },
-        })
-      }
-
-      clearHelpIndexCache()
-      await loadDocs(modules)
-      setState({ saving: false, uploading: false, uploadFile: null, importing: null })
-      alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
-    } catch (err) {
-      console.error(err)
-      setState({ saving: false })
-      alertUserResponse({ response: err })
-    }
-  }
-
-  const cancelUpload = () => setState({ uploading: false, uploadFile: null, replacing: null, importing: null })
-
-  const uploadSchema = useMemo(
-    () => getMetadataSchema(context, { locales, routes }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locales, routes]
-  )
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const uploadUi = useMemo(() => uploadUiSchema(routes, fmt), [routes])
-
-  /**
-   * A slug seeded from the chosen file, since a manual usually arrives already named.
-   *
-   * The schema's slug pattern is strict, so the file name is folded to fit it rather than offered
-   * as-is and rejected on submit.
-   */
-  const uploadDefaults = useMemo(() => {
-    const stem = (uploadFile?.name ?? '').replace(/\.(pdf|md|zip)$/i, '')
-    // An imported guide states its own route and title in its front matter and its locale and slug
-    // in its file name, so the form opens on what the document says. Offered only as a default:
-    // a route or locale this deployment does not have falls back rather than seeding a value the
-    // schema would reject, and the form is shown for review before any of it is stored.
-    const meta = importing?.meta ?? {}
-    const doc = importing?.doc
-    const offered = (value, options) =>
-      (options.some(option => option.value === value) ? value : options[0]?.value ?? '')
-
-    return {
-      // Kept as written rather than run through `offered`: the route field takes free text now, so
-      // an imported guide routed by a pattern would otherwise be quietly moved to the first module
-      // in the list. Only an empty route falls back.
-      route: meta.route || routes[0]?.value || '',
-      locale: offered(doc?.locale, locales),
-      order: Number(meta.order) || 1,
-      slug: doc?.slug ?? stem.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-      title: meta.title || stem,
-    }
-  }, [routes, locales, uploadFile, importing])
+  const { routes, moduleLabel } = useGuideRoutes(modules, docs, props.routeRegistry, fmt)
+  const { resolveImage, uploadImage } = useGuideFigures({
+    svSession, editing, editingModule, anchorFor, cache, fmt,
+  })
+  const { exporting, exportDoc, exportEditing } = useGuideExport({
+    svSession, editing, resolveImage, cache,
+  })
 
   const openDoc = async (record) => {
     // A manual is bytes nobody here authored, so there is nothing for the editor to open. Saying
@@ -603,7 +88,6 @@ const UserGuidesAdmin = (props, context) => {
       const markdown = await fetchHelpText(svSession, record)
       setState({
         editing: { value: markdown, locale: record.locale, slug: record.slug, route: record.notes?.route ?? '' },
-        imageUrls: {},
         loading: false,
       })
     } catch (err) {
@@ -620,7 +104,6 @@ const UserGuidesAdmin = (props, context) => {
       slug: '',
       route: routes[0]?.value ?? '',
     },
-    imageUrls: {},
   })
 
   const handleSave = async ({ document, locale, slug, meta }) => {
@@ -641,7 +124,7 @@ const UserGuidesAdmin = (props, context) => {
       // The navbar reader caches each module's index for the life of the tab, so a fresh save is
       // invisible to it until the cache is dropped.
       clearHelpIndexCache()
-      await loadDocs(modules)
+      await reloadDocs()
       setState({ saving: false, editing: null })
       alertUserV2({ type: 'success', title: fmt('perun.admin_console.saved') })
     } catch (err) {
@@ -674,7 +157,7 @@ const UserGuidesAdmin = (props, context) => {
       setState({ saving: true })
       await deleteHelpDoc(svSession, { objectId, fileName: doc.fileName, kind: doc.kind })
       clearHelpIndexCache()
-      await loadDocs(modules)
+      await reloadDocs()
       setState({ saving: false })
       alertUserV2({ type: 'success', title: fmt('perun.admin_console.user_guides_deleted') })
     } catch (err) {
@@ -717,7 +200,7 @@ const UserGuidesAdmin = (props, context) => {
           resolveImage={resolveImage}
           onSave={handleSave}
           onCancel={() => setState({ editing: null })}
-          onMetaChange={(meta) => setState({ editing: { ...editing, route: meta.route }, imageUrls: {} })}
+          onMetaChange={(meta) => setState({ editing: { ...editing, route: meta.route } })}
           onExport={exportEditing}
           saving={saving}
         />
@@ -737,7 +220,7 @@ const UserGuidesAdmin = (props, context) => {
         <button
           type='button'
           className='md-btn user-guides-upload-btn'
-          onClick={startUpload}
+          onClick={upload.startUpload}
           disabled={!modules.length}
         >
           <Icon name='IconUpload' size={16} stroke={1.7} />
@@ -746,143 +229,46 @@ const UserGuidesAdmin = (props, context) => {
       </div>
 
       <input
-        ref={manualInputRef}
+        ref={upload.inputRef}
         type='file'
         accept='application/pdf,.pdf,text/markdown,.md,application/zip,.zip'
         className='md-file-input'
-        onChange={pickManual}
+        onChange={upload.pickFile}
       />
 
-      {uploading && uploadFile && (
-        <section className='user-guides-upload' aria-label={fmt('perun.admin_console.user_guides_upload')}>
-          <header className='user-guides-upload-head'>
-            <h3>{fmt(importing ? 'perun.admin_console.user_guides_import' : 'perun.admin_console.user_guides_upload')}</h3>
-            <button
-              type='button'
-              className='user-guides-upload-close'
-              title={fmt('perun.help_editor.cancel')}
-              aria-label={fmt('perun.help_editor.cancel')}
-              onClick={cancelUpload}
-            >
-              <Icon name='IconX' size={16} stroke={1.7} />
-            </button>
-          </header>
-
-          <p className='user-guides-upload-file'>
-            <Icon name={importing ? 'IconFileText' : 'IconFileTypePdf'} size={22} stroke={1.5} />
-            <span className='user-guides-upload-name'>{uploadFile.name}</span>
-            <span className='user-guides-upload-size'>{fileSize(uploadFile.size)}</span>
-            <button type='button' className='user-guides-upload-swap' onClick={() => manualInputRef.current?.click()}>
-              {fmt('perun.admin_console.user_guides_choose_other')}
-            </button>
-          </p>
-
-          <p className='user-guides-upload-hint'>{fmt('perun.admin_console.user_guides_upload_hint')}</p>
-
-          <Form
-            schema={uploadSchema.schema}
-            uiSchema={uploadUi}
-            formData={uploadDefaults}
-            validator={validator}
-            transformErrors={errors => transformMetadataErrors(errors, context)}
-            showErrorList={false}
-            noHtml5Validate
-            className='user-guides-upload-form'
-            onSubmit={({ formData }) => (importing
-              ? importGuide({ ...importing, meta: formData })
-              : uploadManual({ file: uploadFile, meta: formData }))}
-          >
-            <div className='user-guides-upload-actions'>
-              <button type='button' className='md-btn md-btn--ghost' onClick={cancelUpload}>
-                {fmt('perun.help_editor.cancel')}
-              </button>
-              <button type='submit' className='md-btn md-btn--primary' disabled={saving}>
-                <Icon name='IconUpload' size={16} stroke={1.7} />
-                <span>{fmt(importing ? 'perun.admin_console.user_guides_import' : 'perun.admin_console.user_guides_upload')}</span>
-              </button>
-            </div>
-          </Form>
-        </section>
+      {upload.uploading && upload.file && (
+        <GuideUploadDialog
+          file={upload.file}
+          importing={upload.importing}
+          routes={routes}
+          locales={locales}
+          saving={busy}
+          fmt={fmt}
+          intlContext={context}
+          onPickOther={() => upload.inputRef.current?.click()}
+          onCancel={upload.cancel}
+          onSubmit={upload.submit}
+        />
       )}
 
-      {(loading || saving || exporting) && <Loading />}
+      {(booting || loading || busy || exporting) && <Loading />}
 
-      {!loading && !saving && !docs.length && (
+      {!booting && !loading && !busy && !docs.length && (
         <p className='user-guides-empty'>{fmt('perun.admin_console.user_guides_empty')}</p>
       )}
 
-      {!loading && !saving && docs.length > 0 && (
-        <table className='user-guides-table'>
-          <thead>
-            <tr>
-              <th>{fmt('perun.admin_console.user_guides_module')}</th>
-              <th>{fmt('perun.help_editor.title')}</th>
-              <th>{fmt('perun.help_editor.route')}</th>
-              <th>{fmt('perun.help_editor.locale')}</th>
-              <th>{fmt('perun.help_editor.order')}</th>
-              <th>{fmt('perun.admin_console.user_guides_file')}</th>
-              <th aria-label={fmt('perun.admin_console.user_guides_delete')} />
-            </tr>
-          </thead>
-          <tbody>
-            {docs.map(doc => (
-              <tr key={`${doc.module}/${doc.objectId}`} onClick={() => openDoc(doc)}>
-                <td>{moduleLabel(doc.notes?.route)}</td>
-                <td>{doc.notes?.title || doc.slug}</td>
-                <td><code>{doc.notes?.route || '--'}</code></td>
-                <td>{doc.locale}</td>
-                <td>{doc.notes?.order ?? ''}</td>
-                <td>
-                  <code>{`${docStem(doc.fileName)}.${kindExtension(doc.kind)}`}</code>
-                </td>
-                <td className='user-guides-row-actions'>
-                  <button
-                    type='button'
-                    className='user-guides-action'
-                    hidden={doc.kind === PDF_KIND}
-                    disabled={exporting}
-                    title={fmt('perun.help_panel.download_pdf')}
-                    aria-label={fmt('perun.help_panel.download_pdf')}
-                    onClick={event => exportDoc(event, doc, 'pdf')}
-                  >
-                    <Icon name='IconFileTypePdf' size={17} stroke={1.6} />
-                  </button>
-                  <button
-                    type='button'
-                    className='user-guides-action'
-                    hidden={doc.kind === PDF_KIND}
-                    disabled={exporting}
-                    title={fmt('perun.help_panel.download_source')}
-                    aria-label={fmt('perun.help_panel.download_source')}
-                    onClick={event => exportDoc(event, doc, 'source')}
-                  >
-                    <Icon name='IconFileZip' size={17} stroke={1.6} />
-                  </button>
-                  <button
-                    type='button'
-                    className='user-guides-action'
-                    hidden={doc.kind !== PDF_KIND}
-                    disabled={saving}
-                    title={fmt('perun.admin_console.user_guides_replace')}
-                    aria-label={fmt('perun.admin_console.user_guides_replace')}
-                    onClick={event => startReplace(event, doc)}
-                  >
-                    <Icon name='IconUpload' size={17} stroke={1.6} />
-                  </button>
-                  <button
-                    type='button'
-                    className='user-guides-delete'
-                    title={fmt('perun.admin_console.user_guides_delete')}
-                    disabled={saving}
-                    onClick={event => confirmDelete(event, doc)}
-                  >
-                    <Icon name='IconTrash' size={17} stroke={1.6} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!booting && !loading && !busy && docs.length > 0 && (
+        <GuidesTable
+          docs={docs}
+          moduleLabel={moduleLabel}
+          fmt={fmt}
+          exporting={exporting}
+          saving={busy}
+          onOpen={openDoc}
+          onExport={exportDoc}
+          onReplace={upload.startReplace}
+          onDelete={confirmDelete}
+        />
       )}
     </React.Fragment>
   )

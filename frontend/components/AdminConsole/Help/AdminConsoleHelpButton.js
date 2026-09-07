@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { ReactBootstrap, Icon } from '../../../elements'
-import { fetchLabelText } from '../../../elements/help/helpConfig'
-import HelpContext from '../../../elements/help/HelpContext'
+import { fetchLabelText } from '../../../elements/fieldHelp/helpConfig'
+import HelpContext from '../../../elements/fieldHelp/HelpContext'
 
 const { useState, useEffect, useContext } = React
 const { Modal } = ReactBootstrap

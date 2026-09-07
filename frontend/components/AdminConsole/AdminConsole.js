@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import HelpContext from '../../elements/help/HelpContext'
+import HelpContext from '../../elements/fieldHelp/HelpContext'
 import { getServerOrigin } from '../../functions/utils'
 import ACSideMenu from './ACSideMenu'
 // COMPONENTS

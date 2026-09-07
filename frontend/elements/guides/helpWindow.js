@@ -1,4 +1,4 @@
-import { renderMarkdown } from '../MarkdownEditor/renderMarkdown'
+import { renderMarkdown } from './renderMarkdown'
 
 /**
  * Opens one guide in its own browser window.

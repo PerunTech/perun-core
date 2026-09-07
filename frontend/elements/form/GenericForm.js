@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Form from '@rjsf/core';
 import { connect } from 'react-redux';
-import HelpFieldTemplate from '../help/HelpFieldTemplate';
-import HelpContext from '../help/HelpContext';
+import HelpFieldTemplate from '../fieldHelp/HelpFieldTemplate';
+import HelpContext from '../fieldHelp/HelpContext';
 
 import Select from 'react-select';
 import createFilterOptions from "react-select-fast-filter-options";

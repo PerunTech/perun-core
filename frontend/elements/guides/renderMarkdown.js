@@ -99,7 +99,3 @@ export const renderMarkdown = (markdown, resolveImage) => {
 
   return fragment;
 };
-
-// One definition, shared with the exporters: the preview, the source archive and the PDF all have
-// to agree on what counts as a figure reference.
-export { figureNames as collectImageNames } from '../../elements/help/figureRefs';

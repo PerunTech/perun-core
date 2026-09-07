@@ -6,7 +6,7 @@ import { svConfig } from '../../../config';
 import { Dropdown, ComponentManager, alertUserResponse } from '../..';
 import { Loading } from '../../../components/ComponentsIndex';
 import { isValidArray, isValidObject, getArrayIndexFromElementId } from '../../../functions/utils';
-import FieldHelpButton from '../../help/FieldHelpButton';
+import FieldHelpButton from '../../fieldHelp/FieldHelpButton';
 
 const right = {
   'display': 'inline-table'

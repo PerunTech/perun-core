@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { renderMarkdown } from './renderMarkdown';
+import { renderMarkdown } from '../../elements/guides/renderMarkdown';
 
 /**
  * Renders the document body the way the help panel will.
