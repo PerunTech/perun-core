@@ -216,9 +216,32 @@ export const router = (function () {
         registerRoute(name, config);
     });
 
+    /**
+     * Which plugin registered each route, keyed by path.
+     *
+     * The registry above is keyed by route name and holds rendered <Route> elements, so the plugin
+     * a route came from is otherwise lost the moment it is registered. Read back out of the loaded
+     * bundles rather than recorded during registration, so this stays a read of state that already
+     * exists. A plugin may declare a path as an array, which is flattened here.
+     *
+     * Used by the user guides admin to name the module a route belongs to, which is not always the
+     * module its path is spelled after: farm-registry also serves /main/registry.
+     */
+    const routeOwners = () => {
+        const owners = {};
+        Object.entries(storageBundles).forEach(([name, plugin]) => {
+            if (!Array.isArray(plugin?.routes)) return;
+            plugin.routes.forEach(route => {
+                [route?.path].flat().filter(Boolean).forEach(path => { owners[path] = name; });
+            });
+        });
+        return owners;
+    };
+
     return {
         registerRoute,
         setRoute,
+        routeOwners,
         waitForPlugins: () => pluginsReadyPromise,
     };
 })();
