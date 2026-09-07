@@ -16,7 +16,7 @@ import { openHelpWindow } from '../../elements/guides/helpWindow'
  * @param {object} doc    the loaded document, for the guide that is open
  * @param {object} cache  a blob cache from createBlobCache
  */
-export const useGuideExports = ({ svSession, active, doc, resolveImage, cache, fmt }) => {
+export const useDrawerExports = ({ svSession, active, doc, resolveImage, cache, fmt }) => {
   // One guide at a time: a PDF of a long guide takes a moment to lay out, and a second click
   // while the first is still working would only queue a duplicate download.
   const [exporting, setExporting] = useState(false)

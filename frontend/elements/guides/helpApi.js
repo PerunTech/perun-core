@@ -17,7 +17,7 @@ export const PLUGIN_TABLE = 'SVAROG_PERUN_PLUGIN'
 // name and not the short context name. Sending 'PERUN_PLUGIN' makes getTypeIdByName fail, and the
 // getObjectById that follows throws, which the endpoint reports as a 500. Derived from the table
 // constant so the two cannot drift apart again.
-export const HELP_ANCHOR_TYPE = PLUGIN_TABLE
+const HELP_ANCHOR_TYPE = PLUGIN_TABLE
 
 /* ------------------------------------------------------------------- rest -- */
 
@@ -85,7 +85,7 @@ export const listHelpFiles = async (svSession, objectId, fileType, objectType = 
  * path, and downloadFile answers application/octet-stream regardless, so the type is taken from the
  * record and only then from the response.
  */
-export const fetchHelpBlob = async (svSession, record) => {
+const fetchHelpBlob = async (svSession, record) => {
   const url = `${window.server}/ReactElements/downloadFile/sid/${svSession}`
     + `/object-id/${record.objectId}/file-name/${encodeURIComponent(record.fileName)}`
   const response = requireResponse(await axios.get(url, { responseType: 'blob' }))
@@ -145,7 +145,7 @@ const OBJECT_TYPE_FILE = 2
  * goes through encodeURIComponent and there is no value half. deleteLinks is on so the row in
  * SVAROG_LINK goes with the file rather than being left dangling at the plugin.
  */
-export const deleteHelpFile = async (svSession, objectId) => {
+const deleteHelpFile = async (svSession, objectId) => {
   const payload = JSON.stringify({ OBJECT_ID: Number(objectId), OBJECT_TYPE: OBJECT_TYPE_FILE })
   const url = `${window.server}/ReactElements/deleteObject/${svSession}/false/true`
   const response = requireResponse(await axios.post(url, encodeURIComponent(payload), {

@@ -68,19 +68,3 @@ export const applyFrontMatter = (raw, patch) => {
   const { meta, body } = parseFrontMatter(raw);
   return serializeFrontMatter({ ...meta, ...patch }, body);
 };
-
-/**
- * Returns the list of problems that should block a save. An empty array means the document is
- * publishable; the panel cannot route a document that declares no route.
- */
-export const validateFrontMatter = (raw) => {
-  const { meta } = parseFrontMatter(raw);
-  const problems = [];
-
-  if (!hasValue(meta.route)) problems.push('route');
-  else if (!String(meta.route).startsWith('/')) problems.push('route');
-
-  if (hasValue(meta.order) && !Number.isFinite(Number(meta.order))) problems.push('order');
-
-  return problems;
-};

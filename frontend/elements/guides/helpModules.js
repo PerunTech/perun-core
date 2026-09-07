@@ -4,23 +4,6 @@
 import axios from 'axios'
 import { PLUGIN_TABLE, readItems, readObjectId, readValue, requireResponse } from './helpApi'
 
-/**
- * Resolves the PERUN_PLUGIN row a module's help files hang off.
- *
- * getConfigModules builds the bundle entries without the plugin's object id, so bundleStorage
- * cannot supply this. Looking the row up by CONTEXT_NAME keeps the feature working against an
- * unmodified backend; adding the id to the card JSON would remove this round trip.
- */
-export const resolveHelpAnchor = async (svSession, contextName = 'perun-core') => {
-  const url = `${window.server}/ReactElements/getTableWithFilter/${svSession}`
-    + `/${PLUGIN_TABLE}/CONTEXT_NAME/${encodeURIComponent(contextName)}/1`
-  const response = requireResponse(await axios.get(url))
-  const rows = Array.isArray(response?.data) ? response.data : readItems(response?.data)
-  const row = rows?.[0]
-  if (!row) return null
-  return row[`${PLUGIN_TABLE}.OBJECT_ID`] ?? row.object_id ?? readValue(row, 'OBJECT_ID') ?? null
-}
-
 const pluginCol = (row, name) => row[`${PLUGIN_TABLE}.${name}`] ?? readValue(row, name)
 
 // Rows like grid-table and single-form-table are built-in placeholders rather than deployed
@@ -41,8 +24,8 @@ const moduleTitle = (row, contextName) => {
 /**
  * Every module that can own help content, as { id, title, objectId }, in one call.
  *
- * getTableData and getTableWithFilter both serialize through prapareTableQueryData, so this parses
- * the same TABLE.COLUMN shaped rows as resolveHelpAnchor without one lookup per module.
+ * getTableData serializes through prapareTableQueryData, so one call answers with every plugin
+ * row in the TABLE.COLUMN shape parsed below, rather than one lookup per module.
  */
 export const listHelpModules = async (svSession) => {
   const url = `${window.server}/ReactElements/getTableData/${svSession}/${PLUGIN_TABLE}/0`
@@ -51,8 +34,8 @@ export const listHelpModules = async (svSession) => {
   return toHelpModules(rows)
 }
 
-/** The mapping half on its own, for a caller holding an already-fetched plugin row set. */
-export const toHelpModules = (rows) => (rows ?? [])
+/** The mapping half, so the fetch above is only the fetch. */
+const toHelpModules = (rows) => (rows ?? [])
   .filter(isModuleRow)
   .map(row => {
     const id = pluginCol(row, 'CONTEXT_NAME')

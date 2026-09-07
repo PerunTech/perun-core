@@ -45,7 +45,7 @@ const named = (fileName, suffix) => `${(fileName ?? 'guide').replace(/\.md$/i, '
  * @param {string} markdown  the document as stored, front matter included
  * @param {(name: string) => string|null} resolveUrl  figure name to a URL this document can fetch
  */
-export const downloadGuideArchive = async (fileName, markdown, resolveUrl) => {
+const downloadGuideArchive = async (fileName, markdown, resolveUrl) => {
   const source = markdown ?? ''
   const entries = [{ name: named(fileName, 'md'), data: source }]
 
@@ -69,7 +69,7 @@ export const downloadGuideArchive = async (fileName, markdown, resolveUrl) => {
  * @param {string} body      the document with its front matter removed
  * @param {(name: string) => string|null} resolveUrl  figure name to a URL this document can fetch
  */
-export const downloadGuidePdf = async (fileName, { title, body, resolveUrl }) => {
+const downloadGuidePdf = async (fileName, { title, body, resolveUrl }) => {
   const figures = await loadPdfFigures(body, resolveUrl)
   downloadBlob(named(fileName, 'pdf'), await renderGuidePdf({ title, body, figures }))
 }

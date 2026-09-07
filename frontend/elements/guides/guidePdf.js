@@ -379,7 +379,7 @@ const withoutRepeatedTitle = (tokens, title) => {
  * @param {string} body     Markdown, front matter already removed
  * @param {object} figures  figure name to a prepared figure, from loadPdfFigures
  */
-export const guideDocDefinition = ({ title, body, figures }) => ({
+const guideDocDefinition = ({ title, body, figures }) => ({
   info: { title: title || 'Guide' },
   pageSize: PAGE_SIZE,
   pageMargins: PAGE_MARGINS,

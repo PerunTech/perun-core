@@ -161,7 +161,7 @@ export const ownerModuleForRoute = (route, modules) => {
  * ranks a specific guide above the general one; params breaks ties so a literal route wins over a
  * parameterised one of the same length.
  */
-export const scoreRoute = (route, pathname) => {
+const scoreRoute = (route, pathname) => {
   if (!route || !String(route).startsWith('/')) return null
   const match = matchPath(pathname ?? '', { path: route, exact: false })
   if (!match) return null
@@ -171,7 +171,7 @@ export const scoreRoute = (route, pathname) => {
 /* ----------------------------------------------------------------- locale -- */
 
 // Redux carries the locale as en-US while filenames carry en_US.
-export const normalizeLocale = (locale) => String(locale || 'en_US').replace('-', '_')
+const normalizeLocale = (locale) => String(locale || 'en_US').replace('-', '_')
 
 const localeRank = (candidate, wanted) => {
   if (candidate === wanted) return 0

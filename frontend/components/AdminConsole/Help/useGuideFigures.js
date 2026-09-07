@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { HELP_IMAGE, buildImageName, displayImageName } from '../../../elements/guides/helpNames'
 import { uploadHelpFile } from '../../../elements/guides/helpApi'
-import { loadImageIndex } from '../../../elements/guides/routeGuides'
+import { figureResolver, loadImageIndex } from '../../../elements/guides/routeGuides'
 
 /**
  * The figures behind the document being edited: the stored ones, and the writer for new ones.
@@ -52,7 +52,10 @@ export const useGuideFigures = ({ svSession, editing, editingModule, anchorFor, 
     return () => { cancelled = true }
   }, [editing, editingModule, svSession, anchorFor, cache])
 
-  const resolveImage = useCallback((name) => imageUrls[name] ?? null, [imageUrls])
+  // Through figureResolver rather than a plain lookup, so the editor's preview resolves the
+  // same two spellings the reader does: the display name the editor writes into the Markdown,
+  // and the stored name a hand-written or imported document may carry instead.
+  const resolveImage = useMemo(() => figureResolver(imageUrls), [imageUrls])
 
   /**
    * Called by the editor on save, once per figure the document still references.

@@ -7,7 +7,7 @@ import { PDF_KIND } from '../../elements/guides/helpNames'
 import { createBlobCache } from '../../elements/guides/helpApi'
 import { guideTitle, moduleIdFromPath } from '../../elements/guides/routeGuides'
 import { useDrawerWidth } from './useDrawerWidth'
-import { useGuideExports } from './useGuideExports'
+import { useDrawerExports } from './useDrawerExports'
 import { useGuideDoc } from './useGuideDoc'
 import { useGuideIndex } from './useGuideIndex'
 import { useGuideToc } from './useGuideToc'
@@ -131,7 +131,7 @@ const NavbarHelp = (props, context) => {
 
   /* -------------------------------------------------------------- fetch -- */
 
-  const { exporting, exportActive, exportRecord, savePdf, openWindow } = useGuideExports({
+  const { exporting, exportActive, exportRecord, savePdf, openWindow } = useDrawerExports({
     svSession, active, doc, resolveImage, cache, fmt,
   })
 
