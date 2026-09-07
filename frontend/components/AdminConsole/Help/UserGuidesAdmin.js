@@ -22,6 +22,7 @@ import { downloadGuideArchive, downloadGuidePdf } from '../../../elements/help/h
 import { readGuideUpload } from '../../../elements/help/guideImport'
 import { applyFrontMatter, parseFrontMatter } from '../../MarkdownEditor/frontMatter'
 import getMetadataSchema, { transformMetadataErrors } from '../../MarkdownEditor/metadataSchema'
+import RouteWidget from '../../MarkdownEditor/RouteWidget'
 import { collectImageNames } from '../../MarkdownEditor/renderMarkdown'
 
 const { useReducer, useEffect, useRef, useCallback, useMemo } = React
@@ -41,14 +42,20 @@ const blankDoc = (route) => `---\nroute: ${route}\ntitle: \norder: 1\n---\n`
 // they are one gesture: this is the file, put it in.
 const GUIDE_SOURCE = /\.(md|zip)$/i
 
-const UPLOAD_UI_SCHEMA = {
+// The editor's own metadata strip lays these out in a row; here they sit on a grid, so the classes
+// differ while the fields and their widgets do not.
+const uploadUiSchema = (routes, fmt) => ({
   'ui:order': ['route', 'title', 'locale', 'slug', 'order'],
-  route: { 'ui:classNames': 'user-guides-field user-guides-field--wide' },
+  route: {
+    'ui:classNames': 'user-guides-field user-guides-field--wide',
+    'ui:widget': RouteWidget,
+    'ui:options': { routes, toggleLabel: fmt('perun.help_editor.show_routes') },
+  },
   title: { 'ui:classNames': 'user-guides-field user-guides-field--wide' },
   locale: { 'ui:classNames': 'user-guides-field' },
   slug: { 'ui:classNames': 'user-guides-field' },
   order: { 'ui:classNames': 'user-guides-field' },
-}
+})
 
 /** The metadata a stored manual already carries, for a replacement that keeps all of it. */
 const metaOf = (record) => ({
@@ -173,22 +180,43 @@ const UserGuidesAdmin = (props, context) => {
   // The path is part of the label rather than only the value: the route is what decides both where
   // a guide is stored and where it answers, so an author choosing between two similar module names
   // is really choosing between two paths and should be able to see them.
+  /**
+   * Every route the application actually registered, as the plugins declared them.
+   *
+   * The module list only yields `/main/<module id>`, which is a guess that holds for a module's
+   * own root and for nothing else: farm-registry also serves /main/registry, a sibling rather than
+   * a child, and no amount of deriving from the module id would produce it. The registry is the
+   * only place the real answer exists, so it is read rather than reconstructed.
+   *
+   * Paths outside /main are dropped. The reader lives in the navbar behind a session, so a guide
+   * routed at the login screen could never be opened.
+   */
+  const appRoutes = useMemo(() => Object.entries(props.routeRegistry ?? {})
+    // `loading` shares this slice with the registry, and a path may be declared as an array.
+    .filter(([, element]) => element?.props?.path)
+    .flatMap(([name, element]) => [element.props.path].flat().map(path => ({ value: path, label: name })))
+    .filter(route => String(route.value).startsWith('/main')), [props.routeRegistry])
+
   const routes = useMemo(() => {
-    const fromModules = modules.map(module => {
-      const value = `/main/${module.id}`
-      return { value, label: module.title ? `${module.title} (${value})` : value }
-    })
-    const fromDocs = docs.map(doc => doc.notes?.route).filter(Boolean).map(route => ({ value: route, label: route }))
+    // The name and the path are separate fields because RouteWidget shows them in two columns; a
+    // label carrying its own path would print it twice.
+    const fromModules = modules.map(module => ({ value: `/main/${module.id}`, label: module.title || module.id }))
+    // A route only a saved guide knows about has no name to show, just its path.
+    const fromDocs = docs.map(doc => doc.notes?.route).filter(Boolean).map(route => ({ value: route, label: '' }))
     // Every screen in the application. Route matching is a prefix match, so a guide here answers
     // below every module, which is what makes it a general manual; ownerModuleForRoute reads the
     // missing module segment and stores it on perun-core, which the reader consults everywhere.
     // Listed after the modules rather than first, because routes[0] is the schema's default and a
     // new guide should default to a screen rather than to the whole application.
-    const general = { value: '/main', label: `${fmt('perun.admin_console.user_guides_route_all')} (/main)` }
+    const general = { value: '/main', label: fmt('perun.admin_console.user_guides_route_all') }
+    // Modules first, so the schema's default stays a module root rather than a deep screen or the
+    // general entry. Everything the application registered comes next, then the general route,
+    // then any route only a saved guide knows about. First mention of a path wins its label.
     const seen = new Set()
-    return [...fromModules, general, ...fromDocs].filter(route => !seen.has(route.value) && seen.add(route.value))
+    return [...fromModules, ...appRoutes, general, ...fromDocs]
+      .filter(route => !seen.has(route.value) && seen.add(route.value))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules, docs])
+  }, [modules, docs, appRoutes])
 
   // Figures are fetched only for the module being edited, and only on entering the editor, so
   // opening the section costs one request per module rather than two.
@@ -477,6 +505,9 @@ const UserGuidesAdmin = (props, context) => {
     [locales, routes]
   )
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const uploadUi = useMemo(() => uploadUiSchema(routes, fmt), [routes])
+
   /**
    * A slug seeded from the chosen file, since a manual usually arrives already named.
    *
@@ -495,7 +526,10 @@ const UserGuidesAdmin = (props, context) => {
       (options.some(option => option.value === value) ? value : options[0]?.value ?? '')
 
     return {
-      route: offered(meta.route, routes),
+      // Kept as written rather than run through `offered`: the route field takes free text now, so
+      // an imported guide routed by a pattern would otherwise be quietly moved to the first module
+      // in the list. Only an empty route falls back.
+      route: meta.route || routes[0]?.value || '',
       locale: offered(doc?.locale, locales),
       order: Number(meta.order) || 1,
       slug: doc?.slug ?? stem.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
@@ -697,7 +731,7 @@ const UserGuidesAdmin = (props, context) => {
 
           <Form
             schema={uploadSchema.schema}
-            uiSchema={UPLOAD_UI_SCHEMA}
+            uiSchema={uploadUi}
             formData={uploadDefaults}
             validator={validator}
             transformErrors={errors => transformMetadataErrors(errors, context)}
@@ -810,6 +844,8 @@ UserGuidesAdmin.contextTypes = {
 
 const mapStateToProps = state => ({
   svSession: state.security.svSession,
+  // Router.js keeps the application's route registry here, as name -> <Route path=... />.
+  routeRegistry: state.routes,
 })
 
 export default connect(mapStateToProps)(UserGuidesAdmin)

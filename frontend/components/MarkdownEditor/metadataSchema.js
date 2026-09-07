@@ -1,3 +1,5 @@
+import RouteWidget from './RouteWidget';
+
 /**
  * Schema for the guide metadata form.
  *
@@ -14,22 +16,28 @@ export default function getMetadataSchema(context, { locales = [], routes = [] }
     ? { type: 'string', title: fmt('perun.help_editor.locale'), oneOf: locales.map(item => ({ const: item.value, title: item.label })) }
     : { type: 'string', title: fmt('perun.help_editor.locale') };
 
-  // A dropdown, so a guide can only point at a route that exists. The list carries the registered
-  // modules plus every route already used by a saved guide, so opening an older document does not
-  // find its own route missing from the options.
+  // A text field offering the known routes as a datalist, rather than a select limited to them.
+  // The list carries the registered modules, the general /main entry, and every route already used
+  // by a saved guide, so the common answers are one keystroke away and an older document does not
+  // find its own route missing.
   //
-  // The default is load-bearing rather than a convenience: RJSF's SelectWidget only renders its
-  // empty placeholder option while `schema.default` is undefined, so declaring one is what removes
-  // the "pick a route" entry. Every option is a valid answer here and the field is required, so an
-  // empty first entry only offered a way to fail validation.
-  const route = routes.length
-    ? {
-      type: 'string',
-      title: fmt('perun.help_editor.route'),
-      default: routes[0].value,
-      oneOf: routes.map(item => ({ const: item.value, title: item.label })),
-    }
-    : { type: 'string', title: fmt('perun.help_editor.route'), pattern: '^/' };
+  // Free text rather than a closed list, because a select can only offer routes it can enumerate,
+  // and route matching is a prefix match: /main/farm-registry does not cover a sibling such as
+  // /main/registry, so no single option covers both. The route is handed to react-router's
+  // matchPath, which accepts a parameter pattern, so `/main/:section(farm-registry|registry)`
+  // answers on both and on nothing else. That string is not a route the application registers,
+  // only one that matches two of them, so it can never appear as an option.
+  //
+  // The trade is real: a typo now reaches the store, where the select made that unreachable. Only
+  // the leading slash is validated, and a guide whose route matches nothing simply never appears.
+  // The suggestions themselves are handed to RouteWidget through the uiSchema, so the list can
+  // carry each route's title; `examples` here would render as bare paths.
+  const route = {
+    type: 'string',
+    title: fmt('perun.help_editor.route'),
+    pattern: '^/',
+    ...(routes.length ? { default: routes[0].value } : {}),
+  };
 
   return {
     schema: {
@@ -49,7 +57,7 @@ export default function getMetadataSchema(context, { locales = [], routes = [] }
     },
     uiSchema: {
       'ui:order': ['route', 'title', 'locale', 'slug', 'order'],
-      route: { 'ui:classNames': 'md-f md-f--grow' },
+      route: { 'ui:classNames': 'md-f md-f--grow', 'ui:widget': RouteWidget, 'ui:options': { routes, toggleLabel: fmt('perun.help_editor.show_routes') } },
       title: { 'ui:classNames': 'md-f md-f--grow' },
       locale: { 'ui:classNames': 'md-f md-f--narrow' },
       slug: { 'ui:classNames': 'md-f' },
