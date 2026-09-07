@@ -179,8 +179,15 @@ const UserGuidesAdmin = (props, context) => {
       return { value, label: module.title ? `${module.title} (${value})` : value }
     })
     const fromDocs = docs.map(doc => doc.notes?.route).filter(Boolean).map(route => ({ value: route, label: route }))
+    // Every screen in the application. Route matching is a prefix match, so a guide here answers
+    // below every module, which is what makes it a general manual; ownerModuleForRoute reads the
+    // missing module segment and stores it on perun-core, which the reader consults everywhere.
+    // Listed after the modules rather than first, because routes[0] is the schema's default and a
+    // new guide should default to a screen rather than to the whole application.
+    const general = { value: '/main', label: `${fmt('perun.admin_console.user_guides_route_all')} (/main)` }
     const seen = new Set()
-    return [...fromModules, ...fromDocs].filter(route => !seen.has(route.value) && seen.add(route.value))
+    return [...fromModules, general, ...fromDocs].filter(route => !seen.has(route.value) && seen.add(route.value))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modules, docs])
 
   // Figures are fetched only for the module being edited, and only on entering the editor, so

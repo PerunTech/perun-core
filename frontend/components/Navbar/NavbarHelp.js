@@ -411,19 +411,80 @@ const NavbarHelp = (props, context) => {
     }
   }, [svSession, fmt, exportGuide])
 
+  /**
+   * The screen's own guides, and the general ones that answer everywhere.
+   *
+   * A guide whose route names no module is general by construction: `/main` matches every screen
+   * below it, which is what makes it general in the first place. Split rather than left to the
+   * sort, because "how does this screen work" and "how does the application work" are two
+   * questions, and one flat list leaves the reader to work out which entries answer which.
+   */
+  const [screenGuides, generalGuides] = useMemo(() => {
+    const screen = []
+    const general = []
+    guides.forEach(guide => {
+      (moduleIdFromPath(guide.notes?.route) ? screen : general).push(guide)
+    })
+    return [screen, general]
+  }, [guides])
+
+  /**
+   * The guide to open without showing the list first.
+   *
+   * Counted over the screen's own guides rather than all of them, because a general manual answers
+   * on every route: including it would mean this shortcut stopped firing the day the first one was
+   * written. One guide in total is still opened directly, general or not.
+   */
+  const openDirectly = useMemo(() => {
+    if (guides.length === 1) return guides[0]
+    if (screenGuides.length === 1) return screenGuides[0]
+    return null
+  }, [guides, screenGuides])
+
   const toggle = useCallback(() => {
     setOpen(current => {
       // One guide is the common case, so skip the list and open it directly.
-      if (!current && guides.length === 1) setActive(guides[0])
+      if (!current && openDirectly) setActive(openDirectly)
       return !current
     })
-  }, [guides])
+  }, [openDirectly])
 
   const resized = Math.abs(width - clampWidth(DEFAULT_WIDTH)) > 1
 
   const heading = useMemo(
     () => (active ? guideTitle(active) : fmt('perun.navbar.help')),
     [active, fmt]
+  )
+
+  // One renderer for both groups, so a row cannot end up styled or wired one way in the screen's
+  // list and another in the general one.
+  const guideRow = (guide) => (
+    <li key={guide.objectId}>
+      <button className='help-panel-list-open' onClick={() => setActive(guide)}>
+        <Icon name={guide.kind === PDF_KIND ? 'IconFileTypePdf' : 'IconFileText'} size={18} />
+        <span>{guideTitle(guide)}</span>
+      </button>
+      <span className='help-panel-list-actions'>
+        <button
+          hidden={guide.kind === PDF_KIND}
+          onClick={(event) => actOnGuide(event, guide, 'pdf')}
+          disabled={exporting}
+          title={fmt('perun.help_panel.download_pdf')}
+          aria-label={fmt('perun.help_panel.download_pdf')}
+        >
+          <Icon name='IconFileTypePdf' size={16} stroke={1.6} />
+        </button>
+        <button
+          hidden={guide.kind === PDF_KIND}
+          onClick={(event) => actOnGuide(event, guide, 'source')}
+          disabled={exporting}
+          title={fmt('perun.help_panel.download_source')}
+          aria-label={fmt('perun.help_panel.download_source')}
+        >
+          <Icon name='IconFileZip' size={16} stroke={1.6} />
+        </button>
+      </span>
+    </li>
   )
 
   if (!guides.length && !indexFailed && !open) return null
@@ -556,37 +617,21 @@ const NavbarHelp = (props, context) => {
                 {fmt(indexFailed ? 'perun.help_panel.index_failed' : 'perun.help_panel.none')}
               </p>
             )}
-            {!active && guides.length > 0 && (
-              <ul className='help-panel-list'>
-                {guides.map(guide => (
-                  <li key={guide.objectId}>
-                    <button className='help-panel-list-open' onClick={() => setActive(guide)}>
-                      <Icon name={guide.kind === PDF_KIND ? 'IconFileTypePdf' : 'IconFileText'} size={18} />
-                      <span>{guideTitle(guide)}</span>
-                    </button>
-                    <span className='help-panel-list-actions'>
-                      <button
-                        hidden={guide.kind === PDF_KIND}
-                        onClick={(event) => actOnGuide(event, guide, 'pdf')}
-                        disabled={exporting}
-                        title={fmt('perun.help_panel.download_pdf')}
-                        aria-label={fmt('perun.help_panel.download_pdf')}
-                      >
-                        <Icon name='IconFileTypePdf' size={16} stroke={1.6} />
-                      </button>
-                      <button
-                        hidden={guide.kind === PDF_KIND}
-                        onClick={(event) => actOnGuide(event, guide, 'source')}
-                        disabled={exporting}
-                        title={fmt('perun.help_panel.download_source')}
-                        aria-label={fmt('perun.help_panel.download_source')}
-                      >
-                        <Icon name='IconFileZip' size={16} stroke={1.6} />
-                      </button>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            {!active && screenGuides.length > 0 && (
+              <React.Fragment>
+                {generalGuides.length > 0 && (
+                  <p className='help-panel-group'>{fmt('perun.help_panel.this_screen')}</p>
+                )}
+                <ul className='help-panel-list'>{screenGuides.map(guideRow)}</ul>
+              </React.Fragment>
+            )}
+            {!active && generalGuides.length > 0 && (
+              <React.Fragment>
+                {/* Always labelled, even when it is the whole list: the label is what says these
+                    answer for the application rather than for the screen in front of you. */}
+                <p className='help-panel-group'>{fmt('perun.help_panel.general_guides')}</p>
+                <ul className='help-panel-list'>{generalGuides.map(guideRow)}</ul>
+              </React.Fragment>
             )}
             {active && doc.loading && <p className='help-panel-note'>{fmt('perun.help_panel.loading')}</p>}
             {active && doc.failed && <p className='help-panel-note'>{fmt('perun.help_panel.failed')}</p>}
