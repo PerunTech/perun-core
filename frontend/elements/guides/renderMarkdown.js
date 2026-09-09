@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { figureName } from './figureRefs';
 
 // Markdown output is not safe just because the source is Markdown: marked passes raw HTML in the
 // document straight through. Everything below runs through DOMPurify before it reaches the DOM.
@@ -79,7 +80,10 @@ export const renderMarkdown = (markdown, resolveImage) => {
   const fragment = DOMPurify.sanitize(renderToHtml(markdown ?? ''), PURIFY_CONFIG);
 
   fragment.querySelectorAll('img').forEach((img) => {
-    const name = img.getAttribute('src');
+    // marked percent-encodes the destination it renders, so the src is not the name the author
+    // wrote and is not how any figure map is keyed. figureName undoes that, which is what lets a
+    // figure named with a space or in a non-Latin script resolve.
+    const name = figureName(img.getAttribute('src') ?? '');
     img.removeAttribute('src');
     const resolved = name && resolveImage ? resolveImage(name) : null;
     if (resolved) {

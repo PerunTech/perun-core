@@ -135,8 +135,26 @@ export const filesFrom = (dataTransfer) => {
  * @param {object} taken       names already pending in this session
  * @param {(name: string) => boolean} isStored  whether the name already exists server side
  */
+// Markdown gives a link destination no way to carry a space or a parenthesis, so a figure named
+// the way a camera or a screenshot tool leaves it, "photo (1).png", would be inserted as a
+// reference marked cannot parse: it renders as literal text, and figureNames does not see it
+// either, so the file is never uploaded on save. `#` and `?` parse but break the reference once
+// the archive is extracted and opened as files.
+//
+// Only those characters are replaced. Everything else is left alone, so a name written in
+// Cyrillic keeps its letters rather than becoming a row of dashes.
+const REFERENCE_UNSAFE = /[\s()<>[\]"'\\/#?]+/g;
+
+/** The figure name as it can be written into a document and stored beside it. */
+const referenceSafe = (fileName) => {
+  const cleaned = String(fileName || 'image').trim().replace(REFERENCE_UNSAFE, '-');
+  const dot = cleaned.lastIndexOf('.');
+  const stem = (dot > 0 ? cleaned.slice(0, dot) : cleaned).replace(/-{2,}/g, '-').replace(/^-|-$/g, '');
+  return `${stem || 'image'}${dot > 0 ? cleaned.slice(dot) : ''}`;
+};
+
 export const uniqueImageName = (fileName, taken = {}, isStored) => {
-  const safe = String(fileName || 'image').replace(/[\\/]/g, '_').trim();
+  const safe = referenceSafe(fileName);
   const dot = safe.lastIndexOf('.');
   const stem = dot > 0 ? safe.slice(0, dot) : safe;
   const extension = dot > 0 ? safe.slice(dot) : '';
