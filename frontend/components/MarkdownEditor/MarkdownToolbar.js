@@ -12,12 +12,12 @@ import { Icon } from '../../elements';
  */
 const MarkdownToolbar = ({
   fmt, formId, onWrap, onPrefix, onInsertImage, canInsertImage, pendingCount,
-  onExport, showPreview, onTogglePreview, stats, onCancel, saving, uploading,
+  onExport, showPreview, onTogglePreview, stats, onCancel, onDelete, saving, uploading,
 }) => {
-  const tool = (icon, labelId, action, disabled = false) => (
+  const tool = (icon, labelId, action, disabled = false, variant = '') => (
     <button
       type='button'
-      className='md-tool'
+      className={variant ? `md-tool ${variant}` : 'md-tool'}
       title={fmt(labelId)}
       aria-label={fmt(labelId)}
       disabled={disabled}
@@ -61,6 +61,10 @@ const MarkdownToolbar = ({
       </div>
 
       <div className='md-tool-group md-tool-group--end'>
+        {/* Only offered on a document that is already stored, and at the head of this group rather
+            than beside Save: the two are the opposite gesture and a delete takes every stored
+            version of the guide with it. */}
+        {onDelete && tool('IconTrash', 'perun.admin_console.user_guides_delete', onDelete, saving || uploading, 'md-tool--danger')}
         {onExport && tool('IconFileTypePdf', 'perun.help_panel.download_pdf', () => onExport('pdf'))}
         {onExport && tool('IconFileZip', 'perun.help_panel.download_source', () => onExport('source'))}
         {tool(showPreview ? 'IconEyeOff' : 'IconEye', 'perun.help_editor.toggle_preview', onTogglePreview)}
@@ -101,6 +105,8 @@ MarkdownToolbar.propTypes = {
   onTogglePreview: PropTypes.func.isRequired,
   stats: PropTypes.string,
   onCancel: PropTypes.func,
+  // Absent on a document that has never been saved, which hides the delete.
+  onDelete: PropTypes.func,
   saving: PropTypes.bool,
   uploading: PropTypes.bool,
 };

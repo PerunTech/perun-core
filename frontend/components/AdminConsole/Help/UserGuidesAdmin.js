@@ -87,7 +87,16 @@ const UserGuidesAdmin = (props, context) => {
       setState({ loading: true })
       const markdown = await fetchHelpText(svSession, record)
       setState({
-        editing: { value: markdown, locale: record.locale, slug: record.slug, route: record.notes?.route ?? '' },
+        // The stored record travels with the buffer so the editor can offer the same delete the
+        // table row does. It is the document's identity rather than what the form now says: a slug
+        // renamed on screen must still delete the file that was opened.
+        editing: {
+          value: markdown,
+          locale: record.locale,
+          slug: record.slug,
+          route: record.notes?.route ?? '',
+          record,
+        },
         loading: false,
       })
     } catch (err) {
@@ -134,10 +143,9 @@ const UserGuidesAdmin = (props, context) => {
     }
   }
 
-  // Deleting removes every stored version plus the document's own figures, so the row cannot come
-  // back from history. The row itself opens the editor, hence the stopPropagation.
-  const confirmDelete = (event, doc) => {
-    event.stopPropagation()
+  // Deleting removes every stored version plus the document's own figures, so the guide cannot
+  // come back from history. Asked the same way from the table and from the editor.
+  const askDelete = (doc) => {
     alertUserV2({
       type: 'warning',
       title: fmt('perun.admin_console.user_guides_delete_title'),
@@ -150,6 +158,12 @@ const UserGuidesAdmin = (props, context) => {
     })
   }
 
+  // The row itself opens the editor, hence the stopPropagation on the table's own button.
+  const confirmDelete = (event, doc) => {
+    event.stopPropagation()
+    askDelete(doc)
+  }
+
   const removeDoc = async (doc) => {
     const objectId = anchorFor(doc.module)
     if (!objectId) return
@@ -158,7 +172,8 @@ const UserGuidesAdmin = (props, context) => {
       await deleteHelpDoc(svSession, { objectId, fileName: doc.fileName, kind: doc.kind })
       clearHelpIndexCache()
       await reloadDocs()
-      setState({ saving: false })
+      // Leaves the editor when the delete was asked from it; editing is already null otherwise.
+      setState({ saving: false, editing: null })
       alertUserV2({ type: 'success', title: fmt('perun.admin_console.user_guides_deleted') })
     } catch (err) {
       console.error(err)
@@ -202,6 +217,7 @@ const UserGuidesAdmin = (props, context) => {
           onCancel={() => setState({ editing: null })}
           onMetaChange={(meta) => setState({ editing: { ...editing, route: meta.route } })}
           onExport={exportEditing}
+          onDelete={editing.record ? () => askDelete(editing.record) : undefined}
           saving={saving}
         />
         {exporting && <Loading />}

@@ -54,6 +54,7 @@ const MarkdownEditor = ({
   resolveImage,
   onSave,
   onCancel,
+  onDelete,
   onMetaChange,
   onExport,
   saving = false,
@@ -193,6 +194,7 @@ const MarkdownEditor = ({
         onTogglePreview={() => setShowPreview(v => !v)}
         stats={stats}
         onCancel={onCancel}
+        onDelete={onDelete}
         saving={saving}
         uploading={figures.uploading}
       />
