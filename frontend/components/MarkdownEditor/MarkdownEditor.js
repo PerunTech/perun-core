@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types';
 import Editor from '@monaco-editor/react';
 import { Icon } from '../../elements';
+import Loading from '../Loading/Loading';
 import MarkdownMetaForm from './MarkdownMetaForm';
 import MarkdownPreview from './MarkdownPreview';
 import MarkdownToolbar from './MarkdownToolbar';
@@ -142,6 +143,10 @@ const MarkdownEditor = ({
   // RJSF validates on submit and only calls this when the metadata is valid, so the toolbar's Save
   // drives the form rather than carrying its own copy of the rules.
   const handleSubmit = async ({ formData }) => {
+    // The overlay covers the screen while a save runs, but Enter in a metadata field submits the
+    // form natively and goes around it, which would write the document a second time.
+    if (figures.uploading || saving) return;
+
     const meta = { route: formData.route, title: formData.title, order: formData.order };
     const document = serializeFrontMatter(meta, body);
 
@@ -158,6 +163,11 @@ const MarkdownEditor = ({
 
   return (
     <div className='md-editor'>
+
+      {/* A save is one wait with two halves: the figures the document still points at upload first,
+          one at a time, and only then does the parent write the document and re-read the list. The
+          toolbar says which half is running; this stops the buffer being edited underneath it. */}
+      {(figures.uploading || saving) && <Loading />}
 
       <MarkdownMetaForm
         formId={META_FORM_ID}
