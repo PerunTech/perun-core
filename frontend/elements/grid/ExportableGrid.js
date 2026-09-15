@@ -5,10 +5,49 @@ import { WrapItUp, ComponentManager } from '..';
 import GenericGrid from './GenericGrid';
 import { Parser } from '@json2csv/plainjs';
 import xlsx from 'xlsx-js-style';
+import { isValidArray } from '../../functions/utils';
 
 /* This extension component adds a downloadable filter option to the grid,
 with every result from the filter in the grid is displayed as a new row in the excel (csv) format.
 The header of the excel file represents the filter applied to the grid.
+*/
+/* Finds the formatter option a value belongs to. The grid's DropDownFormatter matches an option
+on its value, while this file used to match it on its id - accept either, since the code lists the
+backend sends do not always set the two to the same thing. */
+function findFormatterOption(options, value) {
+  if (!isValidArray(options, 1) || value === null || value === undefined) {
+    return undefined
+  }
+  return options.find((option) => option === value || option.id === value || option.value === value)
+}
+
+/* Returns the text the grid shows for a single cell, trying three things in order:
+- the value itself is a code from the code list, so it decodes to that option's text
+- the column is a multi value one, in which case the codes sit in a comma separated `<key>.CODE`
+  sibling field and the field itself only holds a preview text: decode every code and join them
+  back together, but only when the whole list is known to the code list
+- neither of those, so the value is exported as it stands, which is what DropDownFormatter falls
+  back to on screen for a value it cannot decode (a preview text included). */
+function decodeCellValue(config, element) {
+  const value = element[config.key]
+  const options = config.formatterOptions
+  if (!isValidArray(options, 1)) {
+    return value
+  }
+  const option = findFormatterOption(options, value)
+  if (option) {
+    return option.text || option.value || value
+  }
+  const codes = element[`${config.key}.CODE`]
+  if (typeof codes === 'string' && codes.length > 0) {
+    const decoded = codes.split(',').map((code) => findFormatterOption(options, code.trim()))
+    if (decoded.every((decodedOption) => decodedOption !== undefined)) {
+      return decoded.map((decodedOption) => decodedOption.text || decodedOption.value).join(', ')
+    }
+  }
+  return value
+}
+
 /* This function returns a JSON object from a filtered selection, where one object in the array
 represents one filtered row. Accepts 2 parameters: grid configuration and array of filtered rows.
 The table row names and table data are decoded, using the grid config formatter options functionality,
@@ -26,22 +65,10 @@ export function prepJsonFromConf(gridConfig, arrOfObj) {
       for (let i = 0; i < confLen; i++) {
         const key = gridConfig[i].key
         const formattedKey = gridConfig[i].name
-        // see if property defined in config exists in data array
-        if (element[key]) {
-          let formattedValue = ''
-          // if value is a code list, we need to decode it
-          if (Object.prototype.hasOwnProperty.call(gridConfig[i], 'formatterOptions')) { // if object has this property, decode the value
-            for (let j = 0; j < gridConfig[i].formatterOptions.length; j++) {
-              if (element[key] === gridConfig[i].formatterOptions[j].id) {
-                formattedValue = gridConfig[i].formatterOptions[j].text
-                break
-              }
-            }
-          } else {
-            // if value is not a code just save it in this variable
-            formattedValue = element[key]
-          }
-          newElement[formattedKey] = formattedValue
+        const value = element[key]
+        // see if property defined in config holds something in the data array
+        if (value !== null && value !== undefined && value !== '') {
+          newElement[formattedKey] = decodeCellValue(gridConfig[i], element)
         } else {
           /* if the field in config is not present in the data array, add an empty string
           so as not to get undefined values in document */
