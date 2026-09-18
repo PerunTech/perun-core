@@ -6,44 +6,26 @@ import GenericGrid from './GenericGrid';
 import { Parser } from '@json2csv/plainjs';
 import xlsx from 'xlsx-js-style';
 import { isValidArray } from '../../functions/utils';
+import { cellCodeListValues, findCodeListOption } from './codeListValues';
 
 /* This extension component adds a downloadable filter option to the grid,
 with every result from the filter in the grid is displayed as a new row in the excel (csv) format.
 The header of the excel file represents the filter applied to the grid.
 */
-/* Finds the formatter option a value belongs to. The grid's DropDownFormatter matches an option
-on its value, while this file used to match it on its id - accept either, since the code lists the
-backend sends do not always set the two to the same thing. */
-function findFormatterOption(options, value) {
-  if (!isValidArray(options, 1) || value === null || value === undefined) {
-    return undefined
-  }
-  return options.find((option) => option === value || option.id === value || option.value === value)
-}
-
-/* Returns the text the grid shows for a single cell, trying three things in order:
-- the value itself is a code from the code list, so it decodes to that option's text
-- the column is a multi value one, in which case the codes sit in a comma separated `<key>.CODE`
-  sibling field and the field itself only holds a preview text: decode every code and join them
-  back together, but only when the whole list is known to the code list
-- neither of those, so the value is exported as it stands, which is what DropDownFormatter falls
-  back to on screen for a value it cannot decode (a preview text included). */
+/* Returns the text the grid shows for a single cell: its code list values decoded to their texts,
+or, when any of them is not in the code list, the value as it stands - which is what
+DropDownFormatter falls back to on screen for a value it cannot decode, a text the backend already
+translated included. */
 function decodeCellValue(config, element) {
   const value = element[config.key]
   const options = config.formatterOptions
   if (!isValidArray(options, 1)) {
     return value
   }
-  const option = findFormatterOption(options, value)
-  if (option) {
-    return option.text || option.value || value
-  }
-  const codes = element[`${config.key}.CODE`]
-  if (typeof codes === 'string' && codes.length > 0) {
-    const decoded = codes.split(',').map((code) => findFormatterOption(options, code.trim()))
-    if (decoded.every((decodedOption) => decodedOption !== undefined)) {
-      return decoded.map((decodedOption) => decodedOption.text || decodedOption.value).join(', ')
-    }
+  const decoded = cellCodeListValues(element, config.key, options)
+    .map((cellValue) => findCodeListOption(options, cellValue))
+  if (decoded.length > 0 && decoded.every((option) => option !== undefined)) {
+    return decoded.map((option) => option.text || option.value).join(', ')
   }
   return value
 }
